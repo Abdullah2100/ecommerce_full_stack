@@ -1,0 +1,6 @@
+@ecommerc_dotnet_HostAddress = http://localhost:5077
+
+GET {{ecommerc_dotnet_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
