@@ -26,7 +26,7 @@ namespace ecommerc_dotnet.Migrations
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("UUID");
 
                     b.Property<DateTime>("created_at")
                         .IsConcurrencyToken()
@@ -51,9 +51,13 @@ namespace ecommerc_dotnet.Migrations
 
                     b.Property<string>("username")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -63,7 +67,7 @@ namespace ecommerc_dotnet.Migrations
                     b.OwnsOne("ecommerc_dotnet.module.Person", "person", b1 =>
                         {
                             b1.Property<Guid>("ID")
-                                .HasColumnType("uuid");
+                                .HasColumnType("UUID");
 
                             b1.Property<string>("address")
                                 .IsRequired()

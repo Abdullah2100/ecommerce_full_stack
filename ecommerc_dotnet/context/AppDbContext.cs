@@ -15,21 +15,33 @@ public class AppDbContext:DbContext
             modelBuilder.Entity<User>(
                 user =>
                 {
-                    user.Property(p => p.role)
+                    user.Property(u => u.ID)
+                        .HasColumnType("UUID");
+                    
+                    user.Property(u => u.role)
                         .HasColumnType("int")
                         .HasDefaultValue(1);
 
-                    user.Property(p => p.created_at)
+                    user.Property(u => u.created_at)
                         .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    user.Property(p => p.updated_at)
+                    user.Property(u => u.updated_at)
                         .HasColumnType("timestamp")
                         .HasDefaultValueSql("NULL");
+                    
+                    user.Property(u => u.username)
+                        .HasMaxLength(50);
+
+                    user.HasIndex(u=>u.username).IsUnique();
 
                     user.OwnsOne
                         (u => u.person, person =>
                         {
+                            
+                            person.Property(p => p.ID)
+                                .HasColumnType("UUID");
+
                             person.Property(p => p.name)
                                 .IsRequired()
                                 .HasMaxLength(50);

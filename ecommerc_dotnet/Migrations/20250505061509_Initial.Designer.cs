@@ -12,8 +12,8 @@ using ecommerc_dotnet.context;
 namespace ecommerc_dotnet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250505043350_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250505061509_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,7 +29,7 @@ namespace ecommerc_dotnet.Migrations
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("UUID");
 
                     b.Property<DateTime>("created_at")
                         .IsConcurrencyToken()
@@ -54,9 +54,13 @@ namespace ecommerc_dotnet.Migrations
 
                     b.Property<string>("username")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("username")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -66,7 +70,7 @@ namespace ecommerc_dotnet.Migrations
                     b.OwnsOne("ecommerc_dotnet.module.Person", "person", b1 =>
                         {
                             b1.Property<Guid>("ID")
-                                .HasColumnType("uuid");
+                                .HasColumnType("UUID");
 
                             b1.Property<string>("address")
                                 .IsRequired()

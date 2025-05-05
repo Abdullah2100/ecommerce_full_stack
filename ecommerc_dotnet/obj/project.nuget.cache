@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "x9aLQRmUvps=",
+  "dgSpecHash": "xtEKak1Aun8=",
   "success": true,
   "projectFilePath": "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/ecommerc_dotnet.csproj",
   "expectedPackageFiles": [
@@ -22,6 +22,7 @@
     "/home/abdullah/.nuget/packages/microsoft.entityframeworkcore.design/9.0.4/microsoft.entityframeworkcore.design.9.0.4.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.entityframeworkcore.relational/9.0.4/microsoft.entityframeworkcore.relational.9.0.4.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.entityframeworkcore.tools/9.0.4/microsoft.entityframeworkcore.tools.9.0.4.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.extensions.caching.abstractions/9.0.4/microsoft.extensions.caching.abstractions.9.0.4.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.extensions.caching.memory/9.0.4/microsoft.extensions.caching.memory.9.0.4.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.extensions.configuration.abstractions/9.0.4/microsoft.extensions.configuration.abstractions.9.0.4.nupkg.sha512",
@@ -42,6 +43,10 @@
     "/home/abdullah/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
     "/home/abdullah/.nuget/packages/npgsql/9.0.3/npgsql.9.0.3.nupkg.sha512",
     "/home/abdullah/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.4/npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore/6.6.2/swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore.swagger/6.6.2/swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.6.2/swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.6.2/swashbuckle.aspnetcore.swaggerui.6.6.2.nupkg.sha512",
     "/home/abdullah/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
     "/home/abdullah/.nuget/packages/system.collections.immutable/7.0.0/system.collections.immutable.7.0.0.nupkg.sha512",
     "/home/abdullah/.nuget/packages/system.composition/7.0.0/system.composition.7.0.0.nupkg.sha512",

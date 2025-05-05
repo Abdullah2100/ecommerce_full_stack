@@ -138,3 +138,6 @@
 /home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.pdb
 /home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.genruntimeconfig.cache
 /home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/obj/Debug/net9.0/ref/ecommerc_dotnet.dll
+/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
+/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll

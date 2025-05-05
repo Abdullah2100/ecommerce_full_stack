@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ecommerc_dotnet.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,8 @@ namespace ecommerc_dotnet.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<Guid>(type: "uuid", nullable: false),
-                    username = table.Column<string>(type: "text", nullable: false),
+                    ID = table.Column<Guid>(type: "UUID", nullable: false),
+                    username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     password = table.Column<string>(type: "text", nullable: false),
                     role = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     created_at = table.Column<DateTime>(type: "timestamp", rowVersion: true, nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
@@ -35,6 +35,12 @@ namespace ecommerc_dotnet.Migrations
                 name: "IX_Users_person_email_person_phone",
                 table: "Users",
                 columns: new[] { "person_email", "person_phone" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_username",
+                table: "Users",
+                column: "username",
                 unique: true);
         }
 
