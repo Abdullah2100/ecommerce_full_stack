@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/ecommerc_dotnet.props" />
+</Project>

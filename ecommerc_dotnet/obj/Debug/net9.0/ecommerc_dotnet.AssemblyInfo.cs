@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ecommerc_dotnet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+205547eeb70c05df9183014787507a61baa4920f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6d3acf31d832a0cf57c3e4d24cbe0440868fdc20")]
 [assembly: System.Reflection.AssemblyProductAttribute("ecommerc_dotnet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ecommerc_dotnet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

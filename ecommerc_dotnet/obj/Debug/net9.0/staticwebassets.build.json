@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "vrhWcYKrlEakKTqsWwtPfpirCzKROjvkTWgRCM/N9lo=",
+  "Source": "ecommerc_dotnet",
+  "BasePath": "_content/ecommerc_dotnet",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
