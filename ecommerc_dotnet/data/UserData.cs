@@ -22,6 +22,16 @@ public class UserData
     {
         try
         {
+            if (data.role == 0)
+            {
+               var result = _dbContext.Users.FirstOrDefault(u => u.role == 1);
+               if (result != null)
+               {
+                   Console.WriteLine("can't create new admin while there is already an admin");
+                   return null;
+               }
+            }
+           
             Person person = new Person();
             person.ID = clsUtil.generateGuid();
             person.name = data.name;
@@ -47,11 +57,11 @@ public class UserData
         }
     }
 
-    public User? isExist(string userName , string password)
+    public User? getUser(string userName , string password)
     {
         try
         {
-            return  _dbContext.Users.FirstOrDefault(u => u.username == userName && u.password ==password);
+            return  _dbContext.Users.FirstOrDefault(u => u.username == userName && u.password ==password && u.isDeleted==false);
         }
         catch (Exception e)
         {
@@ -60,4 +70,39 @@ public class UserData
             return null;
         }
     }
+    
+    public User? getUser(Guid userID)
+    {
+        try
+        {
+            return  _dbContext.Users.FirstOrDefault(u => u.ID==userID && u.isDeleted==false);
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username"+e.Message);
+            return null;
+        }
+    }
+    
+    public async Task<bool> deleteUser(Guid userID)
+    {
+        try
+        {
+            var result =  _dbContext.Users.FirstOrDefault(u => u.ID==userID);
+            result!.isDeleted = true;
+         await   _dbContext.SaveChangesAsync();
+         return true;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from delete user"+e.Message);
+            return false;
+        }
+    }
+
+
+
+    
 }

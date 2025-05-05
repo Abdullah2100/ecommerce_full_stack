@@ -1,6 +1,7 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
@@ -21,11 +22,13 @@ public class UserController : ControllerBase
         _dbContext = dbContext;
         // _logger = logger;
         _configuration = configuration;
+        _userData = new UserData(_dbContext);
     }
 
     private readonly AppDbContext _dbContext;
     private readonly ILogger _logger;
     private readonly IConfigurationServices _configuration;
+    private readonly UserData _userData;
 
     [AllowAnonymous]
     [HttpPost("signup")]
@@ -34,6 +37,11 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> signUp([FromBody] SignupDto data)
     {
+        if (data.role != 0 && data.role != 1)
+        {
+            return BadRequest("role must be 1 or 0");
+ 
+        }
         string? validationResult = clsValidation.validateInput(data.email, data.password, data.phone);
 
         if (validationResult != null)
@@ -41,12 +49,10 @@ public class UserController : ControllerBase
             return BadRequest(validationResult);
         }
 
-        var userData = new UserData(_dbContext
-            // , _logger
-            );
-        User? result = await userData.createNew(data);
+        
+        User? result = await _userData.createNew(data);
         if (result == null)
-            return BadRequest("some thing went wrong");
+            return BadRequest("هناك مشكلة ما");
         
         string token = "", refreshToken = "";
         
@@ -71,13 +77,12 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult signUp([FromBody] LoginDto data)
+    public IActionResult signIn([FromBody] LoginDto data)
     {
 
-        var userData = new UserData(_dbContext);
-        User? result =  userData.isExist(data.username,clsUtil.hashingText(data.password));
+        User? result =  _userData.getUser(data.username,clsUtil.hashingText(data.password));
         if (result == null)
-            return BadRequest("user not found ");
+            return BadRequest("المستخدم غير موجود");
         
         string token = "", refreshToken = "";
         
@@ -97,7 +102,89 @@ public class UserController : ControllerBase
     }
 
 
+
+    [HttpDelete("{userID:guid}")]
+    public async Task<IActionResult> deleteUser(Guid userID)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+        
+        var currentUser = _userData.getUser(idHolder.Value);
+
+        if (userID != idHolder&&(currentUser==null || currentUser.role==1))
+        {
+            return BadRequest("ليس لديك الصلاحية لحذف الحساب");
+        }
+
+        if (currentUser.isDeleted)
+        {
+            return BadRequest("المستخدم محذوف");
+ 
+        }
+        
+        bool result = await _userData.deleteUser(idHolder.Value);
+        if(result)
+            return Ok("تم حذف المستخدم بنجاح");
+
+        return BadRequest(" حدثت مشكلة اثناء الحذف");
+ 
+        
+        
+    }
     
+    [HttpGet("")]
+    public async Task<IActionResult> myInfo()
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+        
+        var user = _userData.getUser(idHolder.Value);
+
+        if (user==null)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+
+        var userInfo = new UserInfoDto(
+            id: user.ID,
+            name: user.person.name,
+            phone: user.person.phone,
+            address: user.person.address,
+            email: user.person.email,
+            username: user.username
+            );
+       
+
+        
+        return StatusCode(200,userInfo);
+ 
+        
+        
+    }
+
+
     
     
 }

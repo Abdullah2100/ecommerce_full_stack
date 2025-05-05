@@ -22,6 +22,10 @@ public class AppDbContext:DbContext
                         .HasColumnType("int")
                         .HasDefaultValue(1);
 
+                    user.Property(u => u.isDeleted)
+                        .HasColumnType("BOOLEAN")
+                        .HasDefaultValueSql("FALSE");
+
                     user.Property(u => u.created_at)
                         .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
