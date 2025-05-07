@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xtEKak1Aun8=",
+  "dgSpecHash": "o7ShSodqc7A=",
   "success": true,
-  "projectFilePath": "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/ecommerc_dotnet.csproj",
+  "projectFilePath": "/home/abdullah/Desktop/ecommerce_full_stack/ecommerc_dotnet/ecommerc_dotnet.csproj",
   "expectedPackageFiles": [
     "/home/abdullah/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/9.0.4/microsoft.aspnetcore.authentication.jwtbearer.9.0.4.nupkg.sha512",
@@ -41,8 +41,12 @@
     "/home/abdullah/.nuget/packages/microsoft.identitymodel.tokens/8.0.1/microsoft.identitymodel.tokens.8.0.1.nupkg.sha512",
     "/home/abdullah/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512",
     "/home/abdullah/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/nettopologysuite/2.6.0/nettopologysuite.2.6.0.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/nettopologysuite.io.postgis/2.1.0/nettopologysuite.io.postgis.2.1.0.nupkg.sha512",
     "/home/abdullah/.nuget/packages/npgsql/9.0.3/npgsql.9.0.3.nupkg.sha512",
     "/home/abdullah/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.4/npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/npgsql.entityframeworkcore.postgresql.nettopologysuite/9.0.4/npgsql.entityframeworkcore.postgresql.nettopologysuite.9.0.4.nupkg.sha512",
+    "/home/abdullah/.nuget/packages/npgsql.nettopologysuite/9.0.3/npgsql.nettopologysuite.9.0.3.nupkg.sha512",
     "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore/6.6.2/swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
     "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore.swagger/6.6.2/swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
     "/home/abdullah/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.6.2/swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",
@@ -62,5 +66,12 @@
     "/home/abdullah/.nuget/packages/system.text.json/9.0.4/system.text.json.9.0.4.nupkg.sha512",
     "/home/abdullah/.nuget/packages/system.threading.channels/7.0.0/system.threading.channels.7.0.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Error occurred while getting package vulnerability data: Unable to load the service index for source https://api.nuget.org/v3/index.json."
+    }
+  ]
 }

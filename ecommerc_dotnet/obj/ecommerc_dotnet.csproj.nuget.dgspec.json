@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/ecommerc_dotnet.csproj": {}
+    "/home/abdullah/Desktop/ecommerce_full_stack/ecommerc_dotnet/ecommerc_dotnet.csproj": {}
   },
   "projects": {
-    "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/ecommerc_dotnet.csproj": {
+    "/home/abdullah/Desktop/ecommerce_full_stack/ecommerc_dotnet/ecommerc_dotnet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/ecommerc_dotnet.csproj",
+        "projectUniqueName": "/home/abdullah/Desktop/ecommerce_full_stack/ecommerc_dotnet/ecommerc_dotnet.csproj",
         "projectName": "ecommerc_dotnet",
-        "projectPath": "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/ecommerc_dotnet.csproj",
+        "projectPath": "/home/abdullah/Desktop/ecommerce_full_stack/ecommerc_dotnet/ecommerc_dotnet.csproj",
         "packagesPath": "/home/abdullah/.nuget/packages/",
-        "outputPath": "/home/abdullah/Desktop/ecommerc_dotnet/ecommerc_dotnet/obj/",
+        "outputPath": "/home/abdullah/Desktop/ecommerce_full_stack/ecommerc_dotnet/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/abdullah/.nuget/NuGet/NuGet.Config"
@@ -62,7 +62,15 @@
               "target": "Package",
               "version": "[9.0.4, )"
             },
+            "NetTopologySuite": {
+              "target": "Package",
+              "version": "[2.6.0, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[9.0.4, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite": {
               "target": "Package",
               "version": "[9.0.4, )"
             },

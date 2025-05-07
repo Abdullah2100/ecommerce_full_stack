@@ -9,6 +9,11 @@ namespace hotel_api.util
 {
     sealed class clsUtil
     {
+        public enum enImageType
+        {
+            PROFILE,PRODUCT
+        };
+        private static string localPath = "images/";
         public static Guid generateGuid()
         {
             return Guid.NewGuid();
@@ -47,51 +52,51 @@ namespace hotel_api.util
         public static string getFileExtention(string filename){
             return new FileInfo(filename).Extension;
         }
-       
+
+        private static bool createDirectory(string dir)
+        {
+            try
+            {
+                File.Create(dir);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("this the error from creating file to save image on it "+ex.Message);
+                return false;
+            }
+        }
+
+        public static async Task<string?>saveFile(IFormFile file,enImageType type)
+        {
+            string filePath = clsUtil.localPath + type.ToString()+'/';
+            string? fileFullName = null;
+            try
+            {
+                if (!System.IO.File.Exists(filePath))
+                {
+                    if (!createDirectory(filePath))
+                    {
+                        return null;
+                    }
+                    
+                }
+                fileFullName = filePath+generateGuid()+getFileExtention(file.Name);
+
+                using (var stream = new FileStream(fileFullName, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                return fileFullName;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("this the error from saving image to local"+ex.Message);
+                return null;
+            }
+        } 
         
-        // public static   void saveImage(
-        //     string? imagePath,
-        //     Guid? id
-        //     , ImageBuissness? imageHolder = null
-        // )
-        // {
-        //     if (imageHolder != null)
-        //     {
-        //         imageHolder.path = imagePath;
-        //         imageHolder.save();
-        //     }
-        //     else if (imagePath != null && id != null)
-        //     {
-        //         imageHolder =
-        //             new ImageBuissness(
-        //                 new ImagesTbDto(
-        //                     imagePath: imagePath,
-        //                     belongTo: (Guid)id,
-        //                     imagePathId: null,
-        //                     isThumnail: false));
-        //         imageHolder.save();
-        //     }
-        // }
-        //
-        // public static void saveImage(
-        //     List<ImageRequestDto>? imagePath,
-        //     Guid id
-        // )
-        // {
-        //     if (imagePath != null)
-        //     {
-        //         foreach (var path in imagePath)
-        //         {
-        //             var imageHolder = new ImageBuissness(
-        //                 new ImagesTbDto(
-        //                     imagePath: path.fileName,
-        //                     belongTo: id,
-        //                     imagePathId: null,
-        //                     isThumnail: path.isThumnail)
-        //             );
-        //             imageHolder.save();
-        //         }
-        //     }
-        // }
+      
     }
 }

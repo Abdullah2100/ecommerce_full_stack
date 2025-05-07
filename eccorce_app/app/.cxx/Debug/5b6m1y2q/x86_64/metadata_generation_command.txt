@@ -1,0 +1,18 @@
+                        -H/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/src/main/jni
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_SYSTEM_VERSION=24
+-DANDROID_PLATFORM=android-24
+-DANDROID_ABI=x86_64
+-DCMAKE_ANDROID_ARCH_ABI=x86_64
+-DANDROID_NDK=/home/abdullah/Android/Sdk/ndk/28.0.13004108
+-DCMAKE_ANDROID_NDK=/home/abdullah/Android/Sdk/ndk/28.0.13004108
+-DCMAKE_TOOLCHAIN_FILE=/home/abdullah/Android/Sdk/ndk/28.0.13004108/build/cmake/android.toolchain.cmake
+-DCMAKE_MAKE_PROGRAM=/home/abdullah/Android/Sdk/cmake/3.31.5/bin/ninja
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/build/intermediates/cxx/Debug/5b6m1y2q/obj/x86_64
+-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/build/intermediates/cxx/Debug/5b6m1y2q/obj/x86_64
+-DCMAKE_BUILD_TYPE=Debug
+-B/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64
+-GNinja
+                        Build command args: []
+                        Version: 2

@@ -9,19 +9,18 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Hotel API",
-        Version = "v1"
-    });
-});
+// builder.Services.AddSwaggerGen(c =>
+// {
+//     c.SwaggerDoc("v1", new OpenApiInfo
+//     {
+//         Title = "Hotel API",
+//         Version = "v1"
+//     });
+// });
 
 
 builder.Services.AddSingleton<IConfigurationServices, ConfigurationServicesImp>();
-// builder.Logging.ClearProviders();
-// builder.Logging.AddConsole();
+
 
 var configuration = builder.Configuration;
 
@@ -44,10 +43,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<AppDbContext>(options => options
-    .UseNpgsql(builder
-        .Configuration
-        .GetConnectionString("connection_url")));
+
+var connectionUrl = configuration["ConnectionStrings:connection_url"];
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(
+    connectionUrl,
+    o => o.UseNetTopologySuite()));
 
 
 var app = builder.Build();
@@ -55,12 +55,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Hotel API v1");
-        c.RoutePrefix = string.Empty;  // Swagger UI will be available at the root URL
-    });
+    // app.UseSwagger();
+    // app.UseSwaggerUI(c =>
+    // {
+    //     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Hotel API v1");
+    //     c.RoutePrefix = string.Empty;  // Swagger UI will be available at the root URL
+    // });
 }
 
 app.UseHttpsRedirection();

@@ -1,0 +1,3 @@
+/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/5b6m1y2q/arm64-v8a/CMakeFiles/keys.dir
+/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/5b6m1y2q/arm64-v8a/CMakeFiles/edit_cache.dir
+/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/5b6m1y2q/arm64-v8a/CMakeFiles/rebuild_cache.dir

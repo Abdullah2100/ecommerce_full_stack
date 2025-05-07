@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecommerc_dotnet.context;
 
@@ -20,91 +21,96 @@ namespace ecommerc_dotnet.Migrations
                 .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ecommerc_dotnet.module.Address", b =>
+                {
+                    b.Property<Guid>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Geometry>("location")
+                        .IsRequired()
+                        .HasColumnType("GEOMETRY(Point, 4326)");
+
+                    b.Property<Guid>("owner_id")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("owner_id");
+
+                    b.ToTable("Address");
+                });
 
             modelBuilder.Entity("ecommerc_dotnet.module.User", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("UUID");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("created_at")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("isDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BOOLEAN")
-                        .HasDefaultValueSql("FALSE");
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("password")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("role")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("integer");
+
+                    b.Property<string>("thumbnail")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("updated_at")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("NULL");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("username")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("username")
+                    b.HasIndex("email", "phone", "username")
                         .IsUnique();
 
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ecommerc_dotnet.module.Address", b =>
+                {
+                    b.HasOne("ecommerc_dotnet.module.User", "owner")
+                        .WithMany("addresses")
+                        .HasForeignKey("owner_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("owner");
+                });
+
             modelBuilder.Entity("ecommerc_dotnet.module.User", b =>
                 {
-                    b.OwnsOne("ecommerc_dotnet.module.Person", "person", b1 =>
-                        {
-                            b1.Property<Guid>("ID")
-                                .HasColumnType("UUID");
-
-                            b1.Property<string>("address")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("email")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("name")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("character varying(50)");
-
-                            b1.Property<string>("phone")
-                                .IsRequired()
-                                .HasMaxLength(13)
-                                .HasColumnType("character varying(13)");
-
-                            b1.HasKey("ID");
-
-                            b1.HasIndex("email", "phone")
-                                .IsUnique();
-
-                            b1.ToTable("Users");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ID");
-                        });
-
-                    b.Navigation("person")
-                        .IsRequired();
+                    b.Navigation("addresses");
                 });
 #pragma warning restore 612, 618
         }
