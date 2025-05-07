@@ -7,6 +7,7 @@ using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 
 namespace ecommerc_dotnet.controller;
 
@@ -16,17 +17,14 @@ namespace ecommerc_dotnet.controller;
 public class UserController : ControllerBase
 {
     public UserController(AppDbContext dbContext
-        // , ILogger logger
         , IConfigurationServices configuration)
     {
         _dbContext = dbContext;
-        // _logger = logger;
         _configuration = configuration;
         _userData = new UserData(_dbContext);
     }
 
     private readonly AppDbContext _dbContext;
-    private readonly ILogger _logger;
     private readonly IConfigurationServices _configuration;
     private readonly UserData _userData;
 
@@ -40,8 +38,8 @@ public class UserController : ControllerBase
         if (data.role != 0 && data.role != 1)
         {
             return BadRequest("role must be 1 or 0");
- 
         }
+
         string? validationResult = clsValidation.validateInput(data.email, data.password, data.phone);
 
         if (validationResult != null)
@@ -49,29 +47,29 @@ public class UserController : ControllerBase
             return BadRequest(validationResult);
         }
 
-        
+
         User? result = await _userData.createNew(data);
         if (result == null)
             return BadRequest("هناك مشكلة ما");
-        
+
         string token = "", refreshToken = "";
-        
+
         token = AuthinticationServices.generateToken(
             userID: result.ID,
-            email: result.person.email,
+            email: result.email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
             userID: result.ID,
-            email: result.person.email,
+            email: result.email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
 
         return StatusCode(StatusCodes.Status201Created
             , new { token = token, refreshToken = refreshToken });
     }
-    
-   
+
+
     [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -79,28 +77,26 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public IActionResult signIn([FromBody] LoginDto data)
     {
-
-        User? result =  _userData.getUser(data.username,clsUtil.hashingText(data.password));
+        User? result = _userData.getUser(data.username, clsUtil.hashingText(data.password));
         if (result == null)
             return BadRequest("المستخدم غير موجود");
-        
+
         string token = "", refreshToken = "";
-        
+
         token = AuthinticationServices.generateToken(
             userID: result.ID,
-            email: result.person.email,
+            email: result.email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
             userID: result.ID,
-            email: result.person.email,
+            email: result.email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
 
         return StatusCode(StatusCodes.Status201Created
             , new { token = token, refreshToken = refreshToken });
     }
-
 
 
     [HttpDelete("{userID:guid}")]
@@ -110,7 +106,7 @@ public class UserController : ControllerBase
         var id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
             idHolder = outID;
         }
@@ -119,10 +115,16 @@ public class UserController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        
+
         var currentUser = _userData.getUser(idHolder.Value);
 
-        if (userID != idHolder&&(currentUser==null || currentUser.role==1))
+        if (currentUser == null)
+        {
+            return BadRequest("المستخدم غير موجود");
+ 
+        }
+
+        if (userID != idHolder && (currentUser == null || currentUser.role == 1))
         {
             return BadRequest("ليس لديك الصلاحية لحذف الحساب");
         }
@@ -130,21 +132,17 @@ public class UserController : ControllerBase
         if (currentUser.isDeleted)
         {
             return BadRequest("المستخدم محذوف");
- 
         }
-        
+
         bool result = await _userData.deleteUser(idHolder.Value);
-        if(result)
+        if (result)
             return Ok("تم حذف المستخدم بنجاح");
 
         return BadRequest(" حدثت مشكلة اثناء الحذف");
- 
-        
-        
     }
-    
+
     [HttpGet("")]
-    public async Task<IActionResult> myInfo()
+    public IActionResult  getUser()
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -159,32 +157,93 @@ public class UserController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        
+
         var user = _userData.getUser(idHolder.Value);
 
-        if (user==null)
+        if (user == null)
         {
             return BadRequest("المستخدم غير موجود");
         }
 
-        var userInfo = new UserInfoDto(
-            id: user.ID,
-            name: user.person.name,
-            phone: user.person.phone,
-            address: user.person.address,
-            email: user.person.email,
-            username: user.username
-            );
-       
+        List<Geometry>? locations = user?.addresses == null ? null : user.addresses.Select(x => x.location).ToList();
 
-        
-        return StatusCode(200,userInfo);
- 
-        
-        
+        var userInfo = new UserInfoDto(
+            id: user!.ID,
+            name: user.name,
+            phone: user.phone,
+            email: user.email,
+            username: user.username,
+            thumbnail: user.thumbnail,
+            address: locations
+        );
+
+
+        return StatusCode(200, userInfo);
     }
 
 
-    
-    
+    [HttpPut("")]
+    public async Task<IActionResult> updateUser(
+        [FromForm] UpdateUserInfo userData
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = _userData.getUser(idHolder.Value);
+
+        if (user == null)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+
+        if (idHolder != user.ID)
+        {
+            return BadRequest("فقط المستخدم يمكن تعديل بياناته");
+        }
+
+
+        if (userData.password != null && userData.newPassword != null)
+        {
+            if (user.password != clsUtil.hashingText(userData.password))
+            {
+                return BadRequest("كلمة المرور غير صحيحة");
+            }
+        }
+
+        string? profile = null;
+        if (userData.thumbnail != null)
+        {
+            profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PRODUCT);
+        }
+
+        var result =await _userData.updateUser(userData, profile);
+
+        if (result == null)
+            return BadRequest("هناك مشكلة في تحديث البيانات");
+
+        List<Geometry>? locations = user?.addresses == null ? null : user.addresses.Select(x => x.location).ToList();
+
+        var userInfo = new UserInfoDto(
+            id: user!.ID,
+            name: user.name,
+            phone: user.phone,
+            email: user.email,
+            username: user.username,
+            thumbnail: user.thumbnail,
+            address: locations
+        );
+        return Ok(result);
+    }
 }

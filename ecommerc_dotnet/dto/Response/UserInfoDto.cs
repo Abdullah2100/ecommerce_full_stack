@@ -1,3 +1,5 @@
+using NetTopologySuite.Geometries;
+
 namespace ecommerc_dotnet.dto.Response;
 
 public class UserInfoDto
@@ -6,17 +8,20 @@ public class UserInfoDto
         Guid id, 
         string name, 
         string phone, 
-        string? address, 
         string email, 
-        string username
+        string username,
+        string? thumbnail=null,
+        List<Geometry>? address=null 
+        
        )
     {
         Id = id;
         this.name = name;
         this.phone = phone;
-        this.address = address;
         this.email = email;
         this.username = username;
+        this.thumbnail = thumbnail;
+        this.address = address;
         
     }
 
@@ -24,7 +29,8 @@ public class UserInfoDto
      public string name { get; set; }
 
      public string phone { get; set; }
-    public string? address { get; set; } = "";
      public string email { get; set; }
      public string username { get; set; }
+     public string thumbnail { get; set; }
+     public List<Geometry>? address { get; set; }
 }
