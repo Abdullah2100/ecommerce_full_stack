@@ -18,4 +18,15 @@ object Screens {
     @Serializable
     object ReseatPassword
 
+
+
+    @Serializable
+    object HomeGraph
+
+    @Serializable
+    object Home
+
+
+
+
 }

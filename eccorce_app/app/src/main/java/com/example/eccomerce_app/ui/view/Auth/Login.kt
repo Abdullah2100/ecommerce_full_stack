@@ -31,7 +31,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.ui.Screens
+import com.example.eccomerce_app.ui.component.CustomAuthBotton
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
@@ -55,9 +55,33 @@ fun LoginScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("fackkk@gmail.com")) }
-    val password = remember { mutableStateOf(TextFieldValue("AS!@as23")) }
+    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("")) }
+    val password = remember { mutableStateOf(TextFieldValue("")) }
 
+    val isEmailError = remember { mutableStateOf<Boolean>(false) }
+    val isPasswordError = remember { mutableStateOf<Boolean>(false) }
+    val erroMessage = remember { mutableStateOf("") }
+
+    fun validateLoginInput(
+        username: String,
+        password: String
+    ): Boolean {
+
+        isEmailError.value = false;
+        isPasswordError.value = false;
+
+        if (username.trim().isEmpty()) {
+            erroMessage.value = "email must not be empty"
+            isEmailError.value = true;
+            return false;
+        } else if (password.trim().isEmpty()) {
+            erroMessage.value = ("password must not be empty")
+            isPasswordError.value = true
+            return false;
+        }
+
+        return true
+    }
 
 
     Scaffold(
@@ -106,7 +130,7 @@ fun LoginScreen(
                         modifier = Modifier
                             .padding(start = 5.dp)
                             .clickable {
-                                //  nav.navigate(Screens.Signup)
+                                nav.navigate(Screens.Signup)
                             }
                     ) {
                         Text(
@@ -143,11 +167,21 @@ fun LoginScreen(
                     color = CustomColor.neutralColor950,
                     fontSize = (34 / fontScall).sp
                 )
+
                 Sizer(heigh = 50)
-                TextInputWithTitle(userNameOrEmail, placHolder = "Enter Your email/username", title = "Email")
-                Sizer(heigh = 15)
-                TextSecureInputWithTitle(password)
-                Sizer(heigh = 10)
+                TextInputWithTitle(
+                    userNameOrEmail,
+                    placHolder = "Enter Your email",
+                    title = "Email",
+                    isHasError = isEmailError.value,
+                    erroMessage = erroMessage.value
+                )
+                TextSecureInputWithTitle(
+                    password,
+                    "Password",
+                    isPasswordError.value,
+                    erroMessage.value
+                )
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterEnd
@@ -158,7 +192,7 @@ fun LoginScreen(
                         fontWeight = FontWeight.Medium,
                         color = CustomColor.neutralColor950,
                         fontSize = (16 / fontScall).sp,
-                        modifier = Modifier.clickable{
+                        modifier = Modifier.clickable {
 
                         }
                     )
@@ -167,43 +201,26 @@ fun LoginScreen(
                 Sizer(heigh = 30)
 
 
-                Button(
-                    modifier = Modifier
-                        .padding(bottom = 50.dp)
-                        .height(50.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        authKoin.loginUser(userNameOrEmail.value.text
-                            ,password=password.value.text,
-                            snackbarHostState)
+                CustomAuthBotton(
+                    isLoading = isLoading.value,
+                    operation = {
+                        authKoin.loginUser(
+                            userNameOrEmail.value.text, password = password.value.text,
+                            snackbarHostState,
+                            nav
+                        )
                     },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CustomColor.primaryColor700
-                    ),
+                    buttonTitle = "Login",
+                    validationFun = {
+                        keyboardController?.hide()
 
-                    ) {
+                        validateLoginInput(
+                            username = userNameOrEmail.value.text,
+                            password = password.value.text
+                        )
 
-                    when(isLoading.value){
-                         true->{
-                            CircularProgressIndicator(
-                                color = Color.White,
-                                modifier = Modifier.size(30.dp)
-                            )
-
-                        }
-                        else ->{
-
-                    Text(
-                        "Login",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (16 / fontScall).sp
-                    )
-                        }
                     }
-                }
-
+                )
 
             }
         }

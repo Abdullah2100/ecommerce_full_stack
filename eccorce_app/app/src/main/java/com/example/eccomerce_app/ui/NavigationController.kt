@@ -20,17 +20,19 @@ import androidx.navigation.navigation
 import com.example.eccomerce_app.ui.OnBoarding.OnBoardingScreen
 import com.example.eccomerce_app.ui.view.Auth.LoginScreen
 import com.example.eccomerce_app.View.Pages.SignUpPage
+import com.example.eccomerce_app.ui.view.home.HomePage
 
 
 @Composable
 fun NavController(
     nav: NavHostController,
     isPassOnBoardingScreen: Boolean,
+    isLoginIn: Boolean,
     authViewModle: AuthViewModel = koinViewModel(),
 ) {
 
     NavHost(
-        startDestination = if(isPassOnBoardingScreen) Screens.AuthGraph else Screens.OnBoarding,
+        startDestination =if(isLoginIn) Screens.HomeGraph else if(isPassOnBoardingScreen) Screens.AuthGraph else Screens.OnBoarding,
         navController = nav
     ){
 
@@ -74,13 +76,57 @@ fun NavController(
                     authKoin =authViewModle
                 )
             }
-            composable < Screens.Signup>{
+            composable < Screens.Signup>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+
+                popEnterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                },
+            ){
                 SignUpPage(
                     nav = nav,
                     authKoin =authViewModle
                 )
             }
         }
+
+        navigation < Screens.HomeGraph>(
+            startDestination = Screens.Home
+        ){
+
+            composable < Screens.Home>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                },
+
+                popEnterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }
+            ){
+                HomePage(
+//                    nav = nav,
+//                    authKoin =authViewModle
+                )
+            }
+
+        }
+
+
     }
 
 }

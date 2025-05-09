@@ -11,6 +11,8 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     
+    public DbSet<ReseatePasswordOtp> ReseatPassword { get; set; }
+    
     public DbSet<Address> Address { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,7 +22,7 @@ public class AppDbContext : DbContext
             user =>
             {
              
-                user.HasIndex(u => new { u.email, u.phone,u.username }).IsUnique();;
+                user.HasIndex(u => new { u.email, u.phone }).IsUnique();;
 
                 user.HasMany<Address>(e => e.addresses)
                     .WithOne(u => u.owner)

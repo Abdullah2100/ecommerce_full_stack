@@ -37,16 +37,19 @@ class MainActivity : ComponentActivity() {
             val nav = rememberNavController();
             val authViewModle: AuthViewModel = koinViewModel();
             val isPassingOnBoarding = remember { mutableStateOf<Boolean?>(null) }
+            val isLogin = remember { mutableStateOf<Boolean?>(null) }
             val result = authViewModle.isPassingOnBoardinScreen.collectAsState()
+            val resultLogin = authViewModle.isLogin.collectAsState()
 
 
 
-//            if (result.value!=null) {
-//                isPassingOnBoarding.value=result.value
-//                keepSplash = false;
-//            }
-//            if(isPassingOnBoarding.value!=null)
-//                NavController(nav, isPassingOnBoarding.value == true)
+            if (result.value!=null) {
+                isPassingOnBoarding.value=result.value
+                isLogin.value = resultLogin.value
+                keepSplash = false;
+            }
+            if(isPassingOnBoarding.value!=null&&isLogin.value!=null)
+                NavController(nav, isPassingOnBoarding.value == true, isLogin.value == true)
         }
     }
 }

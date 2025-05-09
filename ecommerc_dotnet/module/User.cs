@@ -9,7 +9,6 @@ public class User
     public string name { get; set; }
     public string phone { get; set; }
     public string  email{ get; set; }
-    public string username { get; set; }
     public string password { get; set; }
     public bool isDeleted { get; set; }
     
@@ -25,5 +24,5 @@ public class User
      public DateTime? updated_at { get; set; } = null;
     
     public string? thumbnail { get; set; }
-    public ICollection<Address> addresses { get; set; }
+    public ICollection<Address>? addresses { get; set; }
 }

@@ -37,7 +37,6 @@ public class UserData
             userData.email = data.email;
             userData.phone = data.phone;
             userData.ID = clsUtil.generateGuid();
-            userData.username = data.username;
             userData.password = clsUtil.hashingText(data.password);
             userData.created_at = DateTime.Now;
             userData.updated_at = null;
@@ -58,7 +57,7 @@ public class UserData
         try
         {
             return _dbContext.Users.FirstOrDefault(u =>
-                (u.username == userName|| u.email==userName) && u.password == password && u.isDeleted == false);
+                (u.name == userName|| u.email==userName) && u.password == password && u.isDeleted == false);
         }
         catch (Exception e)
         {
@@ -79,6 +78,49 @@ public class UserData
             //_logger.LogError("error from get user by username"+e.Message);
             Console.WriteLine("error from get user by username" + e.Message);
             return null;
+        }
+    }
+    
+    public User? getUser(string email)
+    {
+        try
+        {
+            return _dbContext.Users.FirstOrDefault(u => u.email == email && u.isDeleted == false);
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+
+
+    public bool isExistByEmail(string email)
+    {
+        try
+        {
+            return _dbContext.Users.FirstOrDefault(u => u.email==email && u.isDeleted == false)!=null;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return false;
+        }
+    }
+
+    public bool isExistByPhone(string phone)
+    {
+        try
+        {
+            return _dbContext.Users.FirstOrDefault(u => u.phone==phone && u.isDeleted == false)!=null;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return false;
         }
     }
 
@@ -105,18 +147,17 @@ public class UserData
         try
         {
             User? userData = _dbContext.Users.FirstOrDefault(u => u.ID == data.userId);
-
+            
             if (userData == null)
-                return null;
+            return null;
 
             userData.name = data.name ?? userData.name;
             userData.phone = data.phone ?? userData.phone;
-            userData.username = data.username ?? userData.username;
-            userData.password = clsUtil.hashingText(data.newPassword);
+            userData.password =data.newPassword!=null?clsUtil.hashingText(data.newPassword):userData.password;
             userData.updated_at = DateTime.Now;
             userData.thumbnail = imagePath;
 
-            if (data.address != null)
+            if (data?.address != null)
             {
                 Address address = new Address();
                 address.id = clsUtil.generateGuid();
@@ -125,7 +166,6 @@ public class UserData
                 userData.addresses.Add(address);
             }
 
-            _dbContext.Users.Add(userData);
             await _dbContext.SaveChangesAsync();
             return userData;
         }

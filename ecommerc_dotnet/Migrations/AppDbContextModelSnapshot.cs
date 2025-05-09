@@ -44,6 +44,31 @@ namespace ecommerc_dotnet.Migrations
                     b.ToTable("Address");
                 });
 
+            modelBuilder.Entity("ecommerc_dotnet.module.ReseatePasswordOtp", b =>
+                {
+                    b.Property<Guid>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("createdAt")
+                        .HasColumnType("Timestamp");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("otp")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("validation")
+                        .HasColumnType("integer");
+
+                    b.HasKey("id");
+
+                    b.ToTable("ReseatPassword");
+                });
+
             modelBuilder.Entity("ecommerc_dotnet.module.User", b =>
                 {
                     b.Property<Guid>("ID")
@@ -51,9 +76,7 @@ namespace ecommerc_dotnet.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("created_at")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("Timestamp");
 
                     b.Property<string>("email")
                         .IsRequired()
@@ -81,17 +104,11 @@ namespace ecommerc_dotnet.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("updated_at")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("username")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("Timestamp");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("email", "phone", "username")
+                    b.HasIndex("email", "phone")
                         .IsUnique();
 
                     b.ToTable("Users");

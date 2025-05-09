@@ -54,7 +54,7 @@ fun OnBoardingScreen(
             )
             .padding(horizontal = 15.dp)
             .fillMaxSize()) {
-            val (imageRef,titleRef,bottonReef) = createRefs();
+            val (titleRef,bottonReef) = createRefs();
 
 
             Column (

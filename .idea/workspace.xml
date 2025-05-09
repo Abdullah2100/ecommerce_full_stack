@@ -1,4 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PropertiesComponent">{}</component>
+  <component name="ChangeListManager">
+    <list default="true" id="4c695687-76ea-4fdb-9d39-46b11ea390fa" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/.cmake/api/v1/reply/cache-v2-ff078299700bb40dd10a.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/.cmake/api/v1/reply/cmakeFiles-v1-2335d2c723932fd0fc3d.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/.cmake/api/v1/reply/codemodel-v2-cbf0f8b4299a2ad48c05.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/.cmake/api/v1/reply/directory-.-Debug-f5ebdc15457944623624.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/.cmake/api/v1/reply/index-2025-05-07T20-14-41-0270.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/.cmake/api/v1/reply/target-keys-Debug-3b90ad050e1eda68585b.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/TargetDirectories.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/rules.ninja" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/additional_project_files.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/android_gradle_build.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/android_gradle_build_mini.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/build.ninja" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/build_file_index.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/cmake_install.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/compile_commands.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/compile_commands.json.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/configure_fingerprint.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/metadata_generation_command.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/prefab_config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/symbol_folder_index.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/tools/debug/x86/compile_commands.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/dto/request/SignupDto.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/dto/response/ErrorResponse.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/component/CustomBottom.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/home/home.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/util/Validation.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/res/drawable/allert.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/Folder.DotSettings.user" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/Migrations/20250507225958_remvoing username from user.Designer.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/Migrations/20250507225958_remvoing username from user.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/Migrations/20250509141210_check if there any thing change .Designer.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/Migrations/20250509141210_check if there any thing change .cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/data/ForgetPasswordData.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/dto/Request/ForgetPasswordDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/images/PRODUCT/005a0e0f-56ab-4db8-9e5b-b0aa9ea9c6ee.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/images/PRODUCT/9a6e669a-6457-4e61-b9c7-ecf5548f6139.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/module/ReseatePasswordOtp.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/services/EmailServices/EmailServicesImplement.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ecommerc_dotnet/services/EmailServices/IEmailServices.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/8.12.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.idea/assetWizardSettings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeCache.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_C.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_C.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_CXX.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/CMakeConfigureLog.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86/CMakeFiles/CMakeConfigureLog.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/.cmake/api/v1/reply/index-2025-05-07T11-10-02-0799.json" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/.cmake/api/v1/reply/index-2025-05-07T20-14-58-0229.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/.ninja_deps" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/.ninja_log" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/.ninja_log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_C.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_C.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/3.31.5/CMakeDetermineCompilerABI_CXX.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/CMakeConfigureLog.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/CMakeConfigureLog.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/configure_fingerprint.bin" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64/configure_fingerprint.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/data/repository/AuthRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/data/repository/AuthRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/NavigationController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/NavigationController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/Screens.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/Screens.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/component/TextInputWithTitle.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/component/TextInputWithTitle.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/Auth/Login.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/Auth/Login.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/Auth/SignUp.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/Auth/SignUp.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/OnBoarding/OnBoarding.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/ui/view/OnBoarding/OnBoarding.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/viewModel/AuthViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/eccorce_app/app/src/main/java/com/example/eccomerce_app/viewModel/AuthViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/AuthServices/AuthinticationServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/services/AuthinticationServices.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/AuthServices/ConfigurationServicesImp.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/services/ConfigrationServices/ConfigurationServicesImp.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/AuthServices/IConfigurationServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/services/ConfigrationServices/IConfigurationServices.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/Migrations/AppDbContextModelSnapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/Migrations/AppDbContextModelSnapshot.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/bin/Debug/net9.0/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/bin/Debug/net9.0/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/bin/Debug/net9.0/ecommerc_dotnet.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/bin/Debug/net9.0/ecommerc_dotnet.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/bin/Debug/net9.0/ecommerc_dotnet.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/bin/Debug/net9.0/ecommerc_dotnet.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/context/AppDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/context/AppDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/controller/UserController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/controller/UserController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/data/UserData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/data/UserData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/dto/Request/SignupDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/dto/Request/SignupDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/dto/Response/UserInfoDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/dto/Response/UserInfoDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/module/User.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/module/User.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.csproj.CoreCompileInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ecommerc_dotnet.sourcelink.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ref/ecommerc_dotnet.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/ref/ecommerc_dotnet.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/refint/ecommerc_dotnet.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/Debug/net9.0/refint/ecommerc_dotnet.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/project.assets.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/rider.project.model.nuget.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/obj/rider.project.restore.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ecommerc_dotnet/util/clsUtil.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ecommerc_dotnet/util/clsUtil.cs" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Abdullah2100"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Abdullah2100/ecommerce_api_dotnet.git",
+    "accountId": "80707c7b-25a2-4fe6-b473-d7f07cc98abb"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="2wrXsGnEUVp1grMyZgCd9WexNMl" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4c695687-76ea-4fdb-9d39-46b11ea390fa" name="Changes" comment="" />
+      <created>1746800874334</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1746800874334</updated>
+      <workItem from="1746800877425" duration="41000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
 </project>

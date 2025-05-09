@@ -13,7 +13,7 @@ namespace hotel_api.util
         {
             PROFILE,PRODUCT
         };
-        private static string localPath = "images/";
+        private static string localPath = "/images/";
         public static Guid generateGuid()
         {
             return Guid.NewGuid();
@@ -49,15 +49,15 @@ namespace hotel_api.util
         }
         
         
-        public static string getFileExtention(string filename){
-            return new FileInfo(filename).Extension;
+        public static string getFileExtention(IFormFile filename){
+            return Path.GetExtension(filename.FileName);
         }
 
         private static bool createDirectory(string dir)
         {
             try
             {
-                File.Create(dir);
+                Directory.CreateDirectory(dir);
                 return true;
             }
             catch (Exception ex)
@@ -67,27 +67,28 @@ namespace hotel_api.util
             }
         }
 
-        public static async Task<string?>saveFile(IFormFile file,enImageType type)
+        public static async Task<string?>saveFile(IFormFile file,enImageType type,IWebHostEnvironment host)
         {
-            string filePath = clsUtil.localPath + type.ToString()+'/';
+            string filePath = localPath + type.ToString()+"/";
+            
             string? fileFullName = null;
             try
             {
-                if (!System.IO.File.Exists(filePath))
+                if (!Directory.Exists(host.ContentRootPath+filePath))
                 {
-                    if (!createDirectory(filePath))
+                    if (!createDirectory(host.ContentRootPath+filePath))
                     {
                         return null;
                     }
                     
                 }
-                fileFullName = filePath+generateGuid()+getFileExtention(file.Name);
+                fileFullName = filePath+generateGuid()+getFileExtention(file);
 
-                using (var stream = new FileStream(fileFullName, FileMode.Create))
+                using (var stream = new FileStream(host.ContentRootPath+fileFullName, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
-                return fileFullName;
+                return fileFullName.Replace("/images","");
 
             }
             catch (Exception ex)
@@ -97,6 +98,25 @@ namespace hotel_api.util
             }
         } 
         
+        public static bool deleteFile(string filePath,IWebHostEnvironment host)
+        {
+            try
+            {
+                if (File.Exists(host.ContentRootPath+"/images"+filePath))
+                {
+                    File.Delete(host.ContentRootPath +"/images"+ filePath);
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("this the error from delete image  "+ex.Message);
+                return false;
+            }
+        } 
+
       
     }
 }

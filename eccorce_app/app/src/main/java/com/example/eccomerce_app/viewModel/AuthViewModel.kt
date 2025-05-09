@@ -1,99 +1,158 @@
 package com.example.eccomerce_app.viewModel
 
-import android.R
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.eccomerce_app.Dto.AuthResultDto
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.data.Room.AuthModleEntity
 import com.example.eccomerce_app.data.Room.IsPassOnBoardingScreen
-import com.example.eccomerce_app.di.viewModelModel
 import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.data.repository.AuthRepository
+import com.example.eccomerce_app.dto.request.SignupDto
+import com.example.eccomerce_app.dto.response.ErrorResponse
+import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 
-class AuthViewModel(val authRepository: AuthRepository, val dao:AuthDao) : ViewModel() {
-   private val _isPassingOnBoardinScreen = MutableStateFlow<Boolean?>(null)
+class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : ViewModel() {
+    private val _isPassingOnBoardinScreen = MutableStateFlow<Boolean?>(null)
     val isPassingOnBoardinScreen = _isPassingOnBoardinScreen.asStateFlow()
 
-    private  val _isLoadin = MutableStateFlow<Boolean>(false)
+    private val _isLoadin = MutableStateFlow<Boolean>(false)
     val isLoadin = _isLoadin.asStateFlow()
+
+    private val _isLogin = MutableStateFlow<Boolean>(false)
+    val isLogin = _isLogin.asStateFlow()
 
     init {
         getIfPassingOnBoardingScreen()
     }
 
-    fun getIfPassingOnBoardingScreen(){
+    fun getIfPassingOnBoardingScreen() {
         viewModelScope.launch(Dispatchers.IO) {
-         val result =   dao.isPassOnBoarding()
+            val authData = dao.getAuthData()
+            val result = dao.isPassOnBoarding()
+            General.authData.emit(authData)
+            _isLogin.emit(authData != null)
             _isPassingOnBoardinScreen.emit(result)
         }
     }
 
-    fun setIsPassOnBoardingScreen(){
-        viewModelScope.launch (Dispatchers.IO){
-            dao.saveIsPassingOnBoarding(IsPassOnBoardingScreen(0,true))
+    fun setIsPassOnBoardingScreen() {
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.saveIsPassingOnBoarding(IsPassOnBoardingScreen(0, true))
         }
     }
 
-    private suspend  fun validateLoginInput(
-        username: String,
+
+    fun signUpUser(
+        email: String,
+        name: String,
+        phone: String,
         password: String,
-        snackbarHostState: SnackbarHostState
-    ): Boolean{
+        snackBark: SnackbarHostState,
+        nav: NavHostController
 
-        if(username.trim().isEmpty()){
-            snackbarHostState.showSnackbar("username must not be empty")
-            return false;
-        }
-        else if(password.trim().isEmpty()){
-            snackbarHostState.showSnackbar("password must not be empty")
-            return false;
-        }
-
-        return true
-    }
-    fun loginUser(
-        username:String,
-        password:String,
-        snackBark: SnackbarHostState
-    ){
+        ) {
         viewModelScope.launch {
-            val isValideToRequest = validateLoginInput(username,password,snackBark);
-            if(isValideToRequest){
-                _isLoadin.emit(true);
+            _isLoadin.emit(true);
 
-               val result = authRepository.login(LoginDto(username = username,password=password))
-                when(result){
-                    is NetworkCallHandler.Successful<*> ->{
-                        val authData = result.data as AuthResultDto;
-                        dao.saveAuthData(
-                            AuthModleEntity(
-                                id = 0,
-                                token = authData.accessToken,
-                                refreshToken = authData.refreshToken
-                            )
+            val result = authRepository.signup(
+                SignupDto(
+                    name = name,
+                    password = password,
+                    phone = phone,
+                    email = email
+                )
+            )
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    val authData = result.data as AuthResultDto;
+                    dao.saveAuthData(
+                        AuthModleEntity(
+                            id = 0,
+                            token = authData.accessToken,
+                            refreshToken = authData.refreshToken
                         )
-                    }
-                    else ->{
-                        var errorMessage = result.toString()
-                        if(errorMessage.toString().contains(General.BASED_URL)){
-                            errorMessage.toString().replace(General.BASED_URL," Server ")
+                    )
+                    nav.navigate(Screens.HomeGraph){
+                        popUpTo(nav.graph.id){
+                            inclusive=true
                         }
-                        snackBark.showSnackbar(errorMessage)
                     }
                 }
-                _isLoadin.emit(false)
+                is NetworkCallHandler.Error->{
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    snackBark.showSnackbar(errorMessage.replace("\"",""))
+                }
+                else -> {
+                    var errorMessage = (result.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    snackBark.showSnackbar(errorMessage.replace("\"",""))
+                }
             }
+            _isLoadin.emit(false)
 
         }
     }
+
+    fun loginUser(
+        username: String,
+        password: String,
+        snackBark: SnackbarHostState,
+        nav: NavHostController,
+        ) {
+        viewModelScope.launch {
+            _isLoadin.emit(true);
+
+            val result = authRepository.login(LoginDto(username = username, password = password))
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    val authData = result.data as AuthResultDto;
+                    dao.saveAuthData(
+                        AuthModleEntity(
+                            id = 0,
+                            token = authData.accessToken,
+                            refreshToken = authData.refreshToken
+                        )
+                    )
+                    nav.navigate(Screens.HomeGraph){
+                        popUpTo(nav.graph.id){
+                            inclusive=true
+                        }
+                    }
+                }
+            is NetworkCallHandler.Error->{
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                snackBark.showSnackbar(errorMessage.replace("\"",""))
+            }
+                else -> {
+                    var errorMessage = result.toString()
+                    if (errorMessage.toString().contains(General.BASED_URL)) {
+                        errorMessage.toString().replace(General.BASED_URL, " Server ")
+                    }
+                    snackBark.showSnackbar(errorMessage.replace("\"",""))
+                }
+            }
+            _isLoadin.emit(false)
+
+        }
+    }
+
 }
