@@ -10,7 +10,7 @@ public class UserInfoDto
         string phone, 
         string email, 
         string? thumbnail=null,
-        List<Geometry>? address=null 
+        List<AddressResponseDto>? address=null 
         
        )
     {
@@ -29,5 +29,5 @@ public class UserInfoDto
      public string phone { get; set; }
      public string email { get; set; }
      public string thumbnail { get; set; }
-     public List<Geometry>? address { get; set; }
+     public List<AddressResponseDto>? address { get; set; }
 }

@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecommerc_dotnet.context;
 
@@ -30,12 +29,27 @@ namespace ecommerc_dotnet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Geometry>("location")
-                        .IsRequired()
-                        .HasColumnType("GEOMETRY(Point, 4326)");
+                    b.Property<DateTime>("created_at")
+                        .HasColumnType("Timestamp");
+
+                    b.Property<bool>("isCurrent")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("latitude")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("longitude")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("owner_id")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("updated_at")
+                        .HasColumnType("Timestamp");
 
                     b.HasKey("id");
 

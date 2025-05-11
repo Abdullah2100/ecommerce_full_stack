@@ -21,9 +21,6 @@ builder.Services.AddSingleton<IEmailServices, EmailServicesImplement>();
 
 
 
-
-
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

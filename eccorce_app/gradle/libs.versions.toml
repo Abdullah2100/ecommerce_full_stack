@@ -10,6 +10,7 @@ espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 composeBom = "2024.09.00"
+playServicesLocation = "17.0.0"
 room = "2.7.1"
 sqlcipher= "4.5.3"
 sqlight = "2.1.0"
@@ -86,6 +87,8 @@ compose-navigation ={group="androidx.navigation",name="navigation-compose",versi
 #constrin layout
 compose-constrin = {group = "androidx.constraintlayout",name = "constraintlayout-compose",version.ref="constrain-compose"}
 
+#location
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 
 [plugins]

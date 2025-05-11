@@ -118,4 +118,11 @@ dependencies {
 
     //desugra
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+
+    //location
+    implementation (libs.play.services.location)
+
+    //corrutine task
+    implementation(libs.kotlinx.coroutines.play.services)
 }

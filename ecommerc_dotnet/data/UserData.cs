@@ -157,17 +157,17 @@ public class UserData
             userData.updated_at = DateTime.Now;
             userData.thumbnail = imagePath;
 
-            if (data?.address != null)
-            {
-                Address address = new Address();
-                address.id = clsUtil.generateGuid();
-                address.location = data.address;
-                address.owner_id = userData.ID;
-                userData.addresses.Add(address);
-            }
+            // if (data?.address != null)
+            // {
+            //     Address address = new Address();
+            //     address.id = clsUtil.generateGuid();
+            //     address.location = data.address;
+            //     address.owner_id = userData.ID;
+            //     userData.addresses.Add(address);
+            // }
 
             await _dbContext.SaveChangesAsync();
-            return userData;
+            return getUser(userID:userData.ID);
         }
         catch (Exception e)
         {

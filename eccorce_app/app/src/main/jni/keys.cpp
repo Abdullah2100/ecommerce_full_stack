@@ -9,4 +9,5 @@ Java_com_example_eccomerce_1app_util_Secrets_getBaseUrl(
         jobject /* this */
 ) {
     return env->NewStringUTF("http://10.0.2.2:5077/api");
+//    return env->NewStringUTF("http://192.168.1.49:/api");
 }

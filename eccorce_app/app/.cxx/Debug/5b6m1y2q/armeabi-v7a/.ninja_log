@@ -1,3 +1,6 @@
 # ninja log v5
-0	55	1746635146385214073	CMakeFiles/keys.dir/keys.cpp.o	7807eb31991112e5
-56	80	1746635146409213540	/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/build/intermediates/cxx/Debug/5b6m1y2q/obj/armeabi-v7a/libkeys.so	9febf3cf5a91c91a
+0	170	1746812832019706707	CMakeFiles/keys.dir/keys.cpp.o	7807eb31991112e5
+171	211	1746812832051722707	/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/build/intermediates/cxx/Debug/5b6m1y2q/obj/armeabi-v7a/libkeys.so	9febf3cf5a91c91a
+0	3	0	clean	7f25971eecd4a92b
+0	30	0	clean	7f25971eecd4a92b
+0	3	0	clean	7f25971eecd4a92b

@@ -28,6 +28,11 @@ interface AuthDao {
     suspend fun saveIsPassingOnBoarding(value : IsPassOnBoardingScreen)
 
 
+    @Query("SELECT count(*)>0 FROM location WHERE  id = 0")
+    fun   isPassLocationScreen(): Boolean;
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun savePassingLocation(authData : IsPassSetLocationScreen)
 
 
 

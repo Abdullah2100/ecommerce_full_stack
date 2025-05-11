@@ -23,26 +23,47 @@ import kotlinx.serialization.json.Json
 
 
 class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : ViewModel() {
-    private val _isPassingOnBoardinScreen = MutableStateFlow<Boolean?>(null)
-    val isPassingOnBoardinScreen = _isPassingOnBoardinScreen.asStateFlow()
-
     private val _isLoadin = MutableStateFlow<Boolean>(false)
     val isLoadin = _isLoadin.asStateFlow()
 
-    private val _isLogin = MutableStateFlow<Boolean>(false)
-    val isLogin = _isLogin.asStateFlow()
+
+
+    private  val _cuurentScreen = MutableStateFlow<Int?>(null);
+    val currentScreen = _cuurentScreen.asStateFlow();
 
     init {
-        getIfPassingOnBoardingScreen()
+        getStartedScreen()
     }
 
-    fun getIfPassingOnBoardingScreen() {
+    fun getStartedScreen() {
         viewModelScope.launch(Dispatchers.IO) {
             val authData = dao.getAuthData()
-            val result = dao.isPassOnBoarding()
+            val isPassOnBoard = dao.isPassOnBoarding()
+            val isLocation = dao.isPassLocationScreen();
             General.authData.emit(authData)
-            _isLogin.emit(authData != null)
-            _isPassingOnBoardinScreen.emit(result)
+          when(isPassOnBoard){
+              false->{
+                  _cuurentScreen.emit(1)
+              }
+              else->{
+                  when(authData==null){
+                      true->{
+                          _cuurentScreen.emit(2)
+                      }
+                      else->{
+                          when(isLocation==false){
+                              true->{
+                                  _cuurentScreen.emit(3)
+                              }
+                              else->{
+                                  _cuurentScreen.emit(4)
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+
         }
     }
 
@@ -83,7 +104,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                             refreshToken = authData.refreshToken
                         )
                     )
-                    nav.navigate(Screens.HomeGraph){
+                    nav.navigate(Screens.LocationGraph){
                         popUpTo(nav.graph.id){
                             inclusive=true
                         }
@@ -129,7 +150,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                             refreshToken = authData.refreshToken
                         )
                     )
-                    nav.navigate(Screens.HomeGraph){
+                    nav.navigate(Screens.LocationGraph){
                         popUpTo(nav.graph.id){
                             inclusive=true
                         }

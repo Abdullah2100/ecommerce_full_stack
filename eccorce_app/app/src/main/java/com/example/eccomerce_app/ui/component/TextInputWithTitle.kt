@@ -44,6 +44,52 @@ import androidx.compose.ui.unit.sp
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.ui.theme.CustomColor
 
+
+@Composable
+fun TextInputWithNoTitle(
+    value: MutableState<TextFieldValue>,
+    placHolder: String,
+) {
+
+    val fontScall = LocalDensity.current.fontScale
+    Column {
+        OutlinedTextField(
+
+            maxLines = 1,
+            value = value.value,
+            onValueChange = { value.value = it },
+            placeholder = {
+                Text(
+                    placHolder,
+                    color = CustomColor.neutralColor500,
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = (16 / fontScall).sp
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor =  CustomColor.neutralColor50,
+                focusedBorderColor =  Color.Black
+            ),
+
+            textStyle = TextStyle(
+                fontFamily = General.satoshiFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = (16 / fontScall).sp,
+                color = CustomColor.neutralColor950
+            ),
+
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+
+            )
+    }
+
+}
+
+
 @Composable
 fun TextInputWithTitle(
     value: MutableState<TextFieldValue>,

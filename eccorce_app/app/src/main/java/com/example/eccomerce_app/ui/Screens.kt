@@ -19,6 +19,15 @@ object Screens {
     object ReseatPassword
 
 
+    @Serializable
+    object LocationGraph
+
+    @Serializable
+    object LocationHome
+
+
+    @Serializable
+    data class LocationList(var isFromLocationHome: Boolean)
 
     @Serializable
     object HomeGraph
