@@ -14,7 +14,9 @@ object CustomColor {
     val primaryColor700 = Color(0xFF523BEA)
     val primaryColor800 = Color(0xFF2C1AB9)
     val primaryColor900 = Color(0xFFEBEFFF)
-    val primaryColor950 = Color(0xFF1A1254)
+    val primaryColor950 = Color(0xFFF9F9FA)
+
+    val searchBarColor =Color(0xFFF9F9FA)
 
     // Neutral Colors
     val neutralColor50 = Color(0xFFFFFFFF)

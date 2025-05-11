@@ -14,18 +14,18 @@ import com.example.eccomerce_app.model.Address
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.concurrent.timerTask
 
 
 class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : ViewModel() {
 
-//    init {
-//        getUserLocations()
-//    }
+
 
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading = _isLoading.asStateFlow()
@@ -36,6 +36,15 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
 
     private var _location = MutableStateFlow<Address>(Address(null,0.0,0.0,"",false))
     var location= _location.asStateFlow()
+
+
+    private var _currentLocationId = MutableStateFlow<UUID?>(null)
+    var savedCurrentLocationToLocal= _currentLocationId.asStateFlow()
+
+
+    init {
+        getSavedCurrentLocation()
+    }
 
      fun updateLocationObj(longit: Double?=null, latit: Double?=null, title: String?=null)
     {
@@ -133,7 +142,8 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                     snackBark.showSnackbar("the address set as current active address")
                     when(isFromLocationHome){
                         true->{
-                            dao.savePassingLocation(IsPassSetLocationScreen(0,true))
+                            dao.savePassingLocation(IsPassSetLocationScreen(0,addressId.toString(),true))
+                            _currentLocationId.emit(addressId)
                             nav.navigate(Screens.HomeGraph){
                                 popUpTo(nav.graph.id){
                                     inclusive=true
@@ -151,6 +161,15 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
             }
 
           _isLoading.emit(false)
+        }
+    }
+
+    fun getSavedCurrentLocation(){
+        viewModelScope.launch(Dispatchers.IO) {
+            getUserLocations()
+            var result =dao.getSavedLocation()
+            if(result!=null)
+            _currentLocationId.emit(UUID.fromString(result.locationId))
         }
     }
 

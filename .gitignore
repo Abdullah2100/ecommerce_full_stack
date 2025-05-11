@@ -1,8 +1,8 @@
-/build
-/.idea
-/.kotlin
-/.gradle
-/obj
-/bin
+build/
+.idea/
+.kotlin/
+.gradle/
+obj/
+bin/
 appsettings.Development.json
 appsettings.json

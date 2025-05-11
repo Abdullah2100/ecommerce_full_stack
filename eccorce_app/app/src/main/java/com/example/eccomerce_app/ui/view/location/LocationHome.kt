@@ -68,6 +68,7 @@ fun LocationHomeScreen(
     val fontScall = LocalDensity.current.fontScale
 
     val isLoading = homeViewModle.isLoading.collectAsState()
+    val locations = homeViewModle.locations.collectAsState()
 
     val currutine = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -113,7 +114,7 @@ fun LocationHomeScreen(
         }
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(locations.value==null) {
         homeViewModle.getUserLocations()
     }
 

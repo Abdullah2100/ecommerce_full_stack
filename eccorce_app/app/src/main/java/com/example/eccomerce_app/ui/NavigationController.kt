@@ -178,8 +178,8 @@ fun NavController(
                 }
             ) {
                 HomePage(
-//                    nav = nav,
-//                    authKoin =authViewModle
+                    nav = nav,
+                    homeViewModel = homeViewModle
                 )
             }
 
