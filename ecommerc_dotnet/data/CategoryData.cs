@@ -110,6 +110,25 @@ public class CategoryData
     }
 
 
+    public async Task<bool?> blockOrUnBlockCategory(
+        Guid id
+    )
+    {
+        try
+        {
+            var category = await getCategory(id);
+            category!.isBlocked = !category.isBlocked;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  update  category " + ex.Message);
+
+            return false;
+        }
+    }
+
     public async Task<bool> isExistByName
     (
         string name

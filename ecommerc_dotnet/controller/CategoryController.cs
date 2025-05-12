@@ -137,4 +137,42 @@ public class CategoryController : ControllerBase
 
         return StatusCode(201, "تم تعديل  القسم بنجاح");
     }
+    
+    
+    [HttpPut("block/{categoryId:guid}")]
+    public async Task<IActionResult> blockOrUnBlockCateogry( Guid categoryId)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+       
+        if (user.role == 1)
+            return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
+
+        var categoryHolder = await _categoryData.getCategory(categoryId);
+
+        if (categoryHolder == null)
+            return BadRequest("القسم غير موجود");
+
+        var result = await _categoryData.blockOrUnBlockCategory(
+            categoryId);
+
+        if (result == null)
+            return BadRequest("حدثت مشكلة اثناء حفظ القسم");
+
+        return StatusCode(201, "تم تعديل  القسم بنجاح");
+    }
+
 }
