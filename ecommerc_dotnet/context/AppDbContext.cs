@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<ReseatePasswordOtp> ReseatPassword { get; set; }
     
     public DbSet<Address> Address { get; set; }
+    
+    public DbSet<Category> Category { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,9 +30,20 @@ public class AppDbContext : DbContext
                     .WithOne(u => u.owner)
                     .HasForeignKey(u => u.owner_id)
                     .HasPrincipalKey(u => u.ID);
+                
+                user.HasMany<Category>()
+                    .WithOne(u => u.user)
+                    .HasForeignKey(c=>c.owner_id)
+                    .HasPrincipalKey(u=>u.ID);
             }
         );
 
+        modelBuilder.Entity<Category>(ca =>
+        {
+
+            ca.HasIndex(c => new { c.name }).IsUnique();
+            ;
+        });
         base.OnModelCreating(modelBuilder);
     }
 }

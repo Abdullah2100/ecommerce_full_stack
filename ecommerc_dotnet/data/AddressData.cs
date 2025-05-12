@@ -16,17 +16,17 @@ public class AddressData
         _dbContext = dbContext;
     }
 
-    public AddressResponseDto? getUserLocation(Guid addressId)
+    public async Task<AddressResponseDto?> getUserAddressByAddressId(Guid addressId)
     {
         
         try
         {
-            var result = _dbContext.Address
-                .FirstOrDefault(ad => ad.id == addressId);
+            var result = await _dbContext.Address
+                .FindAsync(addressId);
                 
-                var addressHolder = new AddressResponseDto
+            var addressHolder = new AddressResponseDto
                 {
-                    id = result.id,
+                    id = result!.id,
                     longitude = result.longitude,
                     latitude = result.latitude,
                     title = result.title, 
@@ -43,12 +43,14 @@ public class AddressData
         }
     }
 
-    public async Task<List<AddressResponseDto>?> getUserLocations(Guid userId)
+    
+    public async Task<List<AddressResponseDto>?> getUserAddressByUserId(Guid userId)
     {
         
         try
         {
             var result =await   _dbContext.Address
+                .AsNoTracking()
                 .Where(ad => ad.owner_id == userId)
                 .OrderByDescending(ad=>ad.created_at )
                 .Select(ad =>
@@ -75,7 +77,6 @@ public class AddressData
         AddressRequestDto address,
         Guid userId)
     {
-        
         try
         {
 
@@ -88,7 +89,7 @@ public class AddressData
             _dbContext.Address.Add(addressObj);
             await _dbContext.SaveChangesAsync();
             
-            return  getUserLocation(addressObj.id);
+            return  await getUserAddressByAddressId(addressObj.id);
 
         }
         catch (Exception ex)
@@ -109,10 +110,10 @@ public class AddressData
         try
         {
 
-            var result = _dbContext.Address.Where(ad => ad.owner_id == userId && ad.id != addressId);
+            var result = _dbContext.Address.AsNoTracking().Where(ad => ad.owner_id == userId && ad.id != addressId);
             await result
                 .ForEachAsync(u => u.isCurrent = false);
-           var currentAddress =  _dbContext.Address.FirstOrDefault(ad=>ad.id==addressId);
+           var currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.id==addressId);
            
            if(currentAddress!=null)
                currentAddress.isCurrent = true;
@@ -129,6 +130,25 @@ public class AddressData
             return null;
         }
     }
+    
+    public async Task<int>addressCountForUser(
+        Guid userId
+    )
+    {
+        
+        try
+        {
+
+           return await  _dbContext.Address.AsNoTracking().CountAsync(u => u.owner_id == userId && u.id != userId);
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting user address" + ex.Message);
+
+            return 0;
+        }
+    }
+
 
     
 }

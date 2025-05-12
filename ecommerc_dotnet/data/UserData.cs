@@ -1,24 +1,171 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.module;
+using hotel_api.Services;
 using hotel_api.util;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.data;
 
 public class UserData
 {
+    private readonly IConfigurationServices _configuration;
     private readonly AppDbContext _dbContext;
     // private readonly ILogger _logger;
 
-    public UserData(AppDbContext dbContext
+    public UserData(AppDbContext dbContext,
+        IConfigurationServices configuration
+
         // , ILogger logger
     )
     {
         _dbContext = dbContext;
+        _configuration = configuration;
         // _logger = logger;
     }
 
-    public async Task<User?> createNew(SignupDto data)
+ 
+    public async Task<UserInfoResponseDto?> getUser(string userName, string password)
+    {
+        try
+        {
+            
+            var address = await  _dbContext.Address
+                .AsNoTracking()
+                .Where(ad=>ad.owner!=null&&ad.owner.name==userName && ad.owner.password == password)
+                .OrderByDescending(ad=>ad.created_at)
+                .Select(ad=> new AddressResponseDto() 
+                {
+                    id = ad.id,
+                    latitude = ad.latitude,
+                    longitude = ad.longitude,
+                }).ToListAsync() ?? null;
+
+            var result = _dbContext.Users
+                .AsNoTracking()
+                .Where(u => (u.name==userName||u.email==userName)&&u.password==password)
+                .Select(u=> new UserInfoResponseDto
+                {
+                         
+                    Id =u.ID,
+                    name=u.name,
+                    phone=u.phone,
+                    email=u.email,
+                    thumbnail=_configuration.getKey("url_file")+u.thumbnail,
+                    address=address }) ;
+            
+            return await result.FirstOrDefaultAsync(); 
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+
+    public async Task<UserInfoResponseDto?> getUser(Guid userID)
+    {
+        try
+        {
+          
+            var address = await  _dbContext.Address
+                .AsNoTracking()
+                .Where(ad=>ad.owner_id==userID)
+                .OrderByDescending(ad=>ad.created_at)
+            .Select(ad=> new AddressResponseDto() 
+            {
+            id = ad.id,
+            latitude = ad.latitude,
+            longitude = ad.longitude,
+            }).ToListAsync();
+
+            var result = _dbContext.Users
+                .AsNoTracking()
+            .Where(u => u.ID == userID)
+            .Select(u=> new UserInfoResponseDto
+            {
+                         
+            Id =u.ID,
+            name=u.name,
+            phone=u.phone,
+            email=u.email,
+            thumbnail=_configuration.getKey("url_file")+u.thumbnail,
+            address=address }) ;
+            
+            return await result.FirstOrDefaultAsync(); 
+            
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+    
+    public async Task<User?> getUserById(Guid userID)
+    {
+        try
+        {
+            var user = await _dbContext.Users.FindAsync(userID);
+            return user;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+
+ 
+    public bool isExistByEmail(string email)
+    {
+        try
+        {
+            return  _dbContext.Users?.AsNoTracking()?.Where(u => u.email==email && u.isDeleted == false)!=null;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return false;
+        }
+    }
+
+    public bool isExistByPhone(string phone)
+    {
+        try
+        {
+            return _dbContext.Users.FirstOrDefault(u => u.phone==phone && u.isDeleted == false)!=null;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return false;
+        }
+    }
+    
+    public async Task<bool> deleteUser(Guid userID)
+    {
+        try
+        {
+            var result = _dbContext.Users.FirstOrDefault(u => u.ID == userID);
+            result!.isDeleted = true;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from delete user" + e.Message);
+            return false;
+        }
+    }
+    public async Task<UserInfoResponseDto?> createNew(SignupDto data)
     {
         try
         {
@@ -42,7 +189,7 @@ public class UserData
             userData.updated_at = null;
             _dbContext.Users.Add(userData);
             await _dbContext.SaveChangesAsync();
-            return userData;
+            return await getUser(userData.ID);
         }
         catch (Exception e)
         {
@@ -52,97 +199,8 @@ public class UserData
         }
     }
 
-    public User? getUser(string userName, string password)
-    {
-        try
-        {
-            return _dbContext.Users.FirstOrDefault(u =>
-                (u.name == userName|| u.email==userName) && u.password == password && u.isDeleted == false);
-        }
-        catch (Exception e)
-        {
-            //_logger.LogError("error from get user by username"+e.Message);
-            Console.WriteLine("error from get user by username" + e.Message);
-            return null;
-        }
-    }
 
-    public User? getUser(Guid userID)
-    {
-        try
-        {
-            return _dbContext.Users.FirstOrDefault(u => u.ID == userID && u.isDeleted == false);
-        }
-        catch (Exception e)
-        {
-            //_logger.LogError("error from get user by username"+e.Message);
-            Console.WriteLine("error from get user by username" + e.Message);
-            return null;
-        }
-    }
-    
-    public User? getUser(string email)
-    {
-        try
-        {
-            return _dbContext.Users.FirstOrDefault(u => u.email == email && u.isDeleted == false);
-        }
-        catch (Exception e)
-        {
-            //_logger.LogError("error from get user by username"+e.Message);
-            Console.WriteLine("error from get user by username" + e.Message);
-            return null;
-        }
-    }
-
-
-    public bool isExistByEmail(string email)
-    {
-        try
-        {
-            return _dbContext.Users.FirstOrDefault(u => u.email==email && u.isDeleted == false)!=null;
-        }
-        catch (Exception e)
-        {
-            //_logger.LogError("error from get user by username"+e.Message);
-            Console.WriteLine("error from get user by username" + e.Message);
-            return false;
-        }
-    }
-
-    public bool isExistByPhone(string phone)
-    {
-        try
-        {
-            return _dbContext.Users.FirstOrDefault(u => u.phone==phone && u.isDeleted == false)!=null;
-        }
-        catch (Exception e)
-        {
-            //_logger.LogError("error from get user by username"+e.Message);
-            Console.WriteLine("error from get user by username" + e.Message);
-            return false;
-        }
-    }
-
-    public async Task<bool> deleteUser(Guid userID)
-    {
-        try
-        {
-            var result = _dbContext.Users.FirstOrDefault(u => u.ID == userID);
-            result!.isDeleted = true;
-            await _dbContext.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception e)
-        {
-            //_logger.LogError("error from get user by username"+e.Message);
-            Console.WriteLine("error from delete user" + e.Message);
-            return false;
-        }
-    }
-
-
-    public async Task<User?> updateUser(UpdateUserInfo data, string? imagePath)
+    public async Task<UserInfoResponseDto?> updateUser(UpdateUserInfo data, string? imagePath)
     {
         try
         {
@@ -157,17 +215,10 @@ public class UserData
             userData.updated_at = DateTime.Now;
             userData.thumbnail = imagePath;
 
-            // if (data?.address != null)
-            // {
-            //     Address address = new Address();
-            //     address.id = clsUtil.generateGuid();
-            //     address.location = data.address;
-            //     address.owner_id = userData.ID;
-            //     userData.addresses.Add(address);
-            // }
+           
 
             await _dbContext.SaveChangesAsync();
-            return getUser(userID:userData.ID);
+            return await getUser(userID:userData.ID);
         }
         catch (Exception e)
         {

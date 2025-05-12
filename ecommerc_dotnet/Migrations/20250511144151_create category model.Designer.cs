@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ecommerc_dotnet.context;
@@ -11,9 +12,11 @@ using ecommerc_dotnet.context;
 namespace ecommerc_dotnet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250511144151_create category model")]
+    partial class createcategorymodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,9 +74,6 @@ namespace ecommerc_dotnet.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("isBlocked")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -85,9 +85,6 @@ namespace ecommerc_dotnet.Migrations
                         .HasColumnType("Timestamp");
 
                     b.HasKey("id");
-
-                    b.HasIndex("name")
-                        .IsUnique();
 
                     b.HasIndex("owner_id");
 

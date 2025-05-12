@@ -18,26 +18,22 @@ namespace ecommerc_dotnet.controller;
 [Route("api/User")]
 public class UserController : ControllerBase
 {
-    public UserController(AppDbContext dbContext
-        , IConfigurationServices configuration,
-        // IEmailServices emailServices,
+    public UserController(
+        AppDbContext dbContext, 
+        IConfigurationServices configuration,
         IWebHostEnvironment webHostEnvironment
     )
     {
-        _dbContext = dbContext;
         _configuration = configuration;
-        _userData = new UserData(_dbContext);
-        _forgetPasswordData = new ForgetPasswordData(_dbContext);
-        // _emailServices = emailServices;
+        _userData = new UserData(dbContext, configuration);
         _host = webHostEnvironment;
-        _addressData=new AddressData(_dbContext);
+        _addressData = new AddressData(dbContext);
     }
 
-    private readonly AppDbContext _dbContext;
     private readonly IConfigurationServices _configuration;
-    // private readonly IEmailServices _emailServices;
+
     private readonly UserData _userData;
-    private readonly ForgetPasswordData _forgetPasswordData;
+    // private readonly ForgetPasswordData _forgetPasswordData;
     private readonly AddressData _addressData;
     private readonly IWebHostEnvironment _host;
 
@@ -71,19 +67,19 @@ public class UserController : ControllerBase
             return BadRequest("phone already exist");
         }
 
-        User? result = await _userData.createNew(data);
+        UserInfoResponseDto? result = await _userData.createNew(data);
         if (result == null)
             return BadRequest("هناك مشكلة ما");
 
         string token = "", refreshToken = "";
 
         token = AuthinticationServices.generateToken(
-            userID: result.ID,
+            userID: result.Id,
             email: result.email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
-            userID: result.ID,
+            userID: result.Id,
             email: result.email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
@@ -98,21 +94,21 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult signIn([FromBody] LoginDto data)
+    public async Task<IActionResult> signIn([FromBody] LoginDto data)
     {
-        User? result = _userData.getUser(data.username, clsUtil.hashingText(data.password));
+        UserInfoResponseDto? result = await _userData.getUser(data.username, clsUtil.hashingText(data.password));
         if (result == null)
             return BadRequest("المستخدم غير موجود");
 
         string token = "", refreshToken = "";
 
         token = AuthinticationServices.generateToken(
-            userID: result.ID,
+            userID: result.Id,
             email: result.email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
-            userID: result.ID,
+            userID: result.Id,
             email: result.email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
@@ -139,7 +135,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var currentUser = _userData.getUser(idHolder.Value);
+        var currentUser = await _userData.getUserById(idHolder.Value);
 
         if (currentUser == null)
         {
@@ -187,20 +183,8 @@ public class UserController : ControllerBase
             return BadRequest("المستخدم غير موجود");
         }
 
-        List<AddressResponseDto>? locations =await _addressData.getUserLocations(user.ID);
-        string static_file_url = _configuration.getKey("url_file");
 
-        var userInfo = new UserInfoDto(
-            id: user!.ID,
-            name: user.name,
-            phone: user.phone,
-            email: user.email,
-            thumbnail:user.thumbnail!=null?static_file_url+ user.thumbnail:"",
-            address:locations 
-        );
-
-
-        return StatusCode(200, userInfo);
+        return StatusCode(200, user);
     }
 
 
@@ -223,7 +207,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = _userData.getUser(idHolder.Value);
+        var user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
         {
@@ -242,19 +226,17 @@ public class UserController : ControllerBase
             {
                 return BadRequest("كلمة المرور غير صحيحة");
             }
-            
         }
 
         if (user.thumbnail != null && userData.thumbnail != null)
         {
             clsUtil.deleteFile(user.thumbnail, _host);
         }
-        
+
         string? profile = null;
         if (userData.thumbnail != null)
         {
-            
-            profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PRODUCT,_host);
+            profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PRODUCT, _host);
         }
 
         userData.userId = idHolder;
@@ -263,160 +245,150 @@ public class UserController : ControllerBase
         if (result == null)
             return BadRequest("هناك مشكلة في تحديث البيانات");
 
-        List<AddressResponseDto>? locations =await _addressData.getUserLocations(user.ID);
 
-        string static_file_url = _configuration.getKey("url_file");
-        var userInfo = new UserInfoDto(
-            id: user!.ID,
-            name: user.name,
-            phone: user.phone,
-            email: user.email,
-            thumbnail:user.thumbnail!=null?static_file_url+ user.thumbnail:"",
-            address: locations
-        );
-        return Ok(userInfo);
+        return Ok(result);
     }
 
 
     //sendOtp
-   /* [AllowAnonymous]
-    [HttpPost("forgetPasswordOtp")]
-    public async Task<IActionResult> forgetPassword([FromBody] ForgetPasswordDto email)
+    /* [AllowAnonymous]
+     [HttpPost("forgetPasswordOtp")]
+     public async Task<IActionResult> forgetPassword([FromBody] ForgetPasswordDto email)
+     {
+         User? user = _userData.getUser(email.email);
+
+         if (user == null)
+         {
+             BadRequest("user not exist");
+         }
+
+         string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+
+         var isOtpExist = _forgetPasswordData.isExist(otp);
+         bool isExist = isOtpExist;
+
+         if (isExist == true)
+         {
+             do
+             {,
+   "server": "smtp.elasticemail.com",
+   "username": "ali735501225@gmail.com",
+   "password": "8CECFFB7A55CF0C3FC26E857C472B6763BC9",
+   "port": "2525"
+                 otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+                 isOtpExist = _forgetPasswordData.isExist(otp);
+             } while (isOtpExist);
+         }
+
+         var result = await _emailServices.sendingEmail(otp, email.email);
+
+         if (result == false)
+             return BadRequest("some thing wrong");
+         return StatusCode(200, user);
+     }
+     */
+
+
+    [HttpGet("location")]
+    public async Task<IActionResult> getUserLocations()
     {
-        User? user = _userData.getUser(email.email);
-
-        if (user == null)
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
-            BadRequest("user not exist");
+            idHolder = outID;
         }
 
-        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-
-        var isOtpExist = _forgetPasswordData.isExist(otp);
-        bool isExist = isOtpExist;
-
-        if (isExist == true)
+        if (idHolder == null)
         {
-            do
-            {,
-  "server": "smtp.elasticemail.com",
-  "username": "ali735501225@gmail.com",
-  "password": "8CECFFB7A55CF0C3FC26E857C472B6763BC9",
-  "port": "2525" 
-                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                isOtpExist = _forgetPasswordData.isExist(otp);
-            } while (isOtpExist);
+            return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _emailServices.sendingEmail(otp, email.email);
+        var user = await _userData.getUserById(idHolder.Value);
 
-        if (result == false)
-            return BadRequest("some thing wrong");
-        return StatusCode(200, user);
+        if (user == null || user.isDeleted)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+
+
+        var locations = await _addressData.getUserAddressByUserId(user.ID);
+
+        return StatusCode(200, locations);
     }
-    */
-   
-  
-   [HttpGet("location")]
-   public async Task<IActionResult> getUserLocations()
-   {
-       var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-       var id = AuthinticationServices.GetPayloadFromToken("id",
-           authorizationHeader.ToString().Replace("Bearer ", ""));
-       Guid? idHolder = null;
-       if (Guid.TryParse(id.Value.ToString(), out Guid outID))
-       {
-           idHolder = outID;
-       }
 
-       if (idHolder == null)
-       {
-           return Unauthorized("هناك مشكلة في التحقق");
-       }
 
-       var user = _userData.getUser(idHolder.Value);
+    [HttpPost("location")]
+    public async Task<IActionResult> setUserLocation(
+        [FromBody] AddressRequestDto address
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
 
-       if (user == null||user.isDeleted)
-       {
-           return BadRequest("المستخدم غير موجود");
-       }
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
 
-       
-       var locations = await _addressData.getUserLocations(user.ID);
+        var user = await _userData.getUserById(idHolder.Value);
 
-       return StatusCode(200, locations);
-   }
+        if (user == null || user.isDeleted)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
 
- 
-   [HttpPost("location")]
-   public async Task<IActionResult> setUserLocation(
-   [FromBody]AddressRequestDto address
-       )
-   {
-       var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-       var id = AuthinticationServices.GetPayloadFromToken("id",
-           authorizationHeader.ToString().Replace("Bearer ", ""));
-       Guid? idHolder = null;
-       if (Guid.TryParse(id.Value.ToString(), out Guid outID))
-       {
-           idHolder = outID;
-       }
+        var userLocationCount =await _addressData.addressCountForUser(idHolder.Value);
+        if(userLocationCount>10)
+            return BadRequest("اقصى حد للاماكن التي يمكن للمستخدم ادخالها هي 10");
 
-       if (idHolder == null)
-       {
-           return Unauthorized("هناك مشكلة في التحقق");
-       }
+        var location = await _addressData.addUserLocation(address, user.ID);
 
-       var user = _userData.getUser(idHolder.Value);
+        return StatusCode(200, location);
+    }
 
-       if (user == null||user.isDeleted)
-       {
-           return BadRequest("المستخدم غير موجود");
-       }
 
-       
-       var location = await _addressData.addUserLocation(address,user.ID);
-           
-       return StatusCode(200, location);
-   }
+    [HttpPost("location/current{addressID:guid}")]
+    public async Task<IActionResult> setUserLocation(Guid addressID)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
 
-  
-   [HttpPost("location/current{addressID:guid}")]
-   public async Task<IActionResult> setUserLocation(Guid addressID)
-   {
-       var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-       var id = AuthinticationServices.GetPayloadFromToken("id",
-           authorizationHeader.ToString().Replace("Bearer ", ""));
-       Guid? idHolder = null;
-       if (Guid.TryParse(id.Value.ToString(), out Guid outID))
-       {
-           idHolder = outID;
-       }
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
 
-       if (idHolder == null)
-       {
-           return Unauthorized("هناك مشكلة في التحقق");
-       }
+        var user = await _userData.getUserById(idHolder.Value);
 
-       var user = _userData.getUser(idHolder.Value);
+        if (user == null || user.isDeleted)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
 
-       if (user == null||user.isDeleted)
-       {
-           return BadRequest("المستخدم غير موجود");
-       }
+        var address = await _addressData.getUserAddressByAddressId(addressID);
 
-       var address = _addressData.getUserLocation(addressID);
-       
-       if (address==null)
-       {
-           return BadRequest("العنوان غير موجود");
-           
-       }
-       
-       var result = await _addressData.changeCurrentAddress(address.id,user.ID);
-           
-       return StatusCode(200, result);
-   }
- 
-   
+        if (address == null)
+        {
+            return BadRequest("العنوان غير موجود");
+        }
+
+        var result = await _addressData.changeCurrentAddress(address.id, user.ID);
+
+        return StatusCode(200, result);
+    }
 }
