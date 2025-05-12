@@ -19,27 +19,24 @@ public class CategoryData
 
     public List<CategoryResponseDto>? getCategories(
         IConfigurationServices services,
-        int pageNumber=1, 
-        int pageSize=20)
+        int pageNumber = 1,
+        int pageSize = 20)
     {
-        
         try
         {
             var result = _dbContext.Category
-                    
-                .Where(c=>c.isBlocked==false)
-                .OrderBy(c=>c.created_at)
+                .Where(c => c.isBlocked == false)
+                .OrderBy(c => c.created_at)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(u=>new CategoryResponseDto
+                .Select(u => new CategoryResponseDto
                 {
                     id = u.id,
                     name = u.name,
-                    image_path =services.getKey("url_file") + u.image_path,
+                    image_path = services.getKey("url_file") + u.image_path,
                 });
-               
-            return result.ToList() ;
 
+            return result.ToList();
         }
         catch (Exception ex)
         {
@@ -48,19 +45,37 @@ public class CategoryData
             return null;
         }
     }
- 
-   public async Task<bool?> addNewCategory(
+
+    public async Task<Category?> getCategory(
+        Guid id)
+    {
+        try
+        {
+            return await _dbContext.Category.FindAsync(id);
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting category by pages " + ex.Message);
+
+            return null;
+        }
+    }
+
+
+    public async Task<bool?> addNewCategory(
         string name,
         string filePath,
         Guid userId)
     {
         try
         {
-            var categoryObj = new Category{id = clsUtil.generateGuid(),name=name, image_path=filePath, isBlocked=false,owner_id=userId};
+            var categoryObj = new Category
+            {
+                id = clsUtil.generateGuid(), name = name, image_path = filePath, isBlocked = false, owner_id = userId
+            };
             await _dbContext.Category.AddAsync(categoryObj);
             await _dbContext.SaveChangesAsync();
-            return  true;
-            
+            return true;
         }
         catch (Exception ex)
         {
@@ -70,15 +85,39 @@ public class CategoryData
         }
     }
 
-    public async Task<bool> isExistByName
-    (
-        string name
-            )
+
+    public async Task<bool?> updateCategory(
+        Guid id,
+        string? name,
+        string? filePath
+    )
     {
         try
         {
-         return    await _dbContext.Category.FirstOrDefaultAsync(c=>c.name == name)!=null;
-            
+            var category = await getCategory(id);
+            category!.name = name ?? category.name;
+            category.image_path = filePath ?? category.image_path;
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  update  category " + ex.Message);
+
+            return false;
+        }
+    }
+
+
+    public async Task<bool> isExistByName
+    (
+        string name
+    )
+    {
+        try
+        {
+            return await _dbContext.Category.FirstOrDefaultAsync(c => c.name == name) != null;
         }
         catch (Exception ex)
         {
@@ -87,36 +126,4 @@ public class CategoryData
             return false;
         }
     }
- 
-  /*  public async Task<bool?> changeCurrentAddress(
-        Guid addressId,
-        Guid userId
-        )
-    {
-        
-        try
-        {
-
-            var result = _dbContext.Address.Where(ad => ad.owner_id == userId && ad.id != addressId);
-            await result
-                .ForEachAsync(u => u.isCurrent = false);
-           var currentAddress =  _dbContext.Address.FirstOrDefault(ad=>ad.id==addressId);
-           
-           if(currentAddress!=null)
-               currentAddress.isCurrent = true;
-            
-            await _dbContext.SaveChangesAsync();
-            
-            return  true;
-
-        }
-        catch (Exception ex)
-        {
-            Console.Write("error from  getting user address" + ex.Message);
-
-            return null;
-        }
-    }
-*/
-    
 }

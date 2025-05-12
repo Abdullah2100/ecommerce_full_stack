@@ -36,7 +36,7 @@ public class CategoryController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        var categories = _categoryData.getCategories(_configuration,pageNumber);
+        var categories = _categoryData.getCategories(_configuration, pageNumber);
         if (categories == null)
             return BadRequest("لا يوجد اي اقسام");
         return Ok(categories);
@@ -63,8 +63,8 @@ public class CategoryController : ControllerBase
         var user = await _userData.getUserById(idHolder.Value);
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
-        
-        bool isExist =await _categoryData.isExistByName(category.name);
+
+        bool isExist = await _categoryData.isExistByName(category.name);
 
         if (isExist)
             return BadRequest("هناك قسم بهذا الاسم");
@@ -80,5 +80,61 @@ public class CategoryController : ControllerBase
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
 
         return StatusCode(201, "تم انشاء القسم بنجاح");
+    }
+
+    [HttpPut("")]
+    public async Task<IActionResult> updateCateogry([FromForm] CategoryRequestUpdatteDto category)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+       
+        if (user.role == 1)
+            return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
+
+        var categoryHolder = await _categoryData.getCategory(category.id);
+
+        if (categoryHolder == null)
+            return BadRequest("القسم غير موجود");
+
+
+        bool isExistName = false;
+
+        if (category?.name != null)
+            isExistName = await _categoryData.isExistByName(category.name);
+
+        if (isExistName)
+            return BadRequest("هناك قسم بهذا الاسم");
+
+        string? imagePath = null;
+
+        if (category?.image != null)
+        {
+            clsUtil.deleteFile(categoryHolder.image_path, _host);
+            imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
+        }
+
+
+        var result = await _categoryData.updateCategory(
+            category!.id,
+            category.name, 
+            imagePath);
+
+        if (result == null)
+            return BadRequest("حدثت مشكلة اثناء حفظ القسم");
+
+        return StatusCode(201, "تم تعديل  القسم بنجاح");
     }
 }
