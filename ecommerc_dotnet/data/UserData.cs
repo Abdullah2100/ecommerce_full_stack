@@ -25,17 +25,16 @@ public class UserData
         // _logger = logger;
     }
 
- 
+
     public async Task<UserInfoResponseDto?> getUser(string userName, string password)
     {
         try
         {
-            
-            var address = await  _dbContext.Address
+            var address = await _dbContext.Address
                 .AsNoTracking()
-                .Where(ad=>ad.owner!=null&&ad.owner.name==userName && ad.owner.password == password)
-                .OrderByDescending(ad=>ad.created_at)
-                .Select(ad=> new AddressResponseDto() 
+                .Where(ad => ad.owner != null && ad.owner.name == userName && ad.owner.password == password)
+                .OrderByDescending(ad => ad.created_at)
+                .Select(ad => new AddressResponseDto()
                 {
                     id = ad.id,
                     latitude = ad.latitude,
@@ -44,18 +43,18 @@ public class UserData
 
             var result = _dbContext.Users
                 .AsNoTracking()
-                .Where(u => (u.name==userName||u.email==userName)&&u.password==password)
-                .Select(u=> new UserInfoResponseDto
+                .Where(u => ( u.email == userName) && u.password == password)
+                .Select(u => new UserInfoResponseDto
                 {
-                         
-                    Id =u.ID,
-                    name=u.name,
-                    phone=u.phone,
-                    email=u.email,
-                    thumbnail=_configuration.getKey("url_file")+u.thumbnail,
-                    address=address }) ;
-            
-            return await result.FirstOrDefaultAsync(); 
+                    Id = u.ID,
+                    name = u.name,
+                    phone = u.phone,
+                    email = u.email,
+                    thumbnail = _configuration.getKey("url_file") + u.thumbnail,
+                    address = address
+                });
+
+            return await result.FirstOrDefaultAsync();
         }
         catch (Exception e)
         {
@@ -69,33 +68,31 @@ public class UserData
     {
         try
         {
-          
-            var address = await  _dbContext.Address
+            var address = await _dbContext.Address
                 .AsNoTracking()
-                .Where(ad=>ad.owner_id==userID)
-                .OrderByDescending(ad=>ad.created_at)
-            .Select(ad=> new AddressResponseDto() 
-            {
-            id = ad.id,
-            latitude = ad.latitude,
-            longitude = ad.longitude,
-            }).ToListAsync();
+                .Where(ad => ad.owner_id == userID)
+                .OrderByDescending(ad => ad.created_at)
+                .Select(ad => new AddressResponseDto()
+                {
+                    id = ad.id,
+                    latitude = ad.latitude,
+                    longitude = ad.longitude,
+                }).ToListAsync();
 
             var result = _dbContext.Users
                 .AsNoTracking()
-            .Where(u => u.ID == userID)
-            .Select(u=> new UserInfoResponseDto
-            {
-                         
-            Id =u.ID,
-            name=u.name,
-            phone=u.phone,
-            email=u.email,
-            thumbnail=_configuration.getKey("url_file")+u.thumbnail,
-            address=address }) ;
-            
-            return await result.FirstOrDefaultAsync(); 
-            
+                .Where(u => u.ID == userID)
+                .Select(u => new UserInfoResponseDto
+                {
+                    Id = u.ID,
+                    name = u.name,
+                    phone = u.phone,
+                    email = u.email,
+                    thumbnail = _configuration.getKey("url_file") + u.thumbnail,
+                    address = address
+                });
+
+            return await result.FirstOrDefaultAsync();
         }
         catch (Exception e)
         {
@@ -104,7 +101,7 @@ public class UserData
             return null;
         }
     }
-    
+
     public async Task<User?> getUserById(Guid userID)
     {
         try
@@ -120,12 +117,12 @@ public class UserData
         }
     }
 
- 
+
     public bool isExistByEmail(string email)
     {
         try
         {
-            return  _dbContext.Users?.AsNoTracking()?.Where(u => u.email==email && u.isDeleted == false)!=null;
+            return _dbContext.Users?.AsNoTracking()?.Where(u => u.email == email && u.isDeleted == false) != null;
         }
         catch (Exception e)
         {
@@ -135,20 +132,20 @@ public class UserData
         }
     }
 
+    
     public bool isExistByPhone(string phone)
     {
         try
         {
-            return _dbContext.Users.FirstOrDefault(u => u.phone==phone && u.isDeleted == false)!=null;
+            return _dbContext.Users.FirstOrDefault(u => u.phone == phone && u.isDeleted == false) != null;
         }
         catch (Exception e)
         {
-            //_logger.LogError("error from get user by username"+e.Message);
             Console.WriteLine("error from get user by username" + e.Message);
             return false;
         }
     }
-    
+
     public async Task<bool> deleteUser(Guid userID)
     {
         try
@@ -165,11 +162,18 @@ public class UserData
             return false;
         }
     }
-    public async Task<UserInfoResponseDto?> createNew(SignupDto data)
+
+    public async Task<UserInfoResponseDto?> createNew(
+        string name,
+        string phone,
+        string email,
+        string password,
+        int? role = 1
+    )
     {
         try
         {
-            if (data.role == 0)
+            if (role == 0)
             {
                 var result = _dbContext.Users.FirstOrDefault(u => u.role == 1);
                 if (result != null)
@@ -179,15 +183,18 @@ public class UserData
                 }
             }
 
-            User userData = new User();
-            userData.name = data.name;
-            userData.email = data.email;
-            userData.phone = data.phone;
-            userData.ID = clsUtil.generateGuid();
-            userData.password = clsUtil.hashingText(data.password);
-            userData.created_at = DateTime.Now;
-            userData.updated_at = null;
-            _dbContext.Users.Add(userData);
+            User userData = new User
+            {
+                name = name,
+                email = email,
+                phone = phone,
+                password = password,
+                created_at = DateTime.Now,
+                ID = clsUtil.generateGuid(),
+                updated_at = null
+            };
+
+            await _dbContext.Users.AddAsync(userData);
             await _dbContext.SaveChangesAsync();
             return await getUser(userData.ID);
         }
@@ -200,30 +207,34 @@ public class UserData
     }
 
 
-    public async Task<UserInfoResponseDto?> updateUser(UpdateUserInfo data, string? imagePath)
+    public async Task<UserInfoResponseDto?> updateUser(
+        Guid userId,
+        string? phone = null,
+        string? password = null,
+        string? name = null, 
+        string? imagePath = null)
     {
         try
         {
-            User? userData = _dbContext.Users.FirstOrDefault(u => u.ID == data.userId);
-            
-            if (userData == null)
-            return null;
+            User? userData = _dbContext.Users.FirstOrDefault(u => u.ID == userId);
 
-            userData.name = data.name ?? userData.name;
-            userData.phone = data.phone ?? userData.phone;
-            userData.password =data.newPassword!=null?clsUtil.hashingText(data.newPassword):userData.password;
+            if (userData == null)
+                return null;
+
+            userData.name = name ?? userData.name;
+            userData.phone = phone ?? userData.phone;
+            userData.password = password ?? userData.password;
             userData.updated_at = DateTime.Now;
             userData.thumbnail = imagePath;
 
-           
 
             await _dbContext.SaveChangesAsync();
-            return await getUser(userID:userData.ID);
+            return await getUser(userID: userData.ID);
         }
         catch (Exception e)
         {
             //_logger.LogError("error from create new User"+e.Message);
-            Console.Write("error from create new User" + e.Message);
+            Console.Write("error from update User" + e.Message);
             return null;
         }
     }

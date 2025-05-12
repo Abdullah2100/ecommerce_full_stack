@@ -12,7 +12,7 @@ public class User
     public string password { get; set; }
     public bool isDeleted { get; set; }
     
-    //0 :normal user ; 1: is admin
+    //1 :normal user ; 0: is admin
     public int role { get; set; }
     
     

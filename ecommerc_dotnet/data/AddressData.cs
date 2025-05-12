@@ -74,21 +74,27 @@ public class AddressData
     }
     
     public async Task<AddressResponseDto?> addUserLocation(
-        AddressRequestDto address,
+     decimal longitude, 
+     decimal latitude,
+     string title , 
         Guid userId)
     {
         try
         {
 
-            var addressObj = new Address();
-            addressObj.id = clsUtil.generateGuid();
-            addressObj.longitude = address.longitude;
-            addressObj.latitude = address.latitude;
-            addressObj.title = address.title;
-            addressObj.owner_id = userId;
-            _dbContext.Address.Add(addressObj);
-            await _dbContext.SaveChangesAsync();
+            var addressObj = new Address
+            {
+                longitude = longitude,
+                latitude = latitude,
+                title = title,
+                isCurrent = true,
+                id = clsUtil.generateGuid(),
+                created_at = DateTime.Now,
+                owner_id = userId
+            };
             
+            await _dbContext.Address.AddAsync(addressObj);
+            await _dbContext.SaveChangesAsync();
             return  await getUserAddressByAddressId(addressObj.id);
 
         }

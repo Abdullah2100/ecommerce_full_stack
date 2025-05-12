@@ -2,6 +2,7 @@ using ecommerc_dotnet.context;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.module;
+using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,10 @@ public class CategoryData
         _dbContext = dbContext;
     }
 
-    public List<CategoryResponseDto>? getCategories(int pageNumber=1, int pageSize=20)
+    public List<CategoryResponseDto>? getCategories(
+        IConfigurationServices services,
+        int pageNumber=1, 
+        int pageSize=20)
     {
         
         try
@@ -31,7 +35,7 @@ public class CategoryData
                 {
                     id = u.id,
                     name = u.name,
-                    image_path = u.image_path,
+                    image_path =services.getKey("url_file") + u.image_path,
                 });
                
             return result.ToList() ;
@@ -39,42 +43,52 @@ public class CategoryData
         }
         catch (Exception ex)
         {
-            Console.Write("error from  getting user address" + ex.Message);
+            Console.Write("error from  getting category by pages " + ex.Message);
 
             return null;
         }
     }
  
- /*   public async Task<AddressResponseDto?> addUserLocation(
-        AddressRequestDto address,
+   public async Task<bool?> addNewCategory(
+        string name,
+        string filePath,
         Guid userId)
     {
-        
         try
         {
-
-            var addressObj = new Address();
-            addressObj.id = clsUtil.generateGuid();
-            addressObj.longitude = address.longitude;
-            addressObj.latitude = address.latitude;
-            addressObj.title = address.title;
-            addressObj.owner_id = userId;
-            _dbContext.Address.Add(addressObj);
+            var categoryObj = new Category{id = clsUtil.generateGuid(),name=name, image_path=filePath, isBlocked=false,owner_id=userId};
+            await _dbContext.Category.AddAsync(categoryObj);
             await _dbContext.SaveChangesAsync();
+            return  true;
             
-            return  getUserLocation(addressObj.id);
-
         }
         catch (Exception ex)
         {
-            Console.Write("error from  getting user address" + ex.Message);
+            Console.Write("error from  insert new category " + ex.Message);
 
-            return null;
+            return false;
         }
     }
 
-    
-    public async Task<bool?> changeCurrentAddress(
+    public async Task<bool> isExistByName
+    (
+        string name
+            )
+    {
+        try
+        {
+         return    await _dbContext.Category.FirstOrDefaultAsync(c=>c.name == name)!=null;
+            
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  check if the category exist by name" + ex.Message);
+
+            return false;
+        }
+    }
+ 
+  /*  public async Task<bool?> changeCurrentAddress(
         Guid addressId,
         Guid userId
         )

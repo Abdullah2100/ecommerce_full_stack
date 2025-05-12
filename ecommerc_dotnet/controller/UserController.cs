@@ -67,7 +67,13 @@ public class UserController : ControllerBase
             return BadRequest("phone already exist");
         }
 
-        UserInfoResponseDto? result = await _userData.createNew(data);
+        UserInfoResponseDto? result = await _userData.createNew(
+            name:data.name,
+            email:data.email,
+            phone:data.phone,
+            password:clsUtil.hashingText(data.password),
+            role:data.role
+            );
         if (result == null)
             return BadRequest("هناك مشكلة ما");
 
@@ -240,7 +246,12 @@ public class UserController : ControllerBase
         }
 
         userData.userId = idHolder;
-        var result = await _userData.updateUser(userData, profile);
+        var result = await _userData.updateUser(
+            userId:idHolder.Value,
+            phone:userData.phone,
+            password:clsUtil.hashingText(userData.password),
+            name:userData.name,
+            profile);
 
         if (result == null)
             return BadRequest("هناك مشكلة في تحديث البيانات");
@@ -350,7 +361,12 @@ public class UserController : ControllerBase
         if(userLocationCount>10)
             return BadRequest("اقصى حد للاماكن التي يمكن للمستخدم ادخالها هي 10");
 
-        var location = await _addressData.addUserLocation(address, user.ID);
+        var location = await _addressData.addUserLocation(
+            title:address.title,
+            longitude:address.longitude,
+            latitude:address.latitude,
+            userId:idHolder.Value
+            );
 
         return StatusCode(200, location);
     }

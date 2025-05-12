@@ -11,7 +11,7 @@ namespace hotel_api.util
     {
         public enum enImageType
         {
-            PROFILE,PRODUCT
+            PROFILE,PRODUCT,CATEGORY
         };
         private static string localPath = "/images/";
         public static Guid generateGuid()
