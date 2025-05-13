@@ -19,6 +19,15 @@ builder.Services.AddOptions();
 builder.Services.AddSingleton<IConfigurationServices, ConfigurationServicesImp>();
 builder.Services.AddSingleton<IEmailServices, EmailServicesImplement>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()    // Allows all origins
+            .AllowAnyMethod()    // Allows any HTTP methods (GET, POST, etc.)
+            .AllowAnyHeader();   // Allows any headers
+    });
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -46,6 +55,9 @@ var connectionUrl = configuration["ConnectionStrings:connection_url"];
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionUrl, o => o.UseNetTopologySuite()));
 
+
+
+
 var app = builder.Build();
 
 // Middleware Pipeline
@@ -58,6 +70,8 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");
     });
 }
+
+app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 

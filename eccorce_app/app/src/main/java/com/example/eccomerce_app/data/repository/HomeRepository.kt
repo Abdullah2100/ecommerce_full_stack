@@ -7,6 +7,7 @@ import com.example.eccomerce_app.dto.request.LocationRequestDto
 import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.dto.request.SignupDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
+import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.ErrorResponse
 import com.example.eccomerce_app.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -138,4 +139,39 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+
+    suspend fun getCategory(pageNumber:Int=1): NetworkCallHandler {
+        return try {
+            var result = client.get(
+                Secrets.getBaseUrl()+"/Category/all${pageNumber}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if(result.status== HttpStatusCode.OK)
+            {
+                return NetworkCallHandler.Successful(result.body<List<CategoryReponseDto>>())
+            }
+            else{
+                return NetworkCallHandler.Error(result.body())
+            }
+
+        }
+        catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
 }

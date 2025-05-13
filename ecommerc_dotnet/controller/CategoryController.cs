@@ -70,6 +70,7 @@ public class CategoryController : ControllerBase
             return BadRequest("هناك قسم بهذا الاسم");
 
         var imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
+        // var imagePath = await MinIoServices.uploadFile(_configuration,category.image,MinIoServices.enBucketName.CATEGORY); ;
 
         if (imagePath == null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصورة");
@@ -115,15 +116,21 @@ public class CategoryController : ControllerBase
         if (category?.name != null)
             isExistName = await _categoryData.isExistByName(category.name);
 
-        if (isExistName)
+        if (isExistName&&categoryHolder.id!=category.id)
             return BadRequest("هناك قسم بهذا الاسم");
 
         string? imagePath = null;
 
         if (category?.image != null)
         {
-            clsUtil.deleteFile(categoryHolder.image_path, _host);
+            if(categoryHolder.image_path!=null)
+                        clsUtil.deleteFile(categoryHolder.image_path, _host);
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
+            // var image = categoryHolder.image_path.Substring((MinIoServices.enBucketName.CATEGORY.ToString().ToLower()+'/').ToString().Length);
+            
+            //  imagePath = await MinIoServices
+            //  .uploadFile(_configuration,category.image,MinIoServices.enBucketName.CATEGORY,image); ;
+
         }
 
 
@@ -135,7 +142,7 @@ public class CategoryController : ControllerBase
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
 
-        return StatusCode(201, "تم تعديل  القسم بنجاح");
+        return StatusCode(200, "تم تعديل  القسم بنجاح");
     }
     
     

@@ -1,24 +1,10 @@
 package com.example.eccomerce_app.ui.view.home
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOut
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,12 +20,11 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,23 +43,18 @@ import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.addOutline
+import com.example.eccomerce_app.ui.component.CategoryLoadingShape
+import com.example.eccomerce_app.ui.component.CategoryShape
 import com.example.eccomerce_app.ui.component.LocationLoadingShape
 
 @Composable
@@ -86,15 +66,20 @@ fun HomePage(
     val configuration = LocalConfiguration.current
 
     var address = homeViewModel.locations.collectAsState()
+    var categories = homeViewModel.categories.collectAsState()
     var savedAddress = homeViewModel.savedCurrentLocationToLocal.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val isClickingSearch = remember { mutableStateOf(false) }
 
-    val animatedColor = animateDpAsState(
+    val sizeAnimation = animateDpAsState(
         if (!isClickingSearch.value) 80.dp else 0.dp,
-//        label = "color"
     )
-    val requestNotificationPermssion = rememberLauncherForActivityResult(
+
+    LaunchedEffect(Unit) {
+        homeViewModel.getCategory(1)
+    }
+
+    /*val requestNotificationPermssion = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permission ->
             val arePermissionsGranted = permission.values.reduce { acc, next ->
@@ -105,7 +90,7 @@ fun HomePage(
 //                isNotEnablePermission.value=true
             }
         }
-    )
+    )*/
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -135,7 +120,7 @@ fun HomePage(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.height(animatedColor.value)
+                            modifier = Modifier.height(sizeAnimation.value)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -226,7 +211,42 @@ fun HomePage(
             }
 
             item {
-                Row { }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 5.dp)
+                    ,horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text( "Category",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
+                    )
+                    Text("View All",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
+                    )
+                }
+
+                when(categories.value==null){
+                   true->{
+                        CategoryLoadingShape(20)
+                    }
+                    else->{
+
+                      when(categories.value!!.isEmpty()){
+                          true->{}
+                          else ->{
+                              CategoryShape(categories.value!!)
+                          }
+                      }
+                    }
+                }
             }
 
         }

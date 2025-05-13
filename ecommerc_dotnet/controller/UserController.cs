@@ -19,7 +19,7 @@ namespace ecommerc_dotnet.controller;
 public class UserController : ControllerBase
 {
     public UserController(
-        AppDbContext dbContext, 
+        AppDbContext dbContext,
         IConfigurationServices configuration,
         IWebHostEnvironment webHostEnvironment
     )
@@ -33,6 +33,7 @@ public class UserController : ControllerBase
     private readonly IConfigurationServices _configuration;
 
     private readonly UserData _userData;
+
     // private readonly ForgetPasswordData _forgetPasswordData;
     private readonly AddressData _addressData;
     private readonly IWebHostEnvironment _host;
@@ -68,12 +69,12 @@ public class UserController : ControllerBase
         }
 
         UserInfoResponseDto? result = await _userData.createNew(
-            name:data.name,
-            email:data.email,
-            phone:data.phone,
-            password:clsUtil.hashingText(data.password),
-            role:data.role
-            );
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            password: clsUtil.hashingText(data.password),
+            role: data.role
+        );
         if (result == null)
             return BadRequest("هناك مشكلة ما");
 
@@ -234,23 +235,27 @@ public class UserController : ControllerBase
             }
         }
 
-        if (user.thumbnail != null && userData.thumbnail != null)
-        {
-            clsUtil.deleteFile(user.thumbnail, _host);
-        }
+        // if (user.thumbnail != null && userData.thumbnail != null)
+        // {
+        //     clsUtil.deleteFile(user.thumbnail, _host);
+        // }
 
         string? profile = null;
         if (userData.thumbnail != null)
         {
             profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PRODUCT, _host);
+            // var image =user.thumbnail==null?null: user.thumbnail.Substring((MinIoServices.enBucketName.PROFILE.ToString().ToLower()+'/').Length);
+
+            // profile = await MinIoServices.uploadFile(_configuration, userData.thumbnail,
+                // MinIoServices.enBucketName.PROFILE, image);
         }
 
         userData.userId = idHolder;
         var result = await _userData.updateUser(
-            userId:idHolder.Value,
-            phone:userData.phone,
-            password:clsUtil.hashingText(userData.password),
-            name:userData.name,
+            userId: idHolder.Value,
+            phone: userData.phone,
+            password: clsUtil.hashingText(userData.password),
+            name: userData.name,
             profile);
 
         if (result == null)
@@ -357,16 +362,16 @@ public class UserController : ControllerBase
             return BadRequest("المستخدم غير موجود");
         }
 
-        var userLocationCount =await _addressData.addressCountForUser(idHolder.Value);
-        if(userLocationCount>10)
+        var userLocationCount = await _addressData.addressCountForUser(idHolder.Value);
+        if (userLocationCount > 10)
             return BadRequest("اقصى حد للاماكن التي يمكن للمستخدم ادخالها هي 10");
 
         var location = await _addressData.addUserLocation(
-            title:address.title,
-            longitude:address.longitude,
-            latitude:address.latitude,
-            userId:idHolder.Value
-            );
+            title: address.title,
+            longitude: address.longitude,
+            latitude: address.latitude,
+            userId: idHolder.Value
+        );
 
         return StatusCode(200, location);
     }

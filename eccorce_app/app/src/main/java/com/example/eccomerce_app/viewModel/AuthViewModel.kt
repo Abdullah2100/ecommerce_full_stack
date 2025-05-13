@@ -109,8 +109,12 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                             inclusive=true
                         }
                     }
+                    _isLoadin.emit(false)
+
                 }
                 is NetworkCallHandler.Error->{
+                    _isLoadin.emit(false)
+
                     var errorMessage = (result.data.toString())
                     if (errorMessage.contains(General.BASED_URL)) {
                         errorMessage.replace(General.BASED_URL, " Server ")
@@ -118,6 +122,8 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                     snackBark.showSnackbar(errorMessage.replace("\"",""))
                 }
                 else -> {
+                    _isLoadin.emit(false)
+
                     var errorMessage = (result.toString())
                     if (errorMessage.contains(General.BASED_URL)) {
                         errorMessage.replace(General.BASED_URL, " Server ")
@@ -125,7 +131,6 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                     snackBark.showSnackbar(errorMessage.replace("\"",""))
                 }
             }
-            _isLoadin.emit(false)
 
         }
     }
@@ -155,8 +160,12 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                             inclusive=true
                         }
                     }
+                    _isLoadin.emit(false)
+
                 }
             is NetworkCallHandler.Error->{
+                _isLoadin.emit(false)
+
                 var errorMessage = (result.data.toString())
                 if (errorMessage.contains(General.BASED_URL)) {
                     errorMessage.replace(General.BASED_URL, " Server ")
@@ -164,6 +173,8 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                 snackBark.showSnackbar(errorMessage.replace("\"",""))
             }
                 else -> {
+                    _isLoadin.emit(false)
+
                     var errorMessage = result.toString()
                     if (errorMessage.toString().contains(General.BASED_URL)) {
                         errorMessage.toString().replace(General.BASED_URL, " Server ")
@@ -171,7 +182,6 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                     snackBark.showSnackbar(errorMessage.replace("\"",""))
                 }
             }
-            _isLoadin.emit(false)
 
         }
     }

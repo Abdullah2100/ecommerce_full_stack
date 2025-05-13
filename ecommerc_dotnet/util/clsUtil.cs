@@ -67,7 +67,7 @@ namespace hotel_api.util
             }
         }
 
-        public static async Task<string?>saveFile(IFormFile file,enImageType type,IWebHostEnvironment host)
+       public static async Task<string?>saveFile(IFormFile file,enImageType type,IWebHostEnvironment host)
         {
             string filePath = localPath + type.ToString()+"/";
             

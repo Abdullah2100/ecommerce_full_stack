@@ -125,4 +125,9 @@ dependencies {
 
     //corrutine task
     implementation(libs.kotlinx.coroutines.play.services)
+
+
+    //coil
+    implementation (libs.coil.compose)
+    implementation(libs.coil.svg)
 }
