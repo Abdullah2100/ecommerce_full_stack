@@ -14,7 +14,7 @@ public class User
     
     //1 :normal user ; 0: is admin
     public int role { get; set; }
-    
+
     
     [Column(TypeName = "Timestamp")]
      public DateTime created_at { get; set; } = DateTime.Now;
@@ -25,4 +25,8 @@ public class User
     
     public string? thumbnail { get; set; }
     public ICollection<Address>? addresses { get; set; }
+    public ICollection<Category>? categories { get; set; }
+
+    public Guid? store_id { get; set; } = null;
+    public Store? Store { get; set; } = null;
 }

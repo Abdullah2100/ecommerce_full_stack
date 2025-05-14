@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.viewModel
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -11,10 +10,13 @@ import com.example.eccomerce_app.data.repository.HomeRepository
 import com.example.eccomerce_app.dto.ModelToDto.toLocationRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
+import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.model.Address
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.model.DtoToModel.toCategory
+import com.example.eccomerce_app.model.DtoToModel.toUser
+import com.example.eccomerce_app.model.User
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
-import kotlin.concurrent.timerTask
 
 
 class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : ViewModel() {
@@ -47,12 +48,25 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     private var _currentLocationId = MutableStateFlow<UUID?>(null)
     var savedCurrentLocationToLocal = _currentLocationId.asStateFlow()
 
+    private var _myInfo = MutableStateFlow<User?>(null)
+     var myInfo = _myInfo.asStateFlow()
+
 
     init {
-        getSavedCurrentLocation()
+        getSavedCurrentAddress()
+        getMyInfo()
+    }
+    fun getSavedCurrentAddress() {
+        viewModelScope.launch(Dispatchers.IO) {
+            getUserLocations()
+            var result = dao.getSavedLocation()
+            if (result != null)
+                _currentLocationId.emit(UUID.fromString(result.locationId))
+        }
     }
 
-    fun updateLocationObj(longit: Double? = null, latit: Double? = null, title: String? = null) {
+
+    fun updateAddressObj(longit: Double? = null, latit: Double? = null, title: String? = null) {
         var locationCopy: Address? = null;
         if (longit != null) {
             locationCopy = _location.value.copy(longitude = longit);
@@ -76,8 +90,9 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
     fun getUserLocations() {
-        viewModelScope.launch {
-            var result = homeRepository.getUserLocations()
+        if(_locations.value!=null)return;
+        viewModelScope.launch(Dispatchers.IO) {
+            var result = homeRepository.getUserAddress()
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     var address = result.data as List<AddressResponseDto>
@@ -85,19 +100,24 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                         _locations.emit(
                             address.map { it.toAddress() }.toList()
                         )
-                    } else {
-                        _locations.emit(emptyList())
+                    }
+                    else {
+                        if (_locations.value.isNullOrEmpty())
+                            _locations.emit(emptyList())
                     }
                 }
 
-                else -> {}
+                else -> {
+                    if (_locations.value.isNullOrEmpty())
+                        _locations.emit(emptyList())
+                }
             }
         }
     }
 
     fun getCategory(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -129,11 +149,11 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
 
-    fun addUserLocation() {
-        viewModelScope.launch {
+    fun addUserAddress() {
+        viewModelScope.launch(Dispatchers.IO) {
 
             _isLoading.emit(true)
-            var result = homeRepository.userAddNewLocation(_location.value.toLocationRequestDto())
+            var result = homeRepository.userAddNewAddress(_location.value.toLocationRequestDto())
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     _location.emit(Address(null, 0.0, 0.0, "", false))
@@ -162,8 +182,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         nav: NavHostController,
         isFromLocationHome: Boolean? = false,
     ) {
-        viewModelScope.launch {
-
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.emit(true)
             delay(6000)
             var result = homeRepository.setAddressAsCurrent(addressId)
@@ -199,18 +218,26 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                     _isLoading.emit(false)
                 }
             }
-
             _isLoading.emit(false)
         }
     }
 
-    fun getSavedCurrentLocation() {
-        viewModelScope.launch(Dispatchers.IO) {
-            getUserLocations()
-            var result = dao.getSavedLocation()
-            if (result != null)
-                _currentLocationId.emit(UUID.fromString(result.locationId))
+    fun getMyInfo(){
+        if(_myInfo.value!=null)return;
+        viewModelScope.launch(Dispatchers.Main) {
+            var result = homeRepository.getMyInfo();
+            when (result){
+               is NetworkCallHandler.Successful<*>->{
+                   var data = result.data as UserDto
+                   _myInfo.emit(data.toUser())
+               }
+                else->{
+
+                }
+            }
         }
     }
+
+
 
 }

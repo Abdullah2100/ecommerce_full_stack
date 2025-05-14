@@ -30,20 +30,9 @@ public class UserData
     {
         try
         {
-            var address = await _dbContext.Address
-                .AsNoTracking()
-                .Where(ad => ad.owner != null && ad.owner.name == userName && ad.owner.password == password)
-                .OrderByDescending(ad => ad.created_at)
-                .Select(ad => new AddressResponseDto()
-                {
-                    id = ad.id,
-                    latitude = ad.latitude,
-                    longitude = ad.longitude,
-                }).ToListAsync() ?? null;
-
             var result = _dbContext.Users
                 .AsNoTracking()
-                .Where(u => ( u.email == userName) && u.password == password)
+                .Where(u => (u.email == userName) && u.password == password)
                 .Select(u => new UserInfoResponseDto
                 {
                     Id = u.ID,
@@ -51,10 +40,23 @@ public class UserData
                     phone = u.phone,
                     email = u.email,
                     thumbnail = _configuration.getKey("url_file") + u.thumbnail,
-                    address = address
-                });
+                    address = null
+                }).FirstOrDefault();
+            var address = await _dbContext.Address
+                .AsNoTracking()
+                .Where(ad => ad.owner_id == result.Id)
+                .OrderByDescending(ad => ad.created_at)
+                .Select(ad => new AddressResponseDto()
+                {
+                    id = ad.id,
+                    latitude = ad.latitude,
+                    longitude = ad.longitude,
+                    title = ad.title
+                }).ToListAsync() ?? null;
 
-            return await result.FirstOrDefaultAsync();
+            result.address = address;
+
+            return result;
         }
         catch (Exception e)
         {
@@ -88,7 +90,7 @@ public class UserData
                     name = u.name,
                     phone = u.phone,
                     email = u.email,
-                    thumbnail = _configuration.getKey("url_file") + u.thumbnail,
+                    thumbnail =u.thumbnail==null?"": _configuration.getKey("url_file") + u.thumbnail,
                     address = address
                 });
 
@@ -102,11 +104,11 @@ public class UserData
         }
     }
 
-    public async Task<User?> getUserById(Guid userID)
+    public async Task<User?> getUserById(Guid ID)
     {
         try
         {
-            var user = await _dbContext.Users.FindAsync(userID);
+            var user = await _dbContext.Users.FindAsync(ID);
             return user;
         }
         catch (Exception e)
@@ -118,11 +120,13 @@ public class UserData
     }
 
 
-    public bool isExistByEmail(string email)
+    public async Task<bool> isExistByEmail(string email)
     {
         try
         {
-            return _dbContext.Users?.AsNoTracking()?.Where(u => u.email == email && u.isDeleted == false) != null;
+            return await  _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.email == email) != null;
         }
         catch (Exception e)
         {
@@ -132,12 +136,14 @@ public class UserData
         }
     }
 
-    
-    public bool isExistByPhone(string phone)
+
+    public async Task<bool> isExistByPhone(string phone)
     {
         try
         {
-            return _dbContext.Users.FirstOrDefault(u => u.phone == phone && u.isDeleted == false) != null;
+            return  await _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.phone == phone && u.isDeleted == false) != null;
         }
         catch (Exception e)
         {
@@ -150,7 +156,9 @@ public class UserData
     {
         try
         {
-            var result = _dbContext.Users.FirstOrDefault(u => u.ID == userID);
+            var result = _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefault(u => u.ID == userID);
             result!.isDeleted = true;
             await _dbContext.SaveChangesAsync();
             return true;
@@ -175,7 +183,9 @@ public class UserData
         {
             if (role == 0)
             {
-                var result = _dbContext.Users.FirstOrDefault(u => u.role == 1);
+                var result = _dbContext.Users
+                    .AsNoTracking()
+                    .FirstOrDefault(u => u.role == 1);
                 if (result != null)
                 {
                     Console.WriteLine("can't create new admin while there is already an admin");
@@ -211,12 +221,14 @@ public class UserData
         Guid userId,
         string? phone = null,
         string? password = null,
-        string? name = null, 
+        string? name = null,
         string? imagePath = null)
     {
         try
         {
-            User? userData = _dbContext.Users.FirstOrDefault(u => u.ID == userId);
+            User? userData = _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefault(u => u.ID == userId);
 
             if (userData == null)
                 return null;

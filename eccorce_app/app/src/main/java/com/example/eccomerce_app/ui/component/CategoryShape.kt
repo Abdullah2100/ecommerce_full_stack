@@ -44,14 +44,6 @@ fun CategoryShape(
 
     LazyRow(modifier = Modifier.padding(top = 10.dp)) {
         items(count = categories.size) { index->
-
-            var url =if(categories[index].image.endsWith(".svg")) ImageRequest.Builder(context)
-                .data(categories[index].image)
-                .decoderFactory(SvgDecoder.Factory())
-                .build() else ImageRequest.Builder(context)
-                .data(categories[index].image)
-                .build()
-
             Column(
                 modifier = Modifier
                     .padding(end = 5.dp)
@@ -72,7 +64,7 @@ fun CategoryShape(
                         modifier = Modifier
                             .height(69.dp)
                             .width(70.dp),
-                        model = url ,
+                        model = General.handlingImageForCoil(categories[index].image,context) ,
                         contentDescription = "",
                         loading = {
                             Box(

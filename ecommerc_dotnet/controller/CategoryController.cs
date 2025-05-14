@@ -31,6 +31,8 @@ public class CategoryController : ControllerBase
 
 
     [HttpGet("all{pageNumber:int}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult getCatgory(int pageNumber = 1)
     {
         if (pageNumber < 1)
@@ -44,6 +46,9 @@ public class CategoryController : ControllerBase
 
 
     [HttpPost("")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> createCateogry([FromForm] CategoryRequestDto category)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -84,6 +89,9 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPut("")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> updateCateogry([FromForm] CategoryRequestUpdatteDto category)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -101,7 +109,11 @@ public class CategoryController : ControllerBase
         }
 
         var user = await _userData.getUserById(idHolder.Value);
-       
+
+        if (user == null)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
@@ -126,11 +138,7 @@ public class CategoryController : ControllerBase
             if(categoryHolder.image_path!=null)
                         clsUtil.deleteFile(categoryHolder.image_path, _host);
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
-            // var image = categoryHolder.image_path.Substring((MinIoServices.enBucketName.CATEGORY.ToString().ToLower()+'/').ToString().Length);
-            
-            //  imagePath = await MinIoServices
-            //  .uploadFile(_configuration,category.image,MinIoServices.enBucketName.CATEGORY,image); ;
-
+           
         }
 
 
@@ -147,6 +155,9 @@ public class CategoryController : ControllerBase
     
     
     [HttpPut("block/{categoryId:guid}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> blockOrUnBlockCateogry( Guid categoryId)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];

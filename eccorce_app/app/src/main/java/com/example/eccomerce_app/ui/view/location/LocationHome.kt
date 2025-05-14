@@ -94,7 +94,7 @@ fun LocationHomeScreen(
                             data?.let {
                                     location->
 
-                                homeViewModle.updateLocationObj(
+                                homeViewModle.updateAddressObj(
                                     longit = location.longitude,
                                     latit = location.latitude
                                 )
@@ -114,7 +114,7 @@ fun LocationHomeScreen(
         }
     )
 
-    LaunchedEffect(locations.value==null) {
+    LaunchedEffect(Unit) {
         homeViewModle.getUserLocations()
     }
 
@@ -222,8 +222,8 @@ fun LocationHomeScreen(
                             ) {
                                 Button(onClick = {
                                     isShownLocationTitleDialog.value = false
-                                    homeViewModle.updateLocationObj(title = locationTitle.value.text)
-                                    homeViewModle.addUserLocation()
+                                    homeViewModle.updateAddressObj(title = locationTitle.value.text)
+                                    homeViewModle.addUserAddress()
                                 }) {
                                     Text("Okay")
                                 }

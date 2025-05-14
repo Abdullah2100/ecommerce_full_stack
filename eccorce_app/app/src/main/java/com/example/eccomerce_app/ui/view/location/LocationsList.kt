@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.location
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -155,7 +156,9 @@ fun LocationsList(
                         .fillMaxWidth()
                 ) {
 
-                    items(locationss.value!!.size) {index->
+                    items(locationss.value!!.size)
+                    {index->
+                        Log.d("titleIs",locationss.value!![index].latitude.toString())
                        Column(
                            modifier = Modifier
                                .clip(RoundedCornerShape(8.dp))
@@ -178,11 +181,11 @@ fun LocationsList(
                                )
                                Sizer(width = 20)
                                Text(
-                                   locationss.value!![index].title,
+                                   locationss.value!![index].latitude.toString(),
                                    fontFamily = General.satoshiFamily,
                                    fontWeight = FontWeight.Medium,
                                    fontSize = (16 / fontScall).sp,
-                                   color = CustomColor.primaryColor950,
+                                   color = CustomColor.neutralColor950,
                                    textAlign = TextAlign.Center
 
                                )
@@ -209,10 +212,10 @@ fun LocationsList(
 
                             Text("Make this location as active Location",
                                 fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Normal,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = (16 / fontScall).sp,
-                                color = CustomColor.primaryColor950,
-                                textAlign = TextAlign.Center
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.End
 
                             )
                                },
@@ -230,7 +233,7 @@ fun LocationsList(
                                 fontFamily = General.satoshiFamily,
                               fontWeight = FontWeight.Normal,
                                 fontSize = (16 / fontScall).sp,
-                                color = CustomColor.primaryColor950,
+                                color = CustomColor.primaryColor700,
                                 textAlign = TextAlign.Center
 
                             )
@@ -245,7 +248,7 @@ fun LocationsList(
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Normal,
                                     fontSize = (16 / fontScall).sp,
-                                    color = CustomColor.primaryColor950,
+                                    color = CustomColor.neutralColor700,
                                     textAlign = TextAlign.Center)
                             }
                         })

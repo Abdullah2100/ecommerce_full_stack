@@ -25,6 +25,7 @@ public class CategoryData
         try
         {
             var result = _dbContext.Category
+                .AsNoTracking()
                 .Where(c => c.isBlocked == false)
                 .OrderBy(c => c.created_at)
                 .Skip((pageNumber - 1) * pageSize)

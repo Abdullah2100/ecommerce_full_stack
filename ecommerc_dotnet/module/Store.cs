@@ -1,21 +1,18 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Drawing;
-using NetTopologySuite.Geometries;
 
 namespace ecommerc_dotnet.module;
 
-public class Address
+public class Store
 {
     [Key]
     public Guid id { get; set; }
-    
-    public decimal longitude { get; set; }
-    public decimal latitude { get; set; }
-    
-    public string title { get; set; }
+    public string name { get; set; }
+    public string wallpaper_image  { get; set; }
+    public string  small_image { get; set; }
+    public bool isBlock { get; set; } = true;
 
-    public bool isCurrent { get; set; } = false;
+    public Guid user_id { get; set; }
     
     [Column(TypeName = "Timestamp")]
     public DateTime created_at { get; set; } = DateTime.Now;
@@ -23,6 +20,7 @@ public class Address
      
     [Column(TypeName = "Timestamp")]
     public DateTime? updated_at { get; set; } = null;
-    public Guid owner_id { get; set; }
     
+    public ICollection<Address>? addresses { get; set; } =null;
+    public User user {get; set;}
 }

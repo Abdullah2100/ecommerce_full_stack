@@ -96,7 +96,8 @@ fun TextInputWithTitle(
     title: String,
     placHolder: String,
     isHasError: Boolean = false,
-    erroMessage: String
+    erroMessage: String,
+    isEnable: Boolean?=true
 ) {
 
     val fontScall = LocalDensity.current.fontScale
@@ -104,13 +105,13 @@ fun TextInputWithTitle(
         Text(
             title,
             fontFamily = General.satoshiFamily,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Bold,
             color = CustomColor.neutralColor950,
             fontSize = (16 / fontScall).sp
         )
         Sizer(heigh = 5)
         OutlinedTextField(
-
+            enabled = isEnable==true,
             maxLines = 1,
             value = value.value,
             onValueChange = { value.value = it },

@@ -77,6 +77,7 @@ fun HomePage(
 
     LaunchedEffect(Unit) {
         homeViewModel.getCategory(1)
+        homeViewModel.getMyInfo();
     }
 
     /*val requestNotificationPermssion = rememberLauncherForActivityResult(
@@ -137,7 +138,7 @@ fun HomePage(
                                 )
                                 Sizer(1)
                                 Text(
-                                    address?.value?.first { it.id == savedAddress.value }?.title
+                                    address?.value?.firstOrNull { it.id == savedAddress.value }?.title
                                         ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,

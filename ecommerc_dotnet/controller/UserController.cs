@@ -57,13 +57,13 @@ public class UserController : ControllerBase
             return BadRequest(validationResult);
         }
 
-        if (_userData.isExistByEmail(data.email))
+        if (await _userData.isExistByEmail(data.email))
         {
             //return BadRequest("email already exist");
             return BadRequest("email already exist");
         }
 
-        if (_userData.isExistByPhone(data.phone))
+        if (await _userData.isExistByPhone(data.phone))
         {
             return BadRequest("phone already exist");
         }
@@ -98,7 +98,7 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> signIn([FromBody] LoginDto data)
@@ -126,6 +126,10 @@ public class UserController : ControllerBase
 
 
     [HttpDelete("{userID:guid}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+
     public async Task<IActionResult> deleteUser(Guid userID)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -167,6 +171,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUser()
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -183,7 +190,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = _userData.getUser(idHolder.Value);
+        var user =await _userData.getUser(idHolder.Value);
 
         if (user == null)
         {
@@ -196,6 +203,9 @@ public class UserController : ControllerBase
 
 
     [HttpPut("")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> updateUser(
         [FromForm] UpdateUserInfo userData
     )
@@ -235,19 +245,15 @@ public class UserController : ControllerBase
             }
         }
 
-        // if (user.thumbnail != null && userData.thumbnail != null)
-        // {
-        //     clsUtil.deleteFile(user.thumbnail, _host);
-        // }
+        if (user.thumbnail != null && userData.thumbnail != null)
+        {
+            clsUtil.deleteFile(user.thumbnail, _host);
+        }
 
         string? profile = null;
         if (userData.thumbnail != null)
         {
             profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PRODUCT, _host);
-            // var image =user.thumbnail==null?null: user.thumbnail.Substring((MinIoServices.enBucketName.PROFILE.ToString().ToLower()+'/').Length);
-
-            // profile = await MinIoServices.uploadFile(_configuration, userData.thumbnail,
-                // MinIoServices.enBucketName.PROFILE, image);
         }
 
         userData.userId = idHolder;
@@ -305,7 +311,10 @@ public class UserController : ControllerBase
      */
 
 
-    [HttpGet("location")]
+    [HttpGet("address")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUserLocations()
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -336,7 +345,10 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpPost("location")]
+    [HttpPost("address")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> setUserLocation(
         [FromBody] AddressRequestDto address
     )
@@ -373,11 +385,14 @@ public class UserController : ControllerBase
             userId: idHolder.Value
         );
 
-        return StatusCode(200, location);
+        return StatusCode(201, location);
     }
 
 
-    [HttpPost("location/current{addressID:guid}")]
+    [HttpPost("address/active{addressID:guid}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> setUserLocation(Guid addressID)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];

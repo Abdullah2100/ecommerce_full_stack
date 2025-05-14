@@ -1,14 +1,10 @@
 package com.example.eccomerce_app.data.repository
 
-import android.R
-import com.example.eccomerce_app.Dto.AuthResultDto
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.dto.request.LocationRequestDto
-import com.example.eccomerce_app.dto.request.LoginDto
-import com.example.eccomerce_app.dto.request.SignupDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
-import com.example.eccomerce_app.dto.response.ErrorResponse
+import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -16,22 +12,19 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.net.UnknownHostException
 import java.util.UUID
 
 class HomeRepository(val client: HttpClient) {
 
-    suspend fun getUserLocations(): NetworkCallHandler {
+    //
+    suspend fun getUserAddress(): NetworkCallHandler {
         return try {
             var result = client.get(
-                Secrets.getBaseUrl() + "/User/location"
+                Secrets.getBaseUrl() + "/User/address"
             ) {
                 headers {
                     append(
@@ -65,7 +58,7 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun userAddNewLocation(locationData:LocationRequestDto): NetworkCallHandler {
+    suspend fun userAddNewAddress(locationData:LocationRequestDto): NetworkCallHandler {
         return try {
             var result = client.post(
                 Secrets.getBaseUrl() + "/User/location"
@@ -105,7 +98,7 @@ class HomeRepository(val client: HttpClient) {
     suspend fun setAddressAsCurrent(addressId: UUID): NetworkCallHandler {
         return try {
             var result = client.post(
-                Secrets.getBaseUrl() + "/User/location/current${addressId}"
+                Secrets.getBaseUrl() + "/User/address/active${addressId}"
             ) {
                 headers {
                     append(
@@ -174,4 +167,38 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
+    suspend fun getMyInfo():NetworkCallHandler{
+        return try{
+            var result = client.get(
+                Secrets.getBaseUrl()+"/User"
+            ) {
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if(result.status== HttpStatusCode.OK){
+                return NetworkCallHandler.Successful(result.body<UserDto>())
+            }
+            else{
+                return NetworkCallHandler.Error(result.body())
+            }
+        }
+        catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
 }
