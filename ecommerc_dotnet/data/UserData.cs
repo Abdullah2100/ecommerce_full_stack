@@ -157,7 +157,6 @@ public class UserData
         try
         {
             var result = _dbContext.Users
-                .AsNoTracking()
                 .FirstOrDefault(u => u.ID == userID);
             result!.isDeleted = true;
             await _dbContext.SaveChangesAsync();
@@ -184,7 +183,6 @@ public class UserData
             if (role == 0)
             {
                 var result = _dbContext.Users
-                    .AsNoTracking()
                     .FirstOrDefault(u => u.role == 1);
                 if (result != null)
                 {
@@ -226,9 +224,8 @@ public class UserData
     {
         try
         {
-            User? userData = _dbContext.Users
-                .AsNoTracking()
-                .FirstOrDefault(u => u.ID == userId);
+            User? userData =await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.ID == userId);
 
             if (userData == null)
                 return null;
@@ -237,7 +234,7 @@ public class UserData
             userData.phone = phone ?? userData.phone;
             userData.password = password ?? userData.password;
             userData.updated_at = DateTime.Now;
-            userData.thumbnail = imagePath;
+            userData.thumbnail = imagePath??userData.thumbnail;
 
 
             await _dbContext.SaveChangesAsync();

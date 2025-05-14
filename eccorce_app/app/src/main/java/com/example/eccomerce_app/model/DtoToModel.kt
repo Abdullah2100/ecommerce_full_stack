@@ -29,7 +29,7 @@ object DtoToModel {
             name = this.name,
             phone = this.phone,
             email = this.email,
-            thumbnail=this.thumbnail,
+            thumbnail=if(this.thumbnail!=null)this.thumbnail.replace("localhost","10.0.2.2") else "",
             address = this.address?.map { it.toAddress() }?.toList()
         )
     }

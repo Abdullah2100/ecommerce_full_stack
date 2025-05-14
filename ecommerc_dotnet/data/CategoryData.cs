@@ -95,7 +95,7 @@ public class CategoryData
     {
         try
         {
-            var category = await getCategory(id);
+            var category = await _dbContext.Category.FindAsync(id);
             category!.name = name ?? category.name;
             category.image_path = filePath ?? category.image_path;
 
@@ -117,7 +117,7 @@ public class CategoryData
     {
         try
         {
-            var category = await getCategory(id);
+            var category = await _dbContext.Category.FindAsync(id);
             category!.isBlocked = !category.isBlocked;
             await _dbContext.SaveChangesAsync();
             return true;

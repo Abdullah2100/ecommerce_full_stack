@@ -21,18 +21,18 @@ public class AddressData
         
         try
         {
-            var result = await _dbContext.Address
-                .FindAsync(addressId);
-                
-            var addressHolder = new AddressResponseDto
+            var result =  _dbContext.Address
+                .AsNoTracking()
+                .Where(ad => ad.id == addressId)
+                .Select(ad => new AddressResponseDto
                 {
-                    id = result!.id,
-                    longitude = result.longitude,
-                    latitude = result.latitude,
-                    title = result.title, 
-                    isCurrent = result.isCurrent,
-                };
-            return addressHolder;
+                    id = ad!.id,
+                    longitude = ad.longitude,
+                    latitude = ad.latitude,
+                    title = ad.title,
+                    isCurrent = ad.isCurrent,
+                });
+            return await result.FirstOrDefaultAsync();
 
         }
         catch (Exception ex)
@@ -116,7 +116,8 @@ public class AddressData
         try
         {
 
-            var result = _dbContext.Address.AsNoTracking().Where(ad => ad.owner_id == userId && ad.id != addressId);
+            var result = _dbContext.Address
+                .Where(ad => ad.owner_id == userId && ad.id != addressId);
             await result
                 .ForEachAsync(u => u.isCurrent = false);
            var currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.id==addressId);

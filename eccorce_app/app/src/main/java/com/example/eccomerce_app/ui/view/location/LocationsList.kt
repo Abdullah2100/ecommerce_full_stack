@@ -158,7 +158,6 @@ fun LocationsList(
 
                     items(locationss.value!!.size)
                     {index->
-                        Log.d("titleIs",locationss.value!![index].latitude.toString())
                        Column(
                            modifier = Modifier
                                .clip(RoundedCornerShape(8.dp))

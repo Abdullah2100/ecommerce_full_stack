@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.account
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,12 +27,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -50,12 +57,18 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
+import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.AccountCustomBottom
 import com.example.eccomerce_app.ui.component.LogoutBotton
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextNumberInputWithTitle
+import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.hotel_mobile.Util.Validation
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -65,27 +78,82 @@ fun ProfileScreen(
     nav: NavHostController,
     homeViewModel: HomeViewModel
 ) {
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val myInfo = homeViewModel.myInfo.collectAsState();
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val fullName = remember { mutableStateOf(TextFieldValue("")) }
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val phone = remember { mutableStateOf(TextFieldValue("")) }
+    val oldPassword = remember { mutableStateOf(TextFieldValue("")) }
+    val newPassword = remember { mutableStateOf(TextFieldValue("")) }
 
-    val context = LocalContext.current
+    val currotine = rememberCoroutineScope()
 
     val file = remember { mutableStateOf<File?>(null) }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Log.d("thumnail",myInfo.value?.thumbnail.toString())
+
+
     val onImageSelection = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context);
-            if (fileHolder != null)
+            if (fileHolder != null){
                 file.value = fileHolder;
-
+            }
         }
     }
+
+    fun validateLoginInput(
+
+    ): Boolean {
+        var erroMessage=""
+
+        if(oldPassword.value.text.isEmpty()&&newPassword.value.text.isEmpty()&&phone.value.text.isEmpty())
+            return true;
+        else if (phone.value.text.trim().length<9) {
+            erroMessage = "Write Valide Phone"
+        }
+        else  if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordSmallValidation(oldPassword.value.text)) {
+            erroMessage = ("password must not contain two small letter")
+        } else if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordNumberValidation(oldPassword.value.text)) {
+            erroMessage = ("password must not contain two number")
+        } else if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordCapitalValidation(oldPassword.value.text)) {
+            erroMessage = ("password must not contain two capitalLetter")
+        } else if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordSpicialCharracterValidation(oldPassword.value.text)) {
+            erroMessage = ("password must not contain two spical character")
+        } else if (newPassword.value.text.isNotEmpty()&&newPassword.value.text.trim().isEmpty()) {
+            erroMessage = ("password must not be empty")
+        } else if (oldPassword.value.text.isNotEmpty()&&newPassword.value.text.isNotEmpty()&&oldPassword.value.text != newPassword.value.text) {
+            erroMessage = ("confirm password not equal to password")
+        }
+
+        if (erroMessage.isNotEmpty()) {
+            currotine.launch {
+
+                snackbarHostState.showSnackbar(erroMessage)
+            }
+            return false;
+        }
+
+
+        return erroMessage.isEmpty();
+    }
+
+
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.clip(RoundedCornerShape(8.dp))
+            )
+        },
 
         modifier = Modifier
             .fillMaxSize()
@@ -119,7 +187,63 @@ fun ProfileScreen(
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+
+                actions = {
+                    if(
+                        file.value!=null||
+                        (fullName.value.text.isNotEmpty()&&
+                                fullName.value.text!=myInfo.value?.name)||
+                        newPassword.value.text.isNotEmpty()||
+                        oldPassword.value.text.isNotEmpty()||
+                        phone.value.text.isNotEmpty()
+
+                        )
+
+                    TextButton(
+                        onClick = {
+                            keyboardController?.hide()
+                            var result = validateLoginInput()
+                            if((result)==true){
+                                var data = MyInfoUpdate(
+                                    name =if(fullName.value.text.isEmpty())null else fullName.value.text,
+                                    oldPassword =if(oldPassword.value.text.isEmpty())null else oldPassword.value.text,
+                                    newPassword =if(newPassword.value.text.isEmpty())null else newPassword.value.text,
+                                    phone =if(phone.value.text.isEmpty())null else phone.value.text,
+                                    thumbnail = file.value,
+                                )
+                                currotine.launch {
+                                    var result=async {
+                                        homeViewModel.updateMyInfoApi(data);
+                                    }.await()
+                                    if(result.isNullOrEmpty()){
+                                        phone.value= TextFieldValue("")
+                                        oldPassword.value= TextFieldValue("")
+                                        newPassword.value= TextFieldValue("")
+                                        fullName.value= TextFieldValue("")
+                                        file===null
+                                        currotine.launch {
+                                            snackbarHostState.showSnackbar("profile update seccessfuly");
+                                        }
+                                    }else{
+                                        currotine.launch {
+                                            snackbarHostState.showSnackbar(result);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            "Save",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = (18).sp,
+                            color = CustomColor.primaryColor700,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                },
+//                scrollBehavior = scrollBehavior
             )
         }
     ) {
@@ -287,13 +411,25 @@ fun ProfileScreen(
                 isEnable = false
             )
 
-            TextInputWithTitle(
+            TextNumberInputWithTitle(
                 value = phone,
                 title = "Phone",
                 placHolder = myInfo.value?.phone ?: "",
                 isHasError = false,
                 erroMessage = "",
-                isEnable = false
+            )
+            TextSecureInputWithTitle(
+                value = oldPassword,
+                title = "Current Password",
+                isHasError = false,
+                errMessage = ""
+            )
+
+            TextSecureInputWithTitle(
+                value = newPassword,
+                title = "New Password",
+                isHasError = false,
+                errMessage = ""
             )
         }
     }

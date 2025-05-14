@@ -253,14 +253,14 @@ public class UserController : ControllerBase
         string? profile = null;
         if (userData.thumbnail != null)
         {
-            profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PRODUCT, _host);
+            profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PROFILE, _host);
         }
 
         userData.userId = idHolder;
         var result = await _userData.updateUser(
             userId: idHolder.Value,
             phone: userData.phone,
-            password: clsUtil.hashingText(userData.password),
+            password:userData.password==null?null: clsUtil.hashingText(userData.password),
             name: userData.name,
             profile);
 

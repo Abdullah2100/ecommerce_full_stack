@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.data.Room.IsPassSetLocationScreen
 import com.example.eccomerce_app.data.repository.HomeRepository
@@ -16,6 +17,7 @@ import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.model.DtoToModel.toCategory
 import com.example.eccomerce_app.model.DtoToModel.toUser
+import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.model.User
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -51,6 +53,9 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     private var _myInfo = MutableStateFlow<User?>(null)
      var myInfo = _myInfo.asStateFlow()
 
+
+    private var _myInfoUpdate = MutableStateFlow<MyInfoUpdate>(MyInfoUpdate())
+    var myInfoUpdate = _myInfoUpdate.asStateFlow()
 
     init {
         getSavedCurrentAddress()
@@ -231,6 +236,8 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                    var data = result.data as UserDto
                    _myInfo.emit(data.toUser())
                }
+
+
                 else->{
 
                 }
@@ -239,5 +246,30 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
 
+  suspend  fun updateMyInfoApi(
+        userData: MyInfoUpdate
+
+    ):String?{
+            var result = homeRepository.UpdateMyInfo(
+                userData
+            );
+            when (result){
+                is NetworkCallHandler.Successful<*>->{
+                    var data = result.data as UserDto
+                    _myInfo.emit(data.toUser())
+                    return null;
+                }
+                is NetworkCallHandler.Error -> {
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                  return errorMessage.replace("\"","").toString()
+
+                }
+
+            }
+    }
 
 }
