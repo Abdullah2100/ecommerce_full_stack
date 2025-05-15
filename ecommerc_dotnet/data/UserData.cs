@@ -57,6 +57,7 @@ public class UserData
             result.address = address;
 
             return result;
+            return null;
         }
         catch (Exception e)
         {

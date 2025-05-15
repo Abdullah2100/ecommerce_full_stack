@@ -2,7 +2,9 @@ package com.example.eccomerce_app.model
 
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
+import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.UserDto
+import kotlin.text.replace
 
 object DtoToModel {
     fun AddressResponseDto.toAddress(): Address {
@@ -11,7 +13,7 @@ object DtoToModel {
             title =this.title,
             latitude = this.latitude,
             longitude = this.longitude,
-            isCurrnt = this.isCurrnt?:false
+            isCurrnt = this.isCurrent?:false
         )
     }
 
@@ -31,6 +33,16 @@ object DtoToModel {
             email = this.email,
             thumbnail=if(this.thumbnail!=null)this.thumbnail.replace("localhost","10.0.2.2") else "",
             address = this.address?.map { it.toAddress() }?.toList()
+        )
+    }
+
+    fun StoreResposeDto.toStore():Store{
+        return Store(
+            id = this.id,
+            name = this.name,
+            user_id = this.user_id,
+            pig_image = this.wallpaper_image.replace("localhost","10.0.2.2"),
+            small_image  = this.small_image.replace("localhost","10.0.2.2"),
         )
     }
 }

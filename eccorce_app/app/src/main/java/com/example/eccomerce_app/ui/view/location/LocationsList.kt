@@ -141,7 +141,7 @@ fun LocationsList(
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = (20 / fontScall).sp,
-                        color = CustomColor.primaryColor950,
+                        color = CustomColor.neutralColor500,
                         textAlign = TextAlign.Center
 
                     )

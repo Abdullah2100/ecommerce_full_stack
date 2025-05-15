@@ -16,6 +16,8 @@ import com.example.eccomerce_app.ui.view.Auth.LoginScreen
 import com.example.eccomerce_app.View.Pages.SignUpPage
 import com.example.eccomerce_app.ui.view.account.AccountPage
 import com.example.eccomerce_app.ui.view.account.ProfileScreen
+import com.example.eccomerce_app.ui.view.account.store.StoreScreen
+import com.example.eccomerce_app.ui.view.home.HomeAddressList
 import com.example.eccomerce_app.ui.view.home.HomePage
 import com.example.eccomerce_app.ui.view.location.LocationHomeScreen
 import com.example.eccomerce_app.ui.view.location.LocationsList
@@ -139,6 +141,7 @@ fun NavController(
                     authKoin = authViewModle
                 )
             }
+
             composable<Screens.Signup>(
                 enterTransition = {
                     return@composable slideIntoContainer(
@@ -164,15 +167,11 @@ fun NavController(
         ) {
 
             composable<Screens.Home>(
-
-
-
                 enterTransition = {
                     return@composable slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.End, tween(750)
                     )
                 },
-
                 exitTransition = {
                     return@composable slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
@@ -182,6 +181,24 @@ fun NavController(
                 HomePage(
                     nav = nav,
                     homeViewModel = homeViewModle
+                )
+            }
+
+            composable<Screens.HomeAddress>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                HomeAddressList(
+                    nav = nav,
+                    homeViewModle = homeViewModle
                 )
             }
 
@@ -217,6 +234,24 @@ fun NavController(
                 }
             ) {
                 ProfileScreen(
+                    nav = nav,
+                    homeViewModel = homeViewModle
+                )
+            }
+
+            composable<Screens.Store>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                StoreScreen(
                     nav = nav,
                     homeViewModel = homeViewModle
                 )

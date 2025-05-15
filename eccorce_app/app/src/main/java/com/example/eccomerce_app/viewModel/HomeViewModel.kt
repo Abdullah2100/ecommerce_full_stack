@@ -11,13 +11,16 @@ import com.example.eccomerce_app.data.repository.HomeRepository
 import com.example.eccomerce_app.dto.ModelToDto.toLocationRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
+import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.model.Address
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.model.DtoToModel.toCategory
+import com.example.eccomerce_app.model.DtoToModel.toStore
 import com.example.eccomerce_app.model.DtoToModel.toUser
 import com.example.eccomerce_app.model.MyInfoUpdate
+import com.example.eccomerce_app.model.Store
 import com.example.eccomerce_app.model.User
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -26,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.UUID
 
 
@@ -47,28 +51,16 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     var location = _location.asStateFlow()
 
 
-    private var _currentLocationId = MutableStateFlow<UUID?>(null)
-    var savedCurrentLocationToLocal = _currentLocationId.asStateFlow()
-
     private var _myInfo = MutableStateFlow<User?>(null)
-     var myInfo = _myInfo.asStateFlow()
+    var myInfo = _myInfo.asStateFlow()
+
+
+    private var _myStore = MutableStateFlow<Store?>(null)
+    var myStore = _myStore.asStateFlow()
 
 
     private var _myInfoUpdate = MutableStateFlow<MyInfoUpdate>(MyInfoUpdate())
     var myInfoUpdate = _myInfoUpdate.asStateFlow()
-
-    init {
-        getSavedCurrentAddress()
-        getMyInfo()
-    }
-    fun getSavedCurrentAddress() {
-        viewModelScope.launch(Dispatchers.IO) {
-            getUserLocations()
-            var result = dao.getSavedLocation()
-            if (result != null)
-                _currentLocationId.emit(UUID.fromString(result.locationId))
-        }
-    }
 
 
     fun updateAddressObj(longit: Double? = null, latit: Double? = null, title: String? = null) {
@@ -95,8 +87,8 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
     fun getUserLocations() {
-        if(_locations.value!=null)return;
-        viewModelScope.launch(Dispatchers.IO) {
+        if (_locations.value != null) return;
+        viewModelScope.launch(Dispatchers.Main) {
             var result = homeRepository.getUserAddress()
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -105,8 +97,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                         _locations.emit(
                             address.map { it.toAddress() }.toList()
                         )
-                    }
-                    else {
+                    } else {
                         if (_locations.value.isNullOrEmpty())
                             _locations.emit(emptyList())
                     }
@@ -187,7 +178,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         nav: NavHostController,
         isFromLocationHome: Boolean? = false,
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
             _isLoading.emit(true)
             delay(6000)
             var result = homeRepository.setAddressAsCurrent(addressId)
@@ -201,11 +192,9 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                             dao.savePassingLocation(
                                 IsPassSetLocationScreen(
                                     0,
-                                    addressId.toString(),
                                     true
                                 )
                             )
-                            _currentLocationId.emit(addressId)
                             nav.navigate(Screens.HomeGraph) {
                                 popUpTo(nav.graph.id) {
                                     inclusive = true
@@ -227,18 +216,18 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         }
     }
 
-    fun getMyInfo(){
-        if(_myInfo.value!=null)return;
+    fun getMyInfo() {
+        if (_myInfo.value != null) return;
         viewModelScope.launch(Dispatchers.Main) {
             var result = homeRepository.getMyInfo();
-            when (result){
-               is NetworkCallHandler.Successful<*>->{
-                   var data = result.data as UserDto
-                   _myInfo.emit(data.toUser())
-               }
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as UserDto
+                    _myInfo.emit(data.toUser())
+                }
 
 
-                else->{
+                else -> {
 
                 }
             }
@@ -246,30 +235,92 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
 
-  suspend  fun updateMyInfoApi(
+    suspend fun updateMyInfo(
         userData: MyInfoUpdate
 
-    ):String?{
-            var result = homeRepository.UpdateMyInfo(
-                userData
-            );
-            when (result){
-                is NetworkCallHandler.Successful<*>->{
-                    var data = result.data as UserDto
-                    _myInfo.emit(data.toUser())
-                    return null;
-                }
-                is NetworkCallHandler.Error -> {
+    ): String? {
+        var result = homeRepository.UpdateMyInfo(
+            userData
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as UserDto
+                _myInfo.emit(data.toUser())
+                return null;
+            }
 
-                    var errorMessage = (result.data.toString())
-                    if (errorMessage.contains(General.BASED_URL)) {
-                        errorMessage.replace(General.BASED_URL, " Server ")
-                    }
-                  return errorMessage.replace("\"","").toString()
+            is NetworkCallHandler.Error -> {
 
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
                 }
+                return errorMessage.replace("\"", "").toString()
 
             }
+
+        }
     }
+
+
+    fun getMyStore() {
+        if (_myStore.value != null) return;
+        viewModelScope.launch(Dispatchers.Main) {
+            var result = homeRepository.getMyStore();
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as StoreResposeDto
+                    _myStore.emit(data.toStore())
+                }
+
+
+                else -> {
+
+                }
+            }
+        }
+    }
+
+
+    suspend fun createStore(
+        name: String,
+        wallpaper_image: File,
+        small_image: File,
+        longitude: Double,
+        latitude: Double,
+        snackBark: SnackbarHostState
+    ):String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.createStore(
+            name,
+            wallpaper_image,
+            small_image,
+            longitude,
+            latitude
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as StoreResposeDto
+                _myStore.emit(data.toStore())
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
+
 
 }

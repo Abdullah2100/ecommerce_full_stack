@@ -45,8 +45,9 @@ object General {
         Font(R.font.satoshi_regular, FontWeight.Normal)
     )
 
-    fun handlingImageForCoil(imageUrl:String,context: Context):ImageRequest{
-       return when (imageUrl.endsWith(".svg")){
+    fun handlingImageForCoil(imageUrl:String?,context: Context):ImageRequest?{
+        if(imageUrl==null)return null
+       return  when (imageUrl.endsWith(".svg")){
             true->{
                 ImageRequest.Builder(context)
                     .data(imageUrl)

@@ -1,44 +1,23 @@
 package com.example.eccomerce_app.View.Pages
 
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,29 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.viewModel.AuthViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.CustomAuthBotton
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
@@ -234,17 +201,19 @@ fun SignUpPage(
                 Sizer(heigh = 50)
                 TextInputWithTitle(
                     name,
-                    placHolder = "Enter Your name",
                     title = "Name",
+                    placHolder = "Enter Your name",
                     isHasError = isNameError.value,
-                    erroMessage = erroMessage.value
+                    erroMessage = erroMessage.value,
+                    focusRequester = focusRequester
                 )
                 TextInputWithTitle(
                     email,
-                    placHolder = "Enter Your email",
                     title = "Email",
+                    placHolder = "Enter Your email",
                     isHasError = isEmailError.value,
-                    erroMessage = erroMessage.value
+                    erroMessage = erroMessage.value,
+                    focusRequester = focusRequester
                 )
                 TextNumberInputWithTitle(
                     phone,

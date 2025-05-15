@@ -1,6 +1,7 @@
 package com.example.eccomerce_app
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,12 +45,12 @@ import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     var keepSplash = true;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val window = (this as Activity).window
-//        window.statusBarColor= Color.White.toArgb()
-//        WindowCompat.getInsetsController(window, this)
-//            .isAppearanceLightStatusBars = !darkTheme
+
+
         installSplashScreen().apply {
             setKeepOnScreenCondition {
                 keepSplash

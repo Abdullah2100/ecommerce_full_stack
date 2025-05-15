@@ -4,6 +4,7 @@ import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.dto.request.LocationRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
+import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.util.Secrets
@@ -248,6 +249,114 @@ class HomeRepository(val client: HttpClient) {
             }
             if (result.status == HttpStatusCode.OK) {
                 return NetworkCallHandler.Successful(result.body<UserDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun getMyStore(): NetworkCallHandler {
+        return try {
+            var result = client.put(
+                Secrets.getBaseUrl() + "/User"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun createStore(
+        name: String,
+        wallpaper_image: File,
+        small_image: File,
+        longitude: Double,
+        latitude: Double
+    ): NetworkCallHandler {
+        return try {
+            var result = client.post(
+                Secrets.getBaseUrl() + "/Store/new"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("name", name)
+                            append("longitude", latitude)
+                            append("latitude", longitude)
+                            append(
+                                key = "wallpaper_image", // Must match backend expectation
+                                value = wallpaper_image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${wallpaper_image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${wallpaper_image.name}"
+                                    )
+                                }
+                            )
+                            append(
+                                key = "small_image", // Must match backend expectation
+                                value = small_image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${small_image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${small_image.name}"
+                                    )
+                                }
+                            )
+
+                        }
+                    )
+                )
+            }
+            if (result.status == HttpStatusCode.Created) {
+                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
             } else {
                 return NetworkCallHandler.Error(result.body())
             }

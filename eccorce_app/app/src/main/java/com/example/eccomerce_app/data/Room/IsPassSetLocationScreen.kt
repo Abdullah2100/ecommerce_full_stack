@@ -7,6 +7,5 @@ import java.util.UUID
 @Entity(tableName = "location")
 data class IsPassSetLocationScreen(
     @PrimaryKey(autoGenerate = true) val id: Int? = 0,
-    var locationId: String,
     val default: Boolean=false
 )

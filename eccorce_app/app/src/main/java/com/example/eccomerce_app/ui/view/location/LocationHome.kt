@@ -73,12 +73,12 @@ fun LocationHomeScreen(
     val currutine = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     val isShownLocationTitleDialog = remember { mutableStateOf(false) }
     val isNotEnablePermission = remember { mutableStateOf(false) }
     val locationTitle = remember { mutableStateOf(TextFieldValue()) }
 
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val requestPermssion = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permission ->

@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.addOutline
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.CategoryLoadingShape
 import com.example.eccomerce_app.ui.component.CategoryShape
 import com.example.eccomerce_app.ui.component.LocationLoadingShape
@@ -67,7 +68,6 @@ fun HomePage(
 
     var address = homeViewModel.locations.collectAsState()
     var categories = homeViewModel.categories.collectAsState()
-    var savedAddress = homeViewModel.savedCurrentLocationToLocal.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val isClickingSearch = remember { mutableStateOf(false) }
 
@@ -76,8 +76,10 @@ fun HomePage(
     )
 
     LaunchedEffect(Unit) {
+        homeViewModel.getUserLocations()
         homeViewModel.getCategory(1)
         homeViewModel.getMyInfo();
+        homeViewModel.getMyStore()
     }
 
     /*val requestNotificationPermssion = rememberLauncherForActivityResult(
@@ -99,7 +101,6 @@ fun HomePage(
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
-
 
 
         LazyColumn(
@@ -126,6 +127,14 @@ fun HomePage(
                             Column(
                                 modifier = Modifier
                                     .width((configuration.screenWidthDp - 30 - 34).dp)
+                                    .clickable(
+                                        enabled = true,
+                                        interactionSource =interactionSource ,
+                                        indication = null,
+                                       onClick = {
+                                           nav.navigate(Screens.HomeAddress)
+                                       }
+                                        )
                             ) {
                                 Text(
                                     "Loaction",
@@ -138,7 +147,7 @@ fun HomePage(
                                 )
                                 Sizer(1)
                                 Text(
-                                    address?.value?.firstOrNull { it.id == savedAddress.value }?.title
+                                    address?.value?.firstOrNull { it.isCurrnt==true }?.title
                                         ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,

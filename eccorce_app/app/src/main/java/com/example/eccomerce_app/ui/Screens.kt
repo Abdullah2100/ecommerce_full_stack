@@ -41,6 +41,12 @@ object Screens {
     @Serializable
     object Profile
 
+    @Serializable
+    object HomeAddress
+
+    @Serializable
+    object Store
+
 
 
 

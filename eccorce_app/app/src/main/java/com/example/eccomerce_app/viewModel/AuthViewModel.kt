@@ -97,13 +97,16 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val authData = result.data as AuthResultDto;
-                    dao.saveAuthData(
-                        AuthModleEntity(
-                            id = 0,
-                            token = authData.accessToken,
-                            refreshToken = authData.refreshToken
-                        )
+                    var authDataHolder =   AuthModleEntity(
+                        id = 0,
+                        token = authData.accessToken,
+                        refreshToken = authData.refreshToken
                     )
+                    dao.saveAuthData(
+                        authDataHolder
+                    );
+
+                    General.authData.emit(authDataHolder)
                     nav.navigate(Screens.LocationGraph){
                         popUpTo(nav.graph.id){
                             inclusive=true
@@ -148,13 +151,15 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val authData = result.data as AuthResultDto;
-                    dao.saveAuthData(
-                        AuthModleEntity(
-                            id = 0,
-                            token = authData.accessToken,
-                            refreshToken = authData.refreshToken
-                        )
+                    var authDataHolder =   AuthModleEntity(
+                        id = 0,
+                        token = authData.accessToken,
+                        refreshToken = authData.refreshToken
                     )
+                    dao.saveAuthData(
+                        authDataHolder
+                    )
+                    General.authData.emit(authDataHolder)
                     nav.navigate(Screens.LocationGraph){
                         popUpTo(nav.graph.id){
                             inclusive=true

@@ -2,20 +2,12 @@ package com.example.eccomerce_app.ui.component
 
 import androidx.compose.foundation.Image
 import com.example.eccomerce_app.R
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.TextObfuscationMode
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -25,8 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -96,10 +89,12 @@ fun TextInputWithTitle(
     title: String,
     placHolder: String,
     isHasError: Boolean = false,
-    erroMessage: String,
-    isEnable: Boolean?=true
+    erroMessage: String? = null,
+    isEnable: Boolean? = true,
+    focusRequester: FocusRequester?
 ) {
 
+    var modifierWithFocus =if(focusRequester==null)Modifier.fillMaxWidth() else Modifier.fillMaxWidth().focusRequester(focusRequester)
     val fontScall = LocalDensity.current.fontScale
     Column {
         Text(
@@ -124,15 +119,14 @@ fun TextInputWithTitle(
                     fontSize = (16 / fontScall).sp
                 )
             },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = modifierWithFocus,
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = if (!isHasError) Color.Gray.copy(alpha = 0.46f) else CustomColor.alertColor_1_400,
                 focusedBorderColor = if (!isHasError) Color.Black else CustomColor.alertColor_1_400
             ),
             supportingText = {
-                if (isHasError)
+                if (isHasError&&erroMessage!=null)
                     Text(
                         erroMessage,
                         color = CustomColor.alertColor_1_400,

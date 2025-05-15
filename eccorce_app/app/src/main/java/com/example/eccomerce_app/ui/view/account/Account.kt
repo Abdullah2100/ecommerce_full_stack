@@ -98,7 +98,9 @@ fun AccountPage(
                     AccountCustomBottom("My Order",R.drawable.order,{})
                     AccountCustomBottom("Payment Me",R.drawable.credit_card,{})
                     AccountCustomBottom("Notifications",R.drawable.notification,{})
-                    AccountCustomBottom("My Store",R.drawable.store,{})
+                    AccountCustomBottom("My Store",R.drawable.store,{
+                        nav.navigate(Screens.Store)
+                    })
                     LogoutBotton("Logout",R.drawable.logout,{})
 
                 }

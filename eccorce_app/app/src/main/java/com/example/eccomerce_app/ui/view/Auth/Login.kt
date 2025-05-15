@@ -22,12 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -171,10 +165,11 @@ fun LoginScreen(
                 Sizer(heigh = 50)
                 TextInputWithTitle(
                     userNameOrEmail,
-                    placHolder = "Enter Your email",
                     title = "Email",
+                    placHolder = "Enter Your email",
                     isHasError = isEmailError.value,
-                    erroMessage = erroMessage.value
+                    erroMessage = erroMessage.value,
+                    focusRequester = focusRequester
                 )
                 TextSecureInputWithTitle(
                     password,
