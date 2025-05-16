@@ -156,6 +156,34 @@ public class AddressData
         }
     }
 
+    // public static List<AddressResponseDto>? getUserAddressByUserId(Guid id,AppDbContext _dbContext)
+    // {
+    //     
+    //     try
+    //     {
+    //         var result =  _dbContext.Address
+    //             .AsNoTracking()
+    //             .Where(ad => ad.owner_id == id)
+    //             .OrderByDescending(ad=>ad.created_at )
+    //             .Select(ad =>
+    //                 new AddressResponseDto
+    //                 {
+    //                     id = ad.id,
+    //                     longitude = ad.longitude,
+    //                     latitude = ad.latitude,
+    //                     title = ad.title, isCurrent = ad.isCurrent,
+    //                 })
+    //             .ToList();
+    //         return result;
+    //
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.Write("error from  getting user address" + ex.Message);
+    //
+    //         return null;
+    //     }
+    // }
 
     
 }

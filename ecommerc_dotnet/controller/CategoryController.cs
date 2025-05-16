@@ -30,7 +30,7 @@ public class CategoryController : ControllerBase
     private readonly IWebHostEnvironment _host;
 
 
-    [HttpGet("all{pageNumber:int}")]
+    [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult getCatgory(int pageNumber = 1)
@@ -69,7 +69,7 @@ public class CategoryController : ControllerBase
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
-        bool isExist = await _categoryData.isExistByName(category.name);
+        bool isExist = await _categoryData.isExist(category.name);
 
         if (isExist)
             return BadRequest("هناك قسم بهذا الاسم");
@@ -126,7 +126,7 @@ public class CategoryController : ControllerBase
         bool isExistName = false;
 
         if (category?.name != null)
-            isExistName = await _categoryData.isExistByName(category.name);
+            isExistName = await _categoryData.isExist(category.name);
 
         if (isExistName&&categoryHolder.id!=category.id)
             return BadRequest("هناك قسم بهذا الاسم");
@@ -154,7 +154,7 @@ public class CategoryController : ControllerBase
     }
     
     
-    [HttpPut("block/{categoryId:guid}")]
+    [HttpPut("status/{categoryId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]

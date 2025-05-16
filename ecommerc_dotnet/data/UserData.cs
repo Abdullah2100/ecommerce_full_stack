@@ -25,6 +25,8 @@ public class UserData
         // _logger = logger;
     }
 
+   
+
 
     public async Task<UserInfoResponseDto?> getUser(string userName, string password)
     {
@@ -40,7 +42,8 @@ public class UserData
                     phone = u.phone,
                     email = u.email,
                     thumbnail = _configuration.getKey("url_file") + u.thumbnail,
-                    address = null
+                    address = null,
+                    store = null
                 }).FirstOrDefault();
             var address = await _dbContext.Address
                 .AsNoTracking()
@@ -71,31 +74,89 @@ public class UserData
     {
         try
         {
-            var address = await _dbContext.Address
+            return await (from us in _dbContext.Users
+                    join st in _dbContext.Store on us.ID equals st.user_id
+                    where us.ID == userID
+                    select new UserInfoResponseDto
+                    {
+                        name = us.name,
+                        phone = us.phone,
+                        email = us.phone,
+                        Id = us.ID,
+                        thumbnail = st.user.thumbnail == null
+                            ? null
+                            : _configuration.getKey("url_file") + st.user.thumbnail,
+                        address = _dbContext.Address.Where(add => add.owner_id == st.user_id)
+                            .Select(add => new AddressResponseDto
+                            {
+                                id = add.id,
+                                isCurrent = add.isCurrent,
+                                latitude = add.latitude,
+                                longitude = add.longitude,
+                                title = add.title
+                            }).ToList(),
+                        store = new StoreResponseDto
+                        {
+                            id = st.id,
+                            name = st.name,
+                            wallpaper_image = _configuration.getKey("url_file") + st.wallpaper_image,
+                            small_image = _configuration.getKey("url_file") + st.small_image,
+                            created_at = st.created_at,
+                            latitude = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
+                            longitide = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
+                            subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
+                            {
+                                name = sub.name,
+                                id = sub.id,
+                            }).ToList(),
+                            user = null
+                        }
+                    }
+                )
                 .AsNoTracking()
-                .Where(ad => ad.owner_id == userID)
-                .OrderByDescending(ad => ad.created_at)
-                .Select(ad => new AddressResponseDto()
-                {
-                    id = ad.id,
-                    latitude = ad.latitude,
-                    longitude = ad.longitude,
-                }).ToListAsync();
+                .FirstOrDefaultAsync();
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+    // public static UserInfoResponseDto? getUser(Guid userID,AppDbContext _dbContext,IConfigurationServices _configuration)
+    //    {
+    //        try
+    //        {
+    //            var result = _dbContext.Users
+    //                .AsNoTracking()
+    //                .Where(u => u.ID == userID)
+    //                .Select(u => new UserInfoResponseDto
+    //                {
+    //                    Id = u.ID,
+    //                    name = u.name,
+    //                    phone = u.phone,
+    //                    email = u.email,
+    //                    thumbnail =u.thumbnail==null?"": _configuration.getKey("url_file") + u.thumbnail,
+    //                    address =  AddressData.getUserAddressByUserId(userID, _dbContext),
+    //                    store = null
+    //                }).FirstOrDefault();
+    //
+    //            return  result; 
+    //        }
+    //        catch (Exception e)
+    //        {
+    //            //_logger.LogError("error from get user by username"+e.Message);
+    //            Console.WriteLine("error from get user by username" + e.Message);
+    //            return null;
+    //        }
+    //    }
 
-            var result = _dbContext.Users
-                .AsNoTracking()
-                .Where(u => u.ID == userID)
-                .Select(u => new UserInfoResponseDto
-                {
-                    Id = u.ID,
-                    name = u.name,
-                    phone = u.phone,
-                    email = u.email,
-                    thumbnail =u.thumbnail==null?"": _configuration.getKey("url_file") + u.thumbnail,
-                    address = address
-                });
-
-            return await result.FirstOrDefaultAsync();
+    public async Task<User?> getUserById(Guid ID)
+    {
+        try
+        {
+            return _dbContext.Users
+                .FirstOrDefault(u => u.ID == ID);
         }
         catch (Exception e)
         {
@@ -105,18 +166,20 @@ public class UserData
         }
     }
 
-    public async Task<User?> getUserById(Guid ID)
+
+    public async Task<bool> isExist(Guid userid)
     {
         try
         {
-            var user = await _dbContext.Users.FindAsync(ID);
-            return user;
+            return await _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.ID==userid&&u.isDeleted==false) != null;
         }
         catch (Exception e)
         {
             //_logger.LogError("error from get user by username"+e.Message);
             Console.WriteLine("error from get user by username" + e.Message);
-            return null;
+            return false;
         }
     }
 
@@ -125,7 +188,7 @@ public class UserData
     {
         try
         {
-            return await  _dbContext.Users
+            return await _dbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.email == email) != null;
         }
@@ -142,7 +205,7 @@ public class UserData
     {
         try
         {
-            return  await _dbContext.Users
+            return await _dbContext.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.phone == phone && u.isDeleted == false) != null;
         }
@@ -225,7 +288,7 @@ public class UserData
     {
         try
         {
-            User? userData =await _dbContext.Users
+            User? userData = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.ID == userId);
 
             if (userData == null)
@@ -235,7 +298,7 @@ public class UserData
             userData.phone = phone ?? userData.phone;
             userData.password = password ?? userData.password;
             userData.updated_at = DateTime.Now;
-            userData.thumbnail = imagePath??userData.thumbnail;
+            userData.thumbnail = imagePath ?? userData.thumbnail;
 
 
             await _dbContext.SaveChangesAsync();

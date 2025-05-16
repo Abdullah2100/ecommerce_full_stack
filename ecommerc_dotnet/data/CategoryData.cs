@@ -130,7 +130,7 @@ public class CategoryData
         }
     }
 
-    public async Task<bool> isExistByName
+    public async Task<bool> isExist
     (
         string name
     )
@@ -146,4 +146,23 @@ public class CategoryData
             return false;
         }
     }
+     public async Task<bool> isExist
+        (
+            Guid id 
+        )
+        {
+            try
+            {
+                return await _dbContext.Category.FirstOrDefaultAsync(c => c.id == id) != null;
+            }
+            catch (Exception ex)
+            {
+                Console.Write("error from  check if the category exist by name" + ex.Message);
+    
+                return false;
+            }
+        }
+        
+        
+    
 }

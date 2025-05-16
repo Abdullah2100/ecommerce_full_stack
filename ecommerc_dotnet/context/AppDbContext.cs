@@ -15,8 +15,9 @@ public class AppDbContext : DbContext
     
     public DbSet<Address> Address { get; set; }
     
-    public DbSet<Category> Category { get; set; }
     public DbSet<Store> Store { get; set; }
+    public DbSet<Category> Category { get; set; }
+    public DbSet<SubCategory> SubCategory { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,20 +35,36 @@ public class AppDbContext : DbContext
                 
                 user.HasOne(u => u.Store)
                     .WithOne(st => st.user)
-                    .HasForeignKey<Store>(st=>st.user_id);
-                
+                    .HasForeignKey<Store>(st=>st.user_id)
+                    .HasPrincipalKey<User>(u=>u.ID);
             }
         );
 
         modelBuilder.Entity<Category>(ca =>
         {
             ca.HasIndex(c => new { c.name }).IsUnique();
+
+            ca.HasMany(cat => cat.subCategories)
+                .WithOne(sub=>sub.category)
+                .HasForeignKey(sub=>sub.categori_id)
+                .HasPrincipalKey(cat=>cat.id);
         });
 
         modelBuilder.Entity<Store>(st =>
         {
             st.HasIndex(s => s.name).IsUnique();
+            
+            st.HasMany(std=>std.SubCategories)
+                .WithOne(sub=>sub.Store)
+                .HasForeignKey(sub=>sub.store_id)
+                .HasPrincipalKey(stc=>stc.id);
         });
+
+        modelBuilder.Entity<SubCategory>(sub =>
+        {
+        });
+        
+        
         base.OnModelCreating(modelBuilder);
     }
 }

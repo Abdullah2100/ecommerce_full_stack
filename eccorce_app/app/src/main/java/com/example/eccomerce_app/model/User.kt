@@ -9,5 +9,6 @@ data class User(
     var phone: String,
     var email: String,
     var thumbnail:String,
-    var address:List<Address>?=null
+    var address:List<Address>?=null,
+    var store: Store?=null
 )

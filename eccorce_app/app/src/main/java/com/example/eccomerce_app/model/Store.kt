@@ -10,4 +10,6 @@ data class Store(
     var name: String,
     var pig_image: String,
     var small_image: String,
+    var subcategory:List<SubCategory>?=null,
+    var user: User
 )

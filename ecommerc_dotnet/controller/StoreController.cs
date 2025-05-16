@@ -74,7 +74,7 @@ public class StoreController : ControllerBase
             name: store.name,
             wallpaper_image: wallperper,
             small_image: small_image,
-            user_id: store.user_id ?? user.ID,
+            user_id:idHolder.Value!=store?.user_id&&store.user_id!=null?(Guid) store.user_id : user.ID,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -112,21 +112,19 @@ public class StoreController : ControllerBase
             return BadRequest("المستخدم غير موجود");
 
 
-        var userStore = _storeData.getStoreByUser(user.ID,false);
-
-        if (userStore == null)
+        if (user.Store == null)
             return BadRequest("المتجر غير موجود");
 
-        if (userStore.name != store.name && await _storeData.isExist(store.name))
+        if (user.Store.name != store.name && await _storeData.isExist(store.name))
         {
             return BadRequest("اسم المتجر تم استخدامه اختر اسما اخر");
         }
 
         if (store.wallpaper_image != null)
-            clsUtil.deleteFile(userStore.wallpaper_image, _host);
+            clsUtil.deleteFile(user.Store.wallpaper_image, _host);
 
         if (store.small_image != null)
-            clsUtil.deleteFile(userStore.small_image, _host);
+            clsUtil.deleteFile(user.Store.small_image, _host);
 
 
         string? wallperper = null, small_image = null;
@@ -154,6 +152,8 @@ public class StoreController : ControllerBase
         return StatusCode(200, result);
     }
 
+    
+    
       [HttpPut("status/{storeId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

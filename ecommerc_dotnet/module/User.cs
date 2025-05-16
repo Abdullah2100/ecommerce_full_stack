@@ -27,6 +27,5 @@ public class User
     public ICollection<Address>? addresses { get; set; }
     public ICollection<Category>? categories { get; set; }
 
-    public Guid? store_id { get; set; } = null;
     public Store? Store { get; set; } = null;
 }

@@ -3,6 +3,7 @@ package com.example.eccomerce_app.model
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
+import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
 import kotlin.text.replace
 
@@ -24,6 +25,25 @@ object DtoToModel {
             image=this.image_path.replace("localhost","10.0.2.2")
         );
     }
+    fun SubCategoryResponseDto.toSubCategory(): SubCategory{
+        return SubCategory(id = this.id,name=this.name)
+    }
+
+
+
+
+
+    fun StoreResposeDto.toStore():Store{
+        return Store(
+            id = this.id,
+            name = this.name,
+            user_id = this.user_id,
+            pig_image = this.wallpaper_image.replace("localhost", "10.0.2.2"),
+            small_image = this.small_image.replace("localhost", "10.0.2.2"),
+            subcategory = this.subcategory?.map { it.toSubCategory() }?.toList(),
+            user = this.user.toUser()
+        )
+    }
 
     fun UserDto.toUser(): User{
         return User(
@@ -32,17 +52,8 @@ object DtoToModel {
             phone = this.phone,
             email = this.email,
             thumbnail=if(this.thumbnail!=null)this.thumbnail.replace("localhost","10.0.2.2") else "",
-            address = this.address?.map { it.toAddress() }?.toList()
-        )
-    }
-
-    fun StoreResposeDto.toStore():Store{
-        return Store(
-            id = this.id,
-            name = this.name,
-            user_id = this.user_id,
-            pig_image = this.wallpaper_image.replace("localhost","10.0.2.2"),
-            small_image  = this.small_image.replace("localhost","10.0.2.2"),
+            address = this.address?.map { it.toAddress() }?.toList(),
+            store= this.store?.toStore()
         )
     }
 }

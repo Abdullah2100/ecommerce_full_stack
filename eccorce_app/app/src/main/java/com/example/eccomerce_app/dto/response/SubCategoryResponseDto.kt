@@ -5,13 +5,8 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data class UserDto(
+data class SubCategoryResponseDto(
     @Serializable(with = UUIDKserialize::class)
     var id: UUID,
-    var name:String,
-    var phone: String,
-    var email: String,
-    var thumbnail:String,
-    var address:List<AddressResponseDto>?=null,
-    var store: StoreResposeDto?=null
+    var name: String
 )
