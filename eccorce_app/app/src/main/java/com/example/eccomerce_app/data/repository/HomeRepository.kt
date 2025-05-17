@@ -8,6 +8,7 @@ import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
+import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.util.Secrets
@@ -444,14 +445,21 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun createSubCategory(data:SubCategoryRequestDto): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/login";
+            val full_url =Secrets.getBaseUrl()+"/SubCategory/new";
             val result = client.post(full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
                 setBody(data)
                 contentType(ContentType.Application.Json)
+
             }
 
-            if(result.status== HttpStatusCode.OK){
-                NetworkCallHandler.Successful(result.body<AuthResultDto>())
+            if(result.status== HttpStatusCode.Created){
+                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
             }else{
                 NetworkCallHandler.Error(result.body<String>())
             }

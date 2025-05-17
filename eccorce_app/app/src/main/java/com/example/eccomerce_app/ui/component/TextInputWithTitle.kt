@@ -64,8 +64,8 @@ fun TextInputWithNoTitle(
                 .fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor =  CustomColor.neutralColor50,
-                focusedBorderColor =  Color.Black
+                unfocusedBorderColor = CustomColor.neutralColor50,
+                focusedBorderColor = Color.Black
             ),
 
             textStyle = TextStyle(
@@ -91,23 +91,28 @@ fun TextInputWithTitle(
     isHasError: Boolean = false,
     erroMessage: String? = null,
     isEnable: Boolean? = true,
-    focusRequester: FocusRequester?=null
+    focusRequester: FocusRequester? = null
 ) {
 
-    var modifierWithFocus =if(focusRequester==null)Modifier.fillMaxWidth() else Modifier.fillMaxWidth().focusRequester(focusRequester)
+    var modifierWithFocus =
+//        if (focusRequester == null)
+            Modifier.fillMaxWidth()
+//        else Modifier
+//            .fillMaxWidth()
+//            .focusRequester(focusRequester)
     val fontScall = LocalDensity.current.fontScale
     Column {
-        if(title.trim().isNotEmpty())
-        Text(
-            title,
-            fontFamily = General.satoshiFamily,
-            fontWeight = FontWeight.Bold,
-            color = CustomColor.neutralColor950,
-            fontSize = (16 / fontScall).sp
-        )
+        if (title.trim().isNotEmpty())
+            Text(
+                title,
+                fontFamily = General.satoshiFamily,
+                fontWeight = FontWeight.Bold,
+                color = CustomColor.neutralColor950,
+                fontSize = (16 / fontScall).sp
+            )
         Sizer(heigh = 5)
         OutlinedTextField(
-            enabled = isEnable==true,
+            enabled = isEnable == true,
             maxLines = 1,
             value = value.value,
             onValueChange = { value.value = it },
@@ -127,7 +132,7 @@ fun TextInputWithTitle(
                 focusedBorderColor = if (!isHasError) Color.Black else CustomColor.alertColor_1_400
             ),
             supportingText = {
-                if (isHasError&&erroMessage!=null)
+                if (isHasError && erroMessage != null)
                     Text(
                         erroMessage,
                         color = CustomColor.alertColor_1_400,
@@ -184,7 +189,7 @@ fun TextNumberInputWithTitle(
             maxLines = 1,
             value = value.value,
             onValueChange = {
-                if ((it.text.isEmpty() || it.text.matches(pattern))&&it.text.length<13)
+                if ((it.text.isEmpty() || it.text.matches(pattern)) && it.text.length < 13)
                     value.value = it
             },
             placeholder = {

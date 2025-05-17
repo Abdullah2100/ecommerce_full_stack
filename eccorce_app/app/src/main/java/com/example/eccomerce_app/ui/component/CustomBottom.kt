@@ -80,11 +80,13 @@ fun CustomBotton(
     isLoading: Boolean=false,
     operation: () -> Unit,
     buttonTitle: String,
-    color: Color?
+    color: Color?,
+    isEnable: Boolean?=true
 ){
     val fontScall = LocalDensity.current.fontScale
 
     Button(
+        enabled = isEnable!!,
         modifier = Modifier
 //            .padding(bottom = 50.dp)
             .height(50.dp)

@@ -5,6 +5,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,12 +29,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -51,7 +60,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -69,6 +80,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
+import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
@@ -80,6 +92,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
+import kotlin.collections.forEach
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,6 +107,7 @@ fun StoreScreen(
     val context = LocalContext.current
 
     val storeData = homeViewModel.myInfo.collectAsState()
+    val categories = homeViewModel.categories.collectAsState()
     val isLoading = homeViewModel.isLoading.collectAsState()
 
     val wall_paper_image = remember { mutableStateOf<File?>(null) }
@@ -108,17 +122,30 @@ fun StoreScreen(
     val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
     val isUpdate = remember { mutableStateOf(false) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
+    val isSubCategoryCreateError = remember { mutableStateOf(false) }
+    val errorMessage = remember { mutableStateOf("") }
 
+    val selectedSubCategory = remember { mutableStateOf(0) }
 
     val isPressAddNewAddress = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
+    var isExpandedCategory = remember { mutableStateOf(false) }
     val currutine = rememberCoroutineScope()
     val isNotEnablePermission = remember { mutableStateOf(false) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val focusRequester = FocusRequester()
+    val categoryName = remember { mutableStateOf(TextFieldValue("")) }
 
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var animated = animateDpAsState(
+        if (isExpandedCategory.value) ((categories.value?.size ?: 1) * 45).dp else 0.dp
+    )
+
+    var rotation = animateFloatAsState(
+        if (isExpandedCategory.value) 180f else 0f
+    )
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val requestPermssion = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -220,17 +247,17 @@ fun StoreScreen(
 
                         Row(
                             modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    isPressAddNewAddress.value = false
-                                    requestPermssion.launch(
-                                        arrayOf(
-                                            Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isPressAddNewAddress.value = false
+                                        requestPermssion.launch(
+                                            arrayOf(
+                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                            )
                                         )
-                                    )
-                                }, horizontalArrangement = Arrangement.Start
+                                    }, horizontalArrangement = Arrangement.Start
                         ) {
                             Icon(
                                 Icons.Outlined.LocationOn,
@@ -272,7 +299,7 @@ fun StoreScreen(
                     }
                 }
 
-            if(isShownSubCategoryBottomSheet.value)
+            if (isShownSubCategoryBottomSheet.value)
                 ModalBottomSheet(
                     onDismissRequest = {
                         isPressAddNewAddress.value = false
@@ -286,22 +313,147 @@ fun StoreScreen(
                             .padding(horizontal = 10.dp)
                             .fillMaxWidth()
                     ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
 
-                     TextInputWithTitle(
-                         title = "Name",
-                         value = subCategoryName,
-                         placHolder = "Enter Sub Category Name",
-                     )
+                            Row(
+                                modifier = Modifier
+                                    .height(65.dp)
+                                    .fillMaxWidth()
+                                    .border(
+                                        1.dp,
+                                        CustomColor.neutralColor400,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        isExpandedCategory.value = !isExpandedCategory.value
+                                    }
+                                    .padding(horizontal = 5.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            )
+                            {
+                                Text(
+                                    if (categoryName.value.text.isEmpty()) "Select Category Name"
+                                    else categoryName.value.text
+                                )
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown, "",
+                                    modifier = Modifier.rotate(rotation.value)
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .padding(bottom = 19.dp)
+                                    .fillMaxWidth()
+                                    .height(animated.value)
+                                    .border(
+                                        1.dp,
+                                        CustomColor.neutralColor200,
+                                        RoundedCornerShape(
+                                            topStart = 4.dp,
+                                            topEnd = 4.dp,
+                                            bottomStart = 8.dp,
+                                            bottomEnd = 8.dp
+                                        )
+                                    ),
+
+                                ) {
+                                categories.value!!.forEach { option: Category ->
+                                    Text(
+                                        option.name,
+                                        modifier = Modifier
+                                            .height(50.dp)
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                isExpandedCategory.value = false
+                                                categoryName.value = TextFieldValue(option.name)
+                                            }
+                                            .padding(top = 12.dp, start = 5.dp)
+
+                                    )
+                                }
+                            }
+                        }
+
+
+                        TextInputWithTitle(
+                            title = "Name",
+                            value = subCategoryName,
+                            placHolder = "Enter Sub Category Name",
+                        )
 
                         CustomBotton(
-                            isLoading = false,
+                            isLoading = isLoading.value,
                             operation = {
-//                                homeViewModel.createSubCategory()
+                                currutine.launch {
+                                    keyboardController?.hide()
+                                    var result = async {
+                                        homeViewModel.createSubCategory(
+                                            name = subCategoryName.value.text,
+                                            categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
+                                        )
+                                    }.await()
+                                    if (result.isNullOrEmpty()) {
+                                        isShownSubCategoryBottomSheet.value = false
+                                        categoryName.value = TextFieldValue("")
+                                        subCategoryName.value = TextFieldValue("")
+                                    } else {
+                                        isSubCategoryCreateError.value = true
+                                        errorMessage.value = result
+                                    }
+
+                                }
                             },
                             buttonTitle = "Create",
-                            color =null
+                            color = null,
+                            isEnable = subCategoryName.value.text.isNotEmpty() && categoryName.value.text.isNotEmpty()
 
                         )
+
+                        if (isSubCategoryCreateError.value) {
+                            AlertDialog(
+                                containerColor = Color.White,
+                                onDismissRequest = {
+                                    isSubCategoryCreateError.value = false
+                                },
+
+                                text = {
+
+                                    Text(
+                                        errorMessage.value,
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.End
+
+                                    )
+                                },
+                                confirmButton = {
+
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = {
+                                        isSubCategoryCreateError.value = false
+                                    }) {
+
+                                        Text(
+                                            "cencle",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = (16).sp,
+                                            color = CustomColor.neutralColor700,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                })
+                        }
 
                     }
                 }
@@ -348,7 +500,7 @@ fun StoreScreen(
                             onClick = {
                                 if (creationValidation()) {
                                     keyboardController?.hide()
-                                    focusRequester.requestFocus()
+//                                    focusRequester?.requestFocus()
                                     currutine.launch {
                                         var result = async {
 
@@ -405,7 +557,7 @@ fun StoreScreen(
                             enabled = isLoading.value == false,
                             onClick = {
                                 keyboardController?.hide()
-                                focusRequester.requestFocus()
+//                                focusRequester?.requestFocus()
                                 currutine.launch {
                                     var result = async {
 
@@ -802,10 +954,10 @@ fun StoreScreen(
             )
             TextInputWithTitle(
                 value = storeName,
-                title ="",
+                title = "",
                 placHolder = storeData.value?.store?.name ?: "Write Your Store Name",
                 isHasError = false,
-                focusRequester = focusRequester
+//                focusRequester = focusRequester
             )
 
             if (isNotEnablePermission.value) {
@@ -839,9 +991,8 @@ fun StoreScreen(
 
 
                 Column(
-                    modifier=Modifier
-                        .fillMaxWidth()
-                    ,
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Sizer(5)
@@ -856,41 +1007,66 @@ fun StoreScreen(
                     Sizer(10)
 
                     LazyRow {
-                        items(storeData.value?.store?.subcategory?.size?:0)
-                        {index->
+                        items(storeData.value?.store?.subcategory?.size ?: 0)
+                        { index ->
                             Box(
-                                modifier=Modifier
-                                    .height(30.dp)
+                                modifier = Modifier
+                                    .height(40.dp)
+                                    .width(70.dp)
+                                    .background(
+                                        if (selectedSubCategory.value == index) CustomColor.alertColor_3_300 else Color.White,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (selectedSubCategory.value == index)
+                                            Color.White else CustomColor.neutralColor200,
+                                        RoundedCornerShape(8.dp)
 
-                            ){
+                                        )
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                       selectedSubCategory.value=index
+                                    },
+                                contentAlignment = Alignment.Center
+
+                            ) {
                                 Text(
-                                    storeData?.value?.store?.subcategory!![index]?.name?:"" ,
+                                    storeData?.value?.store?.subcategory!![index]?.name ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = (18).sp,
-                                    color = CustomColor.neutralColor950,
+                                    color = if (selectedSubCategory.value == index)
+                                        Color.White else CustomColor.neutralColor200,
                                     textAlign = TextAlign.Center,
                                 )
                             }
                         }
 
                         item {
-                          Box(
-                                modifier=Modifier
+                            if (storeData.value?.store?.subcategory != null)
+                                Sizer(width = 10)
+                            Box(
+                                modifier = Modifier
                                     .height(40.dp)
                                     .width(70.dp)
-                                    .background(CustomColor.primaryColor200,RoundedCornerShape(8.dp))
+                                    .background(
+                                        CustomColor.primaryColor200,
+                                        RoundedCornerShape(8.dp)
+                                    )
                                     .clip(RoundedCornerShape(8.dp))
-                                    .clickable{
-                                        isShownSubCategoryBottomSheet.value=true
+                                    .clickable {
+                                        isShownSubCategoryBottomSheet.value = true
                                     },
-                              contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center
 
-                            ){
-                              Icon(Icons.Default.Add,
-                                  "",
-                                  tint = Color.White,
-                                  modifier=Modifier.size(24.dp))
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    "",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
                         }
                     }

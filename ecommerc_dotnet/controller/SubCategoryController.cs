@@ -10,7 +10,7 @@ namespace ecommerc_dotnet.controller;
 
 [Authorize]
 [ApiController]
-[Route("api/Category")]
+[Route("api/SubCategory")]
 public class SubCategoryController : ControllerBase
 {
     public SubCategoryController
