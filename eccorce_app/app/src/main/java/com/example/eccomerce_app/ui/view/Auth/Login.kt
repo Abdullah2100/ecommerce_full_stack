@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +56,8 @@ fun LoginScreen(
     val isEmailError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
     val erroMessage = remember { mutableStateOf("") }
+
+    val focusRequester = FocusRequester()
 
     fun validateLoginInput(
         username: String,

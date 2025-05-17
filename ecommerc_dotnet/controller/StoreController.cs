@@ -134,8 +134,6 @@ public class StoreController : ControllerBase
         if (store.wallpaper_image != null)
             wallperper = await clsUtil.saveFile(store.wallpaper_image, clsUtil.enImageType.STORE, _host);
 
-        if (small_image == null || wallperper == null)
-            return BadRequest("حدثة مشكلة اثناء حفظ الصور");
 
         var result = await _storeData.updateStore(
             name: store.name,

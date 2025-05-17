@@ -74,36 +74,50 @@ public class UserData
     {
         try
         {
-            return await (from us in _dbContext.Users
-                    join st in _dbContext.Store on us.ID equals st.user_id
-                    where us.ID == userID
-                    select new UserInfoResponseDto
+            var result =await _dbContext.Users
+                .AsNoTracking()
+                .Where(us => us.ID == userID)
+                .Select(us => new UserInfoResponseDto
+                {
+                    name = us.name,
+                    phone = us.phone,
+                    email = us.phone,
+                    Id = us.ID,
+                    thumbnail = us.thumbnail == null
+                        ? ""
+                        : _configuration.getKey("url_file") + us.thumbnail,
+
+                    address = null,
+                    store = null
+                }).FirstOrDefaultAsync();
+            ;
+            if (result != null) {
+                //result.address =await _dbContext.Address.Where(ad=>ad.owner_id==userID).ToListAsync()
+                result.address =await _dbContext.Address
+                    .AsNoTracking()
+                    .Where(ad => ad.owner_id == userID)
+                    .Select(ad => new AddressResponseDto
                     {
-                        name = us.name,
-                        phone = us.phone,
-                        email = us.phone,
-                        Id = us.ID,
-                        thumbnail = st.user.thumbnail == null
-                            ? null
-                            : _configuration.getKey("url_file") + st.user.thumbnail,
-                        address = _dbContext.Address.Where(add => add.owner_id == st.user_id)
-                            .Select(add => new AddressResponseDto
-                            {
-                                id = add.id,
-                                isCurrent = add.isCurrent,
-                                latitude = add.latitude,
-                                longitude = add.longitude,
-                                title = add.title
-                            }).ToList(),
-                        store = new StoreResponseDto
+                        id = ad.id,
+                        longitude = ad.longitude,
+                        latitude = ad.latitude,
+                        title = ad.title,
+                        isCurrent = ad.isCurrent,
+                    }).ToListAsync();
+
+                result.store = await _dbContext.Store
+                    .AsNoTracking()
+                    .Where(st => st.user_id == userID)
+                    .Select(st =>
+                        new StoreResponseDto
                         {
                             id = st.id,
                             name = st.name,
                             wallpaper_image = _configuration.getKey("url_file") + st.wallpaper_image,
                             small_image = _configuration.getKey("url_file") + st.small_image,
                             created_at = st.created_at,
-                            latitude = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
-                            longitide = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
+                            // latitude = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
+                            // longitide = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
                             subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
                             {
                                 name = sub.name,
@@ -111,10 +125,25 @@ public class UserData
                             }).ToList(),
                             user = null
                         }
-                    }
-                )
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
+                    ).FirstOrDefaultAsync();
+
+                if (result.store != null)
+                {
+                    result.store.addresses = await _dbContext.Address
+                        .AsNoTracking()
+                        .Where(ad=>ad.owner_id==result.store.id)
+                        .Select(ad=> new AddressResponseDto
+                        {
+                            id= ad.id,
+                            title = ad.title,
+                            longitude = ad.longitude,
+                            latitude = ad.latitude,
+                        }).ToListAsync();
+                }
+
+
+            }
+            return result;
         }
         catch (Exception e)
         {
@@ -123,39 +152,13 @@ public class UserData
             return null;
         }
     }
-    // public static UserInfoResponseDto? getUser(Guid userID,AppDbContext _dbContext,IConfigurationServices _configuration)
-    //    {
-    //        try
-    //        {
-    //            var result = _dbContext.Users
-    //                .AsNoTracking()
-    //                .Where(u => u.ID == userID)
-    //                .Select(u => new UserInfoResponseDto
-    //                {
-    //                    Id = u.ID,
-    //                    name = u.name,
-    //                    phone = u.phone,
-    //                    email = u.email,
-    //                    thumbnail =u.thumbnail==null?"": _configuration.getKey("url_file") + u.thumbnail,
-    //                    address =  AddressData.getUserAddressByUserId(userID, _dbContext),
-    //                    store = null
-    //                }).FirstOrDefault();
-    //
-    //            return  result; 
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            //_logger.LogError("error from get user by username"+e.Message);
-    //            Console.WriteLine("error from get user by username" + e.Message);
-    //            return null;
-    //        }
-    //    }
-
+    
     public async Task<User?> getUserById(Guid ID)
     {
         try
         {
             return _dbContext.Users
+                .Include(st=>st.Store)
                 .FirstOrDefault(u => u.ID == ID);
         }
         catch (Exception e)

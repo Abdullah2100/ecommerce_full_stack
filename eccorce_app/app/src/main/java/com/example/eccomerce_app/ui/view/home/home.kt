@@ -66,7 +66,7 @@ fun HomePage(
     val fontScall = LocalDensity.current.fontScale
     val configuration = LocalConfiguration.current
 
-    var address = homeViewModel.locations.collectAsState()
+    var myInfo = homeViewModel.myInfo.collectAsState()
     var categories = homeViewModel.categories.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val isClickingSearch = remember { mutableStateOf(false) }
@@ -76,10 +76,8 @@ fun HomePage(
     )
 
     LaunchedEffect(Unit) {
-        homeViewModel.getUserLocations()
+        homeViewModel.getMyInfo()
         homeViewModel.getCategory(1)
-        homeViewModel.getMyInfo();
-        homeViewModel.getMyStore()
     }
 
     /*val requestNotificationPermssion = rememberLauncherForActivityResult(
@@ -113,7 +111,7 @@ fun HomePage(
         ) {
 
             item {
-                when (address.value == null) {
+                when (myInfo.value?.address == null) {
                     true -> {
                         LocationLoadingShape(configuration.screenWidthDp)
                     }
@@ -147,7 +145,7 @@ fun HomePage(
                                 )
                                 Sizer(1)
                                 Text(
-                                    address?.value?.firstOrNull { it.isCurrnt==true }?.title
+                                    myInfo.value?.address?.firstOrNull { it.isCurrnt==true }?.title
                                         ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,

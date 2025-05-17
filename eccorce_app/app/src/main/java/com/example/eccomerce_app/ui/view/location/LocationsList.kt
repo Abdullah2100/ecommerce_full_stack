@@ -71,7 +71,7 @@ fun LocationsList(
 ) {
     val fontScall = LocalDensity.current.fontScale
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val locationss = homeViewModle.locations.collectAsState()
+    val locationss = homeViewModle.myInfo.collectAsState()
     val isLoading = homeViewModle.isLoading.collectAsState()
     val currentLocationId = remember { mutableStateOf<UUID?>(null) }
     val isPressLocation = remember { mutableStateOf<Boolean>(false) }
@@ -120,7 +120,7 @@ fun LocationsList(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        when (locationss.value.isNullOrEmpty()) {
+        when (locationss.value?.address.isNullOrEmpty()) {
             true -> {
                 Column(modifier=Modifier
                     .fillMaxSize(),
@@ -156,14 +156,14 @@ fun LocationsList(
                         .fillMaxWidth()
                 ) {
 
-                    items(locationss.value!!.size)
+                    items(locationss.value!!.address!!.size)
                     {index->
                        Column(
                            modifier = Modifier
                                .clip(RoundedCornerShape(8.dp))
                                .clickable{
                                    isPressLocation.value=true
-                                   currentLocationId.value=locationss.value!![index].id
+                                   currentLocationId.value=locationss.value!!.address!![index].id
                                }
                        ) {
                            Row(
@@ -180,7 +180,7 @@ fun LocationsList(
                                )
                                Sizer(width = 20)
                                Text(
-                                   locationss.value!![index].latitude.toString(),
+                                   locationss.value!!.address!![index].latitude.toString(),
                                    fontFamily = General.satoshiFamily,
                                    fontWeight = FontWeight.Medium,
                                    fontSize = (16 / fontScall).sp,

@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,10 +20,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
@@ -66,6 +69,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
+import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.ui.theme.CustomColor
@@ -83,24 +87,27 @@ import java.io.File
 fun StoreScreen(
     nav: NavHostController,
     homeViewModel: HomeViewModel
-)
-{
+) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val context = LocalContext.current
 
-    val storeData = homeViewModel.myStore.collectAsState()
+    val storeData = homeViewModel.myInfo.collectAsState()
     val isLoading = homeViewModel.isLoading.collectAsState()
 
-    val wall_paper_image= remember{ mutableStateOf<File?>(null) }
-    val small_paper_image= remember{ mutableStateOf<File?>(null) }
+    val wall_paper_image = remember { mutableStateOf<File?>(null) }
+    val small_paper_image = remember { mutableStateOf<File?>(null) }
     val storeName = remember { mutableStateOf(TextFieldValue("")) }
     val longint = remember { mutableStateOf(0.0) }
-    val latit = remember {  mutableStateOf(0.0)}
+    val latit = remember { mutableStateOf(0.0) }
 
 
     val isPigImage = remember { mutableStateOf(false) }
+
+    val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
+    val isUpdate = remember { mutableStateOf(false) }
+    val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
 
 
     val isPressAddNewAddress = remember { mutableStateOf(false) }
@@ -124,24 +131,22 @@ fun StoreScreen(
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
-                        data?.let {
-                                location->
-                            longint.value = location.longitude?:5.5000
-                            latit.value = location.latitude?:5.5000
+                        data?.let { location ->
+                            longint.value = location.longitude ?: 5.5000
+                            latit.value = location.latitude ?: 5.5000
                         }
-                        if(longint.value==0.0)
-                        {
-                            longint.value=5.50000
-                            latit.value=5.50000
+                        if (longint.value == 0.0) {
+                            longint.value = 5.50000
+                            latit.value = 5.50000
                         }
 
                     } catch (e: SecurityException) {
-                        var   error = "Permission exception: ${e.message}"
+                        var error = "Permission exception: ${e.message}"
                     }
 
                 }
             } else {
-                isNotEnablePermission.value=true
+                isNotEnablePermission.value = true
             }
         }
     )
@@ -151,14 +156,14 @@ fun StoreScreen(
     ) { uri ->
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context);
-            if (fileHolder != null){
-                when(isPigImage.value)
-                {
-                    true->{
+            if (fileHolder != null) {
+                when (isPigImage.value) {
+                    true -> {
                         wall_paper_image.value = fileHolder
                     }
-                    else->{
-                       small_paper_image.value = fileHolder
+
+                    else -> {
+                        small_paper_image.value = fileHolder
                     }
                 }
 
@@ -167,19 +172,18 @@ fun StoreScreen(
     }
 
 
-    fun creationValidation(): Boolean{
+    fun creationValidation(): Boolean {
         keyboardController?.hide()
         var errorMessage = "";
-        if(wall_paper_image.value==null)
-            errorMessage="You must select the wallpaper image"
-        else if(small_paper_image.value==null)
-            errorMessage="You must select the small image"
-        else if(longint.value==0.0)
-            errorMessage="You must select the store Location"
-        else if(storeName.value.text.isEmpty())
-            errorMessage="You write the store name"
-        if(errorMessage.trim().isNotEmpty())
-        {
+        if (wall_paper_image.value == null)
+            errorMessage = "You must select the wallpaper image"
+        else if (small_paper_image.value == null)
+            errorMessage = "You must select the small image"
+        else if (longint.value == 0.0)
+            errorMessage = "You must select the store Location"
+        else if (storeName.value.text.isEmpty())
+            errorMessage = "You write the store name"
+        if (errorMessage.trim().isNotEmpty()) {
             currutine.launch {
                 snackbarHostState.showSnackbar(errorMessage)
             }
@@ -200,7 +204,7 @@ fun StoreScreen(
         },
 
         bottomBar = {
-            if(isPressAddNewAddress.value)
+            if (isPressAddNewAddress.value)
                 ModalBottomSheet(
                     onDismissRequest = {
                         isPressAddNewAddress.value = false
@@ -208,20 +212,26 @@ fun StoreScreen(
                     sheetState = sheetState
                 ) {
 
-                    Column(modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth()
+                    ) {
 
-                        Row(modifier =
+                        Row(
+                            modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .clickable{
-                                    isPressAddNewAddress.value=false
-                                    requestPermssion.launch(arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    ))
-                                }, horizontalArrangement = Arrangement.Start) {
+                                .clickable {
+                                    isPressAddNewAddress.value = false
+                                    requestPermssion.launch(
+                                        arrayOf(
+                                            Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION
+                                        )
+                                    )
+                                }, horizontalArrangement = Arrangement.Start
+                        ) {
                             Icon(
                                 Icons.Outlined.LocationOn,
                                 "",
@@ -239,7 +249,10 @@ fun StoreScreen(
 
                         Sizer(20)
 
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Start
+                        ) {
                             Icon(
                                 ImageVector.vectorResource(R.drawable.outline_map),
                                 "",
@@ -258,6 +271,41 @@ fun StoreScreen(
 
                     }
                 }
+
+            if(isShownSubCategoryBottomSheet.value)
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        isPressAddNewAddress.value = false
+                    },
+                    sheetState = sheetState,
+                    containerColor = Color.White
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth()
+                    ) {
+
+                     TextInputWithTitle(
+                         title = "Name",
+                         value = subCategoryName,
+                         placHolder = "Enter Sub Category Name",
+                     )
+
+                        CustomBotton(
+                            isLoading = false,
+                            operation = {
+//                                homeViewModel.createSubCategory()
+                            },
+                            buttonTitle = "Create",
+                            color =null
+
+                        )
+
+                    }
+                }
+
 
         },
         modifier = Modifier
@@ -294,55 +342,112 @@ fun StoreScreen(
                     }
                 },
                 actions = {
-                    if(storeData.value==null){
-                       TextButton(
-                           enabled = isLoading.value==false,
-                           onClick = {
-                               if(creationValidation()){
-                                   focusRequester.requestFocus()
-                                   currutine.launch {
-                                   var result = async{
+                    if (storeData.value?.store == null) {
+                        TextButton(
+                            enabled = isLoading.value == false,
+                            onClick = {
+                                if (creationValidation()) {
+                                    keyboardController?.hide()
+                                    focusRequester.requestFocus()
+                                    currutine.launch {
+                                        var result = async {
 
-                                       homeViewModel.createStore(
-                                       name=storeName.value.text,
-                                       wallpaper_image=wall_paper_image.value!!,
-                                       small_image=small_paper_image.value!!,
-                                       longitude=longint.value,
-                                       latitude=latit.value,
-                                           snackbarHostState
-                                   );
-                                   }.await()
+                                            homeViewModel.createStore(
+                                                name = storeName.value.text,
+                                                wallpaper_image = wall_paper_image.value!!,
+                                                small_image = small_paper_image.value!!,
+                                                longitude = longint.value,
+                                                latitude = latit.value,
+                                            );
+                                        }.await()
 
-                                   if(result!=null){
-                                       snackbarHostState.showSnackbar(result)
-                                   }else{
-                                       wall_paper_image.value=null
-                                       small_paper_image.value=null
-                                       storeName.value= TextFieldValue("")
-                                   }
-                               }
-                               }
-                           }
-                       ) {
-                           when (isLoading.value){
-                               true->{
-                                   CircularProgressIndicator(
-                                       modifier= Modifier.size(20.dp),
-                                       strokeWidth = 2.dp
-                                   )
-                               }
-                               else->{
-                                   Text(
-                                       "Create",
-                                       fontFamily = General.satoshiFamily,
-                                       fontWeight = FontWeight.Normal,
-                                       fontSize = (16).sp,
-                                       color = CustomColor.primaryColor700,
-                                       textAlign = TextAlign.Center
-                                   )
-                               }
-                           }
-                       }
+                                        if (result != null) {
+                                            snackbarHostState.showSnackbar(result)
+                                        } else {
+                                            wall_paper_image.value = null
+                                            small_paper_image.value = null
+                                            storeName.value = TextFieldValue("")
+                                            longint.value = 0.0;
+                                            latit.value = 0.0
+                                        }
+                                    }
+                                }
+                            }
+                        ) {
+                            when (isLoading.value) {
+                                true -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                }
+
+                                else -> {
+                                    Text(
+                                        "Create",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.primaryColor700,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    } else if (storeData?.value?.store != null &&
+                        (storeName.value.text.isNotEmpty() ||
+                                latit.value != 0.0 ||
+                                longint.value != 0.0 ||
+                                wall_paper_image.value != null ||
+                                small_paper_image.value != null)
+                    ) {
+                        TextButton(
+                            enabled = isLoading.value == false,
+                            onClick = {
+                                keyboardController?.hide()
+                                focusRequester.requestFocus()
+                                currutine.launch {
+                                    var result = async {
+
+                                        homeViewModel.updateStore(
+                                            name = storeName.value.text,
+                                            wallpaper_image = wall_paper_image.value,
+                                            small_image = small_paper_image.value,
+                                            longitude = longint.value,
+                                            latitude = latit.value,
+                                        );
+                                    }.await()
+
+                                    if (result != null) {
+                                        snackbarHostState.showSnackbar(result)
+                                    } else {
+                                        wall_paper_image.value = null
+                                        small_paper_image.value = null
+                                        storeName.value = TextFieldValue("")
+                                    }
+                                }
+                            }
+                        ) {
+                            when (isLoading.value) {
+                                true -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                }
+
+                                else -> {
+                                    Text(
+                                        "Update",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.primaryColor700,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -352,15 +457,15 @@ fun StoreScreen(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        Column(modifier=Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(top = it.calculateTopPadding()-29.dp)
-            .padding(horizontal = 15.dp)
-            .verticalScroll(rememberScrollState())
-            ,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ){
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(top = it.calculateTopPadding() - 29.dp)
+                .padding(horizontal = 15.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.Start,
+        ) {
 
             ConstraintLayout(
                 modifier = Modifier
@@ -368,12 +473,12 @@ fun StoreScreen(
                     .fillMaxWidth()
             ) {
 
-                val (bigImageRef,smalImageRef) = createRefs()
+                val (bigImageRef, smalImageRef) = createRefs()
 
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                       // .padding(bottom = 15.dp)
+                        // .padding(bottom = 15.dp)
                         .constrainAs(bigImageRef) {
                             top.linkTo(parent.top)
                             bottom.linkTo(parent.bottom)
@@ -401,7 +506,7 @@ fun StoreScreen(
                     ) {
                         when (wall_paper_image.value == null) {
                             true -> {
-                                when (storeData.value?.pig_image.isNullOrEmpty()) {
+                                when (storeData.value?.store?.pig_image.isNullOrEmpty()) {
                                     true -> {
 
                                         Icon(
@@ -419,10 +524,9 @@ fun StoreScreen(
                                             modifier = Modifier
                                                 .fillMaxHeight()
                                                 .fillMaxWidth()
-                                                .clip(RoundedCornerShape(8.dp))
-                                            ,
+                                                .clip(RoundedCornerShape(8.dp)),
                                             model = General.handlingImageForCoil(
-                                                storeData.value?.pig_image.toString(),
+                                                storeData.value?.store?.pig_image.toString(),
                                                 context
                                             ),
                                             contentDescription = "",
@@ -514,7 +618,7 @@ fun StoreScreen(
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y=-50.dp)
+                        .offset(y = -50.dp)
                         .constrainAs(smalImageRef) {
                             top.linkTo(bigImageRef.bottom)
                             start.linkTo(parent.start)
@@ -538,13 +642,12 @@ fun StoreScreen(
                                 shape = RoundedCornerShape(60.dp)
                             )
                             .clip(RoundedCornerShape(60.dp))
-                            .background(Color.White)
-                        ,
+                            .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
                         when (small_paper_image.value == null) {
                             true -> {
-                                when (storeData.value?.small_image.isNullOrEmpty()) {
+                                when (storeData.value?.store?.small_image.isNullOrEmpty()) {
                                     true -> {
 
                                         Icon(
@@ -566,7 +669,7 @@ fun StoreScreen(
                                                 .width(90.dp)
                                                 .clip(RoundedCornerShape(50.dp)),
                                             model = General.handlingImageForCoil(
-                                                storeData.value?.small_image?:"",
+                                                storeData.value?.store?.small_image ?: "",
                                                 context
                                             ),
                                             contentDescription = "",
@@ -660,14 +763,14 @@ fun StoreScreen(
             Sizer(20)
 
             Row(
-                modifier=Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
                     "Store Location",
                     fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
+                    fontWeight = FontWeight.Bold,
                     fontSize = (18).sp,
                     color = CustomColor.neutralColor950,
                     textAlign = TextAlign.Center,
@@ -676,32 +779,39 @@ fun StoreScreen(
                     onClick = {
                         keyboardController?.hide()
 
-                        isPressAddNewAddress.value=true
+                        isPressAddNewAddress.value = true
                     }
                 ) {
                     Icon(
                         ImageVector.vectorResource(R.drawable.location_address_list),
-                            "",
-                            modifier = Modifier.size(24.dp),
+                        "",
+                        modifier = Modifier.size(24.dp),
                         tint = CustomColor.primaryColor700
                     )
                 }
             }
-            Sizer(20)
+            Sizer(10)
 
+            Text(
+                "Store Name",
+                fontFamily = General.satoshiFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = (18).sp,
+                color = CustomColor.neutralColor950,
+                textAlign = TextAlign.Center,
+            )
             TextInputWithTitle(
                 value = storeName,
-                title = "Store Name",
-                placHolder = storeData.value?.name ?: "Write Your Store Name",
+                title ="",
+                placHolder = storeData.value?.store?.name ?: "Write Your Store Name",
                 isHasError = false,
-                focusRequester=focusRequester
+                focusRequester = focusRequester
             )
 
-            if(isNotEnablePermission.value)
-            {
+            if (isNotEnablePermission.value) {
                 AlertDialog(
                     onDismissRequest = {
-                        isNotEnablePermission.value=false
+                        isNotEnablePermission.value = false
                     },
                     title = {
                         Text("Permission Required")
@@ -715,7 +825,7 @@ fun StoreScreen(
                         TextButton(onClick = {
                             //Logic when user denies to accept permissions
                         }) {
-                            isNotEnablePermission.value=false;
+                            isNotEnablePermission.value = false;
                             Text("Deny")
                         }
                     })
@@ -723,10 +833,74 @@ fun StoreScreen(
 
 
 
+            AnimatedVisibility(
+                visible = storeData.value?.store != null
+            ) {
+
+
+                Column(
+                    modifier=Modifier
+                        .fillMaxWidth()
+                    ,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Sizer(5)
+                    Text(
+                        "Sub Category",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (18).sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center,
+                    )
+                    Sizer(10)
+
+                    LazyRow {
+                        items(storeData.value?.store?.subcategory?.size?:0)
+                        {index->
+                            Box(
+                                modifier=Modifier
+                                    .height(30.dp)
+
+                            ){
+                                Text(
+                                    storeData?.value?.store?.subcategory!![index]?.name?:"" ,
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (18).sp,
+                                    color = CustomColor.neutralColor950,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        }
+
+                        item {
+                          Box(
+                                modifier=Modifier
+                                    .height(40.dp)
+                                    .width(70.dp)
+                                    .background(CustomColor.primaryColor200,RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable{
+                                        isShownSubCategoryBottomSheet.value=true
+                                    },
+                              contentAlignment = Alignment.Center
+
+                            ){
+                              Icon(Icons.Default.Add,
+                                  "",
+                                  tint = Color.White,
+                                  modifier=Modifier.size(24.dp))
+                            }
+                        }
+                    }
+                }
+
+            }
+
 
         }
     }
-
 
 
 }

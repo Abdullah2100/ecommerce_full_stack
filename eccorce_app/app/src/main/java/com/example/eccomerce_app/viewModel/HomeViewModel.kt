@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.viewModel
 
+import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,18 +10,23 @@ import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.data.Room.IsPassSetLocationScreen
 import com.example.eccomerce_app.data.repository.HomeRepository
 import com.example.eccomerce_app.dto.ModelToDto.toLocationRequestDto
+import com.example.eccomerce_app.dto.request.LocationRequestDto
+import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
+import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.model.Address
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.model.DtoToModel.toCategory
 import com.example.eccomerce_app.model.DtoToModel.toStore
+import com.example.eccomerce_app.model.DtoToModel.toSubCategory
 import com.example.eccomerce_app.model.DtoToModel.toUser
 import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.model.Store
+import com.example.eccomerce_app.model.SubCategory
 import com.example.eccomerce_app.model.User
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -43,27 +49,20 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     var categories = _categories.asStateFlow()
 
 
-    private var _locations = MutableStateFlow<List<Address>?>(null)
-    var locations = _locations.asStateFlow()
-
-
-    private var _location = MutableStateFlow<Address>(Address(null, 0.0, 0.0, "", false))
-    var location = _location.asStateFlow()
-
 
     private var _myInfo = MutableStateFlow<User?>(null)
     var myInfo = _myInfo.asStateFlow()
 
 
-    private var _myStore = MutableStateFlow<Store?>(null)
-    var myStore = _myStore.asStateFlow()
-
+//    private var _myStore = MutableStateFlow<Store?>(null)
+//    var myStore = _myStore.asStateFlow()
+//
 
     private var _myInfoUpdate = MutableStateFlow<MyInfoUpdate>(MyInfoUpdate())
     var myInfoUpdate = _myInfoUpdate.asStateFlow()
 
 
-    fun updateAddressObj(longit: Double? = null, latit: Double? = null, title: String? = null) {
+ /*   fun updateAddressObj(longit: Double? = null, latit: Double? = null, title: String? = null) {
         var locationCopy: Address? = null;
         if (longit != null) {
             locationCopy = _location.value.copy(longitude = longit);
@@ -85,8 +84,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         }
 
     }
-
-    fun getUserLocations() {
+fun getUserLocations() {
         if (_locations.value != null) return;
         viewModelScope.launch(Dispatchers.Main) {
             var result = homeRepository.getUserAddress()
@@ -110,6 +108,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
             }
         }
     }
+*/
 
     fun getCategory(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
@@ -117,6 +116,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
+                    dao.savePassingLocation(IsPassSetLocationScreen(0,true))
                     var categoriesHolder = result.data as List<CategoryReponseDto>
 
                     var mutableCategories = mutableListOf<Category>()
@@ -145,32 +145,46 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
 
-    fun addUserAddress() {
-        viewModelScope.launch(Dispatchers.IO) {
+   suspend fun addUserAddress(
+       longit: Double? = null,
+       latit: Double? = null,
+       title: String? = null,
+       ):String? {
+
 
             _isLoading.emit(true)
-            var result = homeRepository.userAddNewAddress(_location.value.toLocationRequestDto())
+       delay(100)
+            var result = homeRepository
+                .userAddNewAddress(LocationRequestDto(longitude = longit?:5.5,
+                    latitude = latit?:5.5,
+                    title = title?:"home"))
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    _location.emit(Address(null, 0.0, 0.0, "", false))
                     var address = result.data as AddressResponseDto?
                     if (address != null) {
                         var locationsCopy = mutableListOf<Address>()
                         locationsCopy.add(address.toAddress())
-                        if (_locations.value != null) {
-                            locationsCopy.addAll(_locations.value!!.toList())
+                        if (myInfo.value?.address != null) {
+                            locationsCopy.addAll(myInfo.value!!.address!!)
                         }
-                        _locations.emit(locationsCopy)
+                        var copyMyInfo = _myInfo.value?.copy(address = locationsCopy.toList())
+                        _myInfo.emit(copyMyInfo)
                     } else {
-                        _locations.emit(emptyList())
-                    }
-                }
 
-                else -> {}
+                    }
+                    _isLoading.emit(false)
+
+                    return null;
+                }
+                is NetworkCallHandler.Error -> {
+                    _isLoading.emit(false)
+                    return  result.data.toString().replace("\"","")
+                }
             }
-            _isLoading.emit(false)
-        }
-    }
+       _isLoading.emit(false)
+
+
+   }
 
     fun setCurrentActiveUserAddress(
         addressId: UUID,
@@ -216,6 +230,7 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         }
     }
 
+
     fun getMyInfo() {
         if (_myInfo.value != null) return;
         viewModelScope.launch(Dispatchers.Main) {
@@ -225,7 +240,10 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
                     var data = result.data as UserDto
                     _myInfo.emit(data.toUser())
                 }
-
+                is NetworkCallHandler.Error -> {
+                    var resultError = result.data as String
+                    Log.d("errorFromNetowrk",resultError)
+                }
 
                 else -> {
 
@@ -263,23 +281,6 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
     }
 
 
-    fun getMyStore() {
-        if (_myStore.value != null) return;
-        viewModelScope.launch(Dispatchers.Main) {
-            var result = homeRepository.getMyStore();
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as StoreResposeDto
-                    _myStore.emit(data.toStore())
-                }
-
-
-                else -> {
-
-                }
-            }
-        }
-    }
 
 
     suspend fun createStore(
@@ -288,7 +289,6 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         small_image: File,
         longitude: Double,
         latitude: Double,
-        snackBark: SnackbarHostState
     ):String? {
         _isLoading.emit(true)
 
@@ -302,7 +302,8 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as StoreResposeDto
-                _myStore.emit(data.toStore())
+                var copyMyInfo = _myInfo.value!!.copy(store = data.toStore())
+                _myInfo.emit(copyMyInfo)
                 return null;
             }
 
@@ -321,6 +322,91 @@ class HomeViewModel(val homeRepository: HomeRepository, val dao: AuthDao) : View
             }
         }
     }
+
+    suspend fun updateStore(
+        name: String,
+        wallpaper_image: File?,
+        small_image: File?,
+        longitude: Double,
+        latitude: Double,
+    ):String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.updateStore(
+            name,
+            wallpaper_image,
+            small_image,
+            longitude,
+            latitude
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as StoreResposeDto
+                var copyMyInfo = _myInfo.value!!.copy(store = data.toStore())
+                _myInfo.emit(copyMyInfo)
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"","")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
+
+    suspend fun createSubCategory(
+        name: String,
+        categoryId: UUID
+    ):String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.createSubCategory(
+            SubCategoryRequestDto(
+               name= name,
+                cateogy_id = categoryId
+            )
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as SubCategoryResponseDto
+                var listSubCategory = mutableListOf<SubCategory>()
+                if(_myInfo.value?.store?.subcategory!=null) {
+                    listSubCategory.addAll(_myInfo.value!!.store!!.subcategory!!)
+                    listSubCategory.add(data.toSubCategory())
+                }else{
+                    listSubCategory.add(data.toSubCategory())
+                }
+                var storeCopy = _myInfo?.value?.store?.copy(subcategory = listSubCategory)
+                var copyStore = _myInfo.value?.copy(store = storeCopy)
+                _myInfo.emit(copyStore)
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"","")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
+
 
 
 }

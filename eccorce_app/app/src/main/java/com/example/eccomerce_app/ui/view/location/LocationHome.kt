@@ -4,26 +4,34 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -42,11 +51,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
+import com.example.eccomerce_app.dto.request.LocationRequestDto
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.CustomTitleBotton
@@ -54,6 +65,7 @@ import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithNoTitle
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -68,7 +80,6 @@ fun LocationHomeScreen(
     val fontScall = LocalDensity.current.fontScale
 
     val isLoading = homeViewModle.isLoading.collectAsState()
-    val locations = homeViewModle.locations.collectAsState()
 
     val currutine = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -77,6 +88,12 @@ fun LocationHomeScreen(
     val isShownLocationTitleDialog = remember { mutableStateOf(false) }
     val isNotEnablePermission = remember { mutableStateOf(false) }
     val locationTitle = remember { mutableStateOf(TextFieldValue()) }
+
+
+    val locationHolder = remember { mutableStateOf<LocationRequestDto?>(null) }
+
+    val isPressAddNewAddress = remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val requestPermssion = rememberLauncherForActivityResult(
@@ -89,16 +106,18 @@ fun LocationHomeScreen(
                 currutine.launch(Dispatchers.Main) {
 
                     try {
-//                        val data = fusedLocationClient
+                        isPressAddNewAddress.value=true
+
                             val data = fusedLocationClient.lastLocation.await()
                             data?.let {
                                     location->
 
-                                homeViewModle.updateAddressObj(
-                                    longit = location.longitude,
-                                    latit = location.latitude
-                                )
+                               locationHolder.value = LocationRequestDto(null,
+                                   longitude = location.longitude,
+                                   latitude = location.latitude,
+                                   title = "home")
                             }
+
 
                     } catch (e: SecurityException) {
                       var   error = "Permission exception: ${e.message}"
@@ -115,10 +134,90 @@ fun LocationHomeScreen(
     )
 
     LaunchedEffect(Unit) {
-        homeViewModle.getUserLocations()
+        homeViewModle.getMyInfo()
     }
 
     Scaffold(
+        bottomBar = {
+            if(isPressAddNewAddress.value)
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        isPressAddNewAddress.value = false
+                    },
+                    sheetState = sheetState
+                ) {
+
+                    Column(modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .fillMaxWidth()) {
+
+                        Row(modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(2.dp))
+                                .clickable{
+                                   currutine.launch {
+                                       isPressAddNewAddress.value=false
+                                       var result = async {
+                                           homeViewModle.addUserAddress(
+                                               longit = locationHolder.value?.longitude,
+                                               latit = locationHolder.value?.latitude,
+                                               title = "home")
+                                       }.await()
+
+                                       if(result==null){
+                                           snackbarHostState.showSnackbar("complate adding address")
+                                           nav.navigate(Screens.HomeGraph) {
+                                               popUpTo(nav.graph.id) {
+                                                   inclusive = true
+                                               }
+                                           }
+                                       }
+                                       else{
+                                           snackbarHostState.showSnackbar(result)
+                                       }
+                                   }
+                                },
+                            horizontalArrangement = Arrangement.Start) {
+                            Icon(
+                                Icons.Outlined.LocationOn,
+                                "",
+                                tint = CustomColor.neutralColor950,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                "Current Address",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp,
+                                color = CustomColor.neutralColor950,
+                            )
+                        }
+
+                        Sizer(20)
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.outline_map),
+                                "",
+                                tint = CustomColor.neutralColor950,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                "Chose From Map",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp,
+                                color = CustomColor.neutralColor950,
+                            )
+                        }
+
+
+                    }
+                }
+
+        },
+
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
@@ -176,7 +275,7 @@ fun LocationHomeScreen(
             )
             Sizer(50)
             CustomBotton(
-                isLoading = isLoading.value,
+                //isLoading = isLoading.value,
                 operation = {
                     requestPermssion.launch(arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -196,46 +295,7 @@ fun LocationHomeScreen(
             );
 
 
-            if (isShownLocationTitleDialog.value)
-                BasicAlertDialog(
-                    onDismissRequest = {
 
-                    },
-                    content = {
-                        Column(
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .background(Color.White, RoundedCornerShape(8.dp))
-                                .padding(horizontal = 20.dp)
-
-                        ) {
-                            Sizer(10)
-                            TextInputWithNoTitle(
-                                value = locationTitle,
-                                placHolder = "Write Your Location Name"
-                            )
-                            Sizer(10)
-
-                            Row(
-                                modifier = Modifier.padding(top = 15.dp),
-//                                verticalAlignment = Alignment.C/enterStart
-                            ) {
-                                Button(onClick = {
-                                    isShownLocationTitleDialog.value = false
-                                    homeViewModle.updateAddressObj(title = locationTitle.value.text)
-                                    homeViewModle.addUserAddress()
-                                }) {
-                                    Text("Okay")
-                                }
-                                Button(onClick = {
-                                    isShownLocationTitleDialog.value = false
-                                }) {
-                                    Text("cencle")
-                                }
-                            }
-                        }
-                    }
-                )
 
             if(isNotEnablePermission.value)
             {
@@ -267,6 +327,26 @@ fun LocationHomeScreen(
                     })
             }
         }
+
+        if(isLoading.value)
+            Dialog(
+                onDismissRequest = {}
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(90.dp)
+                        .width(90.dp)
+                        .background(Color.White,
+                            RoundedCornerShape(15.dp))
+                    , contentAlignment = Alignment.Center
+                )
+                {
+                    CircularProgressIndicator(
+                        color = CustomColor.primaryColor700,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
     }
 
 }

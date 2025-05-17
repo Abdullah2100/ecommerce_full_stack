@@ -16,7 +16,8 @@ data class StoreResposeDto(
     var wallpaper_image: String,
     var small_image: String,
     var subcategory:List<SubCategoryResponseDto>?=null,
-    var user: UserDto
+   var addresses:List<AddressResponseDto>,
+    var user: UserDto?
 
 
     )

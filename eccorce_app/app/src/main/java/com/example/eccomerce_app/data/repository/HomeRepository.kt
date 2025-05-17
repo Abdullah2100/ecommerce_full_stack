@@ -1,7 +1,10 @@
 package com.example.eccomerce_app.data.repository
 
+import com.example.eccomerce_app.Dto.AuthResultDto
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.dto.request.LocationRequestDto
+import com.example.eccomerce_app.dto.request.LoginDto
+import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
@@ -18,9 +21,11 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import java.io.File
 import java.io.IOException
 import java.net.UnknownHostException
@@ -28,7 +33,7 @@ import java.util.UUID
 
 class HomeRepository(val client: HttpClient) {
 
-    //
+    /*
     suspend fun getUserAddress(): NetworkCallHandler {
         return try {
             var result = client.get(
@@ -63,11 +68,12 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+*/
 
     suspend fun userAddNewAddress(locationData: LocationRequestDto): NetworkCallHandler {
         return try {
             var result = client.post(
-                Secrets.getBaseUrl() + "/User/location"
+                Secrets.getBaseUrl() + "/User/address"
             ) {
                 headers {
                     append(
@@ -75,9 +81,14 @@ class HomeRepository(val client: HttpClient) {
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
+                setBody(
+                    locationData
+                )
+                contentType(ContentType.Application.Json)
+
             }
 
-            if (result.status == HttpStatusCode.OK) {
+            if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
             } else {
                 NetworkCallHandler.Error(
@@ -138,7 +149,7 @@ class HomeRepository(val client: HttpClient) {
     suspend fun getCategory(pageNumber: Int = 1): NetworkCallHandler {
         return try {
             var result = client.get(
-                Secrets.getBaseUrl() + "/Category/all${pageNumber}"
+                Secrets.getBaseUrl() + "/Category/all/${pageNumber}"
             ) {
                 headers {
                     append(
@@ -167,6 +178,7 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+    //user
     suspend fun getMyInfo(): NetworkCallHandler {
         return try {
             var result = client.get(
@@ -267,37 +279,6 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun getMyStore(): NetworkCallHandler {
-        return try {
-            var result = client.put(
-                Secrets.getBaseUrl() + "/User"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
 
     suspend fun createStore(
         name: String,
@@ -375,4 +356,117 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
+    suspend fun updateStore(
+        name: String,
+        wallpaper_image: File?,
+        small_image: File?,
+        longitude: Double,
+        latitude: Double
+    ): NetworkCallHandler {
+        return try {
+            var result = client.put (
+                Secrets.getBaseUrl() + "/Store"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            if(name.trim().length>0)
+                            append("name", name)
+                            if(latitude!=0.0)
+                            append("longitude", latitude)
+                            if(longitude!=0.0)
+                            append("latitude", longitude)
+                            if(wallpaper_image!=null)
+                            append(
+                                key = "wallpaper_image", // Must match backend expectation
+                                value = wallpaper_image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${wallpaper_image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${wallpaper_image.name}"
+                                    )
+                                }
+                            )
+                            if(small_image!=null)
+                            append(
+                                key = "small_image", // Must match backend expectation
+                                value = small_image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${small_image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${small_image.name}"
+                                    )
+                                }
+                            )
+
+                        }
+                    )
+                )
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+
+
+
+
+
+    suspend fun createSubCategory(data:SubCategoryRequestDto): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/User/login";
+            val result = client.post(full_url){
+                setBody(data)
+                contentType(ContentType.Application.Json)
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<AuthResultDto>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
 }

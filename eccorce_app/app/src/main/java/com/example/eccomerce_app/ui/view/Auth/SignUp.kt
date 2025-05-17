@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -77,6 +78,9 @@ fun SignUpPage(
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordConfirm = remember { mutableStateOf<Boolean>(false) }
     val erroMessage = remember { mutableStateOf("") }
+
+    val focusRequester = FocusRequester()
+
 
     val currotine = rememberCoroutineScope()
 

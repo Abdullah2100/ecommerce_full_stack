@@ -81,7 +81,7 @@ fun HomeAddressList(
 ) {
     val fontScall = LocalDensity.current.fontScale
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val locationss = homeViewModle.locations.collectAsState()
+    val locationss = homeViewModle.myInfo.collectAsState()
     val isLoading = homeViewModle.isLoading.collectAsState()
     val currentLocationId = remember { mutableStateOf<UUID?>(null) }
     val isPressLocation = remember { mutableStateOf<Boolean>(false) }
@@ -91,7 +91,7 @@ fun HomeAddressList(
     val sheetState = rememberModalBottomSheetState()
 
     val selectedIndex =
-        remember { mutableStateOf(locationss.value?.firstOrNull { it -> it.isCurrnt == true }?.id) }
+        remember { mutableStateOf(locationss.value?.address?.firstOrNull { it -> it.isCurrnt == true }?.id) }
 
 
 
@@ -191,7 +191,7 @@ fun HomeAddressList(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        when (locationss.value.isNullOrEmpty()) {
+        when (locationss.value?.address.isNullOrEmpty()) {
             true -> {
                 Column(
                     modifier = Modifier
@@ -231,7 +231,7 @@ fun HomeAddressList(
                         .fillMaxWidth()
                 ) {
 
-                    items(locationss.value!!.size)
+                    items(locationss.value!!.address!!.size)
                     { index ->
 
                         Column(
@@ -261,7 +261,7 @@ fun HomeAddressList(
                                     )
                                     Sizer(width = 5)
                                     Text(
-                                        locationss.value!![index].latitude.toString(),
+                                        locationss.value!!.address!![index].latitude.toString(),
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = (16 / fontScall).sp,
@@ -271,9 +271,9 @@ fun HomeAddressList(
                                     )
                                 }
                                 RadioButton(
-                                    selected = locationss.value!![index].id == selectedIndex.value,
+                                    selected = locationss.value!!.address!![index].id == selectedIndex.value,
                                     onClick = {
-                                        selectedIndex.value = locationss.value!![index].id
+                                        selectedIndex.value = locationss.value!!.address!![index].id
                                     },
                                     colors = RadioButtonDefaults.colors(
                                         selectedColor = CustomColor.neutralColor950

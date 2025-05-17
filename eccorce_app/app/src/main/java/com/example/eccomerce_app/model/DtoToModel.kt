@@ -41,7 +41,8 @@ object DtoToModel {
             pig_image = this.wallpaper_image.replace("localhost", "10.0.2.2"),
             small_image = this.small_image.replace("localhost", "10.0.2.2"),
             subcategory = this.subcategory?.map { it.toSubCategory() }?.toList(),
-            user = this.user.toUser()
+            user = this.user?.toUser(),
+            addresses = this.addresses.map { it.toAddress() }
         )
     }
 

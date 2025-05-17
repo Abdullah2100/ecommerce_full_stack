@@ -384,6 +384,8 @@ public class UserController : ControllerBase
             latitude: address.latitude,
             userId: idHolder.Value
         );
+        if (location == null)
+            return BadRequest("حدثة مشكلة اثناء حفظ المان");
 
         return StatusCode(201, location);
     }

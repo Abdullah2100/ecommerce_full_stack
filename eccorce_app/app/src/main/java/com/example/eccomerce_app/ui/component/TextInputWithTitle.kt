@@ -91,12 +91,13 @@ fun TextInputWithTitle(
     isHasError: Boolean = false,
     erroMessage: String? = null,
     isEnable: Boolean? = true,
-    focusRequester: FocusRequester?
+    focusRequester: FocusRequester?=null
 ) {
 
     var modifierWithFocus =if(focusRequester==null)Modifier.fillMaxWidth() else Modifier.fillMaxWidth().focusRequester(focusRequester)
     val fontScall = LocalDensity.current.fontScale
     Column {
+        if(title.trim().isNotEmpty())
         Text(
             title,
             fontFamily = General.satoshiFamily,

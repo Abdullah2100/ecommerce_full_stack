@@ -33,9 +33,15 @@ public class StoreData
                         name = st.name,
                         wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
                         small_image = _config.getKey("url_file") + st.small_image,
-                        created_at = st.created_at,
-                        latitude = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
-                        longitide = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
+                        created_at = st.created_at, 
+                        addresses = _dbContext.Address.Where(a => a.owner_id == st.id)
+                            .Select(add=>new AddressResponseDto
+                            {
+                                id=add.id,
+                                title=add.title,
+                                longitude = add.longitude,
+                                latitude = add.latitude,
+                            }).ToList(),
                         subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
                         {
                             name = sub.name,
@@ -48,7 +54,7 @@ public class StoreData
                             email = st.user.phone,
                             Id = st.user.ID,
                             thumbnail = st.user.thumbnail == null
-                                ? null
+                                ?"" 
                                 : _config.getKey("url_file") + st.user.thumbnail,
                             address = _dbContext.Address.Where(add=>add.owner_id==st.user_id)
                                 .Select(add=>new AddressResponseDto
@@ -120,9 +126,15 @@ public class StoreData
                         wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
                         small_image = _config.getKey("url_file") + st.small_image,
                         created_at = st.created_at,
-                        latitude = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
-                        longitide = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
-                        subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
+                        addresses = _dbContext.Address.Where(a => a.owner_id == st.id)
+                            .Select(add=>new AddressResponseDto
+                            {
+                                id=add.id,
+                                title=add.title,
+                                longitude = add.longitude,
+                                latitude = add.latitude,
+                            }).ToList(),
+                         subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
                         {
                             name = sub.name,
                             id = sub.id,
