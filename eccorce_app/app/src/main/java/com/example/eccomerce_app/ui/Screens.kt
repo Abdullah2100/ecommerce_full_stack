@@ -1,5 +1,7 @@
 package com.example.eccomerce_app.ui
+import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 object Screens {
 
@@ -45,7 +47,7 @@ object Screens {
     object HomeAddress
 
     @Serializable
-    object Store
+    data class Store(var store_idCopy: String?=null,var isFromHome: Boolean?=true)
 
 
 

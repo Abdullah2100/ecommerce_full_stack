@@ -19,6 +19,8 @@ public class AppDbContext : DbContext
     public DbSet<Category> Category { get; set; }
     public DbSet<SubCategory> SubCategory { get; set; }
 
+    public DbSet<Bannel> Banner { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
        
@@ -37,6 +39,7 @@ public class AppDbContext : DbContext
                     .WithOne(st => st.user)
                     .HasForeignKey<Store>(st=>st.user_id)
                     .HasPrincipalKey<User>(u=>u.ID);
+                
             }
         );
 
@@ -58,9 +61,19 @@ public class AppDbContext : DbContext
                 .WithOne(sub=>sub.Store)
                 .HasForeignKey(sub=>sub.store_id)
                 .HasPrincipalKey(stc=>stc.id);
+            
+            st.HasMany(sto => sto.banners)
+                .WithOne(bn=>bn.store)
+                .HasForeignKey(ban=>ban.store_id)
+                .HasPrincipalKey(sto=>sto.id);
+            
         });
 
         modelBuilder.Entity<SubCategory>(sub =>
+        {
+        });
+
+        modelBuilder.Entity<Bannel>(ba =>
         {
         });
         

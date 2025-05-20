@@ -1,12 +1,11 @@
 using System.Text;
 using ecommerc_dotnet.context;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using hotel_api.Services;
-using hotel_api.Services.EmailServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -15,9 +14,8 @@ builder.Services.AddOptions();
 
 
 // Other Services (Scoped)
-// builder.Services.AddTransient<IWebHostEnvironment>();
-builder.Services.AddSingleton<IConfigurationServices, ConfigurationServicesImp>();
-builder.Services.AddSingleton<IEmailServices, EmailServicesImplement>();
+builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -25,11 +23,14 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyOrigin()    // Allows all origins
             .AllowAnyMethod()    // Allows any HTTP methods (GET, POST, etc.)
-            .AllowAnyHeader();   // Allows any headers
+            .AllowAnyHeader();
+            // ;   // Allows any headers
     });
 });
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR(option =>
+option.EnableDetailedErrors=true);;
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -86,4 +87,5 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<EcommercHub>("/bannerHub");
 app.Run();

@@ -13,5 +13,5 @@ public class UserInfoResponseDto
      public string email { get; set; }
      public string thumbnail { get; set; }
      public List<AddressResponseDto>? address { get; set; }
-     public StoreResponseDto? store { get; set; }
+     public Guid? store_id { get; set; }
 }

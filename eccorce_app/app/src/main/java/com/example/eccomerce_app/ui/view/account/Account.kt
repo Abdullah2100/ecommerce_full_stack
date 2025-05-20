@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +41,8 @@ fun AccountPage(
     homeViewModel: HomeViewModel
 ){
 
+    var myInfo= homeViewModel.myInfo.collectAsState()
+    var storeId=myInfo.value?.store_id
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -99,7 +102,10 @@ fun AccountPage(
                     AccountCustomBottom("Payment Me",R.drawable.credit_card,{})
                     AccountCustomBottom("Notifications",R.drawable.notification,{})
                     AccountCustomBottom("My Store",R.drawable.store,{
-                        nav.navigate(Screens.Store)
+                        nav.navigate(Screens.Store(
+                            if (storeId==null)null else storeId.toString(),
+                            false
+                        ))
                     })
                     LogoutBotton("Logout",R.drawable.logout,{})
 

@@ -1,7 +1,6 @@
 package com.example.eccomerce_app
 
 import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,23 +31,62 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eccomerce_app.Util.General
+import com.example.eccomerce_app.dto.response.BannerResponseDto
+import com.example.eccomerce_app.model.Banner
 import com.example.eccomerce_app.ui.NavController
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.eccomerce_app.model.ButtonNavItem
+import com.example.eccomerce_app.model.DtoToModel.toBanner
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.eccomerce_app.util.Secrets
+import com.microsoft.signalr.HubConnection
+import com.microsoft.signalr.HubConnectionBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
     var keepSplash = true;
-
+//    private  var connection: HubConnection?=null;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val window = (this as Activity).window
+
+       /* val connectionUrl = Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
+         connection = HubConnectionBuilder
+             .create(connectionUrl)
+            .withTransport(com.microsoft.signalr.TransportEnum.LONG_POLLING)
+            .build()
+
+        // Start the connection
+        connection?.start()?.blockingAwait()
+
+        // Register a handler for incoming messages
+        connection?.on("createdBanner",
+            {
+                    result->
+                var banners= mutableListOf<Banner>();
+                if(General.banners.value==null){
+                   banners.add(result.toBanner())
+                }
+                else{
+                    banners.add(result.toBanner())
+                    banners.addAll(General.banners.value!!)
+                }
+                lifecycleScope.launch(Dispatchers.Main) {
+                    General.banners.emit(banners)
+                }
+            },
+            BannerResponseDto::class.java).runCatching {
+
+        }*/
+
 
 
         installSplashScreen().apply {
@@ -147,5 +185,11 @@ class MainActivity : ComponentActivity() {
                     NavController(nav, currentScreen=currentScreen.value?:1)
                 }
         }
+    }
+
+
+    override fun onDestroy() {
+//        connection?.stop()
+        super.onDestroy()
     }
 }

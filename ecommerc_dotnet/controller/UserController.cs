@@ -2,9 +2,9 @@ using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using hotel_api.Services;
-using hotel_api.Services.EmailServices;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ public class UserController : ControllerBase
 {
     public UserController(
         AppDbContext dbContext,
-        IConfigurationServices configuration,
+        IConfig configuration,
         IWebHostEnvironment webHostEnvironment
     )
     {
@@ -30,7 +30,7 @@ public class UserController : ControllerBase
         _addressData = new AddressData(dbContext);
     }
 
-    private readonly IConfigurationServices _configuration;
+    private readonly IConfig _configuration;
 
     private readonly UserData _userData;
 

@@ -1,6 +1,7 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace ecommerc_dotnet.controller;
 public class CategoryController : ControllerBase
 {
     public CategoryController(AppDbContext dbContext
-        , IConfigurationServices configuration,
+        , IConfig configuration,
         IWebHostEnvironment webHostEnvironment
     )
     {
@@ -26,19 +27,19 @@ public class CategoryController : ControllerBase
 
     private readonly CategoryData _categoryData;
     private readonly UserData _userData;
-    private readonly IConfigurationServices _configuration;
+    private readonly IConfig _configuration;
     private readonly IWebHostEnvironment _host;
 
 
     [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult getCatgory(int pageNumber = 1)
+    public async Task<IActionResult>getCatgory(int pageNumber = 1)
     {
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        var categories = _categoryData.getCategories(_configuration, pageNumber);
+        var categories = await _categoryData.getCategories(_configuration, pageNumber);
         if (categories == null)
             return BadRequest("لا يوجد اي اقسام");
         return Ok(categories);

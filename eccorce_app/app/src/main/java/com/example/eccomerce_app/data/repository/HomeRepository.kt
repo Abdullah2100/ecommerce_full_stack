@@ -5,11 +5,14 @@ import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.dto.request.LocationRequestDto
 import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
+import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
+import com.example.eccomerce_app.dto.response.BannerResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
+import com.example.eccomerce_app.model.Banner
 import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -438,11 +441,6 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
-
-
-
-
     suspend fun createSubCategory(data:SubCategoryRequestDto): NetworkCallHandler {
         return try {
             val full_url =Secrets.getBaseUrl()+"/SubCategory/new";
@@ -477,4 +475,173 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
+
+    suspend fun updateSubCategory(data: SubCategoryUpdateDto): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/SubCategory";
+            val result = client.put (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(data)
+                contentType(ContentType.Application.Json)
+
+            }
+
+            if(result.status== HttpStatusCode.Created){
+                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun getBannerByStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Banner/${store_id}/${pageNumber}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if(result.status== HttpStatusCode.Created){
+                NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getStoreById(id: UUID): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Store/${id}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getStoreAddress(id: UUID,pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Store/${id}/${pageNumber}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<AddressResponseDto>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getStoreSubCategory(id: UUID,pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/SubCategory/${id}/${pageNumber}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<List<SubCategoryResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+
 }

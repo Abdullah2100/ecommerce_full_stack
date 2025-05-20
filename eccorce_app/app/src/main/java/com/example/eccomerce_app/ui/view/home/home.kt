@@ -30,10 +30,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,17 +41,8 @@ import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.ClipOp
-import androidx.compose.ui.graphics.DefaultShadowColor
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.addOutline
 import com.example.eccomerce_app.ui.Screens
+import com.example.eccomerce_app.ui.component.BannerBage
 import com.example.eccomerce_app.ui.component.CategoryLoadingShape
 import com.example.eccomerce_app.ui.component.CategoryShape
 import com.example.eccomerce_app.ui.component.LocationLoadingShape
@@ -63,13 +52,14 @@ fun HomePage(
     nav: NavHostController,
     homeViewModel: HomeViewModel
 ) {
-    val fontScall = LocalDensity.current.fontScale
     val configuration = LocalConfiguration.current
 
     var myInfo = homeViewModel.myInfo.collectAsState()
+    var bannel = homeViewModel.homeBanners.collectAsState()
     var categories = homeViewModel.categories.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val isClickingSearch = remember { mutableStateOf(false) }
+
 
     val sizeAnimation = animateDpAsState(
         if (!isClickingSearch.value) 80.dp else 0.dp,
@@ -77,21 +67,10 @@ fun HomePage(
 
     LaunchedEffect(Unit) {
         homeViewModel.getMyInfo()
-        homeViewModel.getCategory(1)
+        homeViewModel.getCategories(1)
     }
 
-    /*val requestNotificationPermssion = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permission ->
-            val arePermissionsGranted = permission.values.reduce { acc, next ->
-                acc && next
-            }
-            if (arePermissionsGranted) {
-            } else {
-//                isNotEnablePermission.value=true
-            }
-        }
-    )*/
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -257,31 +236,16 @@ fun HomePage(
                 }
             }
 
+            if(bannel.value!=null)
+            item{
+                BannerBage(
+                    banners = bannel.value!!,
+                    isMe = false,
+                    nav=nav
+                )
+            }
         }
 
 
     }
 }
-
-
-fun Modifier.shadowWithClipIntersect(
-    elevation: Dp,
-    shape: Shape = RectangleShape,
-    clip: Boolean = elevation > 0.dp,
-    ambientColor: Color = DefaultShadowColor,
-    spotColor: Color = DefaultShadowColor,
-): Modifier = this
-    .drawWithCache {
-        //  bottom shadow offset in Px based on elevation
-        val bottomOffsetPx = elevation.toPx() * 2.2f
-        // Adjust the size to extend the bottom by the bottom shadow offset
-        val adjustedSize = Size(size.width, size.height + bottomOffsetPx)
-        val outline = shape.createOutline(adjustedSize, layoutDirection, this)
-        val path = Path().apply { addOutline(outline) }
-        onDrawWithContent {
-            clipPath(path, ClipOp.Intersect) {
-                this@onDrawWithContent.drawContent()
-            }
-        }
-    }
-    .shadow(elevation, shape, clip, ambientColor, spotColor)

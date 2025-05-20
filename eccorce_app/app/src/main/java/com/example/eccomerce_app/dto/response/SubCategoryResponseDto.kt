@@ -6,7 +6,11 @@ import java.util.UUID
 
 @Serializable
 data class SubCategoryResponseDto(
+    var name: String,
     @Serializable(with = UUIDKserialize::class)
     var id: UUID,
-    var name: String
+    @Serializable(with = UUIDKserialize::class)
+    var category_id: UUID,
+    @Serializable(with = UUIDKserialize::class)
+    var store_id: UUID
 )

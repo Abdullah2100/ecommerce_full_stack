@@ -13,5 +13,6 @@ data class UserDto(
     var email: String,
     var thumbnail:String,
     var address:List<AddressResponseDto>?=null,
-    var store: StoreResposeDto?=null
+    @Serializable(with = UUIDKserialize::class)
+    var store_id: UUID,
 )

@@ -4,10 +4,8 @@ import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
-data class Store(
-    var id: UUID,
-    var user_id: UUID,
+data class SubCategoryUpdate(
     var name: String,
-    var pig_image: String,
-    var small_image: String,
+    var id: UUID,
+    var cateogy_id: UUID,
 )

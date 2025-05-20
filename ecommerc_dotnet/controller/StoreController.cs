@@ -1,6 +1,7 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace ecommerc_dotnet.controller;
 public class StoreController : ControllerBase
 {
     public StoreController(AppDbContext dbContext
-        , IConfigurationServices configuration,
+        , IConfig configuration,
         IWebHostEnvironment webHostEnvironment
     )
     {
@@ -26,7 +27,7 @@ public class StoreController : ControllerBase
 
     private readonly StoreData _storeData;
     private readonly UserData _userData;
-    private readonly IConfigurationServices _configuration;
+    private readonly IConfig _configuration;
     private readonly IWebHostEnvironment _host;
 
     [HttpPost("new")]
@@ -199,7 +200,7 @@ public class StoreController : ControllerBase
     }
 
 
-    [HttpGet("")]
+    [HttpGet("me")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetStore()
@@ -225,6 +226,18 @@ public class StoreController : ControllerBase
         return Ok(result);
     }
     
+     [HttpGet("{store_Id:guid}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult>GetStore(Guid store_Id)
+    {
+     
+        var result = await _storeData.getStoreById(store_Id);
+
+        if (result == null)
+            return StatusCode(400, "المتجر غير موجود");
+        return Ok(result);
+    }
     
     [HttpGet("all/{page:int}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -239,6 +252,18 @@ public class StoreController : ControllerBase
         return Ok(result);
     }
 
+   [HttpGet("address/{store_Id:guid}/{page:int}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult>GetStoreAddress(Guid store_Id,int page )
+    {
+     
+        var result = await _storeData.getStoreAddress(store_Id,page);
 
+        if (result == null)
+            return StatusCode(400, "المتجر غير موجود");
+        return Ok(result);
+    }
+  
     
 }

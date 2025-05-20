@@ -1,16 +1,17 @@
 package com.example.eccomerce_app.ui.view.account.store
 
 import android.Manifest
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,14 +34,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -53,6 +49,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,8 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -81,6 +76,8 @@ import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
 import com.example.eccomerce_app.model.Category
+import com.example.eccomerce_app.model.SubCategoryUpdate
+import com.example.eccomerce_app.ui.component.BannerBage
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.component.TextInputWithTitle
@@ -92,6 +89,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
+import java.util.UUID
 import kotlin.collections.forEach
 
 
@@ -99,15 +97,34 @@ import kotlin.collections.forEach
 @Composable
 fun StoreScreen(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    store_idCopy: String?,
+    isFromHome: Boolean?
 ) {
+    var store_id = if (store_idCopy == null) null else UUID.fromString(store_idCopy)
+
+    val myInfo = homeViewModel.myInfo.collectAsState();
+    var myStore_id = myInfo.value?.store_id
+    var isMyStore = myStore_id != null && myStore_id == store_id
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val context = LocalContext.current
 
-    val storeData = homeViewModel.myInfo.collectAsState()
     val categories = homeViewModel.categories.collectAsState()
+
+    val stores = homeViewModel.stores.collectAsState()
+    val storeData = stores.value?.firstOrNull { it.id == store_id }
+
+    val banners = homeViewModel.banners.collectAsState()
+    val storeBanners = banners.value?.filter { it.store_id == store_id }
+
+    val address = homeViewModel.storeAddress.collectAsState()
+    val storeAddress = stores.value?.filter { it.id == store_id }
+
+    val subcategories = homeViewModel.subCategories.collectAsState()
+    val storeSubCategories = subcategories.value?.filter { it.store_id == store_id }
+
     val isLoading = homeViewModel.isLoading.collectAsState()
 
     val wall_paper_image = remember { mutableStateOf<File?>(null) }
@@ -121,6 +138,7 @@ fun StoreScreen(
 
     val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
     val isUpdate = remember { mutableStateOf(false) }
+    val selectedSubCategoryId = remember { mutableStateOf(UUID.randomUUID()) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
     val isSubCategoryCreateError = remember { mutableStateOf(false) }
     val errorMessage = remember { mutableStateOf("") }
@@ -221,7 +239,14 @@ fun StoreScreen(
     }
 
 
+    LaunchedEffect(Unit) {
+        if (store_id != null)
+            homeViewModel.getStoreInfoByStoreId(store_id)
 
+
+    }
+
+    Log.d("storeSubCategoryis",storeSubCategories.toString())
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -394,15 +419,29 @@ fun StoreScreen(
                                 currutine.launch {
                                     keyboardController?.hide()
                                     var result = async {
-                                        homeViewModel.createSubCategory(
-                                            name = subCategoryName.value.text,
-                                            categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
-                                        )
+                                        if (isUpdate.value)
+                                            homeViewModel.updateSubCategory(
+                                                SubCategoryUpdate(
+                                                    name = subCategoryName.value.text,
+                                                    cateogy_id = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id,
+                                                    id = selectedSubCategoryId.value
+
+                                                )
+                                            )
+                                        else
+                                            homeViewModel.createSubCategory(
+                                                name = subCategoryName.value.text,
+                                                categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
+                                            )
                                     }.await()
                                     if (result.isNullOrEmpty()) {
                                         isShownSubCategoryBottomSheet.value = false
                                         categoryName.value = TextFieldValue("")
                                         subCategoryName.value = TextFieldValue("")
+                                        if (isUpdate.value) {
+                                            isUpdate.value = false
+                                            selectedSubCategoryId.value = UUID.randomUUID()
+                                        }
                                     } else {
                                         isSubCategoryCreateError.value = true
                                         errorMessage.value = result
@@ -410,7 +449,7 @@ fun StoreScreen(
 
                                 }
                             },
-                            buttonTitle = "Create",
+                            buttonTitle = if (isUpdate.value) "Update" else "Create",
                             color = null,
                             isEnable = subCategoryName.value.text.isNotEmpty() && categoryName.value.text.isNotEmpty()
 
@@ -494,13 +533,12 @@ fun StoreScreen(
                     }
                 },
                 actions = {
-                    if (storeData.value?.store == null) {
+                    if (myStore_id == null) {
                         TextButton(
                             enabled = isLoading.value == false,
                             onClick = {
                                 if (creationValidation()) {
                                     keyboardController?.hide()
-//                                    focusRequester?.requestFocus()
                                     currutine.launch {
                                         var result = async {
 
@@ -546,7 +584,9 @@ fun StoreScreen(
                                 }
                             }
                         }
-                    } else if (storeData?.value?.store != null &&
+                    } else if (myStore_id != null &&
+                        myStore_id == store_id &&
+                        isFromHome == false &&
                         (storeName.value.text.isNotEmpty() ||
                                 latit.value != 0.0 ||
                                 longint.value != 0.0 ||
@@ -630,7 +670,6 @@ fun StoreScreen(
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // .padding(bottom = 15.dp)
                         .constrainAs(bigImageRef) {
                             top.linkTo(parent.top)
                             bottom.linkTo(parent.bottom)
@@ -651,22 +690,27 @@ fun StoreScreen(
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = CustomColor.neutralColor500,
+                                color = if (isFromHome == true)
+                                    Color.Transparent else CustomColor.neutralColor500,
                                 shape = RoundedCornerShape(8.dp)
+                            )
+                            .background(
+                                color = if (isFromHome == true) CustomColor.primaryColor50
+                                else Color.White,
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         when (wall_paper_image.value == null) {
                             true -> {
-                                when (storeData.value?.store?.pig_image.isNullOrEmpty()) {
+                                when (storeData?.pig_image.isNullOrEmpty()) {
                                     true -> {
-
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(R.drawable.insert_photo),
-                                            "",
-                                            modifier = Modifier.size(80.dp),
-                                            tint = CustomColor.neutralColor200
-                                        )
+                                        if (isFromHome == false)
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(R.drawable.insert_photo),
+                                                "",
+                                                modifier = Modifier.size(80.dp),
+                                                tint = CustomColor.neutralColor200
+                                            )
                                     }
 
                                     else -> {
@@ -678,7 +722,7 @@ fun StoreScreen(
                                                 .fillMaxWidth()
                                                 .clip(RoundedCornerShape(8.dp)),
                                             model = General.handlingImageForCoil(
-                                                storeData.value?.store?.pig_image.toString(),
+                                                storeData.pig_image.toString(),
                                                 context
                                             ),
                                             contentDescription = "",
@@ -729,41 +773,42 @@ fun StoreScreen(
                         }
 
                     }
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 5.dp, bottom = 10.dp)
-                            .constrainAs(cameralRef) {
-                                end.linkTo(imageRef.end)
-                                bottom.linkTo(imageRef.bottom)
-                            }
-
-
-                    ) {
-
-                        IconButton(
-                            onClick = {
-                                keyboardController?.hide()
-                                isPigImage.value = true;
-                                onImageSelection.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            },
+                    if (isFromHome == false)
+                        Box(
                             modifier = Modifier
-                                .size(30.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = CustomColor.primaryColor200
-                            )
+                                .padding(end = 5.dp, bottom = 10.dp)
+                                .constrainAs(cameralRef) {
+                                    end.linkTo(imageRef.end)
+                                    bottom.linkTo(imageRef.bottom)
+                                }
+
+
                         ) {
-                            Icon(
-                                ImageVector.vectorResource(R.drawable.camera),
-                                "",
-                                modifier = Modifier.size(18.dp),
-                                tint = Color.White
-                            )
+
+                            IconButton(
+                                onClick = {
+                                    keyboardController?.hide()
+                                    isPigImage.value = true;
+                                    onImageSelection.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                },
+                                modifier = Modifier
+                                    .size(30.dp),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = CustomColor.primaryColor200
+                                )
+                            ) {
+                                Icon(
+                                    ImageVector.vectorResource(R.drawable.camera),
+                                    "",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = Color.White
+                                )
+                            }
                         }
-                    }
 
                 }
 
@@ -790,25 +835,29 @@ fun StoreScreen(
                             .width(110.dp)
                             .border(
                                 width = 1.dp,
-                                color = CustomColor.neutralColor500,
+                                color = if (isFromHome == true) Color.Transparent else CustomColor.neutralColor500,
                                 shape = RoundedCornerShape(60.dp)
                             )
                             .clip(RoundedCornerShape(60.dp))
-                            .background(Color.White),
+                            .background(
+                                color = if (isFromHome == true && storeData == null) CustomColor.primaryColor50
+                                else Color.White,
+                                shape = RoundedCornerShape(60.dp)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         when (small_paper_image.value == null) {
                             true -> {
-                                when (storeData.value?.store?.small_image.isNullOrEmpty()) {
+                                when (storeData?.small_image.isNullOrEmpty()) {
                                     true -> {
+                                        if (isFromHome == false)
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(R.drawable.insert_photo),
+                                                "",
+                                                modifier = Modifier.size(50.dp),
+                                                tint = CustomColor.neutralColor200
 
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(R.drawable.insert_photo),
-                                            "",
-                                            modifier = Modifier.size(80.dp),
-                                            tint = CustomColor.neutralColor200
-
-                                        )
+                                            )
                                     }
 
                                     else -> {
@@ -821,7 +870,7 @@ fun StoreScreen(
                                                 .width(90.dp)
                                                 .clip(RoundedCornerShape(50.dp)),
                                             model = General.handlingImageForCoil(
-                                                storeData.value?.store?.small_image ?: "",
+                                                storeData.small_image,
                                                 context
                                             ),
                                             contentDescription = "",
@@ -872,41 +921,42 @@ fun StoreScreen(
                         }
 
                     }
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 5.dp)
-                            .constrainAs(cameralRef) {
-                                end.linkTo(imageRef.end)
-                                bottom.linkTo(imageRef.bottom)
-                            }
-
-
-                    ) {
-
-                        IconButton(
-                            onClick = {
-                                keyboardController?.hide()
-                                isPigImage.value = false;
-                                onImageSelection.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            },
+                    if (isFromHome == false)
+                        Box(
                             modifier = Modifier
-                                .size(30.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = CustomColor.primaryColor200
-                            )
+                                .padding(end = 5.dp)
+                                .constrainAs(cameralRef) {
+                                    end.linkTo(imageRef.end)
+                                    bottom.linkTo(imageRef.bottom)
+                                }
+
+
                         ) {
-                            Icon(
-                                ImageVector.vectorResource(R.drawable.camera),
-                                "",
-                                modifier = Modifier.size(18.dp),
-                                tint = Color.White
-                            )
+
+                            IconButton(
+                                onClick = {
+                                    keyboardController?.hide()
+                                    isPigImage.value = false;
+                                    onImageSelection.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                },
+                                modifier = Modifier
+                                    .size(30.dp),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = CustomColor.primaryColor200
+                                )
+                            ) {
+                                Icon(
+                                    ImageVector.vectorResource(R.drawable.camera),
+                                    "",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = Color.White
+                                )
+                            }
                         }
-                    }
 
                 }
 
@@ -914,51 +964,226 @@ fun StoreScreen(
 
             Sizer(20)
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Store Location",
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = (18).sp,
-                    color = CustomColor.neutralColor950,
-                    textAlign = TextAlign.Center,
-                )
-                IconButton(
-                    onClick = {
-                        keyboardController?.hide()
+            when (isFromHome) {
+                true -> {
+                    Box(
+                        Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (storeData == null) {
+                            true -> {
+                                Box(
+                                    modifier = Modifier
+                                        .width(150.dp)
+                                        .height(30.dp)
+                                        .background(
+                                            CustomColor.primaryColor50,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                )
+                            }
 
-                        isPressAddNewAddress.value = true
+                            else -> {
+                                Text(
+                                    storeData.name,
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (24).sp,
+                                    color = CustomColor.neutralColor950,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+
+                        }
                     }
-                ) {
-                    Icon(
-                        ImageVector.vectorResource(R.drawable.location_address_list),
-                        "",
-                        modifier = Modifier.size(24.dp),
-                        tint = CustomColor.primaryColor700
+                }
+
+                else -> {
+                    Sizer(10)
+
+                    Text(
+                        "Store Name",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (18).sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center,
                     )
+                    TextInputWithTitle(
+                        value = storeName,
+                        title = "",
+                        placHolder = storeData?.name ?: "Write Your Store Name",
+                        isHasError = false,
+                    )
+
+
+                }
+            }
+
+            if (isFromHome == false) {
+                Sizer(10)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Store Bannel",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (18).sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .height(40.dp)
+                            .width(70.dp)
+                            .background(
+                                CustomColor.primaryColor200,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                isShownSubCategoryBottomSheet.value = true
+                            },
+                        contentAlignment = Alignment.Center
+
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            "",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                }
+            }
+            when (banners.value==null) {
+                true -> {
+                    Sizer(10)
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .background(
+                                CustomColor.primaryColor50,
+                                RoundedCornerShape(8.dp)
+                            )
+                    )
+                }
+
+                else -> {
+                    if (!storeBanners.isNullOrEmpty()) BannerBage(
+                        storeBanners,
+                        true
+                    )
+
                 }
             }
             Sizer(10)
 
-            Text(
-                "Store Name",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            TextInputWithTitle(
-                value = storeName,
-                title = "",
-                placHolder = storeData.value?.store?.name ?: "Write Your Store Name",
-                isHasError = false,
-//                focusRequester = focusRequester
-            )
+            when (isFromHome) {
+                true -> {
+                    when (address.value==null) {
+                        true -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(40.dp)
+                                    .background(
+                                        CustomColor.primaryColor50,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                            )
+                        }
+
+                        else -> {
+                            if(!storeAddress.isNullOrEmpty())
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Text(
+                                    "Store Location",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (18).sp,
+                                    color = CustomColor.neutralColor950,
+                                    textAlign = TextAlign.Center,
+                                )
+                                IconButton(
+                                    onClick = {
+                                        when (isFromHome == false) {
+                                            true -> {
+                                                keyboardController?.hide()
+                                                isPressAddNewAddress.value = true
+                                            }
+
+                                            else -> {
+
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        ImageVector.vectorResource(R.drawable.location_address_list),
+                                        "",
+                                        modifier = Modifier.size(24.dp),
+                                        tint = CustomColor.primaryColor700
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                else -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Text(
+                            "Store Location",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (18).sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center,
+                        )
+                        IconButton(
+                            onClick = {
+                                when (isFromHome == false) {
+                                    true -> {
+                                        keyboardController?.hide()
+                                        isPressAddNewAddress.value = true
+                                    }
+
+                                    else -> {
+
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.location_address_list),
+                                "",
+                                modifier = Modifier.size(24.dp),
+                                tint = CustomColor.primaryColor700
+                            )
+                        }
+                    }
+                }
+            }
+
+
 
             if (isNotEnablePermission.value) {
                 AlertDialog(
@@ -986,7 +1211,7 @@ fun StoreScreen(
 
 
             AnimatedVisibility(
-                visible = storeData.value?.store != null
+                visible = (store_id != null ||storeData!=null)
             ) {
 
 
@@ -995,56 +1220,92 @@ fun StoreScreen(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Sizer(5)
-                    Text(
-                        "Sub Category",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (18).sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center,
-                    )
                     Sizer(10)
 
                     LazyRow {
-                        items(storeData.value?.store?.subcategory?.size ?: 0)
-                        { index ->
-                            Box(
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .width(70.dp)
-                                    .background(
-                                        if (selectedSubCategory.value == index) CustomColor.alertColor_3_300 else Color.White,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (selectedSubCategory.value == index)
-                                            Color.White else CustomColor.neutralColor200,
-                                        RoundedCornerShape(8.dp)
+                        when((subcategories.value==null)){
+                            true->{
+                                items(20){
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(end = 5.dp)
+                                            .height(40.dp)
+                                            .width(90.dp)
+                                            .background(
+                                                    CustomColor.primaryColor50 ,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                          ,
+                                        contentAlignment = Alignment.Center
 
+                                    ){}
+                                }
+                            }
+                            else->{
+                                if(!storeSubCategories.isNullOrEmpty())
+                                items( storeSubCategories.size)
+                                { index ->
+                                    Box(
+                                        modifier = Modifier
+                                            .height(40.dp)
+                                            .width(70.dp)
+                                            .background(
+                                                if (selectedSubCategory.value == index)
+                                                    CustomColor.alertColor_3_300 else Color.White,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .border(
+                                                width = 1.dp,
+                                                color = if (selectedSubCategory.value == index)
+                                                    Color.White else CustomColor.neutralColor200,
+                                                RoundedCornerShape(8.dp)
+
+                                            )
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .combinedClickable(
+                                                onClick = {
+                                                    selectedSubCategory.value = index
+                                                },
+                                                onLongClick = {
+                                                    isShownSubCategoryBottomSheet.value = true
+                                                    isUpdate.value = true
+                                                    selectedSubCategoryId.value =
+                                                        storeSubCategories!![index].id
+                                                    subCategoryName.value = TextFieldValue(
+                                                        storeSubCategories!![index].name
+                                                    )
+                                                    categoryName.value = TextFieldValue(
+                                                        categories.value?.firstOrNull {
+                                                            it.id ==  storeSubCategories[index].category_id
+                                                        }!!.name
+                                                    )
+
+                                                }
+                                            )
+                                        //
+                                        ,
+                                        contentAlignment = Alignment.Center
+
+                                    ) {
+                                        Text(
+                                            storeSubCategories!![index].name ?: "",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = (18).sp,
+                                            color = if (selectedSubCategory.value == index)
+                                                Color.White else CustomColor.neutralColor200,
+                                            textAlign = TextAlign.Center,
                                         )
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                       selectedSubCategory.value=index
-                                    },
-                                contentAlignment = Alignment.Center
+                                    }
+                                }
 
-                            ) {
-                                Text(
-                                    storeData?.value?.store?.subcategory!![index]?.name ?: "",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (18).sp,
-                                    color = if (selectedSubCategory.value == index)
-                                        Color.White else CustomColor.neutralColor200,
-                                    textAlign = TextAlign.Center,
-                                )
                             }
                         }
 
+                        if(isFromHome==false)
                         item {
-                            if (storeData.value?.store?.subcategory != null)
+
+                            if(!storeSubCategories.isNullOrEmpty())
                                 Sizer(width = 10)
                             Box(
                                 modifier = Modifier
@@ -1076,6 +1337,7 @@ fun StoreScreen(
 
 
         }
+
     }
 
 

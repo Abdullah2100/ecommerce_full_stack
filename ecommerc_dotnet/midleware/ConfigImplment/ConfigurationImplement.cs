@@ -1,12 +1,11 @@
+namespace ecommerc_dotnet.midleware.ConfigImplment;
 
-namespace hotel_api.Services
-{
-    public class ConfigurationServicesImp : IConfigurationServices
+public class ConfigurationImplement : IConfig 
     {
 
-private readonly IConfiguration? _configurationService;
+        private readonly IConfiguration? _configurationService;
 
-        public ConfigurationServicesImp(IConfiguration configurationService){
+        public ConfigurationImplement(IConfiguration configurationService){
             _configurationService = configurationService;
         }
 
@@ -19,9 +18,6 @@ private readonly IConfiguration? _configurationService;
             }
             return result;
         }
-
         
-    }
 
-  
 }

@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using hotel_api.util;
 
 using Microsoft.IdentityModel.Tokens;
@@ -13,7 +14,7 @@ namespace hotel_api.Services
        
         public static string generateToken(
                 Guid? userID,string email,
-                IConfigurationServices config,
+                IConfig config,
                 enTokenMode enTokenMode=enTokenMode.AccessToken
         )
         {

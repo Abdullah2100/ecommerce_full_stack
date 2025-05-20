@@ -10,7 +10,4 @@ public class StoreResponseDto
     
     public Guid user_id { get; set; }
     public DateTime created_at { get; set; } = DateTime.Now;
-    public List<AddressResponseDto> addresses { get; set; }
-    public List<SubCategoryResponseDto>? subcategory { get; set; }
-    public UserInfoResponseDto? user { get; set; }
 }

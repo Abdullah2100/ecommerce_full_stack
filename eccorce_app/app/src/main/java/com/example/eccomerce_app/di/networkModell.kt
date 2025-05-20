@@ -8,14 +8,18 @@ import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.eccomerce_app.Util.General
+import com.microsoft.signalr.HubConnection
+import com.microsoft.signalr.HubConnectionBuilder
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
@@ -29,6 +33,9 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
             connectTimeout = 60_000
         }
 
+        install(WebSockets)
+
+        install(HttpTimeout)
 
         install(Auth) {
             bearer {
@@ -93,9 +100,20 @@ null;
     }
 }
 
-
+fun socketClient(): HubConnection? {
+    try {
+        var connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
+        return  HubConnectionBuilder
+            .create(connectionUrl)
+            .withTransport(com.microsoft.signalr.TransportEnum.LONG_POLLING)
+            .build()
+    }catch(e: Exception){
+        return null;
+    }
+}
 
 val httpClientModule = module {
     single { provideHttpClient(get()) }
+    single { socketClient() }
 
 }

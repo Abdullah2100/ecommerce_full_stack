@@ -1,6 +1,7 @@
 package com.example.eccomerce_app.model
 
 import com.example.eccomerce_app.dto.response.AddressResponseDto
+import com.example.eccomerce_app.dto.response.BannerResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
@@ -26,7 +27,11 @@ object DtoToModel {
         );
     }
     fun SubCategoryResponseDto.toSubCategory(): SubCategory{
-        return SubCategory(id = this.id,name=this.name)
+        return SubCategory(
+            id = this.id,
+            name=this.name,
+            category_id=this.category_id,
+            store_id=this.store_id)
     }
 
 
@@ -40,9 +45,6 @@ object DtoToModel {
             user_id = this.user_id,
             pig_image = this.wallpaper_image.replace("localhost", "10.0.2.2"),
             small_image = this.small_image.replace("localhost", "10.0.2.2"),
-            subcategory = this.subcategory?.map { it.toSubCategory() }?.toList(),
-            user = this.user?.toUser(),
-            addresses = this.addresses.map { it.toAddress() }
         )
     }
 
@@ -54,7 +56,16 @@ object DtoToModel {
             email = this.email,
             thumbnail=if(this.thumbnail!=null)this.thumbnail.replace("localhost","10.0.2.2") else "",
             address = this.address?.map { it.toAddress() }?.toList(),
-            store= this.store?.toStore()
+            store_id = this.store_id
+        )
+    }
+
+
+    fun BannerResponseDto.toBanner():Banner{
+        return Banner(
+            id=this.id,
+            image=if(this.image.isNotEmpty())this.image.replace("localhost","10.0.2.2") else "",
+            store_id = this.store_id
         )
     }
 }

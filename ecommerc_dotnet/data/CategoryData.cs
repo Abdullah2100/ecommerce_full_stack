@@ -1,6 +1,7 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
@@ -17,8 +18,8 @@ public class CategoryData
         _dbContext = dbContext;
     }
 
-    public List<CategoryResponseDto>? getCategories(
-        IConfigurationServices services,
+    public async Task<List<CategoryResponseDto>?>getCategories(
+        IConfig services,
         int pageNumber = 1,
         int pageSize = 20)
     {
@@ -37,7 +38,7 @@ public class CategoryData
                     image_path = services.getKey("url_file") + u.image_path,
                 });
 
-            return result.ToList();
+            return await result.ToListAsync();
         }
         catch (Exception ex)
         {
@@ -52,7 +53,8 @@ public class CategoryData
     {
         try
         {
-            return await _dbContext.Category.FindAsync(id);
+            return await _dbContext.Category
+                .FindAsync(id);
         }
         catch (Exception ex)
         {

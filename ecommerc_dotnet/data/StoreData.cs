@@ -1,5 +1,6 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
@@ -11,68 +12,32 @@ namespace ecommerc_dotnet.data;
 public class StoreData
 {
     private readonly AppDbContext _dbContext;
-    private readonly IConfigurationServices _config;
+    private readonly IConfig _config;
 
-    public StoreData(AppDbContext dbContext, IConfigurationServices config)
+    public StoreData(AppDbContext dbContext, IConfig config)
     {
         _dbContext = dbContext;
         _config = config;
     }
 
 
-    public async Task<StoreResponseDto?> getStoreByUser(Guid id)
+    public async Task<StoreResponseDto?> getStoreByUser(Guid userId)
     {
         try
         {
-            var result = await (from st in _dbContext.Store
-                    join ad in _dbContext.Address on st.id equals ad.owner_id
-                    where st.user_id == id
-                    select new StoreResponseDto
-                    {
-                        id = st.id,
-                        name = st.name,
-                        wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
-                        small_image = _config.getKey("url_file") + st.small_image,
-                        created_at = st.created_at, 
-                        addresses = _dbContext.Address.Where(a => a.owner_id == st.id)
-                            .Select(add=>new AddressResponseDto
-                            {
-                                id=add.id,
-                                title=add.title,
-                                longitude = add.longitude,
-                                latitude = add.latitude,
-                            }).ToList(),
-                        subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
-                        {
-                            name = sub.name,
-                            id = sub.id,
-                        }).ToList(),
-                        user = new UserInfoResponseDto
-                        {
-                            name = st.name,
-                            phone = st.user.phone,
-                            email = st.user.phone,
-                            Id = st.user.ID,
-                            thumbnail = st.user.thumbnail == null
-                                ?"" 
-                                : _config.getKey("url_file") + st.user.thumbnail,
-                            address = _dbContext.Address.Where(add=>add.owner_id==st.user_id)
-                                .Select(add=>new AddressResponseDto
-                                {
-                                    id=add.id,
-                                    isCurrent = add.isCurrent,
-                                    latitude=add.latitude,
-                                    longitude = add.longitude,
-                                    title = add.title
-                                }).ToList(),
-                            store = null
-                        },
-                    }
-                )
+            return await _dbContext.Store
                 .AsNoTracking()
-                .OrderByDescending(st => st.created_at)
+                .Where(st => st.user_id == userId)
+                .Select(st => new StoreResponseDto
+                {
+                    id = st.id,
+                    name = st.name,
+                    wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
+                    small_image = _config.getKey("url_file") + st.small_image,
+                    created_at = st.created_at,
+                    user_id = st.user_id
+                })
                 .FirstOrDefaultAsync();
-            return result;
         }
         catch (Exception ex)
         {
@@ -81,29 +46,24 @@ public class StoreData
         }
     }
 
-/*
-    public static StoreResponseDto? getStoreByUser(Guid id,AppDbContext dbContext,IConfigurationServices config)
+    public async Task<StoreResponseDto?> getStoreById(Guid id)
     {
         try
         {
-            return       (from st in dbContext.Store
-                    join ad in dbContext.Address on st.id equals ad.id
-                    where st.user_id == id
-                    select new StoreResponseDto
-                    {
-                        id = st.id,
-                        name = st.name,
-                        wallpaper_image = config.getKey("url_file") +st.wallpaper_image,
-                        small_image = config.getKey("url_file") + st.small_image,
-                        created_at = st.created_at,
-                        latitude = ad.latitude,
-                        longitide = ad.longitude,
-                        user = UserData.getUser(st.user_id,dbContext,config)
-                    }
-                )
+            return await _dbContext.Store
                 .AsNoTracking()
-                .OrderByDescending(st=>st.created_at)
-                .FirstOrDefault();
+                .Where(st => st.id == id)
+                .OrderByDescending(st => st.created_at)
+                .Select(st => new StoreResponseDto
+                {
+                    id = st.id,
+                    name = st.name,
+                    wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
+                    small_image = _config.getKey("url_file") + st.small_image,
+                    created_at = st.created_at,
+                    user_id = st.user_id
+                })
+                .FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -111,14 +71,79 @@ public class StoreData
             return null;
         }
     }
-*/
+
+
+    public async Task<List<AddressResponseDto>> getStoreAddress(
+        Guid id,
+        int pageNumber,
+        int pageSize = 20
+        )
+    {
+        try
+        {
+            return await _dbContext.Address
+                .AsNoTracking()
+                .Where(ad => ad.owner_id == id)
+                .OrderByDescending(st => st.created_at)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(ad => new AddressResponseDto
+                {
+                    id = ad.id,
+                    isCurrent = ad.isCurrent,
+                    longitude = ad.longitude,
+                    latitude = ad.latitude,
+                    title = ad.title
+                })
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("error from getting store by id " + ex.Message);
+            return new  List<AddressResponseDto>();
+        }
+    }
+
+
+    /*
+        public static StoreResponseDto? getStoreByUser(Guid id,AppDbContext dbContext,IConfigurationServices config)
+        {
+            try
+            {
+                return       (from st in dbContext.Store
+                        join ad in dbContext.Address on st.id equals ad.id
+                        where st.user_id == id
+                        select new StoreResponseDto
+                        {
+                            id = st.id,
+                            name = st.name,
+                            wallpaper_image = config.getKey("url_file") +st.wallpaper_image,
+                            small_image = config.getKey("url_file") + st.small_image,
+                            created_at = st.created_at,
+                            latitude = ad.latitude,
+                            longitide = ad.longitude,
+                            user = UserData.getUser(st.user_id,dbContext,config)
+                        }
+                    )
+                    .AsNoTracking()
+                    .OrderByDescending(st=>st.created_at)
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error from getting store by id " + ex.Message);
+                return null;
+            }
+        }
+    */
+
     public async Task<List<StoreResponseDto>>? getStore(int pageNumber, int pageSize = 25)
     {
         try
         {
-            return await (from st in _dbContext.Store
+            return /* await (from st in _dbContext.Store
                     join ad in _dbContext.Address on st.id equals ad.owner_id
-                    
+
                     select new StoreResponseDto
                     {
                         id = st.id,
@@ -134,38 +159,27 @@ public class StoreData
                                 longitude = add.longitude,
                                 latitude = add.latitude,
                             }).ToList(),
-                         subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
-                        {
-                            name = sub.name,
-                            id = sub.id,
-                        }).ToList(),
-                        user = new UserInfoResponseDto
-                        {
-                            name = st.name,
-                            phone = st.user.phone,
-                            email = st.user.phone,
-                            Id = st.user.ID,
-                            thumbnail = st.user.thumbnail == null
-                                ? null
-                                : _config.getKey("url_file") + st.user.thumbnail,
-                            address = _dbContext.Address.Where(add=>add.owner_id==st.user_id)
-                                .Select(add=>new AddressResponseDto
-                                {
-                                    id=add.id,
-                                    isCurrent = add.isCurrent,
-                                    latitude=add.latitude,
-                                    longitude = add.longitude,
-                                    title = add.title
-                                }).ToList(),
-                            store = null
-                        },
+
+                        user_id =st.user_id
+
                     }
-                )
-                .AsNoTracking()
-            .OrderByDescending(st => st.created_at)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+                )*/
+                await _dbContext.Store
+                    .Include(st => st.addresses)
+                    .AsNoTracking()
+                    .OrderByDescending(st => st.created_at)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(st => new StoreResponseDto
+                    {
+                        id = st.id,
+                        name = st.name,
+                        wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
+                        small_image = _config.getKey("url_file") + st.small_image,
+                        created_at = st.created_at,
+                        user_id = st.user_id,
+                    })
+                    .ToListAsync();
         }
         catch (Exception ex)
         {

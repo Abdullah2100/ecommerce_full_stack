@@ -49,7 +49,7 @@ public class AddressData
         
         try
         {
-            var result =await   _dbContext.Address
+             return await   _dbContext.Address
                 .AsNoTracking()
                 .Where(ad => ad.owner_id == userId)
                 .OrderByDescending(ad=>ad.created_at )
@@ -62,7 +62,6 @@ public class AddressData
                         title = ad.title, isCurrent = ad.isCurrent,
                     })
                 .ToListAsync();
-            return result;
 
         }
         catch (Exception ex)
@@ -146,7 +145,9 @@ public class AddressData
         try
         {
 
-           return await  _dbContext.Address.AsNoTracking().CountAsync(u => u.owner_id == userId && u.id != userId);
+           return await  _dbContext.Address
+               .AsNoTracking()
+               .CountAsync(u => u.owner_id == userId && u.id != userId);
         }
         catch (Exception ex)
         {

@@ -240,6 +240,7 @@ fun NavController(
             }
 
             composable<Screens.Store>(
+
                 enterTransition = {
                     return@composable slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.End, tween(750)
@@ -250,8 +251,11 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {
+            ) {navRef->
+                var store_id = navRef.toRoute<Screens.Store>()
                 StoreScreen(
+                    store_idCopy= store_id.store_idCopy,
+                    isFromHome=store_id.isFromHome,
                     nav = nav,
                     homeViewModel = homeViewModle
                 )

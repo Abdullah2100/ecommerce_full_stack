@@ -1,6 +1,7 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
@@ -10,12 +11,12 @@ namespace ecommerc_dotnet.data;
 
 public class UserData
 {
-    private readonly IConfigurationServices _configuration;
+    private readonly IConfig _configuration;
     private readonly AppDbContext _dbContext;
     // private readonly ILogger _logger;
 
     public UserData(AppDbContext dbContext,
-        IConfigurationServices configuration
+        IConfig configuration
 
         // , ILogger logger
     )
@@ -32,7 +33,7 @@ public class UserData
     {
         try
         {
-            var result = _dbContext.Users
+            var result = await _dbContext.Users
                 .AsNoTracking()
                 .Where(u => (u.email == userName) && u.password == password)
                 .Select(u => new UserInfoResponseDto
@@ -43,8 +44,10 @@ public class UserData
                     email = u.email,
                     thumbnail = _configuration.getKey("url_file") + u.thumbnail,
                     address = null,
-                    store = null
-                }).FirstOrDefault();
+                    store_id = u.Store.id
+                })
+                .FirstOrDefaultAsync();
+            
             var address = await _dbContext.Address
                 .AsNoTracking()
                 .Where(ad => ad.owner_id == result.Id)
@@ -76,6 +79,7 @@ public class UserData
         {
             var result =await _dbContext.Users
                 .AsNoTracking()
+                .Include(u=>u.Store)
                 .Where(us => us.ID == userID)
                 .Select(us => new UserInfoResponseDto
                 {
@@ -88,7 +92,7 @@ public class UserData
                         : _configuration.getKey("url_file") + us.thumbnail,
 
                     address = null,
-                    store = null
+                    store_id = us.Store.id
                 }).FirstOrDefaultAsync();
             ;
             if (result != null) {
@@ -105,41 +109,8 @@ public class UserData
                         isCurrent = ad.isCurrent,
                     }).ToListAsync();
 
-                result.store = await _dbContext.Store
-                    .AsNoTracking()
-                    .Where(st => st.user_id == userID)
-                    .Select(st =>
-                        new StoreResponseDto
-                        {
-                            id = st.id,
-                            name = st.name,
-                            wallpaper_image = _configuration.getKey("url_file") + st.wallpaper_image,
-                            small_image = _configuration.getKey("url_file") + st.small_image,
-                            created_at = st.created_at,
-                            // latitude = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
-                            // longitide = (_dbContext.Address.FirstOrDefault(adh => adh.owner_id == st.id).latitude),
-                            subcategory = st.SubCategories.Select(sub => new SubCategoryResponseDto
-                            {
-                                name = sub.name,
-                                id = sub.id,
-                            }).ToList(),
-                            user = null
-                        }
-                    ).FirstOrDefaultAsync();
+               
 
-                if (result.store != null)
-                {
-                    result.store.addresses = await _dbContext.Address
-                        .AsNoTracking()
-                        .Where(ad=>ad.owner_id==result.store.id)
-                        .Select(ad=> new AddressResponseDto
-                        {
-                            id= ad.id,
-                            title = ad.title,
-                            longitude = ad.longitude,
-                            latitude = ad.latitude,
-                        }).ToListAsync();
-                }
 
 
             }
@@ -157,9 +128,9 @@ public class UserData
     {
         try
         {
-            return _dbContext.Users
+            return await _dbContext.Users
                 .Include(st=>st.Store)
-                .FirstOrDefault(u => u.ID == ID);
+                .FirstOrDefaultAsync(u => u.ID == ID);
         }
         catch (Exception e)
         {
@@ -224,7 +195,9 @@ public class UserData
         try
         {
             var result = _dbContext.Users
+                .AsNoTracking()
                 .FirstOrDefault(u => u.ID == userID);
+            
             result!.isDeleted = true;
             await _dbContext.SaveChangesAsync();
             return true;
@@ -249,8 +222,8 @@ public class UserData
         {
             if (role == 0)
             {
-                var result = _dbContext.Users
-                    .FirstOrDefault(u => u.role == 1);
+                var result = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.role == 1);
                 if (result != null)
                 {
                     Console.WriteLine("can't create new admin while there is already an admin");

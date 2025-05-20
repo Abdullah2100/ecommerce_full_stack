@@ -12,6 +12,7 @@ activityCompose = "1.10.1"
 composeBom = "2025.05.00"
 playServicesLocation = "17.0.0"
 room = "2.7.1"
+signalr = "10.0.0-preview.4.25258.110"
 sqlcipher= "4.5.3"
 sqlight = "2.1.0"
 koin = "4.0.4"
@@ -55,6 +56,8 @@ room-runtime = { group = "androidx.room",name="room-runtime", version.ref = "roo
 room-compiler = { group = "androidx.room",name="room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room",name="room-ktx", version.ref = "room" }
 
+#signalr
+signalr = { module = "com.microsoft.signalr:signalr", version.ref = "signalr" }
 
 #sqlciper
 sqlcipher = {group = "net.zetetic" , name = "android-database-sqlcipher" , version.ref = "sqlcipher"}
