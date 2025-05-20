@@ -584,6 +584,54 @@ class HomeViewModel(
 
     }
 
+    suspend fun createBanner(
+        end_date: String,
+        image: File,
+
+    ): String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.createBanner(
+            end_date,
+            image
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as BannerResponseDto
+
+                var bannersHolder = mutableListOf<Banner>()
+                var bannersResponse =data.toBanner()
+
+                bannersHolder.add(bannersResponse)
+                if (_banners.value != null) {
+                    bannersHolder.addAll(_banners.value!!)
+                }
+
+                var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
+                if (distinticBanner.size > 0)
+                    _banners.emit(distinticBanner)
+                else
+                    _banners.emit(emptyList<Banner>())
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString().replace("",""))
+                if (errorMessage.contains(General.BASED_URL.substring(8,20))) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"","")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
+
+
     private fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
             var result = homeRepository.getStoreAddress(store_id, pageNumber);

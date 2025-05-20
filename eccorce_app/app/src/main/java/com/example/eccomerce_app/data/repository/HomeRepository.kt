@@ -546,6 +546,63 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+    suspend fun createBanner(
+        endDate: String,
+        image: File,
+    ): NetworkCallHandler {
+        return try {
+            var result = client.post(
+                Secrets.getBaseUrl() + "/Banner"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("end_at", endDate)
+                            append(
+                                key = "image", // Must match backend expectation
+                                value = image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${image.name}"
+                                    )
+                                }
+                            )
+
+                        }
+                    )
+                )
+            }
+            if (result.status == HttpStatusCode.Created) {
+                return NetworkCallHandler.Successful(result.body<BannerResponseDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
     suspend fun getStoreById(id: UUID): NetworkCallHandler {
         return try {
             val full_url =Secrets.getBaseUrl()+"/Store/${id}";

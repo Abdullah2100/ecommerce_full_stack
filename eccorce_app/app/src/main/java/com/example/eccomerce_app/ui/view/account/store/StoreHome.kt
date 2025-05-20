@@ -1,6 +1,7 @@
 package com.example.eccomerce_app.ui.view.account.store
 
 import android.Manifest
+import android.provider.CalendarContract
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -36,6 +37,8 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +50,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,12 +73,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
+import com.example.eccomerce_app.Util.General.toLocalDateTime
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.SubCategoryUpdate
 import com.example.eccomerce_app.ui.component.BannerBage
@@ -89,6 +95,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.Calendar
 import java.util.UUID
 import kotlin.collections.forEach
 
@@ -105,7 +115,6 @@ fun StoreScreen(
 
     val myInfo = homeViewModel.myInfo.collectAsState();
     var myStore_id = myInfo.value?.store_id
-    var isMyStore = myStore_id != null && myStore_id == store_id
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -127,20 +136,23 @@ fun StoreScreen(
 
     val isLoading = homeViewModel.isLoading.collectAsState()
 
+//    var isLoading = remember { muta }
+
     val wall_paper_image = remember { mutableStateOf<File?>(null) }
     val small_paper_image = remember { mutableStateOf<File?>(null) }
     val storeName = remember { mutableStateOf(TextFieldValue("")) }
     val longint = remember { mutableStateOf(0.0) }
     val latit = remember { mutableStateOf(0.0) }
 
-
-    val isPigImage = remember { mutableStateOf(false) }
+    val isPigImage = remember { mutableStateOf<Boolean?>(null) }
 
     val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
     val isUpdate = remember { mutableStateOf(false) }
     val selectedSubCategoryId = remember { mutableStateOf(UUID.randomUUID()) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
     val isSubCategoryCreateError = remember { mutableStateOf(false) }
+
+
     val errorMessage = remember { mutableStateOf("") }
 
     val selectedSubCategory = remember { mutableStateOf(0) }
@@ -157,6 +169,14 @@ fun StoreScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+
+    val bannerImage = remember { mutableStateOf<File?>(null) }
+    val bannelEndDate = remember { mutableStateOf<LocalDateTime?>(null) }
+    val isShownDateDialog = remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    val currentTime = Calendar.getInstance().timeInMillis;
+    val isSendingBanner = remember { mutableStateOf(false) }
+
     var animated = animateDpAsState(
         if (isExpandedCategory.value) ((categories.value?.size ?: 1) * 45).dp else 0.dp
     )
@@ -165,6 +185,7 @@ fun StoreScreen(
         if (isExpandedCategory.value) 180f else 0f
     )
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
     val requestPermssion = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permission ->
@@ -202,16 +223,25 @@ fun StoreScreen(
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context);
             if (fileHolder != null) {
-                when (isPigImage.value) {
+                when (isPigImage.value == null) {
                     true -> {
-                        wall_paper_image.value = fileHolder
+                        bannerImage.value = fileHolder
+                        isShownDateDialog.value = true
                     }
 
                     else -> {
-                        small_paper_image.value = fileHolder
+                        when (isPigImage.value) {
+                            true -> {
+                                wall_paper_image.value = fileHolder
+                            }
+
+                            else -> {
+                                small_paper_image.value = fileHolder
+                            }
+                        }
                     }
                 }
-
+                isPigImage.value = null
             }
         }
     }
@@ -242,11 +272,9 @@ fun StoreScreen(
     LaunchedEffect(Unit) {
         if (store_id != null)
             homeViewModel.getStoreInfoByStoreId(store_id)
-
-
     }
 
-    Log.d("storeSubCategoryis",storeSubCategories.toString())
+    Log.d("storeSubCategoryis", storeSubCategories.toString())
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -419,6 +447,8 @@ fun StoreScreen(
                                 currutine.launch {
                                     keyboardController?.hide()
                                     var result = async {
+                                        keyboardController?.hide()
+
                                         if (isUpdate.value)
                                             homeViewModel.updateSubCategory(
                                                 SubCategoryUpdate(
@@ -533,7 +563,10 @@ fun StoreScreen(
                     }
                 },
                 actions = {
-                    if (myStore_id == null) {
+                    if (
+                        myStore_id == null &&
+                        isFromHome == false
+                    ) {
                         TextButton(
                             enabled = isLoading.value == false,
                             onClick = {
@@ -584,7 +617,9 @@ fun StoreScreen(
                                 }
                             }
                         }
-                    } else if (myStore_id != null &&
+                    } else if (
+                        isFromHome == false &&
+                        myStore_id != null &&
                         myStore_id == store_id &&
                         isFromHome == false &&
                         (storeName.value.text.isNotEmpty() ||
@@ -597,7 +632,6 @@ fun StoreScreen(
                             enabled = isLoading.value == false,
                             onClick = {
                                 keyboardController?.hide()
-//                                focusRequester?.requestFocus()
                                 currutine.launch {
                                     var result = async {
 
@@ -648,6 +682,86 @@ fun StoreScreen(
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
+
+
+        if (isSendingBanner.value)
+            Dialog(
+                onDismissRequest = {}
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(90.dp)
+                        .width(90.dp)
+                        .background(
+                            Color.White,
+                            RoundedCornerShape(15.dp)
+                        ), contentAlignment = Alignment.Center
+                )
+                {
+                    CircularProgressIndicator(
+                        color = CustomColor.primaryColor700,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+
+        if (isShownDateDialog.value)
+            DatePickerDialog(
+                modifier = Modifier.background(Color.White),
+                onDismissRequest = { /*TODO*/ },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (datePickerState?.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
+                                isShownDateDialog.value = false
+                                currutine.launch {
+                                    snackbarHostState.showSnackbar("You must select valide date")
+                                }
+                            } else {
+                                isShownDateDialog.value = false
+                                isSendingBanner.value = true
+                                currutine.launch {
+                                 val dattime = Calendar.getInstance().apply {
+                                     timeInMillis = datePickerState.selectedDateMillis!!
+                                 }
+                                    var result = async {
+                                        homeViewModel.createBanner(
+                                            end_date = dattime.toLocalDateTime().toString()
+                                                .toString(),
+                                            image = bannerImage.value!!
+                                        )
+                                    }.await()
+                                    isSendingBanner.value = false
+                                    var errorMessage = result
+                                    if (result.isNullOrEmpty())
+                                        errorMessage = "banner created seccesffuly";
+                                    else errorMessage = result;
+                                    currutine.launch {
+                                        snackbarHostState.showSnackbar(
+                                            errorMessage
+                                        )
+
+                                    }
+                                }
+
+                            }
+                        }
+                    ) {
+                        Text(
+                            "ok",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = (18).sp,
+                            color = CustomColor.primaryColor700,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                },
+                dismissButton = { /*TODO*/ }
+            )
+            {
+                DatePicker(state = datePickerState)
+            }
 
         Column(
             modifier = Modifier
@@ -1046,7 +1160,11 @@ fun StoreScreen(
                             )
                             .clip(RoundedCornerShape(8.dp))
                             .clickable {
-                                isShownSubCategoryBottomSheet.value = true
+                                onImageSelection.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
                             },
                         contentAlignment = Alignment.Center
 
@@ -1061,7 +1179,7 @@ fun StoreScreen(
 
                 }
             }
-            when (banners.value==null) {
+            when (banners.value == null) {
                 true -> {
                     Sizer(10)
 
@@ -1088,7 +1206,7 @@ fun StoreScreen(
 
             when (isFromHome) {
                 true -> {
-                    when (address.value==null) {
+                    when (address.value == null) {
                         true -> {
                             Box(
                                 modifier = Modifier
@@ -1102,43 +1220,43 @@ fun StoreScreen(
                         }
 
                         else -> {
-                            if(!storeAddress.isNullOrEmpty())
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            if (!storeAddress.isNullOrEmpty())
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
 
-                                Text(
-                                    "Store Location",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (18).sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.Center,
-                                )
-                                IconButton(
-                                    onClick = {
-                                        when (isFromHome == false) {
-                                            true -> {
-                                                keyboardController?.hide()
-                                                isPressAddNewAddress.value = true
-                                            }
+                                    Text(
+                                        "Store Location",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (18).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            when (isFromHome == false) {
+                                                true -> {
+                                                    keyboardController?.hide()
+                                                    isPressAddNewAddress.value = true
+                                                }
 
-                                            else -> {
+                                                else -> {
 
+                                                }
                                             }
                                         }
+                                    ) {
+                                        Icon(
+                                            ImageVector.vectorResource(R.drawable.location_address_list),
+                                            "",
+                                            modifier = Modifier.size(24.dp),
+                                            tint = CustomColor.primaryColor700
+                                        )
                                     }
-                                ) {
-                                    Icon(
-                                        ImageVector.vectorResource(R.drawable.location_address_list),
-                                        "",
-                                        modifier = Modifier.size(24.dp),
-                                        tint = CustomColor.primaryColor700
-                                    )
                                 }
-                            }
                         }
                     }
                 }
@@ -1211,7 +1329,7 @@ fun StoreScreen(
 
 
             AnimatedVisibility(
-                visible = (store_id != null ||storeData!=null)
+                visible = (store_id != null || storeData != null)
             ) {
 
 
@@ -1223,113 +1341,114 @@ fun StoreScreen(
                     Sizer(10)
 
                     LazyRow {
-                        when((subcategories.value==null)){
-                            true->{
-                                items(20){
+                        when ((subcategories.value == null)) {
+                            true -> {
+                                items(20) {
                                     Box(
                                         modifier = Modifier
                                             .padding(end = 5.dp)
                                             .height(40.dp)
                                             .width(90.dp)
                                             .background(
-                                                    CustomColor.primaryColor50 ,
+                                                CustomColor.primaryColor50,
                                                 RoundedCornerShape(8.dp)
-                                            )
-                                          ,
+                                            ),
                                         contentAlignment = Alignment.Center
 
-                                    ){}
+                                    ) {}
                                 }
                             }
-                            else->{
-                                if(!storeSubCategories.isNullOrEmpty())
-                                items( storeSubCategories.size)
-                                { index ->
-                                    Box(
-                                        modifier = Modifier
-                                            .height(40.dp)
-                                            .width(70.dp)
-                                            .background(
-                                                if (selectedSubCategory.value == index)
-                                                    CustomColor.alertColor_3_300 else Color.White,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .border(
-                                                width = 1.dp,
+
+                            else -> {
+                                if (!storeSubCategories.isNullOrEmpty())
+                                    items(storeSubCategories.size)
+                                    { index ->
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(end = 4.dp)
+                                                .height(40.dp)
+                                                .width(70.dp)
+                                                .background(
+                                                    if (selectedSubCategory.value == index)
+                                                        CustomColor.alertColor_3_300 else Color.White,
+                                                    RoundedCornerShape(8.dp)
+                                                )
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = if (selectedSubCategory.value == index)
+                                                        Color.White else CustomColor.neutralColor200,
+                                                    RoundedCornerShape(8.dp)
+
+                                                )
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .combinedClickable(
+                                                    onClick = {
+                                                        selectedSubCategory.value = index
+                                                    },
+                                                    onLongClick = {
+                                                        isShownSubCategoryBottomSheet.value = true
+                                                        isUpdate.value = true
+                                                        selectedSubCategoryId.value =
+                                                            storeSubCategories!![index].id
+                                                        subCategoryName.value = TextFieldValue(
+                                                            storeSubCategories!![index].name
+                                                        )
+                                                        categoryName.value = TextFieldValue(
+                                                            categories.value?.firstOrNull {
+                                                                it.id == storeSubCategories[index].category_id
+                                                            }!!.name
+                                                        )
+
+                                                    }
+                                                )
+                                            //
+                                            ,
+                                            contentAlignment = Alignment.Center
+
+                                        ) {
+                                            Text(
+                                                storeSubCategories!![index].name ?: "",
+                                                fontFamily = General.satoshiFamily,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = (18).sp,
                                                 color = if (selectedSubCategory.value == index)
                                                     Color.White else CustomColor.neutralColor200,
-                                                RoundedCornerShape(8.dp)
-
+                                                textAlign = TextAlign.Center,
                                             )
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .combinedClickable(
-                                                onClick = {
-                                                    selectedSubCategory.value = index
-                                                },
-                                                onLongClick = {
-                                                    isShownSubCategoryBottomSheet.value = true
-                                                    isUpdate.value = true
-                                                    selectedSubCategoryId.value =
-                                                        storeSubCategories!![index].id
-                                                    subCategoryName.value = TextFieldValue(
-                                                        storeSubCategories!![index].name
-                                                    )
-                                                    categoryName.value = TextFieldValue(
-                                                        categories.value?.firstOrNull {
-                                                            it.id ==  storeSubCategories[index].category_id
-                                                        }!!.name
-                                                    )
-
-                                                }
-                                            )
-                                        //
-                                        ,
-                                        contentAlignment = Alignment.Center
-
-                                    ) {
-                                        Text(
-                                            storeSubCategories!![index].name ?: "",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = (18).sp,
-                                            color = if (selectedSubCategory.value == index)
-                                                Color.White else CustomColor.neutralColor200,
-                                            textAlign = TextAlign.Center,
-                                        )
+                                        }
                                     }
-                                }
 
                             }
                         }
 
-                        if(isFromHome==false)
-                        item {
+                        if (isFromHome == false)
+                            item {
 
-                            if(!storeSubCategories.isNullOrEmpty())
-                                Sizer(width = 10)
-                            Box(
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .width(70.dp)
-                                    .background(
-                                        CustomColor.primaryColor200,
-                                        RoundedCornerShape(8.dp)
+                                if (!storeSubCategories.isNullOrEmpty())
+                                    Sizer(width = 10)
+                                Box(
+                                    modifier = Modifier
+                                        .height(40.dp)
+                                        .width(70.dp)
+                                        .background(
+                                            CustomColor.primaryColor200,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            isShownSubCategoryBottomSheet.value = true
+                                        },
+                                    contentAlignment = Alignment.Center
+
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        "",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
                                     )
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        isShownSubCategoryBottomSheet.value = true
-                                    },
-                                contentAlignment = Alignment.Center
-
-                            ) {
-                                Icon(
-                                    Icons.Default.Add,
-                                    "",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                }
                             }
-                        }
                     }
                 }
 

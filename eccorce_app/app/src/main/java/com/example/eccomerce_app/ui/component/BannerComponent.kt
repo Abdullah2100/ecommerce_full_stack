@@ -49,8 +49,9 @@ fun BannerBage(
     val coroutine = rememberCoroutineScope()
 
     val currentPage = remember { mutableStateOf(0) }
-    val counter = remember { mutableStateOf(0) }
     var pagerState = rememberPagerState { banners.size }
+
+    var operationType = remember { mutableStateOf('+') }
 
     if (banners.size > 1) {
         LaunchedEffect(Unit) {
@@ -60,15 +61,28 @@ fun BannerBage(
                     easing = EaseInOut
                 ))
 
-                if (currentPage.value < banners.size - 1) {
-                    currentPage.value += 1;
-                } else {
-                    currentPage.value = 0;
+                if (currentPage.value== banners.size-1 ) {
+                    operationType.value='-';
+                } else if(currentPage.value==-1) {
+                    operationType.value='+';
+                }
+
+                when(operationType.value){
+                    '-'->{
+                        currentPage.value-=1;
+                    }
+                    else->{
+                        currentPage.value+=1;
+                    }
                 }
                 delay(3000)
             }
         }
     }
+
+
+
+
     HorizontalPager(
         modifier = Modifier.padding(top = 15.dp), state = pagerState,
         pageSpacing = 2.dp

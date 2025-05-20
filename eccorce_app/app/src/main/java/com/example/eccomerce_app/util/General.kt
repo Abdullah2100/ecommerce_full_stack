@@ -2,20 +2,22 @@ package com.example.eccomerce_app.Util
 
 import android.content.Context
 import android.net.Uri
-import com.example.eccomerce_app.R
+import android.provider.MediaStore
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
+import com.example.eccomerce_app.R
 import com.example.eccomerce_app.data.Room.AuthModleEntity
 import com.example.eccomerce_app.util.Secrets
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import java.io.File
-import android.provider.MediaStore
-import com.example.eccomerce_app.model.Banner
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Calendar
 
 
 object General {
@@ -77,9 +79,12 @@ object General {
             throw e;
         }
     }
+    fun Calendar.toLocalDateTime(): LocalDateTime? {
 
-    fun updateBanner(){
-
+        val tz = this.getTimeZone()
+        val zid = if (tz == null) ZoneId.systemDefault() else tz.toZoneId()
+        return LocalDateTime.ofInstant(this.toInstant(), zid)
     }
+
 
 }

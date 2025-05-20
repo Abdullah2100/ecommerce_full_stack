@@ -21,7 +21,7 @@ public class BannerController : ControllerBase
         IHubContext<EcommercHub> hubContext,
         AppDbContext appDbContext)
     {
-        _bannerData = new BannerData(appDbContext, configuration);
+        _bannerData = new BannerData(appDbContext, configuration,host);
         _userData = new UserData(appDbContext, configuration);
         _configuration = configuration;
         _host = host;

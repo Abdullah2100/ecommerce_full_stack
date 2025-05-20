@@ -13,11 +13,15 @@ public class BannerData
 {
     private readonly AppDbContext _dbContext;
     private readonly IConfig _config;
-
-    public BannerData(AppDbContext dbContext, IConfig configuration)
+    private readonly IWebHostEnvironment _host;
+    public BannerData(AppDbContext dbContext,
+        IConfig configuration,
+        IWebHostEnvironment host
+        )
     {
         _dbContext = dbContext;
         _config = configuration;
+        _host = host;
     }
     
     public async Task<BannerResponseDto?> getBanner(
@@ -104,7 +108,7 @@ public class BannerData
         catch (Exception ex)
         {
             Console.Write("error from  insert new banner " + ex.Message);
-
+            clsUtil.deleteFile(image_path, _host);
             return null;
         }
     }
