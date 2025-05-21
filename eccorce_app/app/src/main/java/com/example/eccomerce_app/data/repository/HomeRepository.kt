@@ -18,6 +18,7 @@ import com.example.eccomerce_app.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
@@ -601,6 +602,41 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
+    suspend fun deleteBanner(
+        banner_id: UUID
+    ): NetworkCallHandler {
+        return try {
+            var result = client.delete (
+                Secrets.getBaseUrl() + "/Banner/${banner_id}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<String>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
 
 
     suspend fun getStoreById(id: UUID): NetworkCallHandler {

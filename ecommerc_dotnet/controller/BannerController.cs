@@ -87,6 +87,59 @@ public class BannerController : ControllerBase
     }
    
     
+    [HttpDelete("{banner_id:guid}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> deleteBanner(
+        Guid banner_id
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var userHolder = await _userData.getUser(idHolder.Value);
+        if (userHolder == null)
+        {
+            return Unauthorized("المستخدم غير موجود");
+        }
+
+        if (userHolder.store_id == null)
+        {
+            return BadRequest("ليس لديك اي متجر");
+        }
+
+        var banner = await _bannerData.getBanner((Guid)userHolder.store_id!, banner_id);
+
+        if ((banner==null))
+        {
+            return BadRequest("اللوحة الاعلانية غير موجودة");
+        }
+        
+
+        clsUtil.deleteFile(banner.image, _host);
+
+
+        var result = await _bannerData.deleteBanner(banner.id);
+
+        if (result == false)
+            return BadRequest("حدثت مشكلة اثناء حذف الوحة الاعلانية");
+
+        return StatusCode(200, "تم الحذف بنجاح");
+    }
+   
+   
     [HttpGet("{store_Id:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getBanner(

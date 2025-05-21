@@ -51,6 +51,35 @@ public class BannerData
         }
     }
     
+    
+    public async Task<BannerResponseDto?> getBanner(
+        Guid store_id,
+        Guid banner_id)
+    {
+        try
+        {
+            return  await  _dbContext.Banner
+                    .Include(st=>st.store)
+                    .AsNoTracking()
+                    .Where(ba=>ba.id==banner_id && ba.store_id==store_id)
+                    .Select(ba=>new BannerResponseDto
+                    {
+                        id = ba.id,
+                        create_at = ba.create_at,
+                        end_at = ba.end_at,
+                        image =  ba.image,
+                        store_id = ba.store_id
+                    }) 
+                .FirstOrDefaultAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting category by pages " + ex.Message);
+
+            return null;
+        }
+    }
+    
  public async Task<List<BannerResponseDto>?> getBanner(
         Guid id,
         int pageNumber,
@@ -112,4 +141,30 @@ public class BannerData
             return null;
         }
     }
+    
+    public async Task<bool?> deleteBanner(
+        Guid banner_id)
+    {
+        try
+        {
+            var result = await _dbContext.Banner.FindAsync(banner_id);
+
+            if (result == null)
+            {
+                return false;
+            }
+
+            _dbContext.Remove(result);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  insert new banner " + ex.Message);
+            return false;
+        }
+    }
+
+    
+    
 }

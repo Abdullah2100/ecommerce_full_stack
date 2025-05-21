@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui.view.account.store
 
 import android.Manifest
-import android.provider.CalendarContract
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -95,8 +94,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Calendar
 import java.util.UUID
@@ -175,7 +172,7 @@ fun StoreScreen(
     val isShownDateDialog = remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     val currentTime = Calendar.getInstance().timeInMillis;
-    val isSendingBanner = remember { mutableStateOf(false) }
+    val isSendingData = remember { mutableStateOf(false) }
 
     var animated = animateDpAsState(
         if (isExpandedCategory.value) ((categories.value?.size ?: 1) * 45).dp else 0.dp
@@ -684,7 +681,7 @@ fun StoreScreen(
         it.calculateBottomPadding()
 
 
-        if (isSendingBanner.value)
+        if (isSendingData.value)
             Dialog(
                 onDismissRequest = {}
             ) {
@@ -719,7 +716,7 @@ fun StoreScreen(
                                 }
                             } else {
                                 isShownDateDialog.value = false
-                                isSendingBanner.value = true
+                                isSendingData.value = true
                                 currutine.launch {
                                  val dattime = Calendar.getInstance().apply {
                                      timeInMillis = datePickerState.selectedDateMillis!!
@@ -731,7 +728,7 @@ fun StoreScreen(
                                             image = bannerImage.value!!
                                         )
                                     }.await()
-                                    isSendingBanner.value = false
+                                    isSendingData.value = false
                                     var errorMessage = result
                                     if (result.isNullOrEmpty())
                                         errorMessage = "banner created seccesffuly";
@@ -1197,7 +1194,25 @@ fun StoreScreen(
                 else -> {
                     if (!storeBanners.isNullOrEmpty()) BannerBage(
                         storeBanners,
-                        true
+                        true,
+                        deleteBanner =if(isFromHome == true)null else  {it->
+                            isSendingData.value=true;
+                            currutine.launch {
+                                var result = async {
+                                    homeViewModel.deleteBanner(it)
+                                }.await()
+
+                                isSendingData.value=false
+                                var errorMessage= ""
+                                if(result.isNullOrEmpty()){
+                                   errorMessage="banner deleted Seccesffuly";
+                                }
+                                else{
+                                    errorMessage=result
+                                }
+                                snackbarHostState.showSnackbar(errorMessage)
+                            }
+                        }
                     )
 
                 }

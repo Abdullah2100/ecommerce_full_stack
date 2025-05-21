@@ -631,6 +631,38 @@ class HomeViewModel(
         }
     }
 
+    suspend fun deleteBanner(
+        banner_id: UUID,
+
+        ): String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.deleteBanner(banner_id);
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var copyBanner = _banners.value?.filter { it.id!=banner_id }
+                if(!copyBanner.isNullOrEmpty())
+                    _banners.emit(copyBanner)
+                else
+                    _banners.emit(emptyList())
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString().replace("",""))
+                if (errorMessage.contains(General.BASED_URL.substring(8,20))) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"","")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
 
     private fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
