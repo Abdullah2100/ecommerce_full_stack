@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<SubCategory> SubCategory { get; set; }
 
     public DbSet<Bannel> Banner { get; set; }
+    
+    public DbSet<Varient> Varients { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -76,7 +78,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Bannel>(ba =>
         {
         });
-        
+
+        modelBuilder.Entity<Varient>(va =>
+        {
+            va.HasIndex(var=>var.name).IsUnique();
+        });
         
         base.OnModelCreating(modelBuilder);
     }

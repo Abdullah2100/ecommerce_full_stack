@@ -15,6 +15,10 @@ public class UserData
     private readonly AppDbContext _dbContext;
     // private readonly ILogger _logger;
 
+    public UserData(AppDbContext appDbContext)
+    {
+        _dbContext = appDbContext;
+    }
     public UserData(AppDbContext dbContext,
         IConfig configuration
 

@@ -142,7 +142,7 @@ public class BannerData
         }
     }
     
-    public async Task<bool?> deleteBanner(
+    public async Task<bool> deleteBanner(
         Guid banner_id)
     {
         try
