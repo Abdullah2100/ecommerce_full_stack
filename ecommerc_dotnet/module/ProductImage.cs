@@ -8,4 +8,6 @@ public class ProductImage
     public Guid? ID { get; set; }
     public string name { get; set; }
     public Guid productId { get; set; }
+    
+    public Product  Product { get; set; }
 }

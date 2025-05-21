@@ -19,4 +19,6 @@ public class SubCategory
     
     public Guid categori_id { get; set; }
     public Category? category { get; set; } 
+    
+    public ICollection<Product>? products { get; set; }
 }

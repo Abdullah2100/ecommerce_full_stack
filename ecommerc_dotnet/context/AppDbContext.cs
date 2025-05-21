@@ -22,6 +22,11 @@ public class AppDbContext : DbContext
     public DbSet<Bannel> Banner { get; set; }
     
     public DbSet<Varient> Varients { get; set; }
+    
+    public DbSet<Product> Products { get; set; }
+    public DbSet<ProductVarient> ProductVarients { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,12 +40,14 @@ public class AppDbContext : DbContext
                 user.HasMany(ca=>ca.categories)
                     .WithOne(u => u.user)
                     .HasForeignKey(c=>c.owner_id)
-                    .HasPrincipalKey(u=>u.ID);
+                    .HasPrincipalKey(u=>u.ID)
+                    .OnDelete(DeleteBehavior.Restrict);
                 
                 user.HasOne(u => u.Store)
                     .WithOne(st => st.user)
                     .HasForeignKey<Store>(st=>st.user_id)
-                    .HasPrincipalKey<User>(u=>u.ID);
+                    .HasPrincipalKey<User>(u=>u.ID)
+                    .OnDelete(DeleteBehavior.Restrict);;
                 
             }
         );
@@ -52,7 +59,8 @@ public class AppDbContext : DbContext
             ca.HasMany(cat => cat.subCategories)
                 .WithOne(sub=>sub.category)
                 .HasForeignKey(sub=>sub.categori_id)
-                .HasPrincipalKey(cat=>cat.id);
+                .HasPrincipalKey(cat=>cat.id)
+                .OnDelete(DeleteBehavior.Restrict);;
         });
 
         modelBuilder.Entity<Store>(st =>
@@ -62,12 +70,14 @@ public class AppDbContext : DbContext
             st.HasMany(std=>std.SubCategories)
                 .WithOne(sub=>sub.Store)
                 .HasForeignKey(sub=>sub.store_id)
-                .HasPrincipalKey(stc=>stc.id);
+                .HasPrincipalKey(stc=>stc.id)
+                .OnDelete(DeleteBehavior.Restrict);;
             
             st.HasMany(sto => sto.banners)
                 .WithOne(bn=>bn.store)
                 .HasForeignKey(ban=>ban.store_id)
-                .HasPrincipalKey(sto=>sto.id);
+                .HasPrincipalKey(sto=>sto.id)
+                .OnDelete(DeleteBehavior.Restrict);;
             
         });
 
@@ -79,9 +89,39 @@ public class AppDbContext : DbContext
         {
         });
 
+        modelBuilder.Entity<Product>(pr =>
+        {
+            pr.HasMany<ProductVarient>(pro => pro.productVarients)
+                .WithOne(p => p.product)
+                .HasForeignKey(p => p.product_id)
+                .HasPrincipalKey(pro => pro.id)
+                .OnDelete(DeleteBehavior.Restrict);;
+            pr.HasOne<SubCategory>(pro=>pro.subCategory) 
+                .WithMany(sub=>sub.products)
+                .HasForeignKey(pro=>pro.subcategory_id)
+                .HasPrincipalKey(sub => sub.id)
+                .OnDelete(DeleteBehavior.Restrict);;
+            pr.HasOne(pro=>pro.store)
+                .WithMany(st=>st.Products)
+                .HasForeignKey(pro=>pro.store_id)
+                .HasPrincipalKey(str=>str.id)
+                .OnDelete(DeleteBehavior.Restrict);;
+            
+            pr.HasMany<ProductImage>(pro => pro.productImages)
+                .WithOne(pim=>pim.Product)
+                .HasForeignKey(pim=>pim.productId)
+                .HasPrincipalKey(pro=>pro.id)
+                .OnDelete(DeleteBehavior.Restrict);;
+        });
+
         modelBuilder.Entity<Varient>(va =>
         {
             va.HasIndex(var=>var.name).IsUnique();
+            va.HasMany(var=>var.productVarients)
+                .WithOne(var=>var.varient)
+                .HasForeignKey(var=>var.varient_id)
+                .HasPrincipalKey(var=>var.id)
+                .OnDelete(DeleteBehavior.Restrict);;
         });
         
         base.OnModelCreating(modelBuilder);
