@@ -6,6 +6,9 @@ public class Product
 {
     public Guid id { get; set; }
     public string name { get; set; }
+    
+    [Column(TypeName = "TEXT")]
+    public string description { get; set; }
     public string  thmbnail { get; set; }
     public Guid subcategory_id { get; set; }
     public Guid store_id { get; set; }

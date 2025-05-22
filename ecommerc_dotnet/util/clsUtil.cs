@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using ecommerc_dotnet.dto.Request;
 using hotel_api.Services;
 
 namespace hotel_api.util
@@ -99,6 +100,26 @@ namespace hotel_api.util
             }
         } 
         
+       
+        public static async Task<List<string>?>saveFile(List<IFormFile> file,enImageType type,IWebHostEnvironment host)
+        {
+            List<string> images = new List<string>();
+            foreach (var image in file)
+            {
+               var path = await saveFile(image,type,host);
+               if (path == null)
+               {
+                   deleteFile(images, host);
+                   return null;
+               }
+               
+               images.Add(path);
+            }
+
+            return images;
+        } 
+
+
         public static bool deleteFile(string filePath,IWebHostEnvironment host)
         {
             try
@@ -118,6 +139,10 @@ namespace hotel_api.util
             }
         } 
 
-      
+        public static void deleteFile(List<string> filePath,IWebHostEnvironment host)
+        {
+             filePath.ForEach(image=>deleteFile(image,host)); 
+        } 
+ 
     }
 }
