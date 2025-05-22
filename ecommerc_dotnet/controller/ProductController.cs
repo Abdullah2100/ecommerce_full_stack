@@ -60,6 +60,49 @@ public class ProductController : ControllerBase
         return StatusCode(200, result);
     }
 
+    [HttpGet("{store_id:guid}/{subCategory_id:guid}/{pageNumber:int}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> getProducts
+    (
+        Guid store_id,
+        Guid subCategory_id,
+        int pageNumber
+    )
+    {
+        var isExist = await _storeData.isExist(store_id,subCategory_id);
+        if (!isExist)
+        {
+            return BadRequest("المتجر غير موجود");
+        }
+
+        var result = await _productData.getProducts(
+            store_id, 
+            subCategory_id
+            ,pageNumber
+        );
+
+
+        return StatusCode(200, result);
+    }
+ 
+   
+    [HttpGet("{pageNumber:int}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> getProducts
+    (int pageNumber)
+    {
+
+        var result = await _productData.getProducts(pageNumber);
+
+
+        return StatusCode(200, result);
+    }
+
+
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

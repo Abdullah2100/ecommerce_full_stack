@@ -218,6 +218,23 @@ public class StoreData
             return false;
         }
     }
+    
+    public async Task<bool> isExist(Guid storeId,Guid subCategory_id)
+    {
+        try
+        {
+            return await _dbContext.Store
+                .Include(st=>st.SubCategories)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(st => st.id == storeId&& st.SubCategories.FirstOrDefault(sbu=>sbu.id==subCategory_id)!=null) != null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("error from getting store by id " + ex.Message);
+            return false;
+        }
+    }
+
 
 
     public async Task<StoreResponseDto?> createStore(
