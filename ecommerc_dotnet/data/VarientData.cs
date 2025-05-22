@@ -37,6 +37,31 @@ public class VarientData
         }
     }
 
+    public async Task<List<VarientResposeDto>> getVarients(int pageNumber, int pageSize=25)
+    {
+        try
+        {
+            return await _dbContext
+                .Varients
+                .AsNoTracking()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(var => new VarientResposeDto
+                    {
+                        id = var.id,
+                        name = var.name,
+
+                    }
+                ).ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this exception occured getting varient data " + ex.Message);
+            return new List<VarientResposeDto>();
+        }
+    }
+
+  
     public async Task<bool> isExist(string name)
     {
         try

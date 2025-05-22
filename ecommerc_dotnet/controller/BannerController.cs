@@ -21,7 +21,7 @@ public class BannerController : ControllerBase
         IHubContext<EcommercHub> hubContext,
         AppDbContext appDbContext)
     {
-        _bannerData = new BannerData(appDbContext, configuration,host);
+        _bannerData = new BannerData(appDbContext, configuration, host);
         _userData = new UserData(appDbContext, configuration);
         _configuration = configuration;
         _host = host;
@@ -77,7 +77,7 @@ public class BannerController : ControllerBase
         }
 
 
-        var result = await _bannerData.addNewBanner(banner.end_at, imagePath,(Guid) userHolder.store_id!);
+        var result = await _bannerData.addNewBanner(banner.end_at, imagePath, (Guid)userHolder.store_id!);
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حقظ الوحة الاعلانية");
@@ -85,8 +85,8 @@ public class BannerController : ControllerBase
         await _hubContext.Clients.All.SendAsync("createdBanner", result);
         return StatusCode(201, result);
     }
-   
-    
+
+
     [HttpDelete("{banner_id:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -122,11 +122,11 @@ public class BannerController : ControllerBase
 
         var banner = await _bannerData.getBanner((Guid)userHolder.store_id!, banner_id);
 
-        if ((banner==null))
+        if ((banner == null))
         {
             return BadRequest("اللوحة الاعلانية غير موجودة");
         }
-        
+
 
         clsUtil.deleteFile(banner.image, _host);
 
@@ -138,16 +138,25 @@ public class BannerController : ControllerBase
 
         return StatusCode(200, "تم الحذف بنجاح");
     }
-   
-   
+
+
     [HttpGet("{store_Id:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getBanner(
-        Guid store_Id,int pageNumber 
+        Guid store_Id, int pageNumber
     )
     {
         var result = await _bannerData.getBanner(store_Id, pageNumber);
 
-        return StatusCode(201, result?? new List<BannerResponseDto>());
+        return StatusCode(201, result ?? new List<BannerResponseDto>());
+    }
+
+    [HttpGet("")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getBanner()
+    {
+        var result = await _bannerData.getBanner(15);
+
+        return StatusCode(200, result ?? new List<BannerResponseDto>());
     }
 }

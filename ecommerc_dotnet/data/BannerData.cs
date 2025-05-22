@@ -30,7 +30,6 @@ public class BannerData
         try
         {
             return  await  _dbContext.Banner
-                    .Include(st=>st.store)
                     .AsNoTracking()
                     .Where(ba=>ba.id==id)
                     .Select(ba=>new BannerResponseDto
@@ -59,7 +58,6 @@ public class BannerData
         try
         {
             return  await  _dbContext.Banner
-                    .Include(st=>st.store)
                     .AsNoTracking()
                     .Where(ba=>ba.id==banner_id && ba.store_id==store_id)
                     .Select(ba=>new BannerResponseDto
@@ -88,7 +86,6 @@ public class BannerData
         try
         {
             return  await  _dbContext.Banner
-                    .Include(st=>st.store)
                     .AsNoTracking()
                     .Where(ba=>ba.store_id==id)
                     .Select(ba=>new BannerResponseDto
@@ -166,5 +163,50 @@ public class BannerData
     }
 
     
+    public async Task<int?> getBanner()
+    {
+        try
+        {
+            return await _dbContext.Banner
+                .AsNoTracking()
+                .Where(ban=>ban.end_at>DateTime.Now)
+                .CountAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting category by pages " + ex.Message);
+
+            return null;
+        }
+    }
+
+    
+    
+    public async Task<List<BannerResponseDto>?> getBanner(int pageSize)
+    {
+        try
+        {
+            return  await  _dbContext.Banner
+                .AsNoTracking()
+                .OrderBy(u=>Guid.NewGuid())
+                .Select(ba=>new BannerResponseDto
+                {
+                    id = ba.id,
+                    create_at = ba.create_at,
+                    end_at = ba.end_at,
+                    image = _config.getKey("url_file") + ba.image,
+                    store_id = ba.store_id
+                })
+                .Take(pageSize)
+                .ToListAsync(); 
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting category by pages " + ex.Message);
+
+            return null;
+        }
+    }
+
     
 }

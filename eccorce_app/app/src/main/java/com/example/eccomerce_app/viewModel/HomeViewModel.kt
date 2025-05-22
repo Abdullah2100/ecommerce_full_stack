@@ -15,23 +15,30 @@ import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.BannerResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
+import com.example.eccomerce_app.dto.response.ProductResponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
+import com.example.eccomerce_app.dto.response.VarientResponseDto
 import com.example.eccomerce_app.model.Address
 import com.example.eccomerce_app.model.Banner
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.model.DtoToModel.toBanner
 import com.example.eccomerce_app.model.DtoToModel.toCategory
+import com.example.eccomerce_app.model.DtoToModel.toProdcut
 import com.example.eccomerce_app.model.DtoToModel.toStore
 import com.example.eccomerce_app.model.DtoToModel.toSubCategory
 import com.example.eccomerce_app.model.DtoToModel.toUser
+import com.example.eccomerce_app.model.DtoToModel.toVarient
 import com.example.eccomerce_app.model.MyInfoUpdate
+import com.example.eccomerce_app.model.Product
+import com.example.eccomerce_app.model.ProductVarientSelection
 import com.example.eccomerce_app.model.Store
 import com.example.eccomerce_app.model.SubCategory
 import com.example.eccomerce_app.model.SubCategoryUpdate
 import com.example.eccomerce_app.model.User
+import com.example.eccomerce_app.model.Varient
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
@@ -60,6 +67,8 @@ class HomeViewModel(
     private var _categories = MutableStateFlow<MutableList<Category>?>(null)
     var categories = _categories.asStateFlow()
 
+    private var _varients = MutableStateFlow<MutableList<Varient>?>(null)
+    var varients = _varients.asStateFlow()
 
     private var _myInfo = MutableStateFlow<User?>(null)
     var myInfo = _myInfo.asStateFlow()
@@ -81,6 +90,8 @@ class HomeViewModel(
     private var _SubCategories = MutableStateFlow<List<SubCategory>?>(null);
     var subCategories = _SubCategories.asStateFlow();
 
+    private var _products = MutableStateFlow<List<Product>?>(null);
+    var products = _products.asStateFlow();
 
     private var _coroutinExption = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
@@ -88,9 +99,15 @@ class HomeViewModel(
 
 
     init {
+        getMyInfo()
+        getCategories(1)
+        getStoresBanner()
+        getVarients(1)
+        getProducts(1)
         if (webSocket != null) {
             connection()
         }
+
     }
 
     override fun onCleared() {
@@ -126,24 +143,6 @@ class HomeViewModel(
                     },
                     BannerResponseDto::class.java
                 )
-
-                _hub.value!!.on(
-                    "Banners",
-                    { resultHolder ->
-
-                        var result = resultHolder
-
-
-                        var copyBanner = result.map { it.toBanner() }.toList();
-
-                        viewModelScope.launch(Dispatchers.IO) {
-
-                            Log.d("bannerCreationData", banners.toString())
-                            _homeBanners.emit(copyBanner)
-                        }
-                    },
-                    Array<BannerResponseDto>::class.java
-                )
             }
 
     }
@@ -175,6 +174,41 @@ class HomeViewModel(
                     } else {
                         if (_categories.value == null)
                             _categories.emit(mutableListOf())
+                    }
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+
+
+    fun getVarients(pageNumber: Int = 1) {
+        if (pageNumber == 1 && _varients.value != null) return;
+        viewModelScope.launch(Dispatchers.IO) {
+            var result = homeRepository.getVarient(pageNumber)
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var varientolder = result.data as List<VarientResponseDto>
+
+                    var mutableVarient = mutableListOf<Varient>()
+
+                    if (pageNumber != 1 && _varients.value != null) {
+                        mutableVarient.addAll(_varients.value!!.toList())
+                    }
+                    if (varientolder.isNotEmpty())
+                        mutableVarient.addAll(
+                            varientolder.map { it.toVarient() }.toList()
+                        )
+
+                    if (mutableVarient.isNotEmpty()) {
+                        _varients.emit(
+                            mutableVarient
+                        )
+                    } else {
+                        if (_varients.value == null)
+                            _varients.emit(mutableListOf())
                     }
                 }
 
@@ -584,6 +618,46 @@ class HomeViewModel(
 
     }
 
+    private fun getStoresBanner() {
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository.getRandomBanner();
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<BannerResponseDto>
+
+                    var bannersHolder = mutableListOf<Banner>()
+                    var bannersResponse = data.map { it.toBanner() }.toList()
+
+                    bannersHolder.addAll(bannersResponse)
+                    if (_banners.value != null) {
+                        bannersHolder.addAll(_banners.value!!)
+                    }
+
+                    var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
+                    if (distinticBanner.size > 0)
+                        _banners.emit(distinticBanner)
+                    else
+                        _banners.emit(emptyList<Banner>())
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    _banners.emit(emptyList<Banner>())
+
+                    _isLoading.emit(false)
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                }
+            }
+        }
+
+    }
+
+
     suspend fun createBanner(
         end_date: String,
         image: File,
@@ -664,7 +738,7 @@ class HomeViewModel(
         }
     }
 
-    private fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
+     fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
             var result = homeRepository.getStoreAddress(store_id, pageNumber);
             when (result) {
@@ -741,5 +815,180 @@ class HomeViewModel(
         }
 
     }
+
+     fun getProducts(pageNumber:Int = 1) {
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository.getProduct(pageNumber);
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<ProductResponseDto>
+
+                    var holder = mutableListOf<Product>()
+                    var addressResponse = data.map { it.toProdcut() }.toList()
+
+                    holder.addAll(addressResponse)
+                    if (_products.value != null) {
+                        holder.addAll(_products.value!!)
+                    }
+
+                    var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
+
+                    if(distinticSubCategories.size>0)
+                        _products.emit(distinticSubCategories)
+                    else
+                        _products.emit(emptyList())
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    _isLoading.emit(false)
+                    _products.emit(emptyList())
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                }
+            }
+        }
+
+    }
+
+     fun getProducts(pageNumber:Int = 1,store_id: UUID) {
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository.getProduct(store_id,pageNumber);
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<ProductResponseDto>
+
+                    var holder = mutableListOf<Product>()
+                    var addressResponse = data.map { it.toProdcut() }.toList()
+
+                    holder.addAll(addressResponse)
+                    if (_products.value != null) {
+                        holder.addAll(_products.value!!)
+                    }
+
+                    var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
+
+                    if(distinticSubCategories.size>0)
+                        _products.emit(distinticSubCategories)
+                    else
+                        _products.emit(emptyList())
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    _isLoading.emit(false)
+                    _products.emit(emptyList())
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                }
+            }
+        }
+
+    }
+
+
+
+     fun getProducts(pageNumber:Int = 1,store_id: UUID,subCategory_id: UUID) {
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository.getProduct(store_id,subCategory_id,pageNumber);
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<ProductResponseDto>
+
+                    var holder = mutableListOf<Product>()
+                    var addressResponse = data.map { it.toProdcut() }.toList()
+
+                    holder.addAll(addressResponse)
+                    if (_products.value != null) {
+                        holder.addAll(_products.value!!)
+                    }
+
+                    var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
+
+                    if(distinticSubCategories.size>0)
+                        _products.emit(distinticSubCategories)
+                    else
+                        _products.emit(emptyList())
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    _isLoading.emit(false)
+                    _products.emit(emptyList())
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                }
+            }
+        }
+
+    }
+
+    fun createProducts(    name:String,
+                        description:String,
+                        thmbnail: File,
+                        subcategory_id: UUID,
+                        store_id: UUID,
+                        price: Double,
+                        productVarients:List<ProductVarientSelection>,
+                        images:List<File>
+    ) {
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository.createProduct(
+                name,
+                description,
+                thmbnail,
+                subcategory_id,
+                store_id,
+                price,
+                productVarients,
+                images
+            );
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as ProductResponseDto
+
+                    var holder = mutableListOf<Product>()
+                    var addressResponse = data.toProdcut()
+
+                    holder.add(addressResponse)
+                    if (_products.value != null) {
+                        holder.addAll(_products.value!!)
+                    }
+
+                    if(holder.size>0)
+                        _products.emit(holder)
+                    else
+                        _products.emit(emptyList())
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    _isLoading.emit(false)
+                    _products.emit(emptyList())
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                }
+            }
+        }
+
+    }
+
+
 
 }

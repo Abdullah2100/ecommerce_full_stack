@@ -39,6 +39,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -82,6 +83,7 @@ import com.example.eccomerce_app.Util.General.toCustomFil
 import com.example.eccomerce_app.Util.General.toLocalDateTime
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.SubCategoryUpdate
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.BannerBage
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer
@@ -145,14 +147,14 @@ fun StoreScreen(
 
     val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
     val isUpdate = remember { mutableStateOf(false) }
-    val selectedSubCategoryId = remember { mutableStateOf(UUID.randomUUID()) }
+    val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
     val isSubCategoryCreateError = remember { mutableStateOf(false) }
 
 
     val errorMessage = remember { mutableStateOf("") }
 
-    val selectedSubCategory = remember { mutableStateOf(0) }
+//    val selectedSubCategory = remember { mutableStateOf(0) }
 
     val isPressAddNewAddress = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -451,7 +453,7 @@ fun StoreScreen(
                                                 SubCategoryUpdate(
                                                     name = subCategoryName.value.text,
                                                     cateogy_id = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id,
-                                                    id = selectedSubCategoryId.value
+                                                    id = selectedSubCategoryId.value!!
 
                                                 )
                                             )
@@ -675,7 +677,20 @@ fun StoreScreen(
                 },
                 scrollBehavior = scrollBehavior
             )
+        },
+        floatingActionButton = {
+            if(isFromHome==false&&storeData!=null)
+            FloatingActionButton(
+                onClick = {
+                    nav.navigate(Screens.CreateProduct(store_id.toString()))
+                },
+                containerColor = CustomColor.primaryColor50
+            ) {
+                Icon(Icons.Default.Add,"",
+                    tint = Color.Black)
+            }
         }
+
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -1376,6 +1391,48 @@ fun StoreScreen(
 
                             else -> {
                                 if (!storeSubCategories.isNullOrEmpty())
+                                {
+                                    item{
+                                   Box(
+                                                modifier = Modifier
+                                                    .padding(end = 4.dp)
+                                                    .height(40.dp)
+                                                    .width(70.dp)
+                                                    .background(
+                                                        if (selectedSubCategoryId.value == null)
+                                                            CustomColor.alertColor_3_300 else Color.White,
+                                                        RoundedCornerShape(8.dp)
+                                                    )
+                                                    .border(
+                                                        width = 1.dp,
+                                                        color = if (selectedSubCategoryId.value == null)
+                                                            Color.White else CustomColor.neutralColor200,
+                                                        RoundedCornerShape(8.dp)
+
+                                                    )
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .combinedClickable(
+                                                        onClick = {
+                                                            selectedSubCategoryId.value =null
+                                                        },
+                                                    )
+                                                //
+                                                ,
+                                                contentAlignment = Alignment.Center
+
+                                            ) {
+                                                Text(
+                                                    "All",
+                                                    fontFamily = General.satoshiFamily,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = (18).sp,
+                                                    color = if (selectedSubCategoryId.value == null)
+                                                        Color.White else CustomColor.neutralColor200,
+                                                    textAlign = TextAlign.Center,
+                                                )
+                                            }
+
+                                    }
                                     items(storeSubCategories.size)
                                     { index ->
                                         Box(
@@ -1384,13 +1441,13 @@ fun StoreScreen(
                                                 .height(40.dp)
                                                 .width(70.dp)
                                                 .background(
-                                                    if (selectedSubCategory.value == index)
+                                                    if (selectedSubCategoryId.value == storeSubCategories[index].id)
                                                         CustomColor.alertColor_3_300 else Color.White,
                                                     RoundedCornerShape(8.dp)
                                                 )
                                                 .border(
                                                     width = 1.dp,
-                                                    color = if (selectedSubCategory.value == index)
+                                                    color = if (selectedSubCategoryId.value == storeSubCategories[index].id)
                                                         Color.White else CustomColor.neutralColor200,
                                                     RoundedCornerShape(8.dp)
 
@@ -1398,7 +1455,8 @@ fun StoreScreen(
                                                 .clip(RoundedCornerShape(8.dp))
                                                 .combinedClickable(
                                                     onClick = {
-                                                        selectedSubCategory.value = index
+                                                        homeViewModel.getProducts(1,store_id!!, storeSubCategories[index].id)
+                                                        selectedSubCategoryId.value = storeSubCategories[index].id
                                                     },
                                                     onLongClick = {
                                                         isShownSubCategoryBottomSheet.value = true
@@ -1426,12 +1484,14 @@ fun StoreScreen(
                                                 fontFamily = General.satoshiFamily,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = (18).sp,
-                                                color = if (selectedSubCategory.value == index)
+                                                color = if (selectedSubCategoryId.value == storeSubCategories[index].id)
                                                     Color.White else CustomColor.neutralColor200,
                                                 textAlign = TextAlign.Center,
                                             )
                                         }
                                     }
+
+                                }
 
                             }
                         }

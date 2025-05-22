@@ -58,6 +58,11 @@ object General {
     }
 
 
+    fun isValideMony(number:String): Boolean{
+        var reges= Regex("/^(?:100(?:\\.0(?:0)?)?|\\d{1,2}(?:\\.\\d{1,2})?)\$")
+        return reges.containsMatchIn(number)
+    }
+
     fun Uri.toCustomFil(context: Context): File? {
         var file: File? = null;
 

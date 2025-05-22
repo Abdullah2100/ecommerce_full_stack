@@ -1,4 +1,6 @@
 package com.example.eccomerce_app.ui
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
@@ -50,7 +52,8 @@ object Screens {
     data class Store(var store_idCopy: String?=null,var isFromHome: Boolean?=true)
 
 
-
+    @Serializable
+    data class  CreateProduct(var store_id: String)
 
 
 }

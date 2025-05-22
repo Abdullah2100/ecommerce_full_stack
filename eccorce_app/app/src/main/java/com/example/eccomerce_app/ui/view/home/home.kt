@@ -46,6 +46,7 @@ import com.example.eccomerce_app.ui.component.BannerBage
 import com.example.eccomerce_app.ui.component.CategoryLoadingShape
 import com.example.eccomerce_app.ui.component.CategoryShape
 import com.example.eccomerce_app.ui.component.LocationLoadingShape
+import com.example.eccomerce_app.ui.component.ProductLoading
 
 @Composable
 fun HomePage(
@@ -57,6 +58,7 @@ fun HomePage(
     var myInfo = homeViewModel.myInfo.collectAsState()
     var bannel = homeViewModel.homeBanners.collectAsState()
     var categories = homeViewModel.categories.collectAsState()
+    var products = homeViewModel.products.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val isClickingSearch = remember { mutableStateOf(false) }
 
@@ -65,10 +67,6 @@ fun HomePage(
         if (!isClickingSearch.value) 80.dp else 0.dp,
     )
 
-    LaunchedEffect(Unit) {
-        homeViewModel.getMyInfo()
-        homeViewModel.getCategories(1)
-    }
 
 
     Scaffold(
@@ -243,6 +241,15 @@ fun HomePage(
                     isMe = false,
                     nav=nav
                 )
+            }
+
+            item{
+                when(products.value==null){
+                    true->{
+                        ProductLoading(50)
+                    }
+                    else->{}
+                }
             }
         }
 

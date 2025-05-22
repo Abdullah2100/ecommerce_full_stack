@@ -170,5 +170,15 @@ public class VarientController : ControllerBase
 
         return StatusCode(200, "تم الحذف بنجاح");
     }
+
+
+    [HttpGet("all/{pageNumber:int}")]
+
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getVarients(int pageNumber = 1)
+    {
+        var result = await _varientData.getVarients(pageNumber);
+        return Ok(result);
+    }
     
 }

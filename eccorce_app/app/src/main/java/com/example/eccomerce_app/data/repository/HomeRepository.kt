@@ -2,6 +2,7 @@ package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.Dto.AuthResultDto
 import com.example.eccomerce_app.Util.General
+import com.example.eccomerce_app.dto.ModelToDto.toProdcutVarientRequestDto
 import com.example.eccomerce_app.dto.request.LocationRequestDto
 import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
@@ -9,11 +10,14 @@ import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.BannerResponseDto
 import com.example.eccomerce_app.dto.response.CategoryReponseDto
+import com.example.eccomerce_app.dto.response.ProductResponseDto
 import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
+import com.example.eccomerce_app.dto.response.VarientResponseDto
 import com.example.eccomerce_app.model.Banner
 import com.example.eccomerce_app.model.MyInfoUpdate
+import com.example.eccomerce_app.model.ProductVarientSelection
 import com.example.eccomerce_app.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -165,6 +169,38 @@ class HomeRepository(val client: HttpClient) {
             }
             if (result.status == HttpStatusCode.OK) {
                 return NetworkCallHandler.Successful(result.body<List<CategoryReponseDto>>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
+        return try {
+            var result = client.get(
+                Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<List<VarientResponseDto>>())
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -547,6 +583,41 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+    suspend fun getRandomBanner(): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Banner";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if(result.status== HttpStatusCode.Created){
+                NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+
     suspend fun createBanner(
         endDate: String,
         image: File,
@@ -734,6 +805,197 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
+
+    suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Product/${pageNumber}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getProduct(store_id: UUID,pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Product/${store_id}/${pageNumber}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getProduct(store_id: UUID, subCatgory: UUID, pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Product/${store_id}/${subCatgory}/${pageNumber}";
+            val result = client.get (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun  createProduct(
+        name:String,
+        description:String,
+        thmbnail: File,
+        subcategory_id: UUID,
+        store_id: UUID,
+        price: Double,
+        productVarients:List<ProductVarientSelection>,
+        images:List<File>
+        ): NetworkCallHandler{
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Product";
+            val result = client.post  (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("name", name)
+                            append("description", description)
+                            append(
+                                key = "image", // Must match backend expectation
+                                value = thmbnail.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${thmbnail.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${thmbnail.name}"
+                                    )
+                                }
+                            )
+
+                            append("subcategory_id", subcategory_id.toString())
+                            append("store_id", store_id.toString())
+                            append("price", price)
+
+                            productVarients.forEachIndexed { it,value->
+                                append("productVarients[${it}].name",value.name)
+                                append("productVarients[${it}].precentage",value.precentage!!)
+                                append("productVarients[${it}].varient_id",value.varient_id.toString())
+                            }
+                            images.forEachIndexed { it,value->
+                                append(
+                                    key = "image[${it}]", // Must match backend expectation
+                                    value = value.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${value.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${value.name}"
+                                        )
+                                    }
+                                )
+                                 }
+
+
+
+                        }
+                    )
+                )
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
 
 
 

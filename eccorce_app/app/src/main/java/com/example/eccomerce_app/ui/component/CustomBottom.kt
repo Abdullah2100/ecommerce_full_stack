@@ -80,7 +80,7 @@ fun CustomBotton(
     isLoading: Boolean=false,
     operation: () -> Unit,
     buttonTitle: String,
-    color: Color?,
+    color: Color?=null,
     isEnable: Boolean?=true
 ){
     val fontScall = LocalDensity.current.fontScale
