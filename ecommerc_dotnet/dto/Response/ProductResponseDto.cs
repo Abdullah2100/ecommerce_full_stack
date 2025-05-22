@@ -13,6 +13,6 @@ public class ProductResponseDto
     public Guid subcategory_id { get; set; }
     public Guid store_id { get; set; }
     public decimal price { get; set; }
-    public List<List<ProductVarientResponseDto>> productVarients { get; set; }
+    public List<List<ProductVarientResponseDto>>? productVarients { get; set; }
     public List<string> productImages { get; set; }
 }

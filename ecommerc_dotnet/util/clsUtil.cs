@@ -120,13 +120,14 @@ namespace hotel_api.util
         } 
 
 
-        public static bool deleteFile(string filePath,IWebHostEnvironment host)
+        public static bool deleteFile(string filePath,IWebHostEnvironment host,string? addtionUrl=null)
         {
             try
             {
-                if (File.Exists(host.ContentRootPath+"/images"+filePath))
+                var fileRealPath = addtionUrl!=null?filePath.Replace(addtionUrl,""):filePath;
+                if (File.Exists(host.ContentRootPath+"/images"+fileRealPath))
                 {
-                    File.Delete(host.ContentRootPath +"/images"+ filePath);
+                    File.Delete(host.ContentRootPath +"/images"+ fileRealPath);
                     return true;
                 }
 
@@ -139,9 +140,9 @@ namespace hotel_api.util
             }
         } 
 
-        public static void deleteFile(List<string> filePath,IWebHostEnvironment host)
+        public static void deleteFile(List<string> filePath,IWebHostEnvironment host,string? addtionUrl=null)
         {
-             filePath.ForEach(image=>deleteFile(image,host)); 
+             filePath.ForEach(image=>deleteFile(image,host,addtionUrl)); 
         } 
  
     }

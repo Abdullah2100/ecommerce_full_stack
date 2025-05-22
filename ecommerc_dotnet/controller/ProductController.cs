@@ -71,39 +71,37 @@ public class ProductController : ControllerBase
         int pageNumber
     )
     {
-        var isExist = await _storeData.isExist(store_id,subCategory_id);
+        var isExist = await _storeData.isExist(store_id, subCategory_id);
         if (!isExist)
         {
             return BadRequest("المتجر غير موجود");
         }
 
         var result = await _productData.getProducts(
-            store_id, 
+            store_id,
             subCategory_id
-            ,pageNumber
+            , pageNumber
         );
 
 
         return StatusCode(200, result);
     }
- 
-   
+
+
     [HttpGet("{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> getProducts
-    (int pageNumber)
+        (int pageNumber)
     {
-
         var result = await _productData.getProducts(pageNumber);
 
 
         return StatusCode(200, result);
     }
 
-
-    [HttpPost("")]
+     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -168,4 +166,131 @@ public class ProductController : ControllerBase
 
         return StatusCode(201, result);
     }
+
+    [HttpDelete("{store_id:guid}/{product_id:guid}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> updateProduct
+    (
+        [FromForm]ProductRequestUpdateDto product
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid userId = Guid.Empty;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            userId = outID;
+        }
+
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUser(userId);
+        if (user == null)
+            return BadRequest("المستخدم غير موجود");
+
+        if (user.store_id != product.store_id)
+            return BadRequest("فقط صاحب المتجر بأمكانه  المنتجات الى متجره");
+
+        var userStore = await _storeData.getStoreByUser((Guid)user.Id);
+
+        if (userStore == null)
+            return BadRequest("المتجر غير موجو");
+
+        if (userStore.isBlocked)
+            return BadRequest("لا يمكن اضافة اي منتج الى المتجر لان المتجر محضور تواصل مع مدير النظام");
+
+        var isExistProduct = await _productData.isExist(product.id);
+
+        if (!isExistProduct)
+            return BadRequest("المنتج غير موجو");
+
+        if (product.images!=null&product?.images?.Count > 15)
+            return BadRequest("اقصى عدد صور المنتجات هو 15 صورة");
+
+        if (product?.deletedProductVarients!=null)
+           await _productData.deleteProductVarient(product.deletedProductVarients,product.id);
+        
+
+        if (product?.deletedimages?.Count > 0)
+           await _productData.deleteProductImages(product.deletedimages);
+
+        string? savedThumbnail = null;
+        if (product.thmbnail != null)
+            savedThumbnail = await clsUtil.saveFile(product.thmbnail, clsUtil.enImageType.PRODUCT, _host);
+
+        List<string>? savedImage = null;
+        if (product.images != null)
+            savedImage = await clsUtil.saveFile(product.images, clsUtil.enImageType.PRODUCT, _host);
+        
+
+        var result = await _productData.updateProduct(
+            id:product.id,
+            name: product.name,
+            description: product.description,
+            thumbnail: (string)savedThumbnail!,
+            subcategory_id: product.subcategory_id,
+            store_id: product.store_id,
+            price: product.price,
+            productVarients: product.productVarients,
+            images: savedImage
+        );
+
+        if (result == null)
+            return BadRequest("حدثة مشكلة اثناء حفظ المنتج");
+
+        return StatusCode(200, result);
+    }
+    
+    [HttpDelete("{store_id:guid}/{product_id:guid}")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> deleteProduct
+    (
+        Guid store_id,
+        Guid product_id
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid userId = Guid.Empty;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            userId = outID;
+        }
+
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUser(userId);
+        if (user == null)
+            return BadRequest("المستخدم غير موجود");
+
+        if (user.store_id != store_id)
+            return BadRequest("فقط صاحب المتجر بأمكانه حذف المنتجات ");
+
+        var isExistProduct = await _productData.isExist(product_id);
+
+        if (!isExistProduct)
+            return BadRequest("المنتج غير موجو");
+
+
+        var result = await _productData.deleteProduct(
+            product_id: product_id
+        );
+
+        if (result == false)
+            return BadRequest("حدثة مشكلة اثناء  حذف المنتج");
+
+        return StatusCode(200, result);
+    } 
 }
