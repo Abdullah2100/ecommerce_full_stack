@@ -1,4 +1,5 @@
 package com.example.eccomerce_app.ui
+
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
@@ -14,7 +15,7 @@ object Screens {
     object AuthGraph
 
     @Serializable
-    object  Login
+    object Login
 
     @Serializable
     object Signup
@@ -49,11 +50,23 @@ object Screens {
     object HomeAddress
 
     @Serializable
-    data class Store(var store_idCopy: String?=null,var isFromHome: Boolean?=true)
+    data class Store(
+        var store_idCopy: String? = null,
+        var isFromHome: Boolean? = true
+    )
 
 
     @Serializable
-    data class  CreateProduct(var store_id: String)
+    data class CreateProduct(
+        var store_id: String,
+        var product_id: String?=null
+    )
 
+    @Serializable
+    data class ProductDetails(
+        var store_Id: String,
+        var product_Id: String,
+        var isFromHome: Boolean
+    )
 
 }

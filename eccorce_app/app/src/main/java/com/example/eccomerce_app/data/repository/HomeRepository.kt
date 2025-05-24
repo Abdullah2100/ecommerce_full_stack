@@ -929,7 +929,7 @@ class HomeRepository(val client: HttpClient) {
                             append("name", name)
                             append("description", description)
                             append(
-                                key = "image", // Must match backend expectation
+                                key = "thmbnail", // Must match backend expectation
                                 value = thmbnail.readBytes(),
                                 headers = Headers.build {
                                     append(
@@ -946,7 +946,7 @@ class HomeRepository(val client: HttpClient) {
                             append("subcategory_id", subcategory_id.toString())
                             append("store_id", store_id.toString())
                             append("price", price)
-
+                          if(productVarients.isNotEmpty())
                             productVarients.forEachIndexed { it,value->
                                 append("productVarients[${it}].name",value.name)
                                 append("productVarients[${it}].precentage",value.precentage!!)
@@ -954,7 +954,7 @@ class HomeRepository(val client: HttpClient) {
                             }
                             images.forEachIndexed { it,value->
                                 append(
-                                    key = "image[${it}]", // Must match backend expectation
+                                    key = "images", // Must match backend expectation
                                     value = value.readBytes(),
                                     headers = Headers.build {
                                         append(
@@ -976,8 +976,162 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
 
+            if(result.status== HttpStatusCode.Created){
+                NetworkCallHandler.Successful(result.body<ProductResponseDto>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun  updateProduct(
+        id: UUID,
+        name:String?,
+        description:String?,
+        thmbnail: File?,
+        subcategory_id: UUID?,
+        store_id: UUID,
+        price: Double?,
+        productVarients:List<ProductVarientSelection>?,
+        images:List<File>?,
+        deletedProductVarients:List<ProductVarientSelection>?,
+        deletedimages:List<String>?
+
+    ): NetworkCallHandler{
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Product";
+            val result = client.put (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("id",id.toString())
+                            if(name!=null)
+                            append("name", name)
+                            if(description!=null)
+                            append("description", description)
+                            if(thmbnail!=null)
+                            append(
+                                key = "thmbnail", // Must match backend expectation
+                                value = thmbnail.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${thmbnail.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${thmbnail.name}"
+                                    )
+                                }
+                            )
+                            if(subcategory_id!=null)
+                            append("subcategory_id", subcategory_id.toString())
+                            append("store_id", store_id.toString())
+
+                            if(price!=null)
+                            append("price", price)
+
+                            if(!productVarients.isNullOrEmpty())
+                                productVarients.forEachIndexed { it,value->
+                                    append("productVarients[${it}].name",value.name)
+                                    append("productVarients[${it}].precentage",value.precentage!!)
+                                    append("productVarients[${it}].varient_id",value.varient_id.toString())
+                                }
+                            if(!deletedProductVarients.isNullOrEmpty())
+                                deletedProductVarients.forEachIndexed { it,value->
+                                    append("deletedProductVarients[${it}].name",value.name)
+                                    append("deletedProductVarients[${it}].precentage",value.precentage!!)
+                                    append("deletedProductVarients[${it}].varient_id",value.varient_id.toString())
+
+                                }
+
+                            if(!deletedimages.isNullOrEmpty())
+                                deletedimages.forEachIndexed { it,value->
+                                    val startIndex= "staticFiles"
+                                    val indexAt = value.indexOf("staticFiles")
+                                    append("deletedimages[${it}]",value.substring(indexAt+startIndex.length,
+                                        value.length))
+                                }
+
+
+                            if(!images.isNullOrEmpty())
+                            images.forEachIndexed { it,value->
+                                append(
+                                    key = "images", // Must match backend expectation
+                                    value = value.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${value.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${value.name}"
+                                        )
+                                    }
+                                )
+                            }
+
+
+
+                        }
+                    )
+                )
+            }
+
             if(result.status== HttpStatusCode.OK){
-                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+                NetworkCallHandler.Successful(result.body<ProductResponseDto>())
+            }else{
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun deleteProduct(store_id: UUID,product_id: UUID): NetworkCallHandler {
+        return try {
+            val full_url =Secrets.getBaseUrl()+"/Product/${store_id}/${product_id}";
+            val result = client.delete  (full_url){
+                headers{
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if(result.status== HttpStatusCode.OK){
+                NetworkCallHandler.Successful(result.body<Boolean>())
             }else{
                 NetworkCallHandler.Error(result.body<String>())
             }

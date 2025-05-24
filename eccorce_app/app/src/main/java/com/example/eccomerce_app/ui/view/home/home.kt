@@ -47,6 +47,7 @@ import com.example.eccomerce_app.ui.component.CategoryLoadingShape
 import com.example.eccomerce_app.ui.component.CategoryShape
 import com.example.eccomerce_app.ui.component.LocationLoadingShape
 import com.example.eccomerce_app.ui.component.ProductLoading
+import com.example.eccomerce_app.ui.component.ProductShape
 
 @Composable
 fun HomePage(
@@ -244,11 +245,18 @@ fun HomePage(
             }
 
             item{
+
+                Sizer(10)
                 when(products.value==null){
                     true->{
                         ProductLoading(50)
                     }
-                    else->{}
+                    else->{
+                        if(products.value!!.isNotEmpty())
+                        {
+                            ProductShape(products.value!!)
+                        }
+                    }
                 }
             }
         }

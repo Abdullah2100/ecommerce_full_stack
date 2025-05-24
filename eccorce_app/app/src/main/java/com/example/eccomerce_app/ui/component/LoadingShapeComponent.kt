@@ -93,7 +93,6 @@ fun CategoryLoadingShape(length: Int = 1) {
 
 @Composable
 fun ProductLoading(size:Int){
-Sizer(10)
     FlowRow (
         modifier = Modifier
 

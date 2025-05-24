@@ -90,14 +90,14 @@ object DtoToModel {
             id = this.id,
             name = this.name,
             description = this.description,
-            thmbnail = this.thmbnail,
+            thmbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("localhost","10.0.2.2") else "",
             subcategory_id = this.subcategory_id,
             store_id = this.store_id,
             price = this.price,
             productVarients = this.productVarients?.map {
                 it.map { it.toProductVarient() }
             },
-            productImages = this.productImages
+            productImages = this.productImages.map { it->if(it.isNotEmpty())it.replace("localhost","10.0.2.2") else "" }
         )
     }
 }

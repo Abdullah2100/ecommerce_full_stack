@@ -12,6 +12,6 @@ public class ProductRequestDto
     public Guid subcategory_id { get; set; }
     public Guid store_id { get; set; }
     public decimal price { get; set; }
-    public List<ProductVarientRequestDto> productVarients { get; set; }
+    public List<ProductVarientRequestDto>? productVarients { get; set; }
     public List<IFormFile> images { get; set; }
 }

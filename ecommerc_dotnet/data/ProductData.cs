@@ -175,13 +175,21 @@ public class ProductData
         }
     }
 
-    public async Task<bool> deleteProductVarient(List<string> productVarients,Guid product_Id)
+    public async Task<bool> deleteProductVarient(
+        List<ProductVarientRequestDto> productVarients
+        ,Guid product_Id)
     {
         try
         {
-            var result = _dbContext.ProductVarients
-                .Where(pv=>pv.product_id==product_Id&&productVarients.Contains(pv.name??"")==true );
-            _dbContext.ProductVarients.RemoveRange(result);
+            
+            productVarients.ForEach((x) =>
+            {
+                var result =  _dbContext.ProductVarients.FirstOrDefault(pv =>
+                    pv.product_id == product_Id && pv.varient_id == x.varient_id && pv.name == x.name);
+               if(result!=null)
+                   _dbContext.ProductVarients.Remove(result);
+
+            });
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -210,12 +218,14 @@ public class ProductData
 
     public async  Task<bool>deleteProductImages(List<string> productImage)
     {
-        try
-        {
-            var result = _dbContext.ProductImages.Where(x => productImage.Contains(x.name.ToString()));
+        try {
+            
+            var result = _dbContext.ProductImages.Where(x => productImage.Contains(
+                x.name));
             _dbContext.ProductImages.RemoveRange(result);
-            clsUtil.deleteFile(productImage, _host, _config.getKey("url_file"));
+            clsUtil.deleteFile(productImage, _host);
             return true;
+            
         }
         catch (Exception ex)
         {
@@ -229,7 +239,7 @@ public class ProductData
         {
             var result = _dbContext.ProductImages.Where(pv=>pv.productId==product_id);
             _dbContext.ProductImages.RemoveRange(result);
-            clsUtil.deleteFile(result.Select(x=>x.name).ToList(), _host, _config.getKey("url_file"));
+            clsUtil.deleteFile(result.Select(x=>x.name).ToList(), _host);
             return true;
         }
         catch (Exception ex)
@@ -316,8 +326,8 @@ public class ProductData
         Guid subcategory_id,
         Guid store_id,
         decimal price,
-        List<ProductVarientRequestDto> productVarients,
-        List<string> images
+        List<string> images,
+        List<ProductVarientRequestDto>? productVarients=null
     )
     {
         try
@@ -336,6 +346,7 @@ public class ProductData
                 thmbnail = thumbnail
             });
 
+            if(productVarients!=null)
             productVarients.ForEach(x =>
                 _dbContext.ProductVarients.AddAsync(new ProductVarient
                 {
@@ -373,7 +384,6 @@ public class ProductData
         string? description,
         string? thumbnail,
         Guid? subcategory_id,
-        Guid store_id,
         decimal? price,
         List<ProductVarientRequestDto>? productVarients,
         List<string>? images

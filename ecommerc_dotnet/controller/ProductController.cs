@@ -159,8 +159,8 @@ public class ProductController : ControllerBase
             subcategory_id: product.subcategory_id,
             store_id: product.store_id,
             price: product.price,
-            productVarients: product.productVarients,
-            images: savedImage
+            images: savedImage,
+            productVarients: product.productVarients
         );
 
         if (result == null)
@@ -169,7 +169,7 @@ public class ProductController : ControllerBase
         return StatusCode(201, result);
     }
 
-    [HttpPut("{store_id:guid}/{product_id:guid}")]
+    [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -223,11 +223,11 @@ public class ProductController : ControllerBase
             await _productData.deleteProductImages(product.deletedimages);
 
         string? savedThumbnail = null;
-        if (product.thmbnail != null)
+        if (product?.thmbnail != null)
             savedThumbnail = await clsUtil.saveFile(product.thmbnail, clsUtil.enImageType.PRODUCT, _host);
 
         List<string>? savedImage = null;
-        if (product.images != null)
+        if (product?.images != null)
             savedImage = await clsUtil.saveFile(product.images, clsUtil.enImageType.PRODUCT, _host);
 
 
@@ -237,7 +237,6 @@ public class ProductController : ControllerBase
             description: product.description,
             thumbnail: (string)savedThumbnail!,
             subcategory_id: product.subcategory_id,
-            store_id: product.store_id,
             price: product.price,
             productVarients: product.productVarients,
             images: savedImage

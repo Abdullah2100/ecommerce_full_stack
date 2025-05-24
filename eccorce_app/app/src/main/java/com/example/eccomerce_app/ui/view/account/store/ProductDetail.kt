@@ -1,6 +1,5 @@
 package com.example.eccomerce_app.ui.view.account.store
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,7 +43,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,7 +69,6 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
-import com.example.eccomerce_app.model.ModelToModel.toListOfProductVarient
 import com.example.eccomerce_app.model.ProductVarientSelection
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer
@@ -82,21 +79,20 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
+import kotlin.collections.forEachIndexed
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProductScreen(
+fun ProductDetail(
     nav: NavHostController,
     homeViewModel: HomeViewModel,
     storeId: String,
-    productId: String? = null
+    productID: String,
+    isFromHome: Boolean
 ) {
-    val products = homeViewModel.products.collectAsState()
+
     val store_id = UUID.fromString(storeId)
-    val product_id = if (productId == null) null else UUID.fromString(productId)
-    var productData =
-        if (product_id == null) null else products.value?.firstOrNull { it -> it.id == product_id }
     val context = LocalContext.current
 
     val subCategory = homeViewModel.subCategories.collectAsState()
@@ -104,10 +100,8 @@ fun CreateProductScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val thumbnail =
-        remember { mutableStateOf<String?>(if (productData != null) productData.thmbnail else null) }
-    val images =
-        remember { mutableStateOf<List<String>>(if (productData != null) productData.productImages else emptyList<String>()) }
+    val thumbnail = remember { mutableStateOf<File?>(null) }
+    val images = remember { mutableStateOf<List<File>>(emptyList()) }
 
     val productName = remember { mutableStateOf(TextFieldValue("")) }
     val description = remember { mutableStateOf(TextFieldValue("")) }
@@ -117,21 +111,12 @@ fun CreateProductScreen(
     var isExpandedSubCategory = remember { mutableStateOf(false) }
 
     var varients = homeViewModel.varients.collectAsState()
-    val productVarients = remember {
-        mutableStateOf<List<ProductVarientSelection>>(
-            if (productData != null && !productData.productVarients.isNullOrEmpty())
-                productData.productVarients!!.toListOfProductVarient()
-            else emptyList()
-        )
-    }
+    val productVarients = remember { mutableStateOf<List<ProductVarientSelection>>(emptyList()) }
     val prodcutVarientName = remember { mutableStateOf(TextFieldValue("")) }
     val prodcutVarientPrecentage = remember { mutableStateOf(TextFieldValue("")) }
+    val prodcutVarient = remember { mutableStateOf(TextFieldValue("")) }
     val selectedVarientId = remember { mutableStateOf<UUID?>(null) }
     var isExpandedVarient = remember { mutableStateOf(false) }
-
-
-    val deleteImages = remember { mutableStateOf<List<String>>(emptyList()) }
-    val deleteProductVarient = remember { mutableStateOf<List<ProductVarientSelection>>(emptyList()) }
 
 
     var corotine = rememberCoroutineScope()
@@ -148,6 +133,7 @@ fun CreateProductScreen(
     )
 
 
+
     var animatedVarient = animateDpAsState(
         if (isExpandedVarient.value) ((varients.value?.size ?: 1) * 45).dp else 0.dp
     )
@@ -161,14 +147,7 @@ fun CreateProductScreen(
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context);
             if (fileHolder != null) {
-                if (thumbnail.value != null && !deleteImages.value.contains(thumbnail.value)) {
-                    val deleteImageCopy = mutableListOf<String>()
-                    deleteImageCopy.add(thumbnail.value!!)
-                    deleteImageCopy.addAll(deleteImages.value)
-                    deleteImages.value = deleteImageCopy
-                }
-                thumbnail.value = fileHolder.absolutePath
-
+                thumbnail.value = fileHolder
             }
         }
     }
@@ -177,7 +156,7 @@ fun CreateProductScreen(
     val selectMutipleImages = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(10)
     ) { uris ->
-        val imagesHolder = mutableListOf<String>()
+        val imagesHolder = mutableListOf<File>()
 
         if (uris.isNotEmpty()) {
             uris.forEach { productImages ->
@@ -187,7 +166,7 @@ fun CreateProductScreen(
 
                 }
                 if (file != null) {
-                    imagesHolder.add(file.absolutePath)
+                    imagesHolder.add(file)
                 }
                 if (imagesHolder.isNotEmpty()) {
                     images.value = imagesHolder
@@ -197,24 +176,24 @@ fun CreateProductScreen(
         }
     }
 
-    Log.d("productData", "${productData.toString()}")
-
-    fun validateInut(): Boolean {
+    fun validateInut(): Boolean{
         var errorMessage = "";
-        if (thumbnail.value == null) {
+        if(thumbnail.value==null){
             errorMessage = "product thumbnail is require"
-        } else if (images.value.isEmpty())
-            errorMessage = "you must select atleast one image for product"
-        else if (productName.value.text.trim().isEmpty())
-            errorMessage = "product name is require"
+        }
+        else if (images.value.isEmpty())
+            errorMessage="you must select atleast one image for product"
+        else if(productName.value.text.trim().isEmpty())
+            errorMessage="product name is require"
         else if (description.value.text.trim().isEmpty())
             errorMessage = "product description is required"
         else if (price.value.text.trim().isEmpty())
             errorMessage = "product price is required"
-        else if (selectedSubCategoryId.value == null)
+        else if (selectedSubCategoryId.value==null)
             errorMessage = "you must select subCategory"
 
-        if (errorMessage.isNotEmpty()) {
+        if(errorMessage.isNotEmpty())
+        {
             corotine.launch {
                 snackbarHostState.showSnackbar(errorMessage)
             }
@@ -244,7 +223,7 @@ fun CreateProductScreen(
                 ),
                 title = {
                     Text(
-                        if (productId == null) "Create Product" else "Update Product",
+                        "Product Detail",
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -273,106 +252,48 @@ fun CreateProductScreen(
             BottomAppBar(
                 containerColor = Color.White,
                 modifier = Modifier.padding(horizontal = 15.dp)
-            ) {
+            ){
                 CustomBotton(
-                    isLoading = isSendingData.value,
+                    isLoading =isSendingData.value,
                     operation = {
-
-                        if (product_id == null) {
-                            var validationResult = validateInut()
-                            if (validationResult) {
-                                corotine.launch {
-                                    isSendingData.value = true;
-                                    val result = async {
-                                        homeViewModel.createProducts(
-                                            name = productName.value.text,
-                                            description = description.value.text,
-                                            thmbnail = File(thumbnail.value!!),
-                                            subcategory_id = selectedSubCategoryId.value!!,
-                                            store_id = store_id!!,
-                                            price = price.value.text.toDouble(),
-                                            productVarients = productVarients.value,
-                                            images = images.value.map { it -> File(it) },
-                                        )
-                                    }.await()
-                                    isSendingData.value = false
-                                    if (!result.isNullOrEmpty()) {
-                                        snackbarHostState.showSnackbar(result)
-                                    } else {
-                                        thumbnail.value = null
-                                        images.value = emptyList<String>()
-                                        productName.value = TextFieldValue("")
-                                        price.value = TextFieldValue("")
-                                        description.value = TextFieldValue("")
-                                        selectedSubCategoryId.value = null;
-                                        productVarients.value = emptyList<ProductVarientSelection>()
-                                        snackbarHostState.showSnackbar("Product created Scucessfuly")
-                                        nav.popBackStack()
-                                    }
-
-                                }
-                            }
-
-                        } else {
-                           var newProductVarient = mutableListOf<ProductVarientSelection>();
-                            if(productVarients.value.isNotEmpty()){
-                                newProductVarient.addAll(productVarients.value)
-                            }
-                           if(newProductVarient.isNotEmpty()&&(productData!=null&&!productData.productVarients.isNullOrEmpty())){
-                              newProductVarient.removeAll(productData.productVarients!!.toListOfProductVarient())
-                           }
-
-                            var newImages = mutableListOf<String>();
-                            if(images.value.isNotEmpty()){
-                                newImages.addAll(images.value)
-                            }
-                            if(newImages.isNotEmpty()&&(productData!=null&&!productData.productImages.isNullOrEmpty())){
-                                newImages.removeAll(productData.productImages)
-                            }
-
-
+                        var validationResult = validateInut()
+                        if(validationResult)
+                        {
                             corotine.launch {
-                                isSendingData.value = true;
+                                isSendingData.value=true;
                                 val result = async {
-                                    homeViewModel.updateProducts(
-                                        id = product_id,
-                                        name = if (productName.value.text.isEmpty()) null else productName.value.text,
-                                        description = if (description.value.text.isEmpty()) null else description.value.text,
-                                        thmbnail = if (thumbnail.value != productData?.thmbnail) File(
-                                            thumbnail.value!!
-                                        ) else null,
-                                        subcategory_id = if (selectedSubCategoryId.value == null) null else selectedSubCategoryId.value!!,
+                                    homeViewModel.createProducts(
+                                        name = productName.value.text,
+                                        description=description.value.text,
+                                        thmbnail = thumbnail.value!!,
+                                        subcategory_id = selectedSubCategoryId.value!!,
                                         store_id = store_id!!,
-                                        price = if (price.value.text.isEmpty()) null
-                                        else if (General.isValideMony(price.value.text.toString())) price.value.text.toDouble()
-                                        else null,
-                                        productVarients = if (newProductVarient.isEmpty()) null
-                                        else newProductVarient,
-                                        images =if(newImages.isEmpty())null else newImages.map { it -> File(it) }.toList(),
-                                        deletedimages = if(deleteImages.value.isEmpty())null else deleteImages.value,
-                                        deletedProductVarients = if(deleteProductVarient.value.isEmpty()) null else deleteProductVarient.value
+                                        price=price.value.text.toDouble(),
+                                        productVarients = productVarients.value,
+                                        images = images.value.toList(),
                                     )
                                 }.await()
-                                isSendingData.value = false
-                                if (!result.isNullOrEmpty()) {
+                                isSendingData.value=false
+                                if(!result.isNullOrEmpty())
+                                {
                                     snackbarHostState.showSnackbar(result)
-                                } else {
-                                    thumbnail.value = null
-                                    images.value = emptyList<String>()
+                                }else {
+                                    thumbnail.value=null
+                                    images.value = emptyList<File>()
                                     productName.value = TextFieldValue("")
                                     price.value = TextFieldValue("")
                                     description.value = TextFieldValue("")
                                     selectedSubCategoryId.value = null;
                                     productVarients.value = emptyList<ProductVarientSelection>()
-                                    snackbarHostState.showSnackbar("Product Update Scucessfuly")
+                                    snackbarHostState.showSnackbar("Product created Scucessfuly")
                                     nav.popBackStack()
                                 }
 
                             }
-
                         }
-                    },
-                    buttonTitle =if(product_id!=null) "Update Product" else  "Create Product",
+                    }
+                    ,
+                    buttonTitle = "Create Product",
                     isEnable = true,
                 )
             }
@@ -443,7 +364,7 @@ fun CreateProductScreen(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(8.dp)),
                                 model = General.handlingImageForCoil(
-                                    thumbnail.value,
+                                    thumbnail.value!!.absolutePath,
                                     context
                                 ),
                                 contentDescription = "",
@@ -548,7 +469,6 @@ fun CreateProductScreen(
 
                     images.value.forEachIndexed { index, value ->
 
-                        Log.d("productImageIs", value)
                         ConstraintLayout {
                             var (image, icon) = createRefs()
 
@@ -559,7 +479,8 @@ fun CreateProductScreen(
                                     .width(120.dp)
                                     .background(
                                         color = Color.White,
-                                    ),
+                                    )
+                                ,
                                 contentAlignment = Alignment.Center
                             ) {
                                 SubcomposeAsyncImage(
@@ -569,7 +490,7 @@ fun CreateProductScreen(
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(8.dp)),
                                     model = General.handlingImageForCoil(
-                                        value,
+                                        value.absolutePath,
                                         context
                                     ),
                                     contentDescription = "",
@@ -601,17 +522,7 @@ fun CreateProductScreen(
                                         RoundedCornerShape(20.dp)
                                     )
                                     .clickable {
-                                        if (productData != null && productData.productImages.contains(
-                                                value
-                                            )
-                                        ) {
-                                            val deletImageList = mutableListOf<String>()
-                                            deletImageList.add(value)
-                                            deletImageList.addAll(deleteImages.value)
-                                            deleteImages.value = deletImageList
-                                        }
-                                        images.value = images.value.filter { it -> it != value }
-
+                                        images.value = images.value.filter { it.name != value.name }
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -673,7 +584,7 @@ fun CreateProductScreen(
             TextInputWithTitle(
                 value = productName,
                 title = "",
-                placHolder = if (productData != null) productData.name else "Product Name"
+                placHolder = "Product Name"
             )
 
             Text(
@@ -695,8 +606,7 @@ fun CreateProductScreen(
                 },
                 placeholder = {
                     Text(
-                        if (productData != null) productData.price.toString() else
-                            "Product Price",
+                        "Product Price",
                         color = CustomColor.neutralColor500,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
@@ -737,7 +647,7 @@ fun CreateProductScreen(
                 onValueChange = { description.value = it },
                 placeholder = {
                     Text(
-                        if (productData != null) productData.description.toString() else "Product Description",
+                        "Product Description",
                         color = CustomColor.neutralColor500,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
@@ -798,10 +708,7 @@ fun CreateProductScreen(
                 )
                 {
                     Text(
-                        if (productData != null && selectedSubCategoryId.value == null)
-                            storeSubCategory?.firstOrNull { it.id == productData.subcategory_id }?.name
-                                ?: "Select SubCategory "
-                        else if (selectedSubCategoryId.value == null) "Select SubCategory "
+                        if (selectedSubCategoryId.value == null) "Select SubCategory "
                         else storeSubCategory?.firstOrNull { it.id == selectedSubCategoryId.value }?.name
                             ?: ""
                     )
@@ -829,7 +736,7 @@ fun CreateProductScreen(
 
                     ) {
                     if (storeSubCategory != null)
-                        storeSubCategory.forEachIndexed { index, value ->
+                        storeSubCategory!!.forEachIndexed { index, value ->
                             Text(
                                 value.name,
                                 modifier = Modifier
@@ -856,25 +763,22 @@ fun CreateProductScreen(
                 textAlign = TextAlign.Center,
             )
             Sizer(2)
-            if (productVarients.value.isNotEmpty())
+            if( productVarients.value.isNotEmpty())
                 Sizer(5)
             FlowRow {
                 productVarients.value.forEachIndexed { index, value ->
                     ConstraintLayout {
-                        var (iconRef) = createRefs()
+                        var (iconRef)=createRefs()
                         Column(
-                            modifier = Modifier
-                                .background(
-                                    CustomColor.alertColor_3_300,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(
-                                    horizontal = 5.dp
-                                )
+                            modifier = Modifier.background(
+                                CustomColor.alertColor_3_300,
+                                RoundedCornerShape(8.dp)
+                            ).padding(
+                                horizontal = 5.dp
+                            )
                         ) {
                             Text(
-                                varients.value?.firstOrNull { it.id == value.varient_id }?.name
-                                    ?: "",
+                                varients.value?.firstOrNull{it.id==value.varient_id}?.name?:"",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (18).sp,
@@ -903,17 +807,8 @@ fun CreateProductScreen(
                                     RoundedCornerShape(20.dp)
                                 )
                                 .clickable {
-                                    if (productData != null && !productData.productVarients.isNullOrEmpty()&&
-                                        productData.productVarients!!.toListOfProductVarient().contains(value)) {
-                                        var deletedProductVarient = mutableListOf<ProductVarientSelection>()
-                                        deletedProductVarient.add(value)
-                                        deletedProductVarient.addAll(deleteProductVarient.value)
-                                        deleteProductVarient.value = deletedProductVarient
-                                    }
-                                    productVarients.value =
-                                        productVarients.value.filter { it.name != value.name }
-                                }
-                                .constrainAs(iconRef) {
+                                    productVarients.value = productVarients.value.filter { it.name != value.name }
+                                }.constrainAs(iconRef){
                                     top.linkTo(parent.top)
                                     end.linkTo(parent.end)
                                 },
@@ -928,7 +823,7 @@ fun CreateProductScreen(
                     }
                 }
             }
-            if (productVarients.value.isNotEmpty())
+            if( productVarients.value.isNotEmpty())
                 Sizer(5)
             Column(
                 modifier = Modifier
@@ -1016,7 +911,8 @@ fun CreateProductScreen(
                     )
                 },
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                ,
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color.Gray,
@@ -1049,7 +945,8 @@ fun CreateProductScreen(
                     )
                 },
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                ,
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color.Gray,
@@ -1070,26 +967,27 @@ fun CreateProductScreen(
             CustomBotton(
                 isLoading = false,
                 operation = {
-                    val selectedVarient = ProductVarientSelection(
+                    val selectedVarient= ProductVarientSelection(
                         name = prodcutVarientName.value.text,
-                        precentage = if (prodcutVarientPrecentage.value.text.isEmpty()) 1.0 else prodcutVarientPrecentage.value.text.toDouble(),
-                        varient_id = selectedVarientId.value!!
-                    )
+                        precentage =   if(prodcutVarientPrecentage.value.text.isEmpty())1.0 else prodcutVarientPrecentage.value.text.toDouble(),
+                        varient_id=  selectedVarientId.value!!)
 
                     var productVarientHolder = mutableListOf<ProductVarientSelection>()
                     productVarientHolder.addAll(productVarients.value)
                     productVarientHolder.add(selectedVarient)
-                    productVarients.value = productVarientHolder
+                    productVarients.value= productVarientHolder
 
-                    prodcutVarientName.value = TextFieldValue("")
-                    prodcutVarientPrecentage.value = TextFieldValue("")
-                    selectedVarientId.value = null
+                    prodcutVarientName.value= TextFieldValue("")
+                    prodcutVarientPrecentage.value= TextFieldValue("")
+                    selectedVarientId.value=null
                 },
                 buttonTitle = "Add ProductVarient",
-                isEnable = selectedVarientId.value != null && prodcutVarientName.value.text.isNotEmpty(),
+                isEnable = selectedVarientId.value!=null &&prodcutVarientName.value.text.isNotEmpty()
+                ,
                 color = null
             )
-            Box(modifier = Modifier.height(140.dp))
+            Box(modifier = Modifier.height(90.dp))
         }
     }
+
 }

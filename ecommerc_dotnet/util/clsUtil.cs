@@ -140,9 +140,12 @@ namespace hotel_api.util
             }
         } 
 
-        public static void deleteFile(List<string> filePath,IWebHostEnvironment host,string? addtionUrl=null)
+        public static void deleteFile(List<string> filePath,IWebHostEnvironment host)
         {
-             filePath.ForEach(image=>deleteFile(image,host,addtionUrl)); 
+             filePath.ForEach(image =>
+             {
+                 deleteFile(image,host);
+             }); 
         } 
  
     }

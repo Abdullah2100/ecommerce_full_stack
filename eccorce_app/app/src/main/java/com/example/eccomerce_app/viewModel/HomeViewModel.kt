@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.viewModel
 
+import android.R
 import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
@@ -181,7 +182,6 @@ class HomeViewModel(
             }
         }
     }
-
 
 
     fun getVarients(pageNumber: Int = 1) {
@@ -662,7 +662,7 @@ class HomeViewModel(
         end_date: String,
         image: File,
 
-    ): String? {
+        ): String? {
         _isLoading.emit(true)
 
         var result = homeRepository.createBanner(
@@ -674,7 +674,7 @@ class HomeViewModel(
                 var data = result.data as BannerResponseDto
 
                 var bannersHolder = mutableListOf<Banner>()
-                var bannersResponse =data.toBanner()
+                var bannersResponse = data.toBanner()
 
                 bannersHolder.add(bannersResponse)
                 if (_banners.value != null) {
@@ -692,11 +692,11 @@ class HomeViewModel(
             is NetworkCallHandler.Error -> {
                 _isLoading.emit(false)
 
-                var errorMessage = (result.data.toString().replace("",""))
-                if (errorMessage.contains(General.BASED_URL.substring(8,20))) {
+                var errorMessage = (result.data.toString().replace("", ""))
+                if (errorMessage.contains(General.BASED_URL.substring(8, 20))) {
                     errorMessage.replace(General.BASED_URL, " Server ")
                 }
-                return errorMessage.replace("\"","")
+                return errorMessage.replace("\"", "")
             }
 
             else -> {
@@ -714,8 +714,8 @@ class HomeViewModel(
         var result = homeRepository.deleteBanner(banner_id);
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var copyBanner = _banners.value?.filter { it.id!=banner_id }
-                if(!copyBanner.isNullOrEmpty())
+                var copyBanner = _banners.value?.filter { it.id != banner_id }
+                if (!copyBanner.isNullOrEmpty())
                     _banners.emit(copyBanner)
                 else
                     _banners.emit(emptyList())
@@ -725,11 +725,11 @@ class HomeViewModel(
             is NetworkCallHandler.Error -> {
                 _isLoading.emit(false)
 
-                var errorMessage = (result.data.toString().replace("",""))
-                if (errorMessage.contains(General.BASED_URL.substring(8,20))) {
+                var errorMessage = (result.data.toString().replace("", ""))
+                if (errorMessage.contains(General.BASED_URL.substring(8, 20))) {
                     errorMessage.replace(General.BASED_URL, " Server ")
                 }
-                return errorMessage.replace("\"","")
+                return errorMessage.replace("\"", "")
             }
 
             else -> {
@@ -738,7 +738,7 @@ class HomeViewModel(
         }
     }
 
-     fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
+    fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
             var result = homeRepository.getStoreAddress(store_id, pageNumber);
             when (result) {
@@ -792,10 +792,11 @@ class HomeViewModel(
                         subCategoriesolder.addAll(_SubCategories.value!!)
                     }
 
-                    var distinticSubCategories = subCategoriesolder.distinctBy { it.id }.toMutableList()
+                    var distinticSubCategories =
+                        subCategoriesolder.distinctBy { it.id }.toMutableList()
 
-                    if(distinticSubCategories.size>0)
-                    _SubCategories.emit(distinticSubCategories)
+                    if (distinticSubCategories.size > 0)
+                        _SubCategories.emit(distinticSubCategories)
                     else
                         _SubCategories.emit(emptyList())
 
@@ -816,7 +817,7 @@ class HomeViewModel(
 
     }
 
-     fun getProducts(pageNumber:Int = 1) {
+    fun getProducts(pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
             var result = homeRepository.getProduct(pageNumber);
             when (result) {
@@ -833,7 +834,7 @@ class HomeViewModel(
 
                     var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
 
-                    if(distinticSubCategories.size>0)
+                    if (distinticSubCategories.size > 0)
                         _products.emit(distinticSubCategories)
                     else
                         _products.emit(emptyList())
@@ -855,9 +856,9 @@ class HomeViewModel(
 
     }
 
-     fun getProducts(pageNumber:Int = 1,store_id: UUID) {
+    fun getProducts(pageNumber: Int = 1, store_id: UUID) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
-            var result = homeRepository.getProduct(store_id,pageNumber);
+            var result = homeRepository.getProduct(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<ProductResponseDto>
@@ -872,7 +873,7 @@ class HomeViewModel(
 
                     var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
 
-                    if(distinticSubCategories.size>0)
+                    if (distinticSubCategories.size > 0)
                         _products.emit(distinticSubCategories)
                     else
                         _products.emit(emptyList())
@@ -895,27 +896,26 @@ class HomeViewModel(
     }
 
 
-
-     fun getProducts(pageNumber:Int = 1,store_id: UUID,subCategory_id: UUID) {
+    fun getProducts(pageNumber: Int = 1, store_id: UUID, subCategory_id: UUID) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
-            var result = homeRepository.getProduct(store_id,subCategory_id,pageNumber);
+            var result = homeRepository.getProduct(store_id, subCategory_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<ProductResponseDto>
 
                     var holder = mutableListOf<Product>()
-                    var addressResponse = data.map { it.toProdcut() }.toList()
+                    var productsesponse = data.map { it.toProdcut() }.toList()
 
-                    holder.addAll(addressResponse)
+                    holder.addAll(productsesponse)
                     if (_products.value != null) {
                         holder.addAll(_products.value!!)
                     }
 
                     var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
 
-                    if(distinticSubCategories.size>0)
+                    if (distinticSubCategories.size > 0)
                         _products.emit(distinticSubCategories)
-                    else
+                    else if (_products.value == null)
                         _products.emit(emptyList())
 
                 }
@@ -935,60 +935,149 @@ class HomeViewModel(
 
     }
 
-    fun createProducts(    name:String,
-                        description:String,
-                        thmbnail: File,
-                        subcategory_id: UUID,
-                        store_id: UUID,
-                        price: Double,
-                        productVarients:List<ProductVarientSelection>,
-                        images:List<File>
-    ) {
-        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
-            var result = homeRepository.createProduct(
-                name,
-                description,
-                thmbnail,
-                subcategory_id,
-                store_id,
-                price,
-                productVarients,
-                images
-            );
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as ProductResponseDto
+    suspend fun createProducts(
+        name: String,
+        description: String,
+        thmbnail: File,
+        subcategory_id: UUID,
+        store_id: UUID,
+        price: Double,
+        productVarients: List<ProductVarientSelection>,
+        images: List<File>
+    ): String? {
+        var result = homeRepository.createProduct(
+            name,
+            description,
+            thmbnail,
+            subcategory_id,
+            store_id,
+            price,
+            productVarients,
+            images
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as ProductResponseDto
 
-                    var holder = mutableListOf<Product>()
-                    var addressResponse = data.toProdcut()
+                var holder = mutableListOf<Product>()
+                var addressResponse = data.toProdcut()
 
-                    holder.add(addressResponse)
-                    if (_products.value != null) {
-                        holder.addAll(_products.value!!)
-                    }
-
-                    if(holder.size>0)
-                        _products.emit(holder)
-                    else
-                        _products.emit(emptyList())
-
+                holder.add(addressResponse)
+                if (_products.value != null) {
+                    holder.addAll(_products.value!!)
                 }
 
-                is NetworkCallHandler.Error -> {
-                    _isLoading.emit(false)
+                if (holder.size > 0)
+                    _products.emit(holder)
+                else
                     _products.emit(emptyList())
+                return null
+            }
 
-                    var errorMessage = (result.data.toString())
-                    if (errorMessage.contains(General.BASED_URL)) {
-                        errorMessage.replace(General.BASED_URL, " Server ")
-                    }
-                    Log.d("errorFromGettingStoreData", errorMessage)
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+                _products.emit(emptyList())
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
                 }
+                Log.d("errorFromGettingStoreData", errorMessage)
+                return errorMessage.replace("\"", "")
             }
         }
+    }
+    suspend fun updateProducts(
+        id: UUID,
+        name:String?,
+        description:String?,
+        thmbnail: File?,
+        subcategory_id: UUID?,
+        store_id: UUID,
+        price: Double?,
+        productVarients:List<ProductVarientSelection>?,
+        images:List<File>?,
+        deletedProductVarients:List<ProductVarientSelection>?,
+        deletedimages:List<String>?
 
+    ): String? {
+        var result = homeRepository.updateProduct(
+            id,
+            name,
+            description,
+            thmbnail,
+            subcategory_id,
+            store_id,
+            price,
+            productVarients,
+            images,
+            deletedProductVarients,
+            deletedimages
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as ProductResponseDto
+
+                var holder = mutableListOf<Product>()
+                var addressResponse = data.toProdcut()
+
+                holder.add(addressResponse)
+                if (_products.value != null) {
+                    holder.addAll(_products.value!!)
+                }
+               val distnectHolder = holder.distinctBy { it.id }
+
+                if (distnectHolder.size > 0)
+                    _products.emit(distnectHolder)
+
+                return null
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+                _products.emit(emptyList())
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                Log.d("errorFromGettingStoreData", errorMessage)
+                return errorMessage.replace("\"", "")
+            }
+        }
     }
 
+
+    suspend fun deleteProduct(
+        store_id: UUID,
+        product_id: UUID,
+
+        ): String? {
+        var result = homeRepository.deleteProduct(
+            store_id = store_id,
+            product_id = product_id
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                if(products.value!=null)
+                {
+                    var copyProduct = _products.value?.filter { it.id!=product_id };
+                  _products.emit(copyProduct);
+                }
+                return null
+            }
+
+            is NetworkCallHandler.Error -> {
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                Log.d("errorFromGettingStoreData", errorMessage)
+                return errorMessage.replace("\"", "")
+            }
+        }
+    }
 
 
 }

@@ -13,7 +13,7 @@ data class ProductResponseDto(
     var description:String,
     var thmbnail:String,
     @Serializable(with = UUIDKserialize::class)
-    var subcategory_id: String,
+    var subcategory_id: UUID,
     @Serializable(with = UUIDKserialize::class)
     var store_id: UUID,
     var price: Double,
