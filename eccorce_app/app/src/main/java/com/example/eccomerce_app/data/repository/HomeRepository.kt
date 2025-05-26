@@ -1,10 +1,7 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.Dto.AuthResultDto
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.dto.ModelToDto.toProdcutVarientRequestDto
 import com.example.eccomerce_app.dto.request.LocationRequestDto
-import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
@@ -15,7 +12,6 @@ import com.example.eccomerce_app.dto.response.StoreResposeDto
 import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.dto.response.VarientResponseDto
-import com.example.eccomerce_app.model.Banner
 import com.example.eccomerce_app.model.MyInfoUpdate
 import com.example.eccomerce_app.model.ProductVarientSelection
 import com.example.eccomerce_app.util.Secrets

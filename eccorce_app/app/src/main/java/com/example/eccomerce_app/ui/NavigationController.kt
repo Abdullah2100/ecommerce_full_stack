@@ -19,6 +19,7 @@ import com.example.eccomerce_app.ui.view.account.ProfileScreen
 import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
 import com.example.eccomerce_app.ui.view.account.store.ProductDetail
 import com.example.eccomerce_app.ui.view.account.store.StoreScreen
+import com.example.eccomerce_app.ui.view.home.CartScreen
 import com.example.eccomerce_app.ui.view.home.HomeAddressList
 import com.example.eccomerce_app.ui.view.home.HomePage
 import com.example.eccomerce_app.ui.view.location.LocationHomeScreen
@@ -308,13 +309,33 @@ fun NavController(
                 ProductDetail(
                     nav = nav,
                     homeViewModel = homeViewModle,
-                    storeId = store.store_Id,
                     productID = store.product_Id,
                     isFromHome = store.isFromHome
                 )
 
             }
+            composable<Screens.Cart>(
 
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                    navRef->
+
+
+                CartScreen(
+                    nav = nav,
+                    homeViewModel = homeViewModle,
+                )
+
+            }
         }
 
     }

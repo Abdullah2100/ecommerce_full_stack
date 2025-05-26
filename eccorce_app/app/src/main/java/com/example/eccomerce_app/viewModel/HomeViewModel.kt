@@ -1,6 +1,5 @@
 package com.example.eccomerce_app.viewModel
 
-import android.R
 import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
@@ -22,7 +21,9 @@ import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
 import com.example.eccomerce_app.dto.response.UserDto
 import com.example.eccomerce_app.dto.response.VarientResponseDto
 import com.example.eccomerce_app.model.Address
-import com.example.eccomerce_app.model.Banner
+import com.example.eccomerce_app.model.BannerModel
+import com.example.eccomerce_app.model.CardProductModel
+import com.example.eccomerce_app.model.CartModel
 import com.example.eccomerce_app.model.Category
 import com.example.eccomerce_app.model.DtoToModel.toAddress
 import com.example.eccomerce_app.model.DtoToModel.toBanner
@@ -33,13 +34,13 @@ import com.example.eccomerce_app.model.DtoToModel.toSubCategory
 import com.example.eccomerce_app.model.DtoToModel.toUser
 import com.example.eccomerce_app.model.DtoToModel.toVarient
 import com.example.eccomerce_app.model.MyInfoUpdate
-import com.example.eccomerce_app.model.Product
+import com.example.eccomerce_app.model.ProductModel
 import com.example.eccomerce_app.model.ProductVarientSelection
-import com.example.eccomerce_app.model.Store
+import com.example.eccomerce_app.model.StoreModel
 import com.example.eccomerce_app.model.SubCategory
 import com.example.eccomerce_app.model.SubCategoryUpdate
-import com.example.eccomerce_app.model.User
-import com.example.eccomerce_app.model.Varient
+import com.example.eccomerce_app.model.UserModel
+import com.example.eccomerce_app.model.VarientModel
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
@@ -48,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -68,21 +70,21 @@ class HomeViewModel(
     private var _categories = MutableStateFlow<MutableList<Category>?>(null)
     var categories = _categories.asStateFlow()
 
-    private var _varients = MutableStateFlow<MutableList<Varient>?>(null)
+    private var _varients = MutableStateFlow<MutableList<VarientModel>?>(null)
     var varients = _varients.asStateFlow()
 
-    private var _myInfo = MutableStateFlow<User?>(null)
+    private var _myInfo = MutableStateFlow<UserModel?>(null)
     var myInfo = _myInfo.asStateFlow()
 
 
-    private var _banners = MutableStateFlow<List<Banner>?>(null);
+    private var _banners = MutableStateFlow<List<BannerModel>?>(null);
     var banners = _banners.asStateFlow();
 
     //this for home only to prevent the size when getting new banner for defferent store
-    private var _homeBanners = MutableStateFlow<List<Banner>?>(null);
+    private var _homeBanners = MutableStateFlow<List<BannerModel>?>(null);
     var homeBanners = _homeBanners.asStateFlow();
 
-    private var _stores = MutableStateFlow<List<Store>?>(null);
+    private var _stores = MutableStateFlow<List<StoreModel>?>(null);
     var stores = _stores.asStateFlow();
 
     private var _storeAddress = MutableStateFlow<List<Address>?>(null);
@@ -91,11 +93,131 @@ class HomeViewModel(
     private var _SubCategories = MutableStateFlow<List<SubCategory>?>(null);
     var subCategories = _SubCategories.asStateFlow();
 
-    private var _products = MutableStateFlow<List<Product>?>(null);
+    private var _products = MutableStateFlow<List<ProductModel>?>(null);
     var products = _products.asStateFlow();
+
+    private var _cartImes = MutableStateFlow<CartModel>(CartModel());
+    var cartImes = _cartImes.asStateFlow();
+
 
     private var _coroutinExption = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
+    }
+
+
+    fun addToCart(product: CardProductModel) {
+        viewModelScope.launch {
+            var cardProducts = mutableListOf<CardProductModel>()
+
+            cardProducts.add(product)
+            cardProducts.addAll(_cartImes.value.cartProducts)
+            var productLength = cardProducts.size;
+            var disntcProduct = cardProducts.distinctBy { it.productVarients }.toList()
+            var distenctProductsLength = disntcProduct.size
+
+            if (productLength == distenctProductsLength) {
+                var varientPrice = product.price
+                product.productVarients.forEach { it ->
+                    varientPrice = varientPrice * it.precentage
+                }
+                var price = ((_cartImes.value.totalPrice ?: 0.0) ) + varientPrice;
+                var copyCardItme = cartImes.value.copy(
+                    totalPrice = price, cartProducts = cardProducts
+                )
+                _cartImes.emit(copyCardItme)
+            }
+        }
+    }
+
+    fun increaseCardItem(productId: UUID) {
+        viewModelScope.launch {
+            var copyproduct: CardProductModel? = null;
+            var productHolders = _cartImes.value.cartProducts.map { product ->
+                if (product.id == productId) {
+                    copyproduct = product.copy(quantity = product.quantity + 1)
+                    copyproduct
+                } else {
+                    product
+                }
+            }
+            var varientPrice = copyproduct!!.price
+
+
+            copyproduct.productVarients.forEach { it ->
+                varientPrice = varientPrice * it.precentage
+            }
+            var price = (_cartImes.value.totalPrice ?: 0.0) + (varientPrice);
+
+
+            val copyCardItme =
+                _cartImes.value.copy(cartProducts = productHolders, totalPrice = price)
+
+            _cartImes.emit(copyCardItme)
+
+        }
+    }
+
+
+    fun decreaseCardItem(productId: UUID) {
+        viewModelScope.launch {
+            var productList = _cartImes.value.cartProducts;
+            var fristProduct = productList.first { it.id == productId }
+            var varientPrice = fristProduct!!.price
+
+
+            fristProduct.productVarients.forEach { it ->
+                varientPrice = varientPrice * it.precentage
+            }
+
+            var totalPrice =
+                (_cartImes.value.totalPrice ?: 0.0) - (varientPrice)
+
+            when (fristProduct.quantity > 1) {
+                true -> {
+                    productList = _cartImes.value.cartProducts.map { product ->
+                        if (product.id == productId) {
+                            product.copy(quantity = product.quantity - 1)
+                        } else {
+                            product
+                        }
+                    }
+                }
+
+                else -> {
+                    productList = _cartImes.value.cartProducts.filter { it.id != productId }
+                }
+            }
+
+            val copyCardItme =
+                _cartImes.value.copy(cartProducts = productList, totalPrice = totalPrice)
+
+            _cartImes.emit(copyCardItme)
+
+        }
+    }
+
+    fun removeItemFromCard(productId: UUID) {
+        viewModelScope.launch {
+            var productList = _cartImes.value.cartProducts;
+            var fristProduct = productList.first { it.id == productId }
+            var varientPrice = fristProduct!!.price
+
+
+            fristProduct.productVarients.forEach { it ->
+                varientPrice = varientPrice * it.precentage
+            }
+
+            var totalPrice =
+                (_cartImes.value.totalPrice ?: 0.0) - (varientPrice)
+
+            productList = _cartImes.value.cartProducts.filter { it.id != productId }
+
+            val copyCardItme =
+                _cartImes.value.copy(cartProducts = productList, totalPrice = totalPrice)
+
+            _cartImes.emit(copyCardItme)
+
+        }
     }
 
 
@@ -129,7 +251,7 @@ class HomeViewModel(
                 _hub.value!!.on(
                     "createdBanner",
                     { result ->
-                        var banners = mutableListOf<Banner>();
+                        var banners = mutableListOf<BannerModel>();
                         if (_banners.value == null) {
                             banners.add(result.toBanner())
                         } else {
@@ -192,7 +314,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var varientolder = result.data as List<VarientResponseDto>
 
-                    var mutableVarient = mutableListOf<Varient>()
+                    var mutableVarient = mutableListOf<VarientModel>()
 
                     if (pageNumber != 1 && _varients.value != null) {
                         mutableVarient.addAll(_varients.value!!.toList())
@@ -379,7 +501,7 @@ class HomeViewModel(
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as StoreResposeDto
-                var storesHolder = mutableListOf<Store>()
+                var storesHolder = mutableListOf<StoreModel>()
                 if (_stores.value != null) {
                     storesHolder.add(data.toStore())
                     storesHolder.addAll(_stores.value!!.toList())
@@ -427,7 +549,7 @@ class HomeViewModel(
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as StoreResposeDto
 
-                var storesHolder = mutableListOf<Store>()
+                var storesHolder = mutableListOf<StoreModel>()
                 if (_stores.value != null) {
                     storesHolder.add(data.toStore())
                     storesHolder.addAll(_stores.value!!.toList())
@@ -554,7 +676,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as StoreResposeDto
 
-                    var storesHolder = mutableListOf<Store>()
+                    var storesHolder = mutableListOf<StoreModel>()
                     storesHolder.add(data.toStore())
 
                     if (_stores.value != null) {
@@ -586,7 +708,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<BannerResponseDto>
 
-                    var bannersHolder = mutableListOf<Banner>()
+                    var bannersHolder = mutableListOf<BannerModel>()
                     var bannersResponse = data.map { it.toBanner() }.toList()
 
                     bannersHolder.addAll(bannersResponse)
@@ -598,12 +720,12 @@ class HomeViewModel(
                     if (distinticBanner.size > 0)
                         _banners.emit(distinticBanner)
                     else
-                        _banners.emit(emptyList<Banner>())
+                        _banners.emit(emptyList<BannerModel>())
 
                 }
 
                 is NetworkCallHandler.Error -> {
-                    _banners.emit(emptyList<Banner>())
+                    _banners.emit(emptyList<BannerModel>())
 
                     _isLoading.emit(false)
 
@@ -625,7 +747,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<BannerResponseDto>
 
-                    var bannersHolder = mutableListOf<Banner>()
+                    var bannersHolder = mutableListOf<BannerModel>()
                     var bannersResponse = data.map { it.toBanner() }.toList()
 
                     bannersHolder.addAll(bannersResponse)
@@ -637,12 +759,12 @@ class HomeViewModel(
                     if (distinticBanner.size > 0)
                         _banners.emit(distinticBanner)
                     else
-                        _banners.emit(emptyList<Banner>())
+                        _banners.emit(emptyList<BannerModel>())
 
                 }
 
                 is NetworkCallHandler.Error -> {
-                    _banners.emit(emptyList<Banner>())
+                    _banners.emit(emptyList<BannerModel>())
 
                     _isLoading.emit(false)
 
@@ -673,7 +795,7 @@ class HomeViewModel(
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as BannerResponseDto
 
-                var bannersHolder = mutableListOf<Banner>()
+                var bannersHolder = mutableListOf<BannerModel>()
                 var bannersResponse = data.toBanner()
 
                 bannersHolder.add(bannersResponse)
@@ -685,7 +807,7 @@ class HomeViewModel(
                 if (distinticBanner.size > 0)
                     _banners.emit(distinticBanner)
                 else
-                    _banners.emit(emptyList<Banner>())
+                    _banners.emit(emptyList<BannerModel>())
                 return null;
             }
 
@@ -824,7 +946,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<ProductResponseDto>
 
-                    var holder = mutableListOf<Product>()
+                    var holder = mutableListOf<ProductModel>()
                     var addressResponse = data.map { it.toProdcut() }.toList()
 
                     holder.addAll(addressResponse)
@@ -863,7 +985,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<ProductResponseDto>
 
-                    var holder = mutableListOf<Product>()
+                    var holder = mutableListOf<ProductModel>()
                     var addressResponse = data.map { it.toProdcut() }.toList()
 
                     holder.addAll(addressResponse)
@@ -903,7 +1025,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<ProductResponseDto>
 
-                    var holder = mutableListOf<Product>()
+                    var holder = mutableListOf<ProductModel>()
                     var productsesponse = data.map { it.toProdcut() }.toList()
 
                     holder.addAll(productsesponse)
@@ -959,7 +1081,7 @@ class HomeViewModel(
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as ProductResponseDto
 
-                var holder = mutableListOf<Product>()
+                var holder = mutableListOf<ProductModel>()
                 var addressResponse = data.toProdcut()
 
                 holder.add(addressResponse)
@@ -987,18 +1109,19 @@ class HomeViewModel(
             }
         }
     }
+
     suspend fun updateProducts(
         id: UUID,
-        name:String?,
-        description:String?,
+        name: String?,
+        description: String?,
         thmbnail: File?,
         subcategory_id: UUID?,
         store_id: UUID,
         price: Double?,
-        productVarients:List<ProductVarientSelection>?,
-        images:List<File>?,
-        deletedProductVarients:List<ProductVarientSelection>?,
-        deletedimages:List<String>?
+        productVarients: List<ProductVarientSelection>?,
+        images: List<File>?,
+        deletedProductVarients: List<ProductVarientSelection>?,
+        deletedimages: List<String>?
 
     ): String? {
         var result = homeRepository.updateProduct(
@@ -1018,14 +1141,14 @@ class HomeViewModel(
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as ProductResponseDto
 
-                var holder = mutableListOf<Product>()
+                var holder = mutableListOf<ProductModel>()
                 var addressResponse = data.toProdcut()
 
                 holder.add(addressResponse)
                 if (_products.value != null) {
                     holder.addAll(_products.value!!)
                 }
-               val distnectHolder = holder.distinctBy { it.id }
+                val distnectHolder = holder.distinctBy { it.id }
 
                 if (distnectHolder.size > 0)
                     _products.emit(distnectHolder)
@@ -1059,10 +1182,9 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                if(products.value!=null)
-                {
-                    var copyProduct = _products.value?.filter { it.id!=product_id };
-                  _products.emit(copyProduct);
+                if (products.value != null) {
+                    var copyProduct = _products.value?.filter { it.id != product_id };
+                    _products.emit(copyProduct);
                 }
                 return null
             }

@@ -26,6 +26,7 @@ public class User
     public string? thumbnail { get; set; }
     public ICollection<Address>? addresses { get; set; }
     public ICollection<Category>? categories { get; set; }
+    public ICollection<Order>? orders { get; set; }
 
     public Store? Store { get; set; } = null;
 }

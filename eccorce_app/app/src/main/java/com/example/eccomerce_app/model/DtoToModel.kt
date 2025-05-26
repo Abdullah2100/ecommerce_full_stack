@@ -38,8 +38,8 @@ object DtoToModel {
     }
 
 
-    fun StoreResposeDto.toStore():Store{
-        return Store(
+    fun StoreResposeDto.toStore():StoreModel{
+        return StoreModel(
             id = this.id,
             name = this.name,
             user_id = this.user_id,
@@ -48,8 +48,8 @@ object DtoToModel {
         )
     }
 
-    fun UserDto.toUser(): User{
-        return User(
+    fun UserDto.toUser(): UserModel{
+        return UserModel(
             id = this.id,
             name = this.name,
             phone = this.phone,
@@ -61,16 +61,16 @@ object DtoToModel {
     }
 
 
-    fun BannerResponseDto.toBanner():Banner{
-        return Banner(
+    fun BannerResponseDto.toBanner():BannerModel{
+        return BannerModel(
             id=this.id,
             image=if(this.image.isNotEmpty())this.image.replace("localhost","10.0.2.2") else "",
             store_id = this.store_id
         )
     }
 
-    fun VarientResponseDto.toVarient(): Varient{
-        return Varient(
+    fun VarientResponseDto.toVarient(): VarientModel{
+        return VarientModel(
             id =  this.id,
             name=this.name
         )
@@ -85,8 +85,8 @@ object DtoToModel {
         )
     }
 
-    fun ProductResponseDto.toProdcut(): Product {
-        return Product(
+    fun ProductResponseDto.toProdcut(): ProductModel {
+        return ProductModel(
             id = this.id,
             name = this.name,
             description = this.description,

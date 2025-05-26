@@ -254,7 +254,7 @@ fun HomePage(
                     else->{
                         if(products.value!!.isNotEmpty())
                         {
-                            ProductShape(products.value!!)
+                            ProductShape(products.value!!,nav=nav)
                         }
                     }
                 }

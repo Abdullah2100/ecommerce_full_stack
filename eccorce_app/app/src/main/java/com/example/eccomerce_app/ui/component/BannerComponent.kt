@@ -35,19 +35,17 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.model.Banner
+import com.example.eccomerce_app.model.BannerModel
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.theme.CustomColor
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 
 @Composable
 fun BannerBage(
 
-    banners: List<Banner>,
+    banners: List<BannerModel>,
     isMe: Boolean? = false,
     nav: NavHostController? = null,
     deleteBanner:((id: UUID)->Unit)?=null

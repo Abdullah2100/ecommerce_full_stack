@@ -64,9 +64,10 @@ object Screens {
 
     @Serializable
     data class ProductDetails(
-        var store_Id: String,
         var product_Id: String,
         var isFromHome: Boolean
     )
+    @Serializable
+    object Cart
 
 }

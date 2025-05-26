@@ -25,6 +25,7 @@ public class Store
     public ICollection<SubCategory>? SubCategories { get; set; } =null;
     public ICollection<Bannel>? banners { get; set; }
     public ICollection<Product>? Products { get; set; }
+    public ICollection<OrderItem>oddrderItems{ get; set; }
 
     public User user {get; set;}
 }

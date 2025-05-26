@@ -31,24 +31,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.dto.response.BannerResponseDto
-import com.example.eccomerce_app.model.Banner
 import com.example.eccomerce_app.ui.NavController
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.eccomerce_app.model.ButtonNavItem
-import com.example.eccomerce_app.model.DtoToModel.toBanner
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.util.Secrets
-import com.microsoft.signalr.HubConnection
-import com.microsoft.signalr.HubConnectionBuilder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
@@ -110,7 +101,7 @@ class MainActivity : ComponentActivity() {
             val pages = listOf(
                 Screens.Home,
                 Screens.Home,
-                Screens.Home,
+                Screens.Cart,
                 Screens.Account,
             )
 
@@ -126,6 +117,7 @@ class MainActivity : ComponentActivity() {
                         val navBackStackEntry = nav.currentBackStackEntryAsState()
                         if(
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Cart::class) == true||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Account::class) == true
                             )
                         {

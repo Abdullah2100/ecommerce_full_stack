@@ -1,7 +1,7 @@
 package com.example.eccomerce_app.ui.component
 
-import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,22 +33,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.model.Product
+import com.example.eccomerce_app.model.ProductModel
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.theme.CustomColor
 import java.util.UUID
-import kotlin.contracts.contract
 
 
 @Composable
 fun ProductShape(
-    product: List<Product>,
+    product: List<ProductModel>,
     delFun: ((it: UUID) -> Unit)? = null,
     updFun: ((product_id: UUID) -> Unit)? = null,
+    nav: NavHostController,
+    isFromHome: Boolean=false
 ) {
     val context = LocalContext.current;
 
@@ -68,11 +70,23 @@ fun ProductShape(
                         containerColor = Color.White
                     ),
                     elevation = CardDefaults.elevatedCardElevation(
-                        defaultElevation = 8.dp
+                        defaultElevation = 58.dp
                     ),
                     modifier = Modifier
 //                        .height(150.dp)
                         .width(160.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable{
+                            nav.navigate(Screens.ProductDetails(
+                                product[index].id.toString(),
+                                isFromHome = isFromHome)
+                            )
+                        }
+                        .border(
+                            (0.7).dp,
+                            CustomColor.neutralColor200,
+                            RoundedCornerShape(8.dp)
+                        )
                 ) {
 
                     Box(

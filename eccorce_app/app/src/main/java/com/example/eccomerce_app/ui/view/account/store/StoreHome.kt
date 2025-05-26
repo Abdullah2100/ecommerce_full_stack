@@ -1577,6 +1577,7 @@ fun StoreScreen(
                                     if (storeFilter.isNotEmpty()) {
                                         ProductShape(
                                             storeFilter,
+                                            nav = nav,
                                             delFun = if (isFromHome == true) null else { it ->
                                                 currutine.launch {
                                                     isSendingData.value=true

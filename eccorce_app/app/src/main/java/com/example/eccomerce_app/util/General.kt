@@ -3,9 +3,11 @@ package com.example.eccomerce_app.Util
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.graphics.toColorInt
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.eccomerce_app.R
@@ -91,5 +93,13 @@ object General {
         return LocalDateTime.ofInstant(this.toInstant(), zid)
     }
 
+    fun convertColorToInt(value: String): Color?{
+        try{
+            return Color("#${value}".toColorInt())
+        }catch(ex: Exception)
+        {
+            return null;
+        }
+    }
 
 }

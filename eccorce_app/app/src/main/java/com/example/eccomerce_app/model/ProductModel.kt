@@ -2,7 +2,7 @@ package com.example.eccomerce_app.model
 
 import java.util.UUID
 
-data class Product(
+data class ProductModel(
     var id: UUID,
     var name: String,
     var description:String,

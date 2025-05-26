@@ -26,11 +26,14 @@ public class AppDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductVarient> ProductVarients { get; set; }
     public DbSet<ProductImage> ProductImages { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<OrderProductsVarient> OrdersProductsVarients { get; set; }
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-       
+      
         modelBuilder.Entity<User>(
             user =>
             {
@@ -124,6 +127,43 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);;
         });
         
+        modelBuilder.Entity<Order>(or =>
+        {
+            or.HasOne<User>(ord => ord.user)
+                .WithMany(u => u.orders)
+                .HasForeignKey(ord => ord.user_id)
+                .HasPrincipalKey(u => u.ID);
+            
+            or.HasMany(ord => ord.items)
+                .WithOne(orIt => orIt.order)
+                .HasForeignKey(ord => ord.order_id)
+                .HasPrincipalKey(orIt => orIt.id);
+        });
+       
+        modelBuilder.Entity<OrderItem>(oIt =>
+        {
+            
+            oIt.HasOne(orIt => orIt.Store)
+                .WithMany(st=>st.oddrderItems)
+                .HasForeignKey(orIt => orIt.store_id)
+                .HasPrincipalKey(st => st.id);
+            
+            oIt.HasMany(orIt => orIt.orderProductsVarients)
+                .WithOne(opv => opv.orderItem)
+                .HasForeignKey(orIt => orIt.order_item_id)
+                .HasPrincipalKey(orIt => orIt.id);
+        });
+        
+        modelBuilder.Entity<OrderProductsVarient>(opv =>
+        {
+            opv.HasOne(OPV => OPV.productVarient)
+                .WithMany(or => or.orderProductsVarients)
+                .HasForeignKey(or => or.product_varient_id)
+                .HasPrincipalKey(or => or.id);
+
+
+        }); 
+
         base.OnModelCreating(modelBuilder);
     }
 }

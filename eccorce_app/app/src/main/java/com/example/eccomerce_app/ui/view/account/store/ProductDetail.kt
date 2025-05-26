@@ -1,10 +1,5 @@
 package com.example.eccomerce_app.ui.view.account.store
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,31 +7,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -50,36 +39,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.Util.General.toCustomFil
-import com.example.eccomerce_app.model.ProductVarientSelection
-import com.example.eccomerce_app.ui.component.CustomBotton
+import com.example.eccomerce_app.model.CardProductModel
+import com.example.eccomerce_app.model.ProductVarient
 import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.UUID
-import kotlin.collections.forEachIndexed
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,120 +63,60 @@ import kotlin.collections.forEachIndexed
 fun ProductDetail(
     nav: NavHostController,
     homeViewModel: HomeViewModel,
-    storeId: String,
-    productID: String,
+    productID: String?,
     isFromHome: Boolean
 ) {
+    val myInfo = homeViewModel.myInfo.collectAsState()
+    val product_id = if (productID == null) null else UUID.fromString(productID)
 
-    val store_id = UUID.fromString(storeId)
+    val products = homeViewModel.products.collectAsState()
+    val varients = homeViewModel.varients.collectAsState()
+    val productData = products.value?.firstOrNull { it.id == product_id }
     val context = LocalContext.current
 
-    val subCategory = homeViewModel.subCategories.collectAsState()
-    val storeSubCategory = subCategory.value?.filter { it.store_id == store_id }
+    val selectedImage = remember { mutableStateOf(productData?.thmbnail) }
+    val selectedProdcutVarients = remember { mutableStateOf<List<ProductVarient>>(emptyList()) }
+    if (selectedProdcutVarients.value.isEmpty() && productData?.productVarients?.isNotEmpty() == true) {
+        productData.productVarients?.forEach { it ->
+            val firstElement = it.first()
+            val copySelectedList = mutableListOf<ProductVarient>()
+            copySelectedList.add(
+                ProductVarient(
+                    id = firstElement.id,
+                    name = firstElement.name,
+                    precentage = firstElement.precentage,
+                    varient_id = firstElement.varient_id
+                )
+            )
+            if (selectedProdcutVarients.value.isNotEmpty())
+                copySelectedList.addAll(selectedProdcutVarients.value)
+            selectedProdcutVarients.value = copySelectedList
+        }
+    }
+    val images = remember { mutableStateOf(productData?.productImages) }
+
+    val coroutine = rememberCoroutineScope()
+
+    if (productData?.thmbnail != null) {
+        if (images.value != null && !images.value!!.contains(productData.thmbnail)) {
+
+            var imageWithThumbnails = mutableListOf<String>()
+            imageWithThumbnails.add(productData.thmbnail)
+
+            if (images.value != null) {
+                imageWithThumbnails.addAll(images.value!!)
+            }
+
+            images.value = imageWithThumbnails
+
+        } else if (images.value == null) {
+            images.value = listOf<String>(productData.thmbnail)
+        }
+    }
+
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val thumbnail = remember { mutableStateOf<File?>(null) }
-    val images = remember { mutableStateOf<List<File>>(emptyList()) }
-
-    val productName = remember { mutableStateOf(TextFieldValue("")) }
-    val description = remember { mutableStateOf(TextFieldValue("")) }
-    val price = remember { mutableStateOf(TextFieldValue("")) }
-    val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
-
-    var isExpandedSubCategory = remember { mutableStateOf(false) }
-
-    var varients = homeViewModel.varients.collectAsState()
-    val productVarients = remember { mutableStateOf<List<ProductVarientSelection>>(emptyList()) }
-    val prodcutVarientName = remember { mutableStateOf(TextFieldValue("")) }
-    val prodcutVarientPrecentage = remember { mutableStateOf(TextFieldValue("")) }
-    val prodcutVarient = remember { mutableStateOf(TextFieldValue("")) }
-    val selectedVarientId = remember { mutableStateOf<UUID?>(null) }
-    var isExpandedVarient = remember { mutableStateOf(false) }
-
-
-    var corotine = rememberCoroutineScope()
-
-    var isSendingData = remember { mutableStateOf(false) }
-
-
-    var animated = animateDpAsState(
-        if (isExpandedSubCategory.value) ((storeSubCategory?.size ?: 1) * 45).dp else 0.dp
-    )
-
-    var rotation = animateFloatAsState(
-        if (isExpandedSubCategory.value) 180f else 0f
-    )
-
-
-
-    var animatedVarient = animateDpAsState(
-        if (isExpandedVarient.value) ((varients.value?.size ?: 1) * 45).dp else 0.dp
-    )
-
-    var rotationVarient = animateFloatAsState(
-        if (isExpandedVarient.value) 180f else 0f
-    )
-    val onImageSelection = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            val fileHolder = uri.toCustomFil(context = context);
-            if (fileHolder != null) {
-                thumbnail.value = fileHolder
-            }
-        }
-    }
-
-
-    val selectMutipleImages = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(10)
-    ) { uris ->
-        val imagesHolder = mutableListOf<File>()
-
-        if (uris.isNotEmpty()) {
-            uris.forEach { productImages ->
-                val file = productImages.toCustomFil(context)
-                if (images.value.isNotEmpty()) {
-                    imagesHolder.addAll(images.value)
-
-                }
-                if (file != null) {
-                    imagesHolder.add(file)
-                }
-                if (imagesHolder.isNotEmpty()) {
-                    images.value = imagesHolder
-                }
-
-            }
-        }
-    }
-
-    fun validateInut(): Boolean{
-        var errorMessage = "";
-        if(thumbnail.value==null){
-            errorMessage = "product thumbnail is require"
-        }
-        else if (images.value.isEmpty())
-            errorMessage="you must select atleast one image for product"
-        else if(productName.value.text.trim().isEmpty())
-            errorMessage="product name is require"
-        else if (description.value.text.trim().isEmpty())
-            errorMessage = "product description is required"
-        else if (price.value.text.trim().isEmpty())
-            errorMessage = "product price is required"
-        else if (selectedSubCategoryId.value==null)
-            errorMessage = "you must select subCategory"
-
-        if(errorMessage.isNotEmpty())
-        {
-            corotine.launch {
-                snackbarHostState.showSnackbar(errorMessage)
-            }
-            return false
-        }
-        return true
-    }
 
     Scaffold(
         snackbarHost = {
@@ -238,7 +154,7 @@ fun ProductDetail(
                         }
                     ) {
                         Icon(
-                            Icons.Default.KeyboardArrowLeft,
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             "",
                             modifier = Modifier.size(30.dp),
                             tint = CustomColor.neutralColor950
@@ -247,746 +163,306 @@ fun ProductDetail(
                 },
             )
         },
-
         bottomBar = {
+            //  if(isFromHome &&(myInfo.value==null||(myInfo.value!=null&&myInfo.value?.store_id!=productData?.store_id)) )
             BottomAppBar(
                 containerColor = Color.White,
                 modifier = Modifier.padding(horizontal = 15.dp)
-            ){
-                CustomBotton(
-                    isLoading =isSendingData.value,
-                    operation = {
-                        var validationResult = validateInut()
-                        if(validationResult)
-                        {
-                            corotine.launch {
-                                isSendingData.value=true;
-                                val result = async {
-                                    homeViewModel.createProducts(
-                                        name = productName.value.text,
-                                        description=description.value.text,
-                                        thmbnail = thumbnail.value!!,
-                                        subcategory_id = selectedSubCategoryId.value!!,
-                                        store_id = store_id!!,
-                                        price=price.value.text.toDouble(),
-                                        productVarients = productVarients.value,
-                                        images = images.value.toList(),
-                                    )
-                                }.await()
-                                isSendingData.value=false
-                                if(!result.isNullOrEmpty())
-                                {
-                                    snackbarHostState.showSnackbar(result)
-                                }else {
-                                    thumbnail.value=null
-                                    images.value = emptyList<File>()
-                                    productName.value = TextFieldValue("")
-                                    price.value = TextFieldValue("")
-                                    description.value = TextFieldValue("")
-                                    selectedSubCategoryId.value = null;
-                                    productVarients.value = emptyList<ProductVarientSelection>()
-                                    snackbarHostState.showSnackbar("Product created Scucessfuly")
-                                    nav.popBackStack()
-                                }
+            ) {
+                Button(
+                    modifier = Modifier
+                        .height(50.dp)
+                        .fillMaxWidth(),
+                    onClick = {
+                        homeViewModel.addToCart(
+                            product = CardProductModel(
+                                id = UUID.randomUUID(),
+                                productId = productData!!.id,
+                                name = productData.name,
+                                thmbnail = productData.thmbnail,
+                                price = productData.price,
+                                productVarients = selectedProdcutVarients.value,
+                                store_id = productData.store_id
+                            )
+                        )
+                        coroutine.launch {
+                            snackbarHostState.showSnackbar("Item Added to Cart")
 
-                            }
                         }
-                    }
-                    ,
-                    buttonTitle = "Create Product",
-                    isEnable = true,
-                )
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CustomColor.primaryColor400
+                    ),
+
+                    ) {
+
+
+                    Text(
+                        "Add To Cart",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (16).sp
+                    )
+
+
+                }
+
             }
         }
+
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
-                .padding(horizontal = 15.dp)
                 .padding(top = it.calculateTopPadding() + 30.dp)
-                .verticalScroll(rememberScrollState())
         ) {
 
-            Text(
-                "Product Thumbnail",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(15)
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                val (imageRef, cameralRef) = createRefs()
-                Box(
+            item {
+                SubcomposeAsyncImage(
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .constrainAs(imageRef) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
-                        .height(150.dp)
+                        .height(250.dp)
                         .fillMaxWidth()
-                        .border(
-                            width = 1.dp,
-                            color = CustomColor.neutralColor500,
-                            shape = RoundedCornerShape(8.dp)
-                        )
                         .background(
-                            color = Color.White,
+                            Color.Green
                         ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (thumbnail.value == null) {
-                        true -> {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.insert_photo),
-                                "",
-                                modifier = Modifier.size(80.dp),
-                                tint = CustomColor.neutralColor200
-                            )
-                        }
-
-                        else -> {
-                            SubcomposeAsyncImage(
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-//                                                .padding(top = 35.dp)
-                                    .fillMaxHeight()
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp)),
-                                model = General.handlingImageForCoil(
-                                    thumbnail.value!!.absolutePath,
-                                    context
-                                ),
-                                contentDescription = "",
-                                loading = {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                    ) {
-                                        CircularProgressIndicator(
-                                            color = Color.Black,
-                                            modifier = Modifier.size(54.dp) // Adjust the size here
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                    }
-
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(end = 5.dp, bottom = 10.dp)
-                        .constrainAs(cameralRef) {
-                            end.linkTo(imageRef.end)
-                            bottom.linkTo(imageRef.bottom)
-                        }
-
-
-                ) {
-
-                    IconButton(
-                        onClick = {
-//                          keyboardController?.hide()
-//                          isPigImage.value = true;
-                            onImageSelection.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly
-                                )
-                            )
-                        },
-                        modifier = Modifier
-                            .size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = CustomColor.primaryColor200
-                        )
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.camera),
-                            "",
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.White
-                        )
-                    }
-                }
-
-            }
-            Sizer(30)
-            Text(
-                "Product Images",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(15)
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                val (cameralRef) = createRefs()
-
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(
-                            width = 1.dp,
-                            color = CustomColor.neutralColor500,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 5.dp, vertical = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
-
-                ) {
-                    if (images.value.isEmpty()) {
+                    model = General.handlingImageForCoil(
+                        selectedImage.value,
+                        context
+                    ),
+                    contentDescription = "",
+                    loading = {
                         Box(
                             modifier = Modifier
-                                .height(150.dp)
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
                         ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.insert_photo),
-                                "",
-                                modifier = Modifier.size(80.dp),
-                                tint = CustomColor.neutralColor200
+                            CircularProgressIndicator(
+                                color = Color.Black,
+                                modifier = Modifier.size(54.dp) // Adjust the size here
                             )
                         }
-                    }
+                    },
+                )
+            }
 
-                    images.value.forEachIndexed { index, value ->
+            item {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 15.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start
 
-                        ConstraintLayout {
-                            var (image, icon) = createRefs()
-
-                            Box(
-                                modifier = Modifier
-
-                                    .height(120.dp)
-                                    .width(120.dp)
-                                    .background(
-                                        color = Color.White,
-                                    )
-                                ,
-                                contentAlignment = Alignment.Center
-                            ) {
-                                SubcomposeAsyncImage(
-                                    contentScale = ContentScale.Crop,
+                ) {
+                    if (images.value != null && images.value!!.size >= 2) {
+                        Sizer(10)
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            items(images.value?.size ?: 0) { index ->
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxHeight()
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(8.dp)),
-                                    model = General.handlingImageForCoil(
-                                        value.absolutePath,
-                                        context
-                                    ),
-                                    contentDescription = "",
-                                    loading = {
+                                        .border(
+                                            1.dp,
+                                            if (images.value!![index] == selectedImage.value)
+                                                CustomColor.primaryColor700 else CustomColor.neutralColor200,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                ) {
+                                    SubcomposeAsyncImage(
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .height(50.dp)
+                                            .width(50.dp)
+                                            .clip(
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable {
+                                                if (images.value!![index] != selectedImage.value)
+                                                    selectedImage.value = images.value!![index]
+                                            },
+                                        model = General.handlingImageForCoil(
+                                            images.value!![index],
+                                            context
+                                        ),
+                                        contentDescription = "",
+                                        loading = {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize(),
+                                                contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                            ) {
+                                                CircularProgressIndicator(
+                                                    color = Color.Black,
+                                                    modifier = Modifier.size(54.dp) // Adjust the size here
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+                    Sizer(10)
+                    Text(
+                        text = productData?.name ?: "",
+                        color = CustomColor.neutralColor950,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (18).sp
+                    )
+                    Sizer(16)
+                    Text(
+                        text = "\$${productData?.price}",
+                        color = CustomColor.neutralColor950,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+
+                    Sizer(16)
+                    Text(
+                        text = "Product Details",
+                        color = CustomColor.neutralColor950,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+
+                    Sizer(10)
+                    Text(
+                        text = productData?.description ?: "",
+                        color = CustomColor.neutralColor800,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp
+                    )
+                    Sizer(15)
+                }
+            }
+
+            if (!productData?.productVarients.isNullOrEmpty()) {
+                items(productData.productVarients?.size ?: 0) { index ->
+                    val title =
+                        varients.value?.firstOrNull { it.id == productData.productVarients!![index][0].varient_id }?.name
+                            ?: ""
+                    Text(
+                        text = "Select ${title}",
+                        color = CustomColor.neutralColor950,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(start = 15.dp)
+                    )
+                    Sizer(10)
+                    FlowRow(
+                        modifier = Modifier
+                            .padding(horizontal = 15.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        repeat(productData.productVarients!![index].size) { pvIndex ->
+
+                            var productVarientHolder = ProductVarient(
+                                id = productData.productVarients!![index][pvIndex].id,
+                                name = productData.productVarients!![index][pvIndex].name,
+                                precentage = productData.productVarients!![index][pvIndex].precentage,
+                                varient_id = productData.productVarients!![index][pvIndex].varient_id
+                            )
+                            when (title == "Color") {
+                                true -> {
+                                    val colorValue =
+                                        General.convertColorToInt(productData.productVarients!![index][pvIndex].name)
+
+                                    if (colorValue != null)
                                         Box(
                                             modifier = Modifier
-                                                .fillMaxSize(),
-                                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                        ) {
-                                            CircularProgressIndicator(
-                                                color = Color.Black,
-                                                modifier = Modifier.size(54.dp) // Adjust the size here
+                                                .height(24.dp)
+                                                .width(24.dp)
+                                                .background(
+                                                    colorValue,
+                                                    RoundedCornerShape(20.dp)
+                                                )
+                                                .border(
+                                                    width = if (selectedProdcutVarients.value.contains(
+                                                            productVarientHolder
+                                                        )
+                                                    ) 1.dp else 0.dp,
+                                                    color = if (selectedProdcutVarients.value.contains(
+                                                            productVarientHolder
+                                                        )
+                                                    ) CustomColor.primaryColor700
+                                                    else Color.Transparent,
+                                                    shape = RoundedCornerShape(20.dp)
+                                                )
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .clickable {
+
+                                                    val copyVarient =
+                                                        mutableListOf<ProductVarient>()
+
+                                                    copyVarient.add(productVarientHolder)
+                                                    copyVarient.addAll(selectedProdcutVarients.value)
+                                                    selectedProdcutVarients.value =
+                                                        copyVarient.distinctBy { it.varient_id }
+
+                                                }
+                                                .padding(5.dp)
+                                        )
+                                }
+
+                                else -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .border(
+                                                1.dp,
+                                                if (selectedProdcutVarients.value.contains(
+                                                        productVarientHolder
+                                                    )
+                                                ) CustomColor.primaryColor700 else CustomColor.neutralColor200,
+                                                RoundedCornerShape(8.dp)
                                             )
-                                        }
-                                    },
-                                )
+                                            .padding(horizontal = 10.dp, vertical = 10.dp)
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .clickable {
 
+                                                val copyVarient = mutableListOf<ProductVarient>()
+
+                                                copyVarient.add(productVarientHolder)
+                                                copyVarient.addAll(selectedProdcutVarients.value)
+                                                selectedProdcutVarients.value = copyVarient
+                                                    .distinctBy { it.varient_id }
+
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = productData.productVarients!![index][pvIndex].name,
+                                            color = CustomColor.neutralColor950,
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            // modifier = Modifier.padding(start = 15.dp)
+                                        )
+                                    }
+                                }
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .height(30.dp)
-                                    .width(30.dp)
-                                    .background(
-                                        Color.Red,
-                                        RoundedCornerShape(20.dp)
-                                    )
-                                    .clip(
-                                        RoundedCornerShape(20.dp)
-                                    )
-                                    .clickable {
-                                        images.value = images.value.filter { it.name != value.name }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Default.Clear, "",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-
-                    }
-                }
-
-
-                Box(
-                    modifier = Modifier
-                        .padding(end = 5.dp, bottom = 10.dp)
-                        .constrainAs(cameralRef) {
-                            end.linkTo(parent.end)
-                            bottom.linkTo(parent.bottom)
-                        }
-
-
-                ) {
-
-                    IconButton(
-                        onClick = {
-                            selectMutipleImages.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly
-                                )
-                            )
-                        },
-                        modifier = Modifier
-                            .size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = CustomColor.primaryColor200
-                        )
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.camera),
-                            "",
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.White
-                        )
-                    }
-                }
-
-            }
-            Sizer(30)
-            Text(
-                "Name",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            TextInputWithTitle(
-                value = productName,
-                title = "",
-                placHolder = "Product Name"
-            )
-
-            Text(
-                "Price",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(2)
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = price.value,
-                onValueChange = {
-                    //if (General.isValideMony(it.text))
-                    price.value = it
-                },
-                placeholder = {
-                    Text(
-                        "Product Price",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-
-                )
-            Sizer(20)
-            Text(
-                "Description",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(2)
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = description.value,
-                onValueChange = { description.value = it },
-                placeholder = {
-                    Text(
-                        "Product Description",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(290.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-
-            Sizer(10)
-
-            Text(
-                "SubCategory",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(5)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-
-                Row(
-                    modifier = Modifier
-                        .height(65.dp)
-                        .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            CustomColor.neutralColor400,
-                            RoundedCornerShape(8.dp)
-                        )
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            isExpandedSubCategory.value = !isExpandedSubCategory.value
-                        }
-                        .padding(horizontal = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                )
-                {
-                    Text(
-                        if (selectedSubCategoryId.value == null) "Select SubCategory "
-                        else storeSubCategory?.firstOrNull { it.id == selectedSubCategoryId.value }?.name
-                            ?: ""
-                    )
-                    Icon(
-                        Icons.Default.KeyboardArrowDown, "",
-                        modifier = Modifier.rotate(rotation.value)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .padding(bottom = 19.dp)
-                        .fillMaxWidth()
-                        .height(animated.value)
-                        .border(
-                            1.dp,
-                            CustomColor.neutralColor200,
-                            RoundedCornerShape(
-                                topStart = 4.dp,
-                                topEnd = 4.dp,
-                                bottomStart = 8.dp,
-                                bottomEnd = 8.dp
-                            )
-                        ),
-
-                    ) {
-                    if (storeSubCategory != null)
-                        storeSubCategory!!.forEachIndexed { index, value ->
-                            Text(
-                                value.name,
-                                modifier = Modifier
-                                    .height(50.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        isExpandedSubCategory.value = false
-                                        selectedSubCategoryId.value = value.id
-                                    }
-                                    .padding(top = 12.dp, start = 5.dp)
-
-                            )
-                        }
-                }
-            }
-            Sizer(5)
-            Text(
-                "Product Varient",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(2)
-            if( productVarients.value.isNotEmpty())
-                Sizer(5)
-            FlowRow {
-                productVarients.value.forEachIndexed { index, value ->
-                    ConstraintLayout {
-                        var (iconRef)=createRefs()
-                        Column(
-                            modifier = Modifier.background(
-                                CustomColor.alertColor_3_300,
-                                RoundedCornerShape(8.dp)
-                            ).padding(
-                                horizontal = 5.dp
-                            )
-                        ) {
-                            Text(
-                                varients.value?.firstOrNull{it.id==value.varient_id}?.name?:"",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (18).sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                            )
-                            Text(
-                                value.name,
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (18).sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .height(20.dp)
-                                .width(20.dp)
-                                .background(
-                                    Color.Red,
-                                    RoundedCornerShape(20.dp)
-                                )
-                                .clip(
-                                    RoundedCornerShape(20.dp)
-                                )
-                                .clickable {
-                                    productVarients.value = productVarients.value.filter { it.name != value.name }
-                                }.constrainAs(iconRef){
-                                    top.linkTo(parent.top)
-                                    end.linkTo(parent.end)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Clear, "",
-                                tint = Color.White,
-                                modifier = Modifier.size(13.dp)
-                            )
                         }
                     }
                 }
             }
-            if( productVarients.value.isNotEmpty())
-                Sizer(5)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
 
-                Row(
-                    modifier = Modifier
-                        .height(65.dp)
-                        .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            CustomColor.neutralColor400,
-                            RoundedCornerShape(8.dp)
-                        )
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            isExpandedVarient.value = !isExpandedVarient.value
-                        }
-                        .padding(horizontal = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                )
-                {
-                    Text(
-                        if (selectedVarientId.value == null) "Select Variant"
-                        else varients.value?.firstOrNull { it.id == selectedVarientId.value }?.name
-                            ?: ""
-                    )
-                    Icon(
-                        Icons.Default.KeyboardArrowDown, "",
-                        modifier = Modifier.rotate(rotationVarient.value)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(animatedVarient.value)
-                        .border(
-                            1.dp,
-                            CustomColor.neutralColor200,
-                            RoundedCornerShape(
-                                topStart = 4.dp,
-                                topEnd = 4.dp,
-                                bottomStart = 8.dp,
-                                bottomEnd = 8.dp
-                            )
-                        ),
-
-                    ) {
-                    if (!varients.value.isNullOrEmpty())
-                        varients.value!!.forEachIndexed { index, value ->
-                            Text(
-                                value.name,
-                                modifier = Modifier
-                                    .height(50.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        isExpandedVarient.value = false
-                                        selectedVarientId.value = value.id
-                                    }
-                                    .padding(top = 12.dp, start = 5.dp)
-
-                            )
-                        }
-                }
-            }
-            Sizer(5)
-
-
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = prodcutVarientName.value,
-                onValueChange = { prodcutVarientName.value = it },
-                placeholder = {
-                    Text(
-                        "Varient Name",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                ,
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-            Sizer(5)
-
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = prodcutVarientPrecentage.value,
-                onValueChange = { prodcutVarientPrecentage.value = it },
-                placeholder = {
-                    Text(
-                        "Varient Price",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                ,
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-            Sizer(5)
-
-            CustomBotton(
-                isLoading = false,
-                operation = {
-                    val selectedVarient= ProductVarientSelection(
-                        name = prodcutVarientName.value.text,
-                        precentage =   if(prodcutVarientPrecentage.value.text.isEmpty())1.0 else prodcutVarientPrecentage.value.text.toDouble(),
-                        varient_id=  selectedVarientId.value!!)
-
-                    var productVarientHolder = mutableListOf<ProductVarientSelection>()
-                    productVarientHolder.addAll(productVarients.value)
-                    productVarientHolder.add(selectedVarient)
-                    productVarients.value= productVarientHolder
-
-                    prodcutVarientName.value= TextFieldValue("")
-                    prodcutVarientPrecentage.value= TextFieldValue("")
-                    selectedVarientId.value=null
-                },
-                buttonTitle = "Add ProductVarient",
-                isEnable = selectedVarientId.value!=null &&prodcutVarientName.value.text.isNotEmpty()
-                ,
-                color = null
-            )
-            Box(modifier = Modifier.height(90.dp))
         }
     }
 

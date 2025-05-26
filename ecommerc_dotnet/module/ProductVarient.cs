@@ -10,4 +10,6 @@ public class ProductVarient
     public Varient varient { get; set; }
     public Product product { get; set; }
     
+    public ICollection<OrderProductsVarient> orderProductsVarients { get; set; }
+    
 }

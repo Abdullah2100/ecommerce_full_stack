@@ -23,11 +23,11 @@ public class ProductData
     private readonly IConfig _config;
     private readonly IWebHostEnvironment _host;
 
-    public async Task<ProductResponseDto?> getProduct(Guid id)
+    public ProductResponseDto? getProduct(Guid id)
     {
         try
         {
-            return await _dbContext.Products
+            return  _dbContext.Products
                 .AsNoTracking()
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
@@ -56,7 +56,7 @@ public class ProductData
                         ).ToList(),
                     productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
         }
         catch (Exception ex)
         {
@@ -366,7 +366,7 @@ public class ProductData
                 })
             );
             await _dbContext.SaveChangesAsync();
-            return await getProduct(id);
+            return  getProduct(id);
         }
         catch (Exception ex)
         {
@@ -423,7 +423,7 @@ public class ProductData
                     })
                 );
             await _dbContext.SaveChangesAsync();
-            return await getProduct(id);
+            return  getProduct(id);
         }
         catch (Exception ex)
         {
