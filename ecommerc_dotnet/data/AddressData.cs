@@ -43,6 +43,24 @@ public class AddressData
         }
     }
 
+    public async Task<Address?> getAddressData(Guid addressId)
+    {
+        
+        try
+        {
+            var result = _dbContext.Address.FindAsync(addressId);
+            return await result;
+
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting user address" + ex.Message);
+
+            return null;
+        }
+    }
+
+
     
     public async Task<List<AddressResponseDto>?> getUserAddressByUserId(Guid userId)
     {
@@ -80,6 +98,7 @@ public class AddressData
     {
         try
         {
+            await _dbContext.Address.ForEachAsync(address => address.isCurrent = false);
 
             var addressObj = new Address
             {
@@ -137,6 +156,60 @@ public class AddressData
         }
     }
     
+    public async Task<AddressResponseDto?> updateAddress(
+        Guid addressId,
+        string? titile=null,
+        decimal? longitude=null,
+        decimal? latitude=null
+    )
+    {
+        
+        try
+        {
+
+            
+            var currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.id==addressId);
+
+            if (currentAddress == null) return null;
+            currentAddress.title = titile??currentAddress.title;
+            currentAddress.longitude = longitude??currentAddress.longitude;
+            currentAddress.latitude = latitude ?? currentAddress.latitude;
+            
+            await _dbContext.SaveChangesAsync();
+            
+            return await getUserAddressByAddressId(addressId);
+
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting user address" + ex.Message);
+
+            return null;
+        }
+    }
+    
+    
+    public async Task<bool> deleteDaddress(
+        Guid addressId 
+    )
+    {
+        
+        try
+        {
+            var addressData = await _dbContext.Address.FindAsync(addressId);
+            if (addressData==null) return false;
+            await _dbContext.SaveChangesAsync();
+            return true;
+
+        }
+        catch (Exception ex)
+        {
+            Console.Write("error from  getting user address" + ex.Message);
+
+            return false;
+        }
+    }
+
     public async Task<int>addressCountForUser(
         Guid userId
     )

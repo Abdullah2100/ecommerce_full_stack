@@ -1,7 +1,8 @@
 package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.dto.request.LocationRequestDto
+import com.example.eccomerce_app.dto.request.AddressRequestDto
+import com.example.eccomerce_app.dto.request.AddressRequestUpdateDto
 import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
@@ -75,7 +76,7 @@ class HomeRepository(val client: HttpClient) {
     }
 */
 
-    suspend fun userAddNewAddress(locationData: LocationRequestDto): NetworkCallHandler {
+    suspend fun userAddNewAddress(locationData: AddressRequestDto): NetworkCallHandler {
         return try {
             var result = client.post(
                 Secrets.getBaseUrl() + "/User/address"
@@ -95,6 +96,82 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
+            } else {
+                NetworkCallHandler.Error(
+                    result.body<String>()
+                )
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun userUpdateAddress(locationData: AddressRequestUpdateDto): NetworkCallHandler {
+        return try {
+            var result = client.put(
+                Secrets.getBaseUrl() + "/User/address"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    locationData
+                )
+                contentType(ContentType.Application.Json)
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
+            } else {
+                NetworkCallHandler.Error(
+                    result.body<String>()
+                )
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
+        return try {
+            var result = client.delete (
+                Secrets.getBaseUrl() + "/User/address/${addressID}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<Boolean>())
             } else {
                 NetworkCallHandler.Error(
                     result.body<String>()

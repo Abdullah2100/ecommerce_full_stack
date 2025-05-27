@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data class LocationRequestDto(
+data class AddressRequestUpdateDto(
     @Serializable(with = UUIDKserialize::class)
-    var id: UUID?=null,
-    var longitude: Double,
-    var latitude: Double,
-    var title: String
+    val id: UUID?,
+    val longitude: Double?,
+    val latitude: Double?,
+    val title: String?
 )

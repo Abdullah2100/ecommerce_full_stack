@@ -37,4 +37,6 @@ interface AuthDao {
     @Query("SELECT * FROM location WHERE id =0")
     suspend fun getSavedLocation(): IsPassSetLocationScreen?
 
+    @Query("DELETE FROM location ")
+    suspend fun nukePassLocationTable()
 }

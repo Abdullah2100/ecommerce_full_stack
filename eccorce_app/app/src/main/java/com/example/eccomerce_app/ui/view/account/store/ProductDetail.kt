@@ -228,9 +228,7 @@ fun ProductDetail(
                     modifier = Modifier
                         .height(250.dp)
                         .fillMaxWidth()
-                        .background(
-                            Color.Green
-                        ),
+                      ,
                     model = General.handlingImageForCoil(
                         selectedImage.value,
                         context
@@ -266,11 +264,13 @@ fun ProductDetail(
                                 .fillMaxWidth()
                                 .height(50.dp),
                             horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+
                         ) {
                             items(images.value?.size ?: 0) { index ->
                                 Box(
                                     modifier = Modifier
+                                        .padding(end = 5.dp)
                                         .border(
                                             1.dp,
                                             if (images.value!![index] == selectedImage.value)

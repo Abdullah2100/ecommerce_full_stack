@@ -67,7 +67,14 @@ object Screens {
         var product_Id: String,
         var isFromHome: Boolean
     )
+
     @Serializable
     object Cart
+
+    @Serializable
+    object Checkout
+
+    @Serializable
+    object Address
 
 }

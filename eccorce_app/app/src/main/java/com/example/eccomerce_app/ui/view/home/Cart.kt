@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -67,6 +68,7 @@ import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
 import com.example.eccomerce_app.R
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.CustomBotton
 import java.util.UUID
 
@@ -128,7 +130,7 @@ fun CartScreen(
 
                 ,
             ) {
-                if(cardData.value.totalPrice!=0.0){
+                if(cardData.value.totalPrice!=null&&cardData.value.totalPrice!=0.0){
                         Row(
                             modifier = Modifier
                                 .background(Color.White)
@@ -162,7 +164,9 @@ fun CartScreen(
                        ){
                            CustomBotton(
                                buttonTitle = "Go to Checkout",
-                               operation = {}
+                               operation = {
+                                   nav.navigate(Screens.Checkout)
+                               }
                            )
                        }
                 }
@@ -189,8 +193,11 @@ fun CartScreen(
                         ) {
                             Row(
                                 modifier = Modifier
-                                    .padding(horizontal = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp)
+                                ,
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -232,7 +239,9 @@ fun CartScreen(
                                             fontWeight = FontWeight.Medium,
                                             fontSize = (16).sp,
                                             color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                         Sizer(width = 5)
                                         cardData.value.cartProducts[index].productVarients.forEach { value ->
@@ -299,7 +308,7 @@ fun CartScreen(
 
 
                                 Row(
-                                    modifier = Modifier.width(120.dp),
+                                    modifier = Modifier.width(90.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {

@@ -98,6 +98,9 @@ fun AccountPage(
                     AccountCustomBottom("Your Profile",R.drawable.user,{
                         nav.navigate(Screens.Profile)
                     })
+                    AccountCustomBottom("Locations",R.drawable.location,{
+                        nav.navigate(Screens.Address)
+                    })
                     AccountCustomBottom("My Order",R.drawable.order,{})
                     AccountCustomBottom("Payment Me",R.drawable.credit_card,{})
                     AccountCustomBottom("Notifications",R.drawable.notification,{})
@@ -107,7 +110,15 @@ fun AccountPage(
                             false
                         ))
                     })
-                    LogoutBotton("Logout",R.drawable.logout,{})
+                    LogoutBotton("Logout",R.drawable.logout,{
+                        homeViewModel.logout()
+                        nav.navigate(Screens.AuthGraph)
+                        {
+                            popUpTo(nav.graph.id){
+                                inclusive=true
+                            }
+                        }
+                    })
 
                 }
     }

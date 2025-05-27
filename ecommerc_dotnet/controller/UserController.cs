@@ -390,6 +390,110 @@ public class UserController : ControllerBase
         return StatusCode(201, location);
     }
 
+    [HttpPut("address")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> updateUserLocation(
+        [FromBody] AddressRequestUpdateDto address
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null || user.isDeleted)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+        var addressResult = await _addressData.getAddressData(address.id);
+
+        if (addressResult == null)
+        {
+            return BadRequest("العنوان غير موجود");
+        }
+       if(addressResult.owner_id!=idHolder.Value)
+       {
+           return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
+       }
+
+        var location = await _addressData.updateAddress(
+           addressId:addressResult.id,    
+            titile: address.title,
+            longitude: address.longitude,
+            latitude: address.latitude
+        );
+        
+        if (location == null)
+            return BadRequest("حدثة مشكلة اثناء تعديل البيانات");
+
+        return StatusCode(200, location);
+    }
+
+    [HttpDelete("address/{addre_id}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> deleteUserLocation(
+        Guid addre_id
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null || user.isDeleted)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+        var addressResult = await _addressData.getAddressData(addre_id);
+
+        if (addressResult == null)
+        {
+            return BadRequest("العنوان غير موجود");
+        }
+        if(addressResult.owner_id!=idHolder.Value)
+        {
+            return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
+        }
+        
+        if (addressResult.isCurrent)
+            return BadRequest("لا يمكن حذف العنوان الحالي");
+ 
+        var result = await _addressData.deleteDaddress(
+            addressId:addressResult.id);
+        
+        if (result == null)
+            return BadRequest("حدثة مشكلة اثناء حذف البيانات");
+
+        return StatusCode(200, result);
+    }
+
+
 
     [HttpPost("address/active{addressID:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -429,4 +533,5 @@ public class UserController : ControllerBase
 
         return StatusCode(200, result);
     }
+
 }

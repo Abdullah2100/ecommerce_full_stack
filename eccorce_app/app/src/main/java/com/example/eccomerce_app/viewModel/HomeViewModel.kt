@@ -1,16 +1,15 @@
 package com.example.eccomerce_app.viewModel
 
 import android.util.Log
-import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.data.Room.IsPassSetLocationScreen
 import com.example.eccomerce_app.data.repository.HomeRepository
 import com.example.eccomerce_app.dto.ModelToDto.toSubCategoryUpdateDto
-import com.example.eccomerce_app.dto.request.LocationRequestDto
+import com.example.eccomerce_app.dto.request.AddressRequestDto
+import com.example.eccomerce_app.dto.request.AddressRequestUpdateDto
 import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
 import com.example.eccomerce_app.dto.response.BannerResponseDto
@@ -41,7 +40,6 @@ import com.example.eccomerce_app.model.SubCategory
 import com.example.eccomerce_app.model.SubCategoryUpdate
 import com.example.eccomerce_app.model.UserModel
 import com.example.eccomerce_app.model.VarientModel
-import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -49,7 +47,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -120,7 +117,7 @@ class HomeViewModel(
                 product.productVarients.forEach { it ->
                     varientPrice = varientPrice * it.precentage
                 }
-                var price = ((_cartImes.value.totalPrice ?: 0.0) ) + varientPrice;
+                var price = ((_cartImes.value.totalPrice ?: 0.0)) + varientPrice;
                 var copyCardItme = cartImes.value.copy(
                     totalPrice = price, cartProducts = cardProducts
                 )
@@ -277,7 +274,6 @@ class HomeViewModel(
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    dao.savePassingLocation(IsPassSetLocationScreen(0, true))
                     var categoriesHolder = result.data as List<CategoryReponseDto>
 
                     var mutableCategories = mutableListOf<Category>()
@@ -300,7 +296,10 @@ class HomeViewModel(
                     }
                 }
 
-                else -> {}
+                is NetworkCallHandler.Error -> {
+                    if (_categories.value == null)
+                        _categories.emit(mutableListOf())
+                }
             }
         }
     }
@@ -351,7 +350,7 @@ class HomeViewModel(
         delay(100)
         var result = homeRepository
             .userAddNewAddress(
-                LocationRequestDto(
+                AddressRequestDto(
                     longitude = longit ?: 5.5,
                     latitude = latit ?: 5.5,
                     title = title ?: "home"
@@ -362,12 +361,27 @@ class HomeViewModel(
                 var address = result.data as AddressResponseDto?
                 if (address != null) {
                     var locationsCopy = mutableListOf<Address>()
-                    locationsCopy.add(address.toAddress())
-                    if (myInfo.value?.address != null) {
-                        locationsCopy.addAll(myInfo.value!!.address!!)
+
+                    if (_myInfo.value?.address != null) {
+
+                        val newAddress = _myInfo.value?.address?.map { it ->
+                            if (it.isCurrnt == true) {
+                                it.copy(isCurrnt = false)
+                            } else it;
+                        }
+                        locationsCopy.addAll(newAddress ?: emptyList());
                     }
+                    locationsCopy.add(address.toAddress())
+
                     var copyMyInfo = _myInfo.value?.copy(address = locationsCopy.toList())
                     _myInfo.emit(copyMyInfo)
+
+                    dao.savePassingLocation(
+                        IsPassSetLocationScreen(
+                            0,
+                            true
+                        )
+                    )
                 } else {
 
                 }
@@ -386,47 +400,115 @@ class HomeViewModel(
 
     }
 
-    fun setCurrentActiveUserAddress(
+    suspend fun setCurrentActiveUserAddress(
         addressId: UUID,
-        snackBark: SnackbarHostState,
-        nav: NavHostController,
-        isFromLocationHome: Boolean? = false,
-    ) {
-        viewModelScope.launch(Dispatchers.Main) {
-            _isLoading.emit(true)
-            delay(6000)
-            var result = homeRepository.setAddressAsCurrent(addressId)
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    _isLoading.emit(false)
+    ): String? {
+        _isLoading.emit(true)
+        var result = homeRepository.setAddressAsCurrent(addressId)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                _isLoading.emit(false)
 
-                    snackBark.showSnackbar("the address set as current active address")
-                    when (isFromLocationHome) {
-                        true -> {
-                            dao.savePassingLocation(
-                                IsPassSetLocationScreen(
-                                    0,
-                                    true
-                                )
-                            )
-                            nav.navigate(Screens.HomeGraph) {
-                                popUpTo(nav.graph.id) {
-                                    inclusive = true
-                                }
-                            }
-                        }
 
-                        else -> {
-                            nav.popBackStack()
+                if (myInfo.value?.address.isNullOrEmpty() == false) {
+                    var addresses = _myInfo.value?.address?.map { address ->
+                        if (address.id == addressId) {
+                            address.copy(isCurrnt = true);
+                        } else {
+                            address.copy(isCurrnt = false);
                         }
                     }
+                    var copyMyAddress = _myInfo.value?.copy(address = addresses);
+                    _myInfo.emit(copyMyAddress)
                 }
 
-                else -> {
-                    _isLoading.emit(false)
-                }
+                dao.savePassingLocation(
+                    IsPassSetLocationScreen(
+                        0,
+                        true
+                    )
+                )
+
+                return null
+
             }
-            _isLoading.emit(false)
+
+            is NetworkCallHandler.Error -> {
+                var errorMessage = result.data
+                return errorMessage.toString()
+            }
+
+
+        }
+    }
+
+    suspend fun updateUserAddress(
+        addressId: UUID,
+        addressTitle: String?,
+        longit: Double?,
+        latit: Double?
+    ): String? {
+        _isLoading.emit(true)
+        var result = homeRepository.userUpdateAddress(
+            AddressRequestUpdateDto(
+                id = addressId,
+                title = addressTitle,
+                latitude = latit,
+                longitude = longit
+            )
+        )
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var resultData = result.data as AddressResponseDto
+
+                var address = _myInfo.value?.address?.map {
+                    it
+                    if (it.id == addressId) {
+                        resultData.toAddress()
+                    } else {
+                        it
+                    }
+                }
+                var copyMyAddress = _myInfo.value?.copy(address = address);
+                _myInfo.emit(copyMyAddress)
+
+
+                return null
+
+            }
+
+            is NetworkCallHandler.Error -> {
+                var errorMessage = result.data
+                return errorMessage.toString()
+            }
+
+
+        }
+    }
+
+    suspend fun deleteUserAddress(
+        addressId: UUID,
+    ): String? {
+        _isLoading.emit(true)
+        var result = homeRepository.deleteUserAddress(addressId)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+
+                var address = _myInfo.value?.address?.filter { it.id!=addressId }
+
+                var copyMyAddress = _myInfo.value?.copy(address = address);
+                _myInfo.emit(copyMyAddress)
+
+                return null
+
+            }
+
+            is NetworkCallHandler.Error -> {
+                var errorMessage = result.data
+                return errorMessage.toString()
+            }
+
+
         }
     }
 
@@ -1202,4 +1284,10 @@ class HomeViewModel(
     }
 
 
+    fun logout() {
+        viewModelScope.launch {
+            dao.nukeTable()
+            dao.nukePassLocationTable()
+        }
+    }
 }

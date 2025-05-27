@@ -50,8 +50,8 @@ fun LoginScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("")) }
-    val password = remember { mutableStateOf(TextFieldValue("")) }
+    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("ali@gmail.com")) }
+    val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
     val isEmailError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }

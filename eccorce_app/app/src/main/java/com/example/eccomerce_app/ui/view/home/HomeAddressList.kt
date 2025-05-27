@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,10 +67,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 
@@ -90,6 +95,7 @@ fun HomeAddressList(
     val isPressAddNewAddress = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
+    val coroutine = rememberCoroutineScope()
     val selectedIndex =
         remember { mutableStateOf(locationss.value?.address?.firstOrNull { it -> it.isCurrnt == true }?.id) }
 
@@ -316,7 +322,6 @@ fun HomeAddressList(
                                 fontSize = 16.sp,
                                 color = CustomColor.neutralColor950,
                             )
-
                         }
                     }
                 }
@@ -343,12 +348,29 @@ fun HomeAddressList(
                         confirmButton = {
                             TextButton(onClick = {
                                 isPressLocation.value = false
-                                homeViewModle.setCurrentActiveUserAddress(
-                                    addressId = currentLocationId.value!!,
-                                    snackBark = snackbarHostState,
-                                    nav = nav,
-//                                isFromLocationHome = isFromHome
-                                )
+                                coroutine.launch {
+                                    delay(50)
+                                    var result = async {
+                                        homeViewModle.setCurrentActiveUserAddress(
+                                            currentLocationId.value!!,
+                                        )
+                                    }.await()
+                                    var message = "update Current Address Seccessfuly"
+                                    if (result != null) {
+                                        message = result
+                                    }
+                                    snackbarHostState.showSnackbar(message)
+                                    if (result == null) {
+                                        nav.navigate(Screens.HomeGraph) {
+                                            popUpTo(nav.graph.id) {
+                                                inclusive = true
+                                            }
+//                            }
+                                        }
+                                    }
+                                }
+
+
                             }) {
                                 Text(
                                     "okay",

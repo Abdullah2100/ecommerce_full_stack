@@ -235,13 +235,14 @@ fun HomePage(
                 }
             }
 
-            if(bannel.value!=null)
-            item{
-                BannerBage(
-                    banners = bannel.value!!,
-                    isMe = false,
-                    nav=nav
-                )
+            if(bannel.value!=null) {
+                item{
+                    BannerBage(
+                        banners = bannel.value!!,
+                        isMe = false,
+                        nav=nav
+                    )
+                }
             }
 
             item{

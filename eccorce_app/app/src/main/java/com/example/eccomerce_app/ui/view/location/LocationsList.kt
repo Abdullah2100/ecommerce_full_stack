@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,9 +57,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
+import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 
@@ -67,7 +72,7 @@ import java.util.UUID
 fun LocationsList(
     nav: NavHostController,
     homeViewModle: HomeViewModel,
-    isFromHome: Boolean?=false
+    isFromHome: Boolean? = false
 ) {
     val fontScall = LocalDensity.current.fontScale
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -77,13 +82,13 @@ fun LocationsList(
     val isPressLocation = remember { mutableStateOf<Boolean>(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val coroutine = rememberCoroutineScope()
 
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
-        }
-,
-                modifier = Modifier
+        },
+        modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
         topBar = {
@@ -122,18 +127,19 @@ fun LocationsList(
 
         when (locationss.value?.address.isNullOrEmpty()) {
             true -> {
-                Column(modifier=Modifier
-                    .fillMaxSize(),
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
-                    ){
+                ) {
 
-                        Icon(
-                            imageVector = ImageVector
-                                .vectorResource(R.drawable.location_arrow), contentDescription = "",
-                            tint = CustomColor.primaryColor700,
-                            modifier = Modifier.size(40.dp)
-                        )
+                    Icon(
+                        imageVector = ImageVector
+                            .vectorResource(R.drawable.location_arrow), contentDescription = "",
+                        tint = CustomColor.primaryColor700,
+                        modifier = Modifier.size(40.dp)
+                    )
 
                     Sizer(10)
                     Text(
@@ -147,6 +153,7 @@ fun LocationsList(
                     )
                 }
             }
+
             else -> {
                 LazyColumn(
                     modifier = Modifier
@@ -157,50 +164,51 @@ fun LocationsList(
                 ) {
 
                     items(locationss.value!!.address!!.size)
-                    {index->
-                       Column(
-                           modifier = Modifier
-                               .clip(RoundedCornerShape(8.dp))
-                               .clickable{
-                                   isPressLocation.value=true
-                                   currentLocationId.value=locationss.value!!.address!![index].id
-                               }
-                       ) {
-                           Row(
-                               modifier = Modifier
-                                   .padding(top=9.dp, start = 4.dp)
-                                   .fillMaxWidth(),
-                               verticalAlignment = Alignment.CenterVertically
-                           ){
-                               Icon(
-                                   imageVector = ImageVector
-                                       .vectorResource(R.drawable.location_arrow), contentDescription = "",
-                                   tint = CustomColor.primaryColor700,
-                                   modifier = Modifier.size(24.dp)
-                               )
-                               Sizer(width = 20)
-                               Text(
-                                   locationss.value!!.address!![index].latitude.toString(),
-                                   fontFamily = General.satoshiFamily,
-                                   fontWeight = FontWeight.Medium,
-                                   fontSize = (16 / fontScall).sp,
-                                   color = CustomColor.neutralColor950,
-                                   textAlign = TextAlign.Center
+                    { index ->
+                        Column(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    isPressLocation.value = true
+                                    currentLocationId.value = locationss.value!!.address!![index].id
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(top = 9.dp, start = 4.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector
+                                        .vectorResource(R.drawable.location_arrow),
+                                    contentDescription = "",
+                                    tint = CustomColor.primaryColor700,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Sizer(width = 20)
+                                Text(
+                                    locationss.value!!.address!![index].latitude.toString(),
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = (16 / fontScall).sp,
+                                    color = CustomColor.neutralColor950,
+                                    textAlign = TextAlign.Center
 
-                               )
-                           }
-                           Sizer(20)
-                           Box(
-                               modifier = Modifier.fillParentMaxWidth()
-                                   .height(1.dp)
-                                   .background(CustomColor.neutralColor200)
-                           )
-                       }
+                                )
+                            }
+                            Sizer(20)
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxWidth()
+                                    .height(1.dp)
+                                    .background(CustomColor.neutralColor200)
+                            )
+                        }
                     }
                 }
 
-                if(isPressLocation.value)
-                {
+                if (isPressLocation.value) {
                     AlertDialog(
                         onDismissRequest = {
                             //Logic when dismiss happens
@@ -209,7 +217,8 @@ fun LocationsList(
 
                         text = {
 
-                            Text("Make this location as active Location",
+                            Text(
+                                "Make this location as active Location",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16 / fontScall).sp,
@@ -217,43 +226,62 @@ fun LocationsList(
                                 textAlign = TextAlign.End
 
                             )
-                               },
+                        },
                         confirmButton = {
-                        TextButton(onClick = {
-                            isPressLocation.value=false
-                            homeViewModle.setCurrentActiveUserAddress(
-                                addressId = currentLocationId.value!!,
-                                snackBark = snackbarHostState,
-                                nav = nav,
-                                isFromLocationHome = isFromHome
-                            )
-                        }) {
-                            Text("okay",
-                                fontFamily = General.satoshiFamily,
-                              fontWeight = FontWeight.Normal,
-                                fontSize = (16 / fontScall).sp,
-                                color = CustomColor.primaryColor700,
-                                textAlign = TextAlign.Center
+                            TextButton(
+                                onClick = {
+                                    isPressLocation.value = false
+                                    coroutine.launch {
+                                        delay(50)
+                                        var result = async {
+                                            homeViewModle.setCurrentActiveUserAddress(
+                                                currentLocationId.value!!,
+                                            )
+                                        }.await()
+                                        var message = "update Current Address Seccessfuly"
+                                        if (result != null) {
+                                            message = result
+                                        }
+                                        snackbarHostState.showSnackbar(message)
+                                        if (result == null) {
+                                            nav.navigate(Screens.HomeGraph) {
+                                                popUpTo(nav.graph.id) {
+                                                    inclusive = true
+                                                }
+//                            }
+                                            }
+                                        }
+                                    }
+                                }) {
+                                Text(
+                                    "okay",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = (16 / fontScall).sp,
+                                    color = CustomColor.primaryColor700,
+                                    textAlign = TextAlign.Center
 
-                            )
-                        }
+                                )
+                            }
                         },
                         dismissButton = {
                             TextButton(onClick = {
-                                isPressLocation.value=false
+                                isPressLocation.value = false
                             }) {
 
-                                Text("Deny",
+                                Text(
+                                    "Deny",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Normal,
                                     fontSize = (16 / fontScall).sp,
                                     color = CustomColor.neutralColor700,
-                                    textAlign = TextAlign.Center)
+                                    textAlign = TextAlign.Center
+                                )
                             }
                         })
                 }
 
-                if(isLoading.value)
+                if (isLoading.value)
                     Dialog(
                         onDismissRequest = {}
                     ) {
@@ -261,14 +289,15 @@ fun LocationsList(
                             modifier = Modifier
                                 .height(90.dp)
                                 .width(90.dp)
-                                .background(Color.White,
-                                    RoundedCornerShape(15.dp))
-                            , contentAlignment = Alignment.Center
+                                .background(
+                                    Color.White,
+                                    RoundedCornerShape(15.dp)
+                                ), contentAlignment = Alignment.Center
                         )
                         {
                             CircularProgressIndicator(
                                 color = CustomColor.primaryColor700,
-                            modifier = Modifier.size(40.dp)
+                                modifier = Modifier.size(40.dp)
                             )
                         }
                     }

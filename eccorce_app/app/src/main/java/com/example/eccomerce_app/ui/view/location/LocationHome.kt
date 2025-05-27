@@ -15,13 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,12 +54,11 @@ import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.dto.request.LocationRequestDto
+import com.example.eccomerce_app.dto.request.AddressRequestDto
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.CustomTitleBotton
 import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.component.TextInputWithNoTitle
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -90,7 +86,7 @@ fun LocationHomeScreen(
     val locationTitle = remember { mutableStateOf(TextFieldValue()) }
 
 
-    val locationHolder = remember { mutableStateOf<LocationRequestDto?>(null) }
+    val locationHolder = remember { mutableStateOf<AddressRequestDto?>(null) }
 
     val isPressAddNewAddress = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -112,7 +108,7 @@ fun LocationHomeScreen(
                             data?.let {
                                     location->
 
-                               locationHolder.value = LocationRequestDto(null,
+                               locationHolder.value = AddressRequestDto(
                                    longitude = location.longitude,
                                    latitude = location.latitude,
                                    title = "home")
