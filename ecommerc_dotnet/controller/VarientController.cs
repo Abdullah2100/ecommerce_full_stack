@@ -30,6 +30,8 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> createVarient([FromBody] VarientRequestDto varient)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -49,7 +51,7 @@ public class VarientController : ControllerBase
         var userHolder = await _userData.getUserById(idHolder.Value);
         if (userHolder == null)
         {
-            return Unauthorized("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         if (userHolder.role != 0)
@@ -61,7 +63,7 @@ public class VarientController : ControllerBase
         var isExist = await _varientData.isExist(varient.name);
 
         if (isExist)
-            return BadRequest("هذا الخيار تم ادخاله سابقا");
+            return Conflict("هذا الخيار تم ادخاله سابقا");
 
 
         var result = await _varientData.createVarient(varient.name);
@@ -76,6 +78,8 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> updateVarient([FromBody] VarientRequestDto varient)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -95,7 +99,7 @@ public class VarientController : ControllerBase
         var userHolder = await _userData.getUserById(idHolder.Value);
         if (userHolder == null)
         {
-            return Unauthorized("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         if (userHolder.role != 0)
@@ -104,17 +108,17 @@ public class VarientController : ControllerBase
         }
 
         if (varient.id == null)
-            return BadRequest("هذا الخيار غير موجود");
+            return NotFound("هذا الخيار غير موجود");
 
         var isExistByID = await _varientData.isExist((Guid)varient.id!);
 
         if (!isExistByID)
-            return BadRequest("هذا الخيار غير موجود");
+            return NotFound("هذا الخيار غير موجود");
 
         var isExistByName = await _varientData.isExist(varient.name);
 
         if (isExistByName)
-            return BadRequest("هذا الخيار تم ادخاله سابقا");
+            return Conflict("هذا الخيار تم ادخاله سابقا");
 
 
         var result = await _varientData.updateVarient(varient.name, (Guid)varient.id!);
@@ -128,7 +132,8 @@ public class VarientController : ControllerBase
     [HttpDelete("{varient_id:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> deleteVarient(Guid varient_id)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -148,7 +153,7 @@ public class VarientController : ControllerBase
         var userHolder = await _userData.getUserById(idHolder.Value);
         if (userHolder == null)
         {
-            return Unauthorized("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         if (userHolder.role != 0)
@@ -160,7 +165,7 @@ public class VarientController : ControllerBase
         var isExistByID = await _varientData.isExist(varient_id);
 
         if (!isExistByID)
-            return BadRequest("هذا الخيار غير موجود");
+            return NotFound("هذا الخيار غير موجود");
 
 
         var result = await _varientData.deleteVarient(varient_id);
@@ -168,16 +173,19 @@ public class VarientController : ControllerBase
         if (result == false)
             return BadRequest("يحتوي هذا الخيار على علاقات مرتبطة به يجب اولا حذف العناصر المرتبطة به اولا قبل حذفه");
 
-        return StatusCode(200, "تم الحذف بنجاح");
+        return NoContent();
     }
 
 
     [HttpGet("all/{pageNumber:int}")]
 
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getVarients(int pageNumber = 1)
     {
         var result = await _varientData.getVarients(pageNumber);
+        if (result.Count < 1)
+            return NoContent();
         return Ok(result);
     }
     

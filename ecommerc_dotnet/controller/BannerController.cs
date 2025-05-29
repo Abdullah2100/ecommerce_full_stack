@@ -40,6 +40,7 @@ public class BannerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> createBanner(
         [FromForm] BannerRequestDto banner
     )
@@ -61,12 +62,12 @@ public class BannerController : ControllerBase
         var userHolder = await _userData.getUser(idHolder.Value);
         if (userHolder == null)
         {
-            return Unauthorized("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         if (userHolder.store_id == null)
         {
-            return BadRequest("لا بد من انشاء متجر قبل اضافة اي لوحة اعلانية");
+            return NotFound("لا بد من انشاء متجر قبل اضافة اي لوحة اعلانية");
         }
 
         var imagePath = await clsUtil.saveFile(banner.image, clsUtil.enImageType.BANNER, _host);
@@ -90,7 +91,8 @@ public class BannerController : ControllerBase
     [HttpDelete("{banner_id:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> deleteBanner(
         Guid banner_id
     )
@@ -112,12 +114,12 @@ public class BannerController : ControllerBase
         var userHolder = await _userData.getUser(idHolder.Value);
         if (userHolder == null)
         {
-            return Unauthorized("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         if (userHolder.store_id == null)
         {
-            return BadRequest("ليس لديك اي متجر");
+            return NotFound("ليس لديك اي متجر");
         }
 
         var banner = await _bannerData.getBanner((Guid)userHolder.store_id!, banner_id);
@@ -136,27 +138,35 @@ public class BannerController : ControllerBase
         if (result == false)
             return BadRequest("حدثت مشكلة اثناء حذف الوحة الاعلانية");
 
-        return StatusCode(200, "تم الحذف بنجاح");
+        return NoContent();
     }
 
 
     [HttpGet("{store_Id:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getBanner(
         Guid store_Id, int pageNumber
     )
     {
         var result = await _bannerData.getBanner(store_Id, pageNumber);
 
-        return StatusCode(201, result ?? new List<BannerResponseDto>());
+        if (result == null)
+            return NoContent();
+        return StatusCode(200, result);
     }
+    
 
     [HttpGet("")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getBanner()
     {
         var result = await _bannerData.getBanner(15);
-
-        return StatusCode(200, result ?? new List<BannerResponseDto>());
+        if (result == null)
+            return NoContent();
+        
+        return StatusCode(200, result);
     }
+    
 }

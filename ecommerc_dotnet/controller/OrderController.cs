@@ -34,7 +34,9 @@ public class OrderController : ControllerBase
 
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> createOrder
     (
         [FromBody] OrderRequestDto order
@@ -57,7 +59,7 @@ public class OrderController : ControllerBase
         var user = await _userData.getUserById(idHolder.Value);
         
         if (user==null)
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
@@ -65,7 +67,7 @@ public class OrderController : ControllerBase
         var isTotalPriceValid = await isValideTotalPrice(order.totalPrice, order.items);
 
         if (isTotalPriceValid == false)
-            return BadRequest("اجمالي السعر غير صحيح");
+            return Conflict("اجمالي السعر غير صحيح");
 
         var result = await _orderData.createOrder(
             userId: idHolder.Value,

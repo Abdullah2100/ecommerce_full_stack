@@ -34,6 +34,8 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateNewStore(
         [FromForm] StoreRequestDto store)
     {
@@ -53,7 +55,7 @@ public class StoreController : ControllerBase
 
         var user = await _userData.getUserById(idHolder.Value);
         if (user == null)
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
         if (user.ID != store.user_id && user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء متجر جديد");
@@ -61,7 +63,7 @@ public class StoreController : ControllerBase
         bool isExist = await _storeData.isExist(store.name);
 
         if (isExist)
-            return BadRequest("اسم التمتجر تم استخدامه يمكنك استخدام اسم اخر");
+            return Conflict("اسم التمتجر تم استخدامه يمكنك استخدام اسم اخر");
 
         string? wallperper = null, small_image = null;
 
@@ -91,6 +93,8 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> updateStore(
         [FromForm] StoreUpdateDto store)
     {
@@ -110,15 +114,15 @@ public class StoreController : ControllerBase
 
         var user = await _userData.getUserById(idHolder.Value);
         if (user == null)
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
 
         if (user.Store == null)
-            return BadRequest("المتجر غير موجود");
+            return NotFound("المتجر غير موجود");
 
         if (user.Store.name != store.name && await _storeData.isExist(store.name))
         {
-            return BadRequest("اسم المتجر تم استخدامه اختر اسما اخر");
+            return Conflict("اسم المتجر تم استخدامه اختر اسما اخر");
         }
 
         if (store.wallpaper_image != null)
@@ -157,6 +161,7 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updateStoreStatus(
         Guid storeId
         )
@@ -177,7 +182,7 @@ public class StoreController : ControllerBase
 
         var user = await _userData.getUserById(idHolder.Value);
         if (user == null )
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
         if (user.role==1 )
             return BadRequest("المستخدم ليس لديه الصلاحية");
@@ -185,7 +190,7 @@ public class StoreController : ControllerBase
         var isExist =await _storeData.isExist(storeId);
 
         if (!isExist)
-            return BadRequest("المتجر غير موجود");
+            return NotFound("المتجر غير موجود");
 
        
 
@@ -196,14 +201,15 @@ public class StoreController : ControllerBase
         if (!result)
             return BadRequest("حدثت مشكلة اثناء حفظ البيانات");
 
-        return StatusCode(200, "تم التعديل بنجاح");
+        return NoContent();
     }
 
 
     [HttpGet("me")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult GetStore()
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> GetStore()
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -219,15 +225,16 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = _storeData.getStoreByUser(userId);
+        var result =await _storeData.getStoreByUser(userId);
 
         if (result == null)
-            return StatusCode(400, "المتجر غير موجود");
+            return NoContent();
         return Ok(result);
     }
     
-     [HttpGet("{store_Id:guid}")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+   
+    [HttpGet("{store_Id:guid}")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult>GetStore(Guid store_Id)
     {
@@ -235,20 +242,20 @@ public class StoreController : ControllerBase
         var result = await _storeData.getStoreById(store_Id);
 
         if (result == null)
-            return StatusCode(400, "المتجر غير موجود");
+            return NotFound("المتجر غير موجود");
         return Ok(result);
     }
     
     [HttpGet("all/{page:int}")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult>GetStores(int page = 1)
     {
 
         var result =await _storeData.getStore(page);
 
-        if (result == null)
-            return StatusCode(400, "حدثة مشكلة اثناء جلب البيانات");
+        if (result.Count<1)
+            return NotFound( "حدثة مشكلة اثناء جلب البيانات");
         return Ok(result);
     }
 
@@ -260,8 +267,8 @@ public class StoreController : ControllerBase
      
         var result = await _storeData.getStoreAddress(store_Id,page);
 
-        if (result == null)
-            return StatusCode(400, "المتجر غير موجود");
+        if (result.Count<1)
+            return NotFound("المتجر غير موجود");
         return Ok(result);
     }
   

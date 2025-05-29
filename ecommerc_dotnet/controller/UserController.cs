@@ -315,6 +315,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getUserLocations()
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -335,11 +337,14 @@ public class UserController : ControllerBase
 
         if (user == null || user.isDeleted)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
 
         var locations = await _addressData.getUserAddressByUserId(user.ID);
+
+        if (locations == null)
+            return NoContent();
 
         return StatusCode(200, locations);
     }
@@ -348,6 +353,7 @@ public class UserController : ControllerBase
     [HttpPost("address")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> setUserLocation(
         [FromBody] AddressRequestDto address
@@ -371,7 +377,7 @@ public class UserController : ControllerBase
 
         if (user == null || user.isDeleted)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         var userLocationCount = await _addressData.addressCountForUser(idHolder.Value);
@@ -393,7 +399,8 @@ public class UserController : ControllerBase
     [HttpPut("address")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updateUserLocation(
         [FromBody] AddressRequestUpdateDto address
     )
@@ -416,13 +423,13 @@ public class UserController : ControllerBase
 
         if (user == null || user.isDeleted)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
         var addressResult = await _addressData.getAddressData(address.id);
 
         if (addressResult == null)
         {
-            return BadRequest("العنوان غير موجود");
+            return NotFound("العنوان غير موجود");
         }
        if(addressResult.owner_id!=idHolder.Value)
        {
@@ -445,7 +452,8 @@ public class UserController : ControllerBase
     [HttpDelete("address/{addre_id}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> deleteUserLocation(
         Guid addre_id
     )
@@ -468,13 +476,13 @@ public class UserController : ControllerBase
 
         if (user == null || user.isDeleted)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
         var addressResult = await _addressData.getAddressData(addre_id);
 
         if (addressResult == null)
         {
-            return BadRequest("العنوان غير موجود");
+            return NotFound("العنوان غير موجود");
         }
         if(addressResult.owner_id!=idHolder.Value)
         {
@@ -487,10 +495,10 @@ public class UserController : ControllerBase
         var result = await _addressData.deleteDaddress(
             addressId:addressResult.id);
         
-        if (result == null)
+        if (result ==false)
             return BadRequest("حدثة مشكلة اثناء حذف البيانات");
 
-        return StatusCode(200, result);
+        return NoContent();
     }
 
 

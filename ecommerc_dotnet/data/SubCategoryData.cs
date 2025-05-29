@@ -92,7 +92,41 @@ public class SubCategoryData
                return null;
            }
        }
-      
+     public async Task<bool?> isExist(Guid store_id,string name )
+           {
+               try
+               {
+                   var result = (from st in _dbContext.Store
+                           join sub in _dbContext.SubCategory on st.id equals sub.id
+                           where st.id==store_id
+                           select sub.name == name 
+                       );
+                   return await result.FirstOrDefaultAsync();
+               }
+               catch (Exception ex)
+               {
+                   Console.WriteLine("this error from getting sub category by id "+ex.Message);
+                   return null;
+               }
+           }
+  
+           public async Task<int?> countByStoreId(Guid? store_id)
+           {
+               if (store_id == null) return null;
+               try
+               {
+                   return  await _dbContext.SubCategory.Where(sub => sub.store_id == store_id).CountAsync();
+               }
+               catch (Exception ex)
+               {
+                   Console.WriteLine("this error from getting sub category by id "+ex.Message);
+                   return null;
+               }
+           }
+
+
+     
+     
  /*   public static List<SubCategoryResponseDto>? getSubCategories(Guid id,AppDbContext dbContext,IConfigurationServices config)
     {
         try

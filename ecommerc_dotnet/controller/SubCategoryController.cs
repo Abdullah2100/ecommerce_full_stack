@@ -32,6 +32,7 @@ public class SubCategoryController : ControllerBase
     [HttpPost("new")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> creatSubCategory([FromBody] SubCategoryRquestDto subCategory)
     {
@@ -52,14 +53,14 @@ public class SubCategoryController : ControllerBase
         var existByName = !await _categoryData.isExist(subCategory.cateogy_id);
         if (existByName == true)
         {
-            return BadRequest("القسم الذي ادخلته غير مودود");
+            return NotFound("القسم الذي ادخلته غير موجود");
         }
 
         var user = await _userData.getUser(idHolder.Value);
 
         if (user == null)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
 
         var isBlockUser = await _userData.isExist(idHolder.Value);
@@ -72,11 +73,14 @@ public class SubCategoryController : ControllerBase
 
         if (storeData == null)
         {
-            return BadRequest("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
+            return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
-        // if(storeData.subcategory!=null && storeData.subcategory.Count > 20)
-        // return BadRequest("لا يمكنك اضافة اكثر من 20 فئة في متجرك");
+        var store_subCateogry_size = await _subCategoryData.countByStoreId(user.store_id);
+        if (store_subCateogry_size == null)
+            return BadRequest("حدثة مشكلة اثناء التاكد من عدد الفئات الفرعية للمتجر");
+        if(store_subCateogry_size>19)
+        return BadRequest("لا يمكنك اضافة اكثر من 20 فئة في متجرك");
 
 
         var result = await _subCategoryData
@@ -92,7 +96,8 @@ public class SubCategoryController : ControllerBase
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updateSubCategory([FromBody] SubCategoryRquestUpdateDto subCategory)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -109,18 +114,19 @@ public class SubCategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var existByName = !await _categoryData.isExist(subCategory.cateogy_id);
-        if (existByName == true)
-        {
-            return BadRequest("القسم الذي ادخلته غير مودود");
-        }
-
         var user = await _userData.getUser(idHolder.Value);
 
         if (user == null)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
+        
+        var existByName = !await _categoryData.isExist(subCategory.cateogy_id);
+        if (existByName == true)
+        {
+            return NotFound("القسم الذي ادخلته غير مودود");
+        }
+
 
         var isBlockUser = await _userData.isExist(idHolder.Value);
         if (!isBlockUser)
@@ -132,7 +138,7 @@ public class SubCategoryController : ControllerBase
 
         if (storeData == null)
         {
-            return BadRequest("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
+            return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
         if (await _subCategoryData.isExist((Guid)user.store_id!, (Guid)subCategory.id!) == null)
@@ -146,15 +152,18 @@ public class SubCategoryController : ControllerBase
 
         if (result == null)
             return BadRequest("حدثة مشكلة اثناء الفئة");
-        return StatusCode(201, result);
+        return StatusCode(200, result);
     }
 
     [HttpGet("{store_id}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getSubCategory(Guid store_id, int page)
     {
         var result = await _subCategoryData
             .getSubCategory(store_id, page);
+        if (result.Count < 1)
+            return NoContent();
 
         return StatusCode(200, result);
     }

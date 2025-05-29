@@ -32,8 +32,9 @@ public class CategoryController : ControllerBase
 
 
     [HttpGet("all/{pageNumber:int}")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult>getCatgory(int pageNumber = 1)
     {
         if (pageNumber < 1)
@@ -41,7 +42,8 @@ public class CategoryController : ControllerBase
 
         var categories = await _categoryData.getCategories(_configuration, pageNumber);
         if (categories == null)
-            return BadRequest("لا يوجد اي اقسام");
+            return NoContent();
+        
         return Ok(categories);
     }
 
@@ -50,6 +52,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> createCateogry([FromForm] CategoryRequestDto category)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -73,7 +76,7 @@ public class CategoryController : ControllerBase
         bool isExist = await _categoryData.isExist(category.name);
 
         if (isExist)
-            return BadRequest("هناك قسم بهذا الاسم");
+            return Conflict("هناك قسم بهذا الاسم");
 
         var imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
         // var imagePath = await MinIoServices.uploadFile(_configuration,category.image,MinIoServices.enBucketName.CATEGORY); ;
@@ -86,13 +89,17 @@ public class CategoryController : ControllerBase
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
 
-        return StatusCode(201, "تم انشاء القسم بنجاح");
+        return Created();
     }
 
+    
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updateCateogry([FromForm] CategoryRequestUpdatteDto category)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -113,7 +120,7 @@ public class CategoryController : ControllerBase
 
         if (user == null)
         {
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
         }
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
@@ -130,7 +137,7 @@ public class CategoryController : ControllerBase
             isExistName = await _categoryData.isExist(category.name);
 
         if (isExistName&&categoryHolder.id!=category.id)
-            return BadRequest("هناك قسم بهذا الاسم");
+            return Conflict("هناك قسم بهذا الاسم");
 
         string? imagePath = null;
 
@@ -151,14 +158,15 @@ public class CategoryController : ControllerBase
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
 
-        return StatusCode(200, "تم تعديل  القسم بنجاح");
+        return NoContent();
     }
     
     
     [HttpPut("status/{categoryId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> blockOrUnBlockCateogry( Guid categoryId)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -177,13 +185,16 @@ public class CategoryController : ControllerBase
 
         var user = await _userData.getUserById(idHolder.Value);
        
+        if (user==null)
+            return NotFound("ليس لديك الصلاحية لانشاء قسم جديد");
+
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
         var categoryHolder = await _categoryData.getCategory(categoryId);
 
         if (categoryHolder == null)
-            return BadRequest("القسم غير موجود");
+            return NotFound("القسم غير موجود");
 
         var result = await _categoryData.blockOrUnBlockCategory(
             categoryId);
@@ -191,7 +202,7 @@ public class CategoryController : ControllerBase
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
 
-        return StatusCode(201, "تم تعديل  القسم بنجاح");
+        return NoContent();
     }
 
 }

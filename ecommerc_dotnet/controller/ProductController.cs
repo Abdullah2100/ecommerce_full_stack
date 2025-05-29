@@ -90,23 +90,26 @@ public class ProductController : ControllerBase
 
 
     [HttpGet("{pageNumber:int}")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getProducts
         (int pageNumber)
     {
         var result = await _productData.getProducts(pageNumber);
 
-
+        if (result.Count == 0)
+            return NoContent();
+        
         return StatusCode(200, result);
     }
 
+    
 
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateProduct
     (
         [FromForm] ProductRequestDto product
@@ -128,7 +131,7 @@ public class ProductController : ControllerBase
 
         var user = await _userData.getUser(userId);
         if (user == null)
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
         if (user.store_id != product.store_id)
             return BadRequest("فقط صاحب المتجر بأمكانه اضافة المنتجات الى متجره");
@@ -136,7 +139,7 @@ public class ProductController : ControllerBase
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
 
         if (userStore == null)
-            return BadRequest("المتجر غير موجو");
+            return NotFound("المتجر غير موجو");
 
         if (userStore.isBlocked)
             return BadRequest("لا يمكن اضافة اي منتج الى المتجر لان المتجر محضور تواصل مع مدير النظام");
@@ -169,10 +172,13 @@ public class ProductController : ControllerBase
         return StatusCode(201, result);
     }
 
+    
     [HttpPut("")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> updateProduct
     (
         [FromForm] ProductRequestUpdateDto product
@@ -194,15 +200,15 @@ public class ProductController : ControllerBase
 
         var user = await _userData.getUser(userId);
         if (user == null)
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
         if (user.store_id != product.store_id)
-            return BadRequest("فقط صاحب المتجر بأمكانه  المنتجات الى متجره");
+            return Conflict("فقط صاحب المتجر بأمكانه  المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
 
         if (userStore == null)
-            return BadRequest("المتجر غير موجو");
+            return NotFound("المتجر غير موجو");
 
         if (userStore.isBlocked)
             return BadRequest("لا يمكن اضافة اي منتج الى المتجر لان المتجر محضور تواصل مع مدير النظام");
@@ -210,7 +216,7 @@ public class ProductController : ControllerBase
         var isExistProduct = await _productData.isExist(product.id);
 
         if (!isExistProduct)
-            return BadRequest("المنتج غير موجو");
+            return NotFound("المنتج غير موجو");
 
         if (product.images != null & product?.images?.Count > 15)
             return BadRequest("اقصى عدد صور المنتجات هو 15 صورة");
@@ -252,6 +258,8 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> deleteProduct
     (
         Guid store_id,
@@ -274,15 +282,15 @@ public class ProductController : ControllerBase
 
         var user = await _userData.getUser(userId);
         if (user == null)
-            return BadRequest("المستخدم غير موجود");
+            return NotFound("المستخدم غير موجود");
 
         if (user.store_id != store_id)
-            return BadRequest("فقط صاحب المتجر بأمكانه حذف المنتجات ");
+            return Conflict("فقط صاحب المتجر بأمكانه حذف المنتجات ");
 
         var isExistProduct = await _productData.isExist(product_id);
 
         if (!isExistProduct)
-            return BadRequest("المنتج غير موجو");
+            return NotFound("المنتج غير موجو");
 
 
         var result = await _productData.deleteProduct(
@@ -292,6 +300,6 @@ public class ProductController : ControllerBase
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء  حذف المنتج");
 
-        return StatusCode(200, result);
+        return NoContent();
     }
 }
