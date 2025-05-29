@@ -181,7 +181,7 @@ fun ProductDetail(
                                 name = productData.name,
                                 thmbnail = productData.thmbnail,
                                 price = productData.price,
-                                productVarients = selectedProdcutVarients.value,
+                                productvarients = selectedProdcutVarients.value,
                                 store_id = productData.store_id
                             )
                         )

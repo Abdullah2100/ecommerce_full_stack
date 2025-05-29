@@ -7,7 +7,7 @@ import java.util.UUID
 @Serializable
 data class CategoryReponseDto(
     @Serializable(with = UUIDKserialize::class)
-    var id : UUID,
-var  name :String,
-var image_path:String
+    val id: UUID,
+    val name: String,
+    val image_path: String
 )

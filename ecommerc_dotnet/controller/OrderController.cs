@@ -37,7 +37,7 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> createOrder
     (
-        [FromForm] OrderRequestDto order
+        [FromBody] OrderRequestDto order
     )
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];

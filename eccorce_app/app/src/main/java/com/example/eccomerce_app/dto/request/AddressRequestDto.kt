@@ -6,7 +6,7 @@ import java.util.UUID
 
 @Serializable
 data class AddressRequestDto(
-    var longitude: Double,
-    var latitude: Double,
-    var title: String
+    val longitude: Double,
+    val latitude: Double,
+    val title: String
 )

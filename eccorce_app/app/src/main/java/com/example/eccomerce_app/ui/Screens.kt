@@ -46,8 +46,6 @@ object Screens {
     @Serializable
     object Profile
 
-    @Serializable
-    object HomeAddress
 
     @Serializable
     data class Store(
@@ -77,4 +75,6 @@ object Screens {
     @Serializable
     object Address
 
+    @Serializable
+    object Map
 }

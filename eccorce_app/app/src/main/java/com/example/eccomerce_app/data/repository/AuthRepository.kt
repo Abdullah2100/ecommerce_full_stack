@@ -3,7 +3,6 @@ package com.example.eccomerce_app.data.repository
 import com.example.eccomerce_app.Dto.AuthResultDto
 import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.dto.request.SignupDto
-import com.example.eccomerce_app.dto.response.ErrorResponse
 import com.example.eccomerce_app.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient

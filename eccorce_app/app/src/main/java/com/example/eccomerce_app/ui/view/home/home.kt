@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.home
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,6 +50,7 @@ import com.example.eccomerce_app.ui.component.LocationLoadingShape
 import com.example.eccomerce_app.ui.component.ProductLoading
 import com.example.eccomerce_app.ui.component.ProductShape
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun HomePage(
     nav: NavHostController,
@@ -91,7 +93,7 @@ fun HomePage(
             item {
                 when (myInfo.value?.address == null) {
                     true -> {
-                        LocationLoadingShape(configuration.screenWidthDp)
+                        LocationLoadingShape((configuration.screenWidthDp))
                     }
 
                     else -> {
@@ -102,13 +104,13 @@ fun HomePage(
                         ) {
                             Column(
                                 modifier = Modifier
-                                    .width((configuration.screenWidthDp - 30 - 34).dp)
+                                    .width(width = (configuration.screenWidthDp - 30 - 34).dp)
                                     .clickable(
                                         enabled = true,
                                         interactionSource =interactionSource ,
                                         indication = null,
                                        onClick = {
-                                           nav.navigate(Screens.HomeAddress)
+                                           nav.navigate(Screens.Address)
                                        }
                                         )
                             ) {

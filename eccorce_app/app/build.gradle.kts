@@ -5,11 +5,10 @@ plugins {
     alias(libs.plugins.ksp.android)
     alias(libs.plugins.kotlin.serialize.plugin)
 }
-
 android {
     namespace = "com.example.eccomerce_app"
     compileSdk = 35
-    ndkVersion ="28.0.13004108"
+    ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.example.eccomerce_app"
@@ -22,7 +21,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters +=listOf("armeabi-v7a","arm64-v8a","x86" ,"x86_64")
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
 
@@ -38,8 +37,8 @@ android {
 
     externalNativeBuild {
         cmake {
-            version ="3.31.5"
-            path =file("src/main/jni/CMakeLists.txt")
+            version = "3.31.5"
+            path = file("src/main/jni/CMakeLists.txt")
         }
     }
 
@@ -53,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+
     }
 }
 
@@ -110,25 +110,25 @@ dependencies {
     implementation(libs.room.ktx)
 
     //secureDataBase
-    implementation (libs.sqlcipher)
-    implementation (libs.sql.light)
+    implementation(libs.sqlcipher)
+    implementation(libs.sql.light)
 
     //splashScreen
-    implementation (libs.androidx.core.splashscreen)
+    implementation(libs.androidx.core.splashscreen)
 
     //desugra
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
 
     //location
-    implementation (libs.play.services.location)
+    implementation(libs.play.services.location)
 
     //corrutine task
     implementation(libs.kotlinx.coroutines.play.services)
 
 
     //coil
-    implementation (libs.coil.compose)
+    implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 
     //signalR

@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SignupDto(
-    var name: String,
-    var phone: String,
-    var email: String,
-    var password: String
+    val name: String,
+    val phone: String,
+    val email: String,
+    val password: String
 )

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -130,20 +131,22 @@ fun AddressScreen(
         bottomBar = {
             when (!isPressAddNewAddress.value) {
                 true -> {
-                    Box(
-                        modifier = Modifier
+                    BottomAppBar{
+                        Box(
+                            modifier = Modifier
 
-                            .padding(bottom = 50.dp)
-                            .fillMaxWidth()
-                            .background(Color.White)
-                            .padding(horizontal = 10.dp)
-                    ) {
-                        CustomBotton(
-                            operation = {
-                                isPressAddNewAddress.value = true
-                            },
-                            buttonTitle = "Add New"
-                        )
+                                .padding(bottom = 50.dp)
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(horizontal = 10.dp)
+                        ) {
+                            CustomBotton(
+                                operation = {
+                                    isPressAddNewAddress.value = true
+                                },
+                                buttonTitle = "Add New"
+                            )
+                        }
                     }
                 }
 

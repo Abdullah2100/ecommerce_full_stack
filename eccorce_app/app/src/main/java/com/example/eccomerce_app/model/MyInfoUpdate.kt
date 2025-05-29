@@ -3,9 +3,9 @@ package com.example.eccomerce_app.model
 import java.io.File
 
 data class MyInfoUpdate(
-    var name:String?=null,
-    var thumbnail: File?=null,
-    var newPassword:String?=null,
-    var oldPassword:String?=null,
-    var phone:String?=null
+    val name:String?=null,
+    val thumbnail: File?=null,
+    val newPassword:String?=null,
+    val oldPassword:String?=null,
+    val phone:String?=null
 )

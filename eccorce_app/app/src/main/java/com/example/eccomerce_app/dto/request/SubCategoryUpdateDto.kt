@@ -6,9 +6,9 @@ import java.util.UUID
 
 @Serializable
 data class SubCategoryUpdateDto(
-    var name: String,
+    val name: String,
     @Serializable(with = UUIDKserialize::class)
-    var id: UUID,
+    val id: UUID,
     @Serializable(with = UUIDKserialize::class)
-    var cateogy_id: UUID
+    val cateogy_id: UUID
 )

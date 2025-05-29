@@ -7,6 +7,7 @@ import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.data.Room.IsPassSetLocationScreen
 import com.example.eccomerce_app.data.repository.HomeRepository
+import com.example.eccomerce_app.dto.ModelToDto.toOrderRequestDto
 import com.example.eccomerce_app.dto.ModelToDto.toSubCategoryUpdateDto
 import com.example.eccomerce_app.dto.request.AddressRequestDto
 import com.example.eccomerce_app.dto.request.AddressRequestUpdateDto
@@ -93,7 +94,15 @@ class HomeViewModel(
     private var _products = MutableStateFlow<List<ProductModel>?>(null);
     var products = _products.asStateFlow();
 
-    private var _cartImes = MutableStateFlow<CartModel>(CartModel());
+    private var _cartImes = MutableStateFlow<CartModel>(
+        CartModel(
+            0.0,
+            0.0,
+            0.0,
+            UUID.randomUUID(),
+            emptyList()
+        )
+    );
     var cartImes = _cartImes.asStateFlow();
 
 
@@ -109,12 +118,12 @@ class HomeViewModel(
             cardProducts.add(product)
             cardProducts.addAll(_cartImes.value.cartProducts)
             var productLength = cardProducts.size;
-            var disntcProduct = cardProducts.distinctBy { it.productVarients }.toList()
+            var disntcProduct = cardProducts.distinctBy { it.productvarients }.toList()
             var distenctProductsLength = disntcProduct.size
 
             if (productLength == distenctProductsLength) {
                 var varientPrice = product.price
-                product.productVarients.forEach { it ->
+                product.productvarients.forEach { it ->
                     varientPrice = varientPrice * it.precentage
                 }
                 var price = ((_cartImes.value.totalPrice ?: 0.0)) + varientPrice;
@@ -125,6 +134,9 @@ class HomeViewModel(
             }
         }
     }
+
+
+
 
     fun increaseCardItem(productId: UUID) {
         viewModelScope.launch {
@@ -140,7 +152,7 @@ class HomeViewModel(
             var varientPrice = copyproduct!!.price
 
 
-            copyproduct.productVarients.forEach { it ->
+            copyproduct.productvarients.forEach { it ->
                 varientPrice = varientPrice * it.precentage
             }
             var price = (_cartImes.value.totalPrice ?: 0.0) + (varientPrice);
@@ -162,7 +174,7 @@ class HomeViewModel(
             var varientPrice = fristProduct!!.price
 
 
-            fristProduct.productVarients.forEach { it ->
+            fristProduct.productvarients.forEach { it ->
                 varientPrice = varientPrice * it.precentage
             }
 
@@ -200,7 +212,7 @@ class HomeViewModel(
             var varientPrice = fristProduct!!.price
 
 
-            fristProduct.productVarients.forEach { it ->
+            fristProduct.productvarients.forEach { it ->
                 varientPrice = varientPrice * it.precentage
             }
 
@@ -494,7 +506,7 @@ class HomeViewModel(
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
 
-                var address = _myInfo.value?.address?.filter { it.id!=addressId }
+                var address = _myInfo.value?.address?.filter { it.id != addressId }
 
                 var copyMyAddress = _myInfo.value?.copy(address = address);
                 _myInfo.emit(copyMyAddress)
@@ -1290,4 +1302,30 @@ class HomeViewModel(
             dao.nukePassLocationTable()
         }
     }
+
+
+
+    suspend  fun submitCartTitems(): String? {
+            var result = homeRepository.submitOrder(_cartImes.value.toOrderRequestDto())
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                   _cartImes.emit(CartModel(
+                       0.0,
+                       0.0,
+                       0.0,
+                       UUID.randomUUID(),
+                       emptyList()
+                   ))
+                    return null
+                }
+                is NetworkCallHandler.Error -> {
+                  var errorMessage = result.data as String
+                    return errorMessage
+                }
+            }
+
+    }
+
+
+
 }

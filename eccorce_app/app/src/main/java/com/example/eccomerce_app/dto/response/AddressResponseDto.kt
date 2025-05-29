@@ -8,9 +8,9 @@ import java.util.UUID
 @Serializable
 data class AddressResponseDto(
     @Serializable(with = UUIDKserialize::class)
-    var id: UUID,
-    var longitude: Double,
-    var latitude: Double,
-    var title: String?,
-    var isCurrent: Boolean?=false
+    val id: UUID,
+    val longitude: Double,
+    val latitude: Double,
+    val title: String?,
+    val isCurrent: Boolean?=false
 )

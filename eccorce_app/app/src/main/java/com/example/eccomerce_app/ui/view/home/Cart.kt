@@ -244,7 +244,7 @@ fun CartScreen(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         Sizer(width = 5)
-                                        cardData.value.cartProducts[index].productVarients.forEach { value ->
+                                        cardData.value.cartProducts[index].productvarients.forEach { value ->
 
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically

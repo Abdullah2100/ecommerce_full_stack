@@ -1,10 +1,13 @@
 package com.example.eccomerce_app.ui.view.checkout
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,54 +16,76 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.BannerBage
-import com.example.eccomerce_app.ui.component.CategoryLoadingShape
-import com.example.eccomerce_app.ui.component.CategoryShape
-import com.example.eccomerce_app.ui.component.LocationLoadingShape
-import com.example.eccomerce_app.ui.component.ProductLoading
-import com.example.eccomerce_app.ui.component.ProductShape
 import com.example.eccomerce_app.ui.component.Sizer
 import com.example.eccomerce_app.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.eccomerce_app.R
+import com.example.eccomerce_app.model.PaymentMethodModel
+import com.example.eccomerce_app.ui.component.CustomBotton
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     nav: NavHostController,
     homeViewModel: HomeViewModel
 ) {
+    val config = LocalConfiguration.current
 
+    var cartData = homeViewModel.cartImes.collectAsState()
     var myInfo = homeViewModel.myInfo.collectAsState()
+    var currentAddress = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }
+    val listOfPaymentMethod = listOf<PaymentMethodModel>(
+        PaymentMethodModel("Cach", R.drawable.money, 1)
+    )
+    val slectedPaymentMethod = remember { mutableStateOf(0) }
+
+    val coroutin = rememberCoroutineScope()
+    val isSendingData = remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 modifier = Modifier.padding(end = 15.dp),
@@ -69,7 +94,7 @@ fun CheckoutScreen(
                 ),
                 title = {
                     Text(
-                        "Product Detail",
+                        "Checkout",
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -93,6 +118,36 @@ fun CheckoutScreen(
                 },
             )
         },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = Color.White
+            ){
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .padding()
+                ){
+                    CustomBotton(
+                        isEnable = !isSendingData.value,
+                        operation = {
+                            coroutin.launch {
+                               val  result = async {
+                                   homeViewModel.submitCartTitems()
+                               }.await()
+
+                                var message  = "Order Submit Seccesffuly"
+                                if(!result.isNullOrEmpty())
+                                {
+                                    message = result
+                                }
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        },
+                        buttonTitle = "Place Order"
+                    )
+                }
+            }
+        }
 
         )
     {
@@ -103,8 +158,9 @@ fun CheckoutScreen(
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(horizontal = 15.dp)
-                .padding(top = it.calculateTopPadding()+20.dp
-                , bottom = it.calculateBottomPadding())
+                .padding(
+                    top = it.calculateTopPadding() + 20.dp, bottom = it.calculateBottomPadding()
+                )
 
         ) {
 
@@ -115,55 +171,220 @@ fun CheckoutScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            color = CustomColor.neutralColor200,
-                            RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Delivery Address",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+
+                            )
+                            TextButton(onClick = {
+                                nav.navigate(Screens.Address)
+                            }) {
+                                Text(
+                                    "Change",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 14.sp,
+                                    color = CustomColor.neutralColor900,
+                                    textAlign = TextAlign.Center,
+                                    textDecoration = TextDecoration.Underline
+
+                                )
+                            }
+
+                        }
+
+                        Sizer(1)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.location_address_list),
+                                "",
+                                tint = CustomColor.neutralColor600
+                            )
+                            TextButton(onClick = {
+                                nav.navigate(Screens.Address)
+                            }) {
+                                Text(
+                                    currentAddress?.title ?: "",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = CustomColor.neutralColor950,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+
+                        }
+                    }
+
+
+                }
+                Sizer(10)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(CustomColor.neutralColor200)
+                )
+                Sizer(25)
+
+            }
+
+            item {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                    ) {
+
+                        Text(
+                            "Payment Method",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center
                         )
-                        .padding(vertical = 10.dp, horizontal = 10.dp)
+
+                        Sizer(15)
+
+                        LazyRow() {
+                            items(listOfPaymentMethod.size) { index ->
+                                Row(
+                                    modifier = Modifier
+                                        .height(50.dp)
+                                        .width(((config.screenWidthDp - 30) / listOfPaymentMethod.size).dp)
+                                        .border(
+                                            if (slectedPaymentMethod.value == index) 0.dp else 1.dp,
+                                            CustomColor.neutralColor200,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .background(
+                                            if (slectedPaymentMethod.value == index) CustomColor.primaryColor700 else Color.Transparent,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clip(
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable {
+                                            slectedPaymentMethod.value = index
+                                        },
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        ImageVector.vectorResource(listOfPaymentMethod[index].icon),
+                                        "",
+                                        tint = if (slectedPaymentMethod.value == index) Color.White else Color.Black
+                                    )
+                                    Sizer(width = 5)
+                                    Text(
+                                        listOfPaymentMethod[index].name,
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        color = if (slectedPaymentMethod.value == index) Color.White else CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                        Sizer(15)
+
+                    }
+
+
+                }
+                Sizer(10)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(CustomColor.neutralColor200)
+                )
+                Sizer(15)
+
+            }
+
+            item {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
                     Column(
                         modifier = Modifier
                     ) {
                         Text(
-                            "Loaction",
+                            "Order Summary",
                             fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = CustomColor.neutralColor800,
-                            textAlign = TextAlign.Center
-
-                        )
-                        Sizer(1)
-                        Text(
-                            myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
-                                ?: "",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 18.sp,
                             color = CustomColor.neutralColor950,
                             textAlign = TextAlign.Center
 
                         )
+
+
+                        Sizer(15)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Total",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "\$${cartData.value.totalPrice}",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
-                   IconButton(
-                       onClick = {
-                           nav.navigate(Screens.Address)
-                       }
-                   ) {
-                       Icon(
-                           Icons.Outlined.Edit,
-                           "",
-                           tint = CustomColor.neutralColor950,
-                           modifier = Modifier.size(30.dp)
 
-                       )
-                   }
                 }
-            }
-        }
 
+            }
+
+
+        }
 
 
     }

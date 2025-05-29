@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class SubCategoryUpdate(
-    var name: String,
-    var id: UUID,
-    var cateogy_id: UUID,
+    val name: String,
+    val id: UUID,
+    val cateogy_id: UUID,
 )

@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class ProductVarient(
-    var id: UUID,
-    var name:String,
-    var precentage: Double,
-    var varient_id: UUID,
+    val id: UUID,
+    val name:String,
+    val precentage: Double,
+    val varient_id: UUID,
     )

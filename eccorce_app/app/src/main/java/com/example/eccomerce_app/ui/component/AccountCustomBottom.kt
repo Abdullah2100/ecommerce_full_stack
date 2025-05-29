@@ -50,7 +50,7 @@ fun AccountCustomBottom(title: String, icon: Int, operation: () -> Unit){
             ) {
                 Icon(imageVector = ImageVector.vectorResource(icon),"",
                     modifier = Modifier.size(24.dp),
-                    tint = CustomColor.neutralColor950)
+                    tint = CustomColor.neutralColor900)
                 Sizer(width = 15)
                 Text(
                     title,

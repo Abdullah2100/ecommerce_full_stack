@@ -12,7 +12,6 @@ import com.example.eccomerce_app.data.Room.IsPassOnBoardingScreen
 import com.example.eccomerce_app.dto.request.LoginDto
 import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.dto.request.SignupDto
-import com.example.eccomerce_app.dto.response.ErrorResponse
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import kotlinx.coroutines.Dispatchers

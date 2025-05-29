@@ -7,12 +7,12 @@ import java.util.UUID
 @Serializable
 data class UserDto(
     @Serializable(with = UUIDKserialize::class)
-    var id: UUID,
-    var name:String,
-    var phone: String,
-    var email: String,
-    var thumbnail:String,
-    var address:List<AddressResponseDto>?=null,
+    val id: UUID,
+    val name:String,
+    val phone: String,
+    val email: String,
+    val thumbnail:String,
+    val address:List<AddressResponseDto>?=null,
     @Serializable(with = UUIDKserialize::class)
-    var store_id: UUID,
+    val store_id: UUID,
 )

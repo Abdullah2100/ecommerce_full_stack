@@ -3,6 +3,7 @@ package com.example.eccomerce_app.data.repository
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.dto.request.AddressRequestDto
 import com.example.eccomerce_app.dto.request.AddressRequestUpdateDto
+import com.example.eccomerce_app.dto.request.CartRequestDto
 import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
 import com.example.eccomerce_app.dto.response.AddressResponseDto
@@ -158,7 +159,7 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
         return try {
-            var result = client.delete (
+            var result = client.delete(
                 Secrets.getBaseUrl() + "/User/address/${addressID}"
             ) {
                 headers {
@@ -393,7 +394,6 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
     suspend fun createStore(
         name: String,
         wallpaper_image: File,
@@ -478,7 +478,7 @@ class HomeRepository(val client: HttpClient) {
         latitude: Double
     ): NetworkCallHandler {
         return try {
-            var result = client.put (
+            var result = client.put(
                 Secrets.getBaseUrl() + "/Store"
             ) {
                 headers {
@@ -490,42 +490,42 @@ class HomeRepository(val client: HttpClient) {
                 setBody(
                     MultiPartFormDataContent(
                         formData {
-                            if(name.trim().length>0)
-                            append("name", name)
-                            if(latitude!=0.0)
-                            append("longitude", latitude)
-                            if(longitude!=0.0)
-                            append("latitude", longitude)
-                            if(wallpaper_image!=null)
-                            append(
-                                key = "wallpaper_image", // Must match backend expectation
-                                value = wallpaper_image.readBytes(),
-                                headers = Headers.build {
-                                    append(
-                                        HttpHeaders.ContentType,
-                                        "image/${wallpaper_image.extension}"
-                                    )
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=${wallpaper_image.name}"
-                                    )
-                                }
-                            )
-                            if(small_image!=null)
-                            append(
-                                key = "small_image", // Must match backend expectation
-                                value = small_image.readBytes(),
-                                headers = Headers.build {
-                                    append(
-                                        HttpHeaders.ContentType,
-                                        "image/${small_image.extension}"
-                                    )
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=${small_image.name}"
-                                    )
-                                }
-                            )
+                            if (name.trim().length > 0)
+                                append("name", name)
+                            if (latitude != 0.0)
+                                append("longitude", latitude)
+                            if (longitude != 0.0)
+                                append("latitude", longitude)
+                            if (wallpaper_image != null)
+                                append(
+                                    key = "wallpaper_image", // Must match backend expectation
+                                    value = wallpaper_image.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${wallpaper_image.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${wallpaper_image.name}"
+                                        )
+                                    }
+                                )
+                            if (small_image != null)
+                                append(
+                                    key = "small_image", // Must match backend expectation
+                                    value = small_image.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${small_image.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${small_image.name}"
+                                        )
+                                    }
+                                )
 
                         }
                     )
@@ -551,11 +551,11 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun createSubCategory(data:SubCategoryRequestDto): NetworkCallHandler {
+    suspend fun createSubCategory(data: SubCategoryRequestDto): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/SubCategory/new";
-            val result = client.post(full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/SubCategory/new";
+            val result = client.post(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -566,9 +566,9 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if(result.status== HttpStatusCode.Created){
+            if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -589,9 +589,9 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun updateSubCategory(data: SubCategoryUpdateDto): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/SubCategory";
-            val result = client.put (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/SubCategory";
+            val result = client.put(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -602,9 +602,9 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if(result.status== HttpStatusCode.Created){
+            if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -623,11 +623,11 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun getBannerByStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
+    suspend fun getBannerByStoreId(store_id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Banner/${store_id}/${pageNumber}";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Banner/${store_id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -636,9 +636,9 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if(result.status== HttpStatusCode.Created){
+            if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -658,9 +658,9 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getRandomBanner(): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Banner";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Banner";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -669,9 +669,9 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if(result.status== HttpStatusCode.Created){
+            if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -688,7 +688,6 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
 
 
     suspend fun createBanner(
@@ -751,7 +750,7 @@ class HomeRepository(val client: HttpClient) {
         banner_id: UUID
     ): NetworkCallHandler {
         return try {
-            var result = client.delete (
+            var result = client.delete(
                 Secrets.getBaseUrl() + "/Banner/${banner_id}"
             ) {
                 headers {
@@ -782,12 +781,11 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
     suspend fun getStoreById(id: UUID): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Store/${id}";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Store/${id}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -795,9 +793,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<StoreResposeDto>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -815,11 +813,11 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getStoreAddress(id: UUID,pageNumber: Int): NetworkCallHandler {
+    suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Store/${id}/${pageNumber}";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -827,9 +825,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<AddressResponseDto>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -847,11 +845,11 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getStoreSubCategory(id: UUID,pageNumber: Int): NetworkCallHandler {
+    suspend fun getStoreSubCategory(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/SubCategory/${id}/${pageNumber}";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/SubCategory/${id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -859,9 +857,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<SubCategoryResponseDto>>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -882,9 +880,9 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Product/${pageNumber}";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Product/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -892,9 +890,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -912,11 +910,11 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProduct(store_id: UUID,pageNumber: Int): NetworkCallHandler {
+    suspend fun getProduct(store_id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Product/${store_id}/${pageNumber}";
-            val result = client.get (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Product/${store_id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -924,9 +922,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -946,9 +944,10 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getProduct(store_id: UUID, subCatgory: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Product/${store_id}/${subCatgory}/${pageNumber}";
-            val result = client.get (full_url){
-                headers{
+            val full_url =
+                Secrets.getBaseUrl() + "/Product/${store_id}/${subCatgory}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -956,9 +955,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -977,20 +976,20 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun  createProduct(
-        name:String,
-        description:String,
+    suspend fun createProduct(
+        name: String,
+        description: String,
         thmbnail: File,
         subcategory_id: UUID,
         store_id: UUID,
         price: Double,
-        productVarients:List<ProductVarientSelection>,
-        images:List<File>
-        ): NetworkCallHandler{
+        productVarients: List<ProductVarientSelection>,
+        images: List<File>
+    ): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Product";
-            val result = client.post  (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Product";
+            val result = client.post(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -1019,13 +1018,16 @@ class HomeRepository(val client: HttpClient) {
                             append("subcategory_id", subcategory_id.toString())
                             append("store_id", store_id.toString())
                             append("price", price)
-                          if(productVarients.isNotEmpty())
-                            productVarients.forEachIndexed { it,value->
-                                append("productVarients[${it}].name",value.name)
-                                append("productVarients[${it}].precentage",value.precentage!!)
-                                append("productVarients[${it}].varient_id",value.varient_id.toString())
-                            }
-                            images.forEachIndexed { it,value->
+                            if (productVarients.isNotEmpty())
+                                productVarients.forEachIndexed { it, value ->
+                                    append("productVarients[${it}].name", value.name)
+                                    append("productVarients[${it}].precentage", value.precentage!!)
+                                    append(
+                                        "productVarients[${it}].varient_id",
+                                        value.varient_id.toString()
+                                    )
+                                }
+                            images.forEachIndexed { it, value ->
                                 append(
                                     key = "images", // Must match backend expectation
                                     value = value.readBytes(),
@@ -1040,8 +1042,7 @@ class HomeRepository(val client: HttpClient) {
                                         )
                                     }
                                 )
-                                 }
-
+                            }
 
 
                         }
@@ -1049,9 +1050,9 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
 
-            if(result.status== HttpStatusCode.Created){
+            if (result.status == HttpStatusCode.Created) {
                 NetworkCallHandler.Successful(result.body<ProductResponseDto>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -1069,24 +1070,24 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun  updateProduct(
+    suspend fun updateProduct(
         id: UUID,
-        name:String?,
-        description:String?,
+        name: String?,
+        description: String?,
         thmbnail: File?,
         subcategory_id: UUID?,
         store_id: UUID,
         price: Double?,
-        productVarients:List<ProductVarientSelection>?,
-        images:List<File>?,
-        deletedProductVarients:List<ProductVarientSelection>?,
-        deletedimages:List<String>?
+        productVarients: List<ProductVarientSelection>?,
+        images: List<File>?,
+        deletedProductVarients: List<ProductVarientSelection>?,
+        deletedimages: List<String>?
 
-    ): NetworkCallHandler{
+    ): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Product";
-            val result = client.put (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Product";
+            val result = client.put(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -1095,74 +1096,86 @@ class HomeRepository(val client: HttpClient) {
                 setBody(
                     MultiPartFormDataContent(
                         formData {
-                            append("id",id.toString())
-                            if(name!=null)
-                            append("name", name)
-                            if(description!=null)
-                            append("description", description)
-                            if(thmbnail!=null)
-                            append(
-                                key = "thmbnail", // Must match backend expectation
-                                value = thmbnail.readBytes(),
-                                headers = Headers.build {
-                                    append(
-                                        HttpHeaders.ContentType,
-                                        "image/${thmbnail.extension}"
-                                    )
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=${thmbnail.name}"
-                                    )
-                                }
-                            )
-                            if(subcategory_id!=null)
-                            append("subcategory_id", subcategory_id.toString())
-                            append("store_id", store_id.toString())
-
-                            if(price!=null)
-                            append("price", price)
-
-                            if(!productVarients.isNullOrEmpty())
-                                productVarients.forEachIndexed { it,value->
-                                    append("productVarients[${it}].name",value.name)
-                                    append("productVarients[${it}].precentage",value.precentage!!)
-                                    append("productVarients[${it}].varient_id",value.varient_id.toString())
-                                }
-                            if(!deletedProductVarients.isNullOrEmpty())
-                                deletedProductVarients.forEachIndexed { it,value->
-                                    append("deletedProductVarients[${it}].name",value.name)
-                                    append("deletedProductVarients[${it}].precentage",value.precentage!!)
-                                    append("deletedProductVarients[${it}].varient_id",value.varient_id.toString())
-
-                                }
-
-                            if(!deletedimages.isNullOrEmpty())
-                                deletedimages.forEachIndexed { it,value->
-                                    val startIndex= "staticFiles"
-                                    val indexAt = value.indexOf("staticFiles")
-                                    append("deletedimages[${it}]",value.substring(indexAt+startIndex.length,
-                                        value.length))
-                                }
-
-
-                            if(!images.isNullOrEmpty())
-                            images.forEachIndexed { it,value->
+                            append("id", id.toString())
+                            if (name != null)
+                                append("name", name)
+                            if (description != null)
+                                append("description", description)
+                            if (thmbnail != null)
                                 append(
-                                    key = "images", // Must match backend expectation
-                                    value = value.readBytes(),
+                                    key = "thmbnail", // Must match backend expectation
+                                    value = thmbnail.readBytes(),
                                     headers = Headers.build {
                                         append(
                                             HttpHeaders.ContentType,
-                                            "image/${value.extension}"
+                                            "image/${thmbnail.extension}"
                                         )
                                         append(
                                             HttpHeaders.ContentDisposition,
-                                            "filename=${value.name}"
+                                            "filename=${thmbnail.name}"
                                         )
                                     }
                                 )
-                            }
+                            if (subcategory_id != null)
+                                append("subcategory_id", subcategory_id.toString())
+                            append("store_id", store_id.toString())
 
+                            if (price != null)
+                                append("price", price)
+
+                            if (!productVarients.isNullOrEmpty())
+                                productVarients.forEachIndexed { it, value ->
+                                    append("productVarients[${it}].name", value.name)
+                                    append("productVarients[${it}].precentage", value.precentage!!)
+                                    append(
+                                        "productVarients[${it}].varient_id",
+                                        value.varient_id.toString()
+                                    )
+                                }
+                            if (!deletedProductVarients.isNullOrEmpty())
+                                deletedProductVarients.forEachIndexed { it, value ->
+                                    append("deletedProductVarients[${it}].name", value.name)
+                                    append(
+                                        "deletedProductVarients[${it}].precentage",
+                                        value.precentage!!
+                                    )
+                                    append(
+                                        "deletedProductVarients[${it}].varient_id",
+                                        value.varient_id.toString()
+                                    )
+
+                                }
+
+                            if (!deletedimages.isNullOrEmpty())
+                                deletedimages.forEachIndexed { it, value ->
+                                    val startIndex = "staticFiles"
+                                    val indexAt = value.indexOf("staticFiles")
+                                    append(
+                                        "deletedimages[${it}]", value.substring(
+                                            indexAt + startIndex.length,
+                                            value.length
+                                        )
+                                    )
+                                }
+
+
+                            if (!images.isNullOrEmpty())
+                                images.forEachIndexed { it, value ->
+                                    append(
+                                        key = "images", // Must match backend expectation
+                                        value = value.readBytes(),
+                                        headers = Headers.build {
+                                            append(
+                                                HttpHeaders.ContentType,
+                                                "image/${value.extension}"
+                                            )
+                                            append(
+                                                HttpHeaders.ContentDisposition,
+                                                "filename=${value.name}"
+                                            )
+                                        }
+                                    )
+                                }
 
 
                         }
@@ -1170,9 +1183,9 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<ProductResponseDto>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -1191,11 +1204,11 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun deleteProduct(store_id: UUID,product_id: UUID): NetworkCallHandler {
+    suspend fun deleteProduct(store_id: UUID, product_id: UUID): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/Product/${store_id}/${product_id}";
-            val result = client.delete  (full_url){
-                headers{
+            val full_url = Secrets.getBaseUrl() + "/Product/${store_id}/${product_id}";
+            val result = client.delete(full_url) {
+                headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
@@ -1203,9 +1216,9 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if(result.status== HttpStatusCode.OK){
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<Boolean>())
-            }else{
+            } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
 
@@ -1224,6 +1237,44 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
+    suspend fun submitOrder(cartData: CartRequestDto): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order";
+            val result = client.post(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                contentType(ContentType.Application.Json)
+                setBody(cartData)
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+
+                NetworkCallHandler.Successful(true)
+
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
 
 
 }

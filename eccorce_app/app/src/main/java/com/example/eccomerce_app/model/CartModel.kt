@@ -3,9 +3,9 @@ package com.example.eccomerce_app.model
 import java.util.UUID
 
 data class CartModel(
-    val totalPrice: Double?=null,
-    val longit: Double?=null,
-    val latitu: Double?=null,
-    val userId: UUID?=null,
-    var cartProducts:List<CardProductModel> = emptyList<CardProductModel>()
+    val totalPrice: Double,
+    val longit: Double,
+    val latitu: Double,
+    val userId: UUID,
+    val cartProducts:List<CardProductModel>
 )

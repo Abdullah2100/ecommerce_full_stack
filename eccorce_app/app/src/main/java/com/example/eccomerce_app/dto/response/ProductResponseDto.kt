@@ -8,16 +8,16 @@ import java.util.UUID
 @Serializable
 data class ProductResponseDto(
     @Serializable(with= UUIDKserialize::class)
-    var id: UUID,
-    var name: String,
-    var description:String,
-    var thmbnail:String,
+    val id: UUID,
+    val name: String,
+    val description:String,
+    val thmbnail:String,
     @Serializable(with = UUIDKserialize::class)
-    var subcategory_id: UUID,
+    val subcategory_id: UUID,
     @Serializable(with = UUIDKserialize::class)
-    var store_id: UUID,
-    var price: Double,
-    var productVarients:List<List<ProductVarientReponseDto>>?=null,
-    var productImages:List<String>
+    val store_id: UUID,
+    val price: Double,
+    val productVarients:List<List<ProductVarientReponseDto>>?=null,
+    val productImages:List<String>
 
 ) ;

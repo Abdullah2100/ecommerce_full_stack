@@ -71,7 +71,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.R
 import com.example.eccomerce_app.Util.General
 import com.example.eccomerce_app.Util.General.toCustomFil
-import com.example.eccomerce_app.model.ModelToModel.toListOfProductVarient
+import com.example.eccomerce_app.dto.ModelToDto.toListOfProductVarient
 import com.example.eccomerce_app.model.ProductVarientSelection
 import com.example.eccomerce_app.ui.component.CustomBotton
 import com.example.eccomerce_app.ui.component.Sizer

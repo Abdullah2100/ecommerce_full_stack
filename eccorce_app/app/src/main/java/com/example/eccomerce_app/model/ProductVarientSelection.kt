@@ -3,7 +3,7 @@ package com.example.eccomerce_app.model
 import java.util.UUID
 
 data class ProductVarientSelection(
-    var name: String,
-    var precentage: Double?,
-    var varient_id: UUID,
+    val name: String,
+    val precentage: Double?,
+    val varient_id: UUID,
     )

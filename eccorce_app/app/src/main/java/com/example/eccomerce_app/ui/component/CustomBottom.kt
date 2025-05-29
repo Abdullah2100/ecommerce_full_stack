@@ -97,7 +97,7 @@ fun CustomBotton(
         },
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor =color?: CustomColor.primaryColor400
+            containerColor =color?: CustomColor.primaryColor700
         ),
 
         ) {

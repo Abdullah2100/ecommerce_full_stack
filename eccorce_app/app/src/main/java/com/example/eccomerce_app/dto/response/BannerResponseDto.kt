@@ -6,8 +6,8 @@ import java.util.UUID
 @Serializable
 data class BannerResponseDto(
     @Serializable(with= UUIDKserialize::class)
-    var id: UUID,
-    var image:String,
+    val id: UUID,
+    val image:String,
     @Serializable(with= UUIDKserialize::class)
-    var store_id: UUID,
+    val store_id: UUID,
 )

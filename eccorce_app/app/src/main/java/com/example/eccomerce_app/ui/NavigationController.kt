@@ -15,6 +15,7 @@ import com.example.eccomerce_app.ui.OnBoarding.OnBoardingScreen
 import com.example.eccomerce_app.ui.view.Auth.LoginScreen
 import com.example.eccomerce_app.View.Pages.SignUpPage
 import com.example.eccomerce_app.ui.view.Address.AddressScreen
+import com.example.eccomerce_app.ui.view.Address.MapScreen
 import com.example.eccomerce_app.ui.view.account.AccountPage
 import com.example.eccomerce_app.ui.view.account.ProfileScreen
 import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
@@ -22,7 +23,6 @@ import com.example.eccomerce_app.ui.view.account.store.ProductDetail
 import com.example.eccomerce_app.ui.view.account.store.StoreScreen
 import com.example.eccomerce_app.ui.view.checkout.CheckoutScreen
 import com.example.eccomerce_app.ui.view.home.CartScreen
-import com.example.eccomerce_app.ui.view.home.HomeAddressList
 import com.example.eccomerce_app.ui.view.home.HomePage
 import com.example.eccomerce_app.ui.view.location.LocationHomeScreen
 import com.example.eccomerce_app.ui.view.location.LocationsList
@@ -189,23 +189,6 @@ fun NavController(
                 )
             }
 
-            composable<Screens.HomeAddress>(
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
-            ) {
-                HomeAddressList(
-                    nav = nav,
-                    homeViewModle = homeViewModle
-                )
-            }
 
             composable<Screens.Account>(
                 enterTransition = {
@@ -380,7 +363,25 @@ fun NavController(
                 )
 
             }
+            composable<Screens.Map>(
 
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                MapScreen(
+                    nav = nav,
+                    homeViewModel = homeViewModle
+                )
+
+            }
         }
 
     }
