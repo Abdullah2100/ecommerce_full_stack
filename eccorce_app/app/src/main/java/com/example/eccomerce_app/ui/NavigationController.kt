@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui
+package com.example.e_commercompose.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -6,27 +6,27 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.viewModel.AuthViewModel
+import com.example.e_commercompose.viewModel.AuthViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.example.eccomerce_app.ui.OnBoarding.OnBoardingScreen
-import com.example.eccomerce_app.ui.view.Auth.LoginScreen
-import com.example.eccomerce_app.View.Pages.SignUpPage
-import com.example.eccomerce_app.ui.view.Address.AddressScreen
-import com.example.eccomerce_app.ui.view.Address.MapScreen
-import com.example.eccomerce_app.ui.view.account.AccountPage
-import com.example.eccomerce_app.ui.view.account.ProfileScreen
-import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
-import com.example.eccomerce_app.ui.view.account.store.ProductDetail
-import com.example.eccomerce_app.ui.view.account.store.StoreScreen
-import com.example.eccomerce_app.ui.view.checkout.CheckoutScreen
-import com.example.eccomerce_app.ui.view.home.CartScreen
-import com.example.eccomerce_app.ui.view.home.HomePage
-import com.example.eccomerce_app.ui.view.location.LocationHomeScreen
-import com.example.eccomerce_app.ui.view.location.LocationsList
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.ui.OnBoarding.OnBoardingScreen
+import com.example.e_commercompose.ui.view.Auth.LoginScreen
+import com.example.e_commercompose.View.Pages.SignUpPage
+import com.example.e_commercompose.ui.view.Address.AddressScreen
+import com.example.e_commercompose.ui.view.Address.MapScreen
+import com.example.e_commercompose.ui.view.account.AccountPage
+import com.example.e_commercompose.ui.view.account.ProfileScreen
+import com.example.e_commercompose.ui.view.account.store.CreateProductScreen
+import com.example.e_commercompose.ui.view.account.store.ProductDetail
+import com.example.e_commercompose.ui.view.account.store.StoreScreen
+import com.example.e_commercompose.ui.view.checkout.CheckoutScreen
+import com.example.e_commercompose.ui.view.home.CartScreen
+import com.example.e_commercompose.ui.view.home.HomePage
+import com.example.e_commercompose.ui.view.location.LocationHomeScreen
+import com.example.e_commercompose.ui.view.location.LocationsList
+import com.example.e_commercompose.viewModel.HomeViewModel
 
 
 @Composable

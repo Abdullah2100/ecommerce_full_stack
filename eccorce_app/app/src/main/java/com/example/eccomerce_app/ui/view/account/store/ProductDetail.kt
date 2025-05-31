@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.account.store
+package com.example.e_commercompose.ui.view.account.store
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,12 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.model.CardProductModel
-import com.example.eccomerce_app.model.ProductVarient
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.model.CardProductModel
+import com.example.e_commercompose.model.ProductVarient
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -462,7 +462,9 @@ fun ProductDetail(
                     }
                 }
             }
-
+           item {
+               Sizer(50)
+           }
         }
     }
 

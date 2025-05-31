@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.model
+package com.example.e_commercompose.model
 
 data class PaymentMethodModel(
     val name:String,

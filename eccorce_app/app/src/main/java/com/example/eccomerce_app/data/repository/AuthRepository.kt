@@ -1,9 +1,9 @@
-package com.example.eccomerce_app.data.repository
+package com.example.e_commercompose.data.repository
 
-import com.example.eccomerce_app.Dto.AuthResultDto
-import com.example.eccomerce_app.dto.request.LoginDto
-import com.example.eccomerce_app.dto.request.SignupDto
-import com.example.eccomerce_app.util.Secrets
+import com.example.e_commercompose.Dto.AuthResultDto
+import com.example.e_commercompose.dto.request.LoginDto
+import com.example.e_commercompose.dto.request.SignupDto
+import com.example.e_commercompose.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

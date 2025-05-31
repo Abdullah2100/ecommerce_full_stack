@@ -1,13 +1,10 @@
 package com.example.eccomerce_app.di
 
-import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.eccomerce_app.data.Room.AuthDataBase
-import com.example.eccomerce_app.util.Secrets
-import com.example.eccomerce_app.Util.General
+import com.example.e_commercompose.data.Room.AuthDataBase
+import com.example.e_commercompose.util.Secrets
+import com.example.e_commercompose.Util.General
 import org.koin.dsl.module
 
 fun provideDataBase(application: Context): AuthDataBase {

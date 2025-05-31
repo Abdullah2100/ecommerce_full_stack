@@ -3,10 +3,12 @@ using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using FirebaseAdmin.Messaging;
 using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ecommerc_dotnet.controller;
 
@@ -19,16 +21,19 @@ public class OrderController : ControllerBase
     private readonly OrderData _orderData;
     private readonly UserData _userData;
     private readonly ProductData _productData;
+    private readonly IHubContext<EcommercHub> _hubContext;
 
     public OrderController(
         AppDbContext dbContext,
         IConfig config,
-        IWebHostEnvironment host)
+        IWebHostEnvironment host,
+        IHubContext<EcommercHub> hubContext)
     {
         _dbContext = dbContext;
         _orderData = new OrderData(dbContext, config);
         _userData = new UserData(dbContext, config);
-        _productData = new ProductData(dbContext,config,host);
+        _productData = new ProductData(dbContext, config, host);
+        _hubContext = hubContext;
     }
 
 
@@ -57,8 +62,8 @@ public class OrderController : ControllerBase
         }
 
         var user = await _userData.getUserById(idHolder.Value);
-        
-        if (user==null)
+
+        if (user == null)
             return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted == true)
@@ -79,7 +84,21 @@ public class OrderController : ControllerBase
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ الطلب");
-        return StatusCode(201,result);
+
+        await _hubContext.Clients.All.SendAsync("createdOrder", result);
+        var messagin = FirebaseMessaging.DefaultInstance;
+        await messagin.SendAsync(new
+            Message
+            {
+                Notification = new Notification
+                {
+                    Title = "Your order has been created",
+                    Body = "Your order has been created",
+                },
+                Token = user.deviceToken
+            });
+
+        return StatusCode(201, result);
     }
 
     private async Task<bool> isValideTotalPrice(decimal totalPrice, List<OrderRequestItemsDto> items)
@@ -88,12 +107,12 @@ public class OrderController : ControllerBase
         {
             bool isAmbiguous = false;
             decimal realPrice = 0;
-            
+
             items.ForEach(item =>
             {
                 var product = _productData.getProduct(item.product_Id);
                 decimal varientPrice = 1;
-              
+
                 item.products_varient_id.ForEach(pvi =>
                 {
                     var productVairntPrice = _dbContext.ProductVarients
@@ -101,14 +120,14 @@ public class OrderController : ControllerBase
                     if (productVairntPrice == null)
                     {
                         isAmbiguous = true;
-                        return ;
+                        return;
                     }
 
                     varientPrice = varientPrice * productVairntPrice.precentage;
                 });
                 if (isAmbiguous == true)
                 {
-                    return ;
+                    return;
                 }
 
                 if (product.price != item.price)
@@ -116,13 +135,12 @@ public class OrderController : ControllerBase
                     isAmbiguous = true;
                     return;
                 }
-                
-                realPrice += ((varientPrice*product.price)*item.quanity);
+
+                realPrice += ((varientPrice * product.price) * item.quanity);
             });
             if (isAmbiguous == true)
             {
-                return  false;
-                
+                return false;
             }
 
             return realPrice == totalPrice;
@@ -131,15 +149,16 @@ public class OrderController : ControllerBase
         {
             return false;
         }
-        
     }
-    
+
     [HttpGet("all/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getOrders 
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getOrders
     (
-        int pageNumber
+        int pageNumber = 1
     )
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -157,16 +176,54 @@ public class OrderController : ControllerBase
         }
 
         var user = await _userData.getUserById(idHolder.Value);
-        
-        if (user==null)
-            return BadRequest("المستخدم غير موجود");
 
-        if (user.isDeleted == true||user.role==1)
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var result =await _orderData.getOrder(1, 25);
-        if (result == null)
-            return BadRequest("حدثت مشكلة اثناء حفظ الطلب");
-        return StatusCode(201,result);
+        var result = await _orderData.getOrder(pageNumber, 25);
+        if (result == null||result.Count<1)
+            return NoContent();
+        return StatusCode(200, result);
+    }
+    
+    [HttpGet("me/{pageNumber}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getMyOrders
+    (
+        int pageNumber = 1
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.isDeleted == true || user.role == 1)
+            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
+
+        var result = await _orderData.getOrder(idHolder.Value,pageNumber, 25);
+        if (result == null||result.Count<1)
+            return NoContent();
+        return StatusCode(200, result);
     }
 }

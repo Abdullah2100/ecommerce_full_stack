@@ -1,46 +1,49 @@
-package com.example.eccomerce_app.viewModel
+package com.example.e_commercompose.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.eccomerce_app.data.Room.IsPassSetLocationScreen
-import com.example.eccomerce_app.data.repository.HomeRepository
-import com.example.eccomerce_app.dto.ModelToDto.toOrderRequestDto
-import com.example.eccomerce_app.dto.ModelToDto.toSubCategoryUpdateDto
-import com.example.eccomerce_app.dto.request.AddressRequestDto
-import com.example.eccomerce_app.dto.request.AddressRequestUpdateDto
-import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
-import com.example.eccomerce_app.dto.response.AddressResponseDto
-import com.example.eccomerce_app.dto.response.BannerResponseDto
-import com.example.eccomerce_app.dto.response.CategoryReponseDto
-import com.example.eccomerce_app.dto.response.ProductResponseDto
-import com.example.eccomerce_app.dto.response.StoreResposeDto
-import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
-import com.example.eccomerce_app.dto.response.UserDto
-import com.example.eccomerce_app.dto.response.VarientResponseDto
-import com.example.eccomerce_app.model.Address
-import com.example.eccomerce_app.model.BannerModel
-import com.example.eccomerce_app.model.CardProductModel
-import com.example.eccomerce_app.model.CartModel
-import com.example.eccomerce_app.model.Category
-import com.example.eccomerce_app.model.DtoToModel.toAddress
-import com.example.eccomerce_app.model.DtoToModel.toBanner
-import com.example.eccomerce_app.model.DtoToModel.toCategory
-import com.example.eccomerce_app.model.DtoToModel.toProdcut
-import com.example.eccomerce_app.model.DtoToModel.toStore
-import com.example.eccomerce_app.model.DtoToModel.toSubCategory
-import com.example.eccomerce_app.model.DtoToModel.toUser
-import com.example.eccomerce_app.model.DtoToModel.toVarient
-import com.example.eccomerce_app.model.MyInfoUpdate
-import com.example.eccomerce_app.model.ProductModel
-import com.example.eccomerce_app.model.ProductVarientSelection
-import com.example.eccomerce_app.model.StoreModel
-import com.example.eccomerce_app.model.SubCategory
-import com.example.eccomerce_app.model.SubCategoryUpdate
-import com.example.eccomerce_app.model.UserModel
-import com.example.eccomerce_app.model.VarientModel
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.data.Room.AuthDao
+import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
+import com.example.e_commercompose.data.repository.HomeRepository
+import com.example.e_commercompose.dto.ModelToDto.toOrderRequestDto
+import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
+import com.example.e_commercompose.dto.request.AddressRequestDto
+import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
+import com.example.e_commercompose.dto.request.SubCategoryRequestDto
+import com.example.e_commercompose.dto.response.AddressResponseDto
+import com.example.e_commercompose.dto.response.BannerResponseDto
+import com.example.e_commercompose.dto.response.CategoryReponseDto
+import com.example.e_commercompose.dto.response.ProductResponseDto
+import com.example.e_commercompose.dto.response.StoreResposeDto
+import com.example.e_commercompose.dto.response.SubCategoryResponseDto
+import com.example.e_commercompose.dto.response.UserDto
+import com.example.e_commercompose.dto.response.VarientResponseDto
+import com.example.e_commercompose.model.Address
+import com.example.e_commercompose.model.BannerModel
+import com.example.e_commercompose.model.CardProductModel
+import com.example.e_commercompose.model.CartModel
+import com.example.e_commercompose.model.Category
+import com.example.e_commercompose.model.DtoToModel.toAddress
+import com.example.e_commercompose.model.DtoToModel.toBanner
+import com.example.e_commercompose.model.DtoToModel.toCategory
+import com.example.e_commercompose.model.DtoToModel.toOrder
+import com.example.e_commercompose.model.DtoToModel.toProdcut
+import com.example.e_commercompose.model.DtoToModel.toStore
+import com.example.e_commercompose.model.DtoToModel.toSubCategory
+import com.example.e_commercompose.model.DtoToModel.toUser
+import com.example.e_commercompose.model.DtoToModel.toVarient
+import com.example.e_commercompose.model.MyInfoUpdate
+import com.example.e_commercompose.model.ProductModel
+import com.example.e_commercompose.model.ProductVarientSelection
+import com.example.e_commercompose.model.StoreModel
+import com.example.e_commercompose.model.SubCategory
+import com.example.e_commercompose.model.SubCategoryUpdate
+import com.example.e_commercompose.model.UserModel
+import com.example.e_commercompose.model.VarientModel
+import com.example.eccomerce_app.dto.response.OrderResponseDto
+import com.example.eccomerce_app.model.Order
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -104,6 +107,10 @@ class HomeViewModel(
         )
     );
     var cartImes = _cartImes.asStateFlow();
+
+
+    private var _orders = MutableStateFlow<List<Order>?>(null);
+    var orders = _orders.asStateFlow();
 
 
     private var _coroutinExption = CoroutineExceptionHandler { _, message ->
@@ -231,6 +238,10 @@ class HomeViewModel(
 
 
     init {
+        initialFun()
+    }
+
+    fun initialFun(){
         getMyInfo()
         getCategories(1)
         getStoresBanner()
@@ -239,9 +250,7 @@ class HomeViewModel(
         if (webSocket != null) {
             connection()
         }
-
     }
-
     override fun onCleared() {
         viewModelScope.launch(Dispatchers.IO) {
             if (_hub.value != null)
@@ -1306,23 +1315,31 @@ class HomeViewModel(
 
 
     suspend  fun submitCartTitems(): String? {
-            var result = homeRepository.submitOrder(_cartImes.value.toOrderRequestDto())
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                   _cartImes.emit(CartModel(
-                       0.0,
-                       0.0,
-                       0.0,
-                       UUID.randomUUID(),
-                       emptyList()
-                   ))
-                    return null
+        var result = homeRepository.submitOrder(_cartImes.value.toOrderRequestDto())
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as OrderResponseDto
+                var orderList = mutableListOf<Order>()
+                orderList.add(data.toOrder())
+                if(!_orders.value.isNullOrEmpty())
+                {
+                    orderList.addAll(_orders.value!!)
                 }
-                is NetworkCallHandler.Error -> {
-                  var errorMessage = result.data as String
-                    return errorMessage
-                }
+                _orders.emit(orderList)
+                _cartImes.emit(CartModel(
+                    0.0,
+                    0.0,
+                    0.0,
+                    UUID.randomUUID(),
+                    emptyList()
+                ))
+                return null
             }
+            is NetworkCallHandler.Error -> {
+                var errorMessage = result.data as String
+                return errorMessage
+            }
+        }
 
     }
 

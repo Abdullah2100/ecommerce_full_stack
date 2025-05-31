@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui
+package com.example.e_commercompose.ui
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember

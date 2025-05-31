@@ -1,6 +1,9 @@
-package com.example.eccomerce_app.ui.view.home
+package com.example.e_commercompose.ui.view.home
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,17 +41,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.BannerBage
-import com.example.eccomerce_app.ui.component.CategoryLoadingShape
-import com.example.eccomerce_app.ui.component.CategoryShape
-import com.example.eccomerce_app.ui.component.LocationLoadingShape
-import com.example.eccomerce_app.ui.component.ProductLoading
-import com.example.eccomerce_app.ui.component.ProductShape
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.BannerBage
+import com.example.e_commercompose.ui.component.CategoryLoadingShape
+import com.example.e_commercompose.ui.component.CategoryShape
+import com.example.e_commercompose.ui.component.LocationLoadingShape
+import com.example.e_commercompose.ui.component.ProductLoading
+import com.example.e_commercompose.ui.component.ProductShape
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
@@ -64,6 +67,13 @@ fun HomePage(
     var products = homeViewModel.products.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
     val isClickingSearch = remember { mutableStateOf(false) }
+    val requestPermssion = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { permission ->
+
+
+        }
+    )
 
 
     val sizeAnimation = animateDpAsState(
@@ -71,6 +81,11 @@ fun HomePage(
     )
 
 
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermssion.launch(input = android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     Scaffold(
         modifier = Modifier
@@ -107,12 +122,12 @@ fun HomePage(
                                     .width(width = (configuration.screenWidthDp - 30 - 34).dp)
                                     .clickable(
                                         enabled = true,
-                                        interactionSource =interactionSource ,
+                                        interactionSource = interactionSource,
                                         indication = null,
-                                       onClick = {
-                                           nav.navigate(Screens.Address)
-                                       }
-                                        )
+                                        onClick = {
+                                            nav.navigate(Screens.Address)
+                                        }
+                                    )
                             ) {
                                 Text(
                                     "Loaction",
@@ -125,7 +140,7 @@ fun HomePage(
                                 )
                                 Sizer(1)
                                 Text(
-                                    myInfo.value?.address?.firstOrNull { it.isCurrnt==true }?.title
+                                    myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
                                         ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,
@@ -200,10 +215,13 @@ fun HomePage(
 
             item {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 5.dp)
-                    ,horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text( "Category",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Category",
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -211,7 +229,8 @@ fun HomePage(
                         textAlign = TextAlign.Center
 
                     )
-                    Text("View All",
+                    Text(
+                        "View All",
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
@@ -221,43 +240,44 @@ fun HomePage(
                     )
                 }
 
-                when(categories.value==null){
-                   true->{
+                when (categories.value == null) {
+                    true -> {
                         CategoryLoadingShape(20)
                     }
-                    else->{
 
-                      when(categories.value!!.isEmpty()){
-                          true->{}
-                          else ->{
-                              CategoryShape(categories.value!!)
-                          }
-                      }
+                    else -> {
+
+                        when (categories.value!!.isEmpty()) {
+                            true -> {}
+                            else -> {
+                                CategoryShape(categories.value!!)
+                            }
+                        }
                     }
                 }
             }
 
-            if(bannel.value!=null) {
-                item{
+            if (bannel.value != null) {
+                item {
                     BannerBage(
                         banners = bannel.value!!,
                         isMe = false,
-                        nav=nav
+                        nav = nav
                     )
                 }
             }
 
-            item{
+            item {
 
                 Sizer(10)
-                when(products.value==null){
-                    true->{
+                when (products.value == null) {
+                    true -> {
                         ProductLoading(50)
                     }
-                    else->{
-                        if(products.value!!.isNotEmpty())
-                        {
-                            ProductShape(products.value!!,nav=nav)
+
+                    else -> {
+                        if (products.value!!.isNotEmpty()) {
+                            ProductShape(products.value!!, nav = nav)
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.Address
+package com.example.e_commercompose.ui.view.Address
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,14 +56,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.model.Address
-import com.example.eccomerce_app.ui.component.CustomBotton
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.component.TextInputWithTitle
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.model.Address
+import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

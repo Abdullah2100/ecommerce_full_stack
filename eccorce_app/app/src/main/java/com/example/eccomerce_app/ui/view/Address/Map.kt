@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.Address
+package com.example.e_commercompose.ui.view.Address
 
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -13,7 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.viewModel.HomeViewModel
 
 
 

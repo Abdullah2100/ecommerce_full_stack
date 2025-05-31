@@ -73,7 +73,8 @@ public class UserController : ControllerBase
             email: data.email,
             phone: data.phone,
             password: clsUtil.hashingText(data.password),
-            role: data.role
+            role: data.role,
+            deviceToken: data.deviceToken
         );
         if (result == null)
             return BadRequest("هناك مشكلة ما");
@@ -107,6 +108,8 @@ public class UserController : ControllerBase
         if (result == null)
             return BadRequest("المستخدم غير موجود");
 
+        await _userData.updateUserDeviceToken(userId: result.Id, deviceToken: data.deviceToken);
+
         string token = "", refreshToken = "";
 
         token = AuthinticationServices.generateToken(
@@ -129,7 +132,6 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-
     public async Task<IActionResult> deleteUser(Guid userID)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -190,7 +192,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user =await _userData.getUser(idHolder.Value);
+        var user = await _userData.getUser(idHolder.Value);
 
         if (user == null)
         {
@@ -260,7 +262,7 @@ public class UserController : ControllerBase
         var result = await _userData.updateUser(
             userId: idHolder.Value,
             phone: userData.phone,
-            password:userData.password==null?null: clsUtil.hashingText(userData.password),
+            password: userData.password == null ? null : clsUtil.hashingText(userData.password),
             name: userData.name,
             profile);
 
@@ -425,24 +427,26 @@ public class UserController : ControllerBase
         {
             return NotFound("المستخدم غير موجود");
         }
+
         var addressResult = await _addressData.getAddressData(address.id);
 
         if (addressResult == null)
         {
             return NotFound("العنوان غير موجود");
         }
-       if(addressResult.owner_id!=idHolder.Value)
-       {
-           return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
-       }
+
+        if (addressResult.owner_id != idHolder.Value)
+        {
+            return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
+        }
 
         var location = await _addressData.updateAddress(
-           addressId:addressResult.id,    
+            addressId: addressResult.id,
             titile: address.title,
             longitude: address.longitude,
             latitude: address.latitude
         );
-        
+
         if (location == null)
             return BadRequest("حدثة مشكلة اثناء تعديل البيانات");
 
@@ -478,29 +482,30 @@ public class UserController : ControllerBase
         {
             return NotFound("المستخدم غير موجود");
         }
+
         var addressResult = await _addressData.getAddressData(addre_id);
 
         if (addressResult == null)
         {
             return NotFound("العنوان غير موجود");
         }
-        if(addressResult.owner_id!=idHolder.Value)
+
+        if (addressResult.owner_id != idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
-        
+
         if (addressResult.isCurrent)
             return BadRequest("لا يمكن حذف العنوان الحالي");
- 
+
         var result = await _addressData.deleteDaddress(
-            addressId:addressResult.id);
-        
-        if (result ==false)
+            addressId: addressResult.id);
+
+        if (result == false)
             return BadRequest("حدثة مشكلة اثناء حذف البيانات");
 
         return NoContent();
     }
-
 
 
     [HttpPost("address/active{addressID:guid}")]
@@ -541,5 +546,4 @@ public class UserController : ControllerBase
 
         return StatusCode(200, result);
     }
-
 }

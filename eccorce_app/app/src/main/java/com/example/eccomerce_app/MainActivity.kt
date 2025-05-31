@@ -1,10 +1,12 @@
-package com.example.eccomerce_app
+package com.example.e_commercompose
 
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,12 +36,15 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.NavController
-import com.example.eccomerce_app.viewModel.AuthViewModel
-import com.example.eccomerce_app.model.ButtonNavItem
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.NavController
+import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.e_commercompose.model.ButtonNavItem
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.theme.CustomColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
@@ -47,36 +52,7 @@ class MainActivity : ComponentActivity() {
 //    private  var connection: HubConnection?=null;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val window = (this as Activity).window
 
-       /* val connectionUrl = Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
-         connection = HubConnectionBuilder
-             .create(connectionUrl)
-            .withTransport(com.microsoft.signalr.TransportEnum.LONG_POLLING)
-            .build()
-
-        // Start the connection
-        connection?.start()?.blockingAwait()
-
-        // Register a handler for incoming messages
-        connection?.on("createdBanner",
-            {
-                    result->
-                var banners= mutableListOf<Banner>();
-                if(General.banners.value==null){
-                   banners.add(result.toBanner())
-                }
-                else{
-                    banners.add(result.toBanner())
-                    banners.addAll(General.banners.value!!)
-                }
-                lifecycleScope.launch(Dispatchers.Main) {
-                    General.banners.emit(banners)
-                }
-            },
-            BannerResponseDto::class.java).runCatching {
-
-        }*/
 
 
 
@@ -88,6 +64,9 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
+
+
+
             val nav = rememberNavController();
             val authViewModle: AuthViewModel = koinViewModel();
             val currentScreen = authViewModle.currentScreen.collectAsState()

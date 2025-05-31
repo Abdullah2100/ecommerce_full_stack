@@ -11,6 +11,7 @@ public class User
     public string  email{ get; set; }
     public string password { get; set; }
     public bool isDeleted { get; set; }
+    public string deviceToken { get; set; }
     
     //1 :normal user ; 0: is admin
     public int role { get; set; }

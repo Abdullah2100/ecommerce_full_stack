@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.location
+package com.example.e_commercompose.ui.view.location
 
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -50,15 +50,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.dto.request.AddressRequestDto
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.CustomBotton
-import com.example.eccomerce_app.ui.component.CustomTitleBotton
-import com.example.eccomerce_app.ui.component.Sizer
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.dto.request.AddressRequestDto
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomTitleBotton
+import com.example.e_commercompose.ui.component.Sizer
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -113,6 +113,7 @@ fun LocationHomeScreen(
                                    latitude = location.latitude,
                                    title = "home")
                             }
+                        homeViewModle.initialFun()
 
 
                     } catch (e: SecurityException) {

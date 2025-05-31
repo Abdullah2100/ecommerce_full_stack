@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.component
+package com.example.e_commercompose.ui.component
 
 import android.util.Log
 import androidx.compose.animation.core.EaseInOut
@@ -34,10 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.model.BannerModel
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.model.BannerModel
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.theme.CustomColor
 import kotlinx.coroutines.delay
 import java.util.UUID
 

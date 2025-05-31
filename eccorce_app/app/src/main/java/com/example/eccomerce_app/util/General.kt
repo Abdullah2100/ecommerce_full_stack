@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.Util
+package com.example.e_commercompose.Util
 
 import android.content.Context
 import android.net.Uri
@@ -10,9 +10,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.core.graphics.toColorInt
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.data.Room.AuthModleEntity
-import com.example.eccomerce_app.util.Secrets
+import com.example.e_commercompose.R
+import com.example.e_commercompose.data.Room.AuthModleEntity
+import com.example.e_commercompose.util.Secrets
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory

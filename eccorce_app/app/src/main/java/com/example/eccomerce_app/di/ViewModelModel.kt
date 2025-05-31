@@ -1,7 +1,7 @@
 package com.example.eccomerce_app.di
 
-import com.example.eccomerce_app.viewModel.AuthViewModel
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.e_commercompose.viewModel.HomeViewModel
 import org.koin.dsl.module
 
 val viewModelModel = module{

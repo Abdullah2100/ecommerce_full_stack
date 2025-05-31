@@ -25,21 +25,18 @@ public class ProductController : ControllerBase
         _userData = new UserData(appDbContext, configuration);
         _productData = new ProductData(appDbContext, configuration, host);
         _storeData = new StoreData(appDbContext, configuration);
-        _configuration = configuration;
         _host = host;
-        _hubContext = hubContext;
     }
 
     private readonly UserData _userData;
     private readonly ProductData _productData;
     private readonly StoreData _storeData;
-    private readonly IConfig _configuration;
     private readonly IWebHostEnvironment _host;
-    private readonly IHubContext<EcommercHub> _hubContext;
 
     [HttpGet("{store_id}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> getProducts
     (
@@ -55,6 +52,9 @@ public class ProductController : ControllerBase
         var result = await _productData.getProducts(
             store_id, pageNumber
         );
+        
+        if (result.Count < 1)
+            return NoContent();
 
 
         return StatusCode(200, result);
@@ -65,6 +65,7 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getProducts
     (
         Guid store_id,
@@ -84,6 +85,10 @@ public class ProductController : ControllerBase
             , pageNumber
         );
 
+        if (result.Count < 1)
+        {
+            return NoContent();
+        }
 
         return StatusCode(200, result);
     }

@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.View.Pages
+package com.example.e_commercompose.View.Pages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,15 +37,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.viewModel.AuthViewModel
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.component.CustomAuthBotton
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.component.TextInputWithTitle
-import com.example.eccomerce_app.ui.component.TextNumberInputWithTitle
-import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.CustomAuthBotton
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
+import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
+import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.hotel_mobile.Util.Validation
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
@@ -81,8 +83,9 @@ fun SignUpPage(
 
     val focusRequester = FocusRequester()
 
+    val isSendingData = remember { mutableStateOf(false) }
+    val coroutine = rememberCoroutineScope()
 
-    val currotine = rememberCoroutineScope()
 
     val scrollState = rememberScrollState()
     fun validateLoginInput(
@@ -145,7 +148,7 @@ fun SignUpPage(
             isPasswordConfirm.value = true
             return false;
         } else if (!isCheckBox.value) {
-            currotine.launch {
+            coroutine.launch {
 
                 snackbarHostState.showSnackbar("You should check the condition box to signup")
             }
@@ -291,14 +294,32 @@ fun SignUpPage(
                     buttonTitle = "Login",
                     operation = {
                         keyboardController?.hide()
-                        authKoin.signUpUser(
-                            phone = phone.value.text,
-                            email = email.value.text,
-                            password = password.value.text,
-                            name = name.value.text,
-                            snackBark = snackbarHostState,
-                            nav = nav
-                        )
+                        coroutine.launch {
+                                isSendingData.value = true
+                                val result = async {
+                                    authKoin.signUpUser(
+                                        phone = phone.value.text,
+                                        email = email.value.text,
+                                        password = password.value.text,
+                                        name = name.value.text,
+                                    )
+
+                                }.await()
+
+                                isSendingData.value = false
+
+                                if (!result.isNullOrEmpty()) {
+                                    snackbarHostState.showSnackbar(result)
+                                } else {
+                                    nav.navigate(Screens.LocationGraph) {
+                                        popUpTo(nav.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+
+
+                        }
                     }
                 )
 

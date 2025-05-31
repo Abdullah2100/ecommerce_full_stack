@@ -8,3 +8,4 @@ appsettings.Development.json
 appsettings.json
 images/
 Migrations/
+firebase-adminsdk.json

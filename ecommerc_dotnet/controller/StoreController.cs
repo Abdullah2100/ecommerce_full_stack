@@ -245,9 +245,10 @@ public class StoreController : ControllerBase
             return NotFound("المتجر غير موجود");
         return Ok(result);
     }
-    
-    [HttpGet("all/{page:int}")]
-    
+
+
+    [HttpGet("all/{page:int}")] 
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult>GetStores(int page = 1)
     {
@@ -255,7 +256,7 @@ public class StoreController : ControllerBase
         var result =await _storeData.getStore(page);
 
         if (result.Count<1)
-            return NotFound( "حدثة مشكلة اثناء جلب البيانات");
+            return NoContent();
         return Ok(result);
     }
 

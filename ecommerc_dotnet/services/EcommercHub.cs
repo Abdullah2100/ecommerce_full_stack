@@ -22,7 +22,11 @@ public class EcommercHub : Hub
         await Clients.All.SendAsync("createdBanner", banner);
     }
 
-  
+    public async Task sendingNewOrder(OrderResponseDto order)
+      {
+          await Clients.All.SendAsync("createdOrder", order);
+      }
+
      
   
 }

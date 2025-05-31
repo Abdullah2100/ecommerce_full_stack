@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.location
+package com.example.e_commercompose.ui.view.location
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -55,12 +55,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -119,6 +119,9 @@ fun LocationsList(
                     }
                 },
                 scrollBehavior = scrollBehavior
+                , colors =TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White
+                )
             )
         }
     ) {
@@ -129,7 +132,8 @@ fun LocationsList(
             true -> {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .background(Color.White),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -157,6 +161,7 @@ fun LocationsList(
             else -> {
                 LazyColumn(
                     modifier = Modifier
+                        .background(Color.White)
                         .padding(top = 100.dp)
                         .padding(horizontal = 15.dp)
                         .fillMaxHeight()
@@ -188,7 +193,7 @@ fun LocationsList(
                                 )
                                 Sizer(width = 20)
                                 Text(
-                                    locationss.value!!.address!![index].latitude.toString(),
+                                    locationss.value!!.address!![index].title?:"",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = (16 / fontScall).sp,
@@ -238,17 +243,18 @@ fun LocationsList(
                                                 currentLocationId.value!!,
                                             )
                                         }.await()
+
                                         var message = "update Current Address Seccessfuly"
                                         if (result != null) {
                                             message = result
                                         }
                                         snackbarHostState.showSnackbar(message)
                                         if (result == null) {
+                                            homeViewModle.initialFun()
                                             nav.navigate(Screens.HomeGraph) {
                                                 popUpTo(nav.graph.id) {
                                                     inclusive = true
                                                 }
-//                            }
                                             }
                                         }
                                     }

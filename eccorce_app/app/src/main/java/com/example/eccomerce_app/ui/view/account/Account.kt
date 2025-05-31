@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.account
+package com.example.e_commercompose.ui.view.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,13 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.AccountCustomBottom
-import com.example.eccomerce_app.ui.component.LogoutBotton
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.AccountCustomBottom
+import com.example.e_commercompose.ui.component.LogoutBotton
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)

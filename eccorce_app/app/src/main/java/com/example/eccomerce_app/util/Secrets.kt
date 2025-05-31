@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.util
+package com.example.e_commercompose.util
 
 object Secrets {
     init {

@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.account.store
+package com.example.e_commercompose.ui.view.account.store
 
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -68,16 +68,16 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.Util.General.toCustomFil
-import com.example.eccomerce_app.dto.ModelToDto.toListOfProductVarient
-import com.example.eccomerce_app.model.ProductVarientSelection
-import com.example.eccomerce_app.ui.component.CustomBotton
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.component.TextInputWithTitle
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.Util.General.toCustomFil
+import com.example.e_commercompose.dto.ModelToDto.toListOfProductVarient
+import com.example.e_commercompose.model.ProductVarientSelection
+import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File

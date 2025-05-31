@@ -1,23 +1,25 @@
-package com.example.eccomerce_app.viewModel
+package com.example.e_commercompose.viewModel
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.Dto.AuthResultDto
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.eccomerce_app.data.Room.AuthModleEntity
-import com.example.eccomerce_app.data.Room.IsPassOnBoardingScreen
-import com.example.eccomerce_app.dto.request.LoginDto
-import com.example.eccomerce_app.data.repository.AuthRepository
-import com.example.eccomerce_app.dto.request.SignupDto
-import com.example.eccomerce_app.ui.Screens
+import com.example.e_commercompose.Dto.AuthResultDto
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.data.Room.AuthDao
+import com.example.e_commercompose.data.Room.AuthModleEntity
+import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
+import com.example.e_commercompose.dto.request.LoginDto
+import com.example.e_commercompose.data.repository.AuthRepository
+import com.example.e_commercompose.dto.request.SignupDto
+import com.example.e_commercompose.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 
 
@@ -73,24 +75,22 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     }
 
 
-    fun signUpUser(
+suspend    fun signUpUser(
         email: String,
         name: String,
         phone: String,
         password: String,
-        snackBark: SnackbarHostState,
-        nav: NavHostController
 
-        ) {
-        viewModelScope.launch {
-            _isLoadin.emit(true);
+        ): String? {
 
+             val token = FirebaseMessaging.getInstance().token.await()?:""
             val result = authRepository.signup(
                 SignupDto(
                     name = name,
                     password = password,
                     phone = phone,
-                    email = email
+                    email = email,
+                    deviceToken = token
                 )
             )
             when (result) {
@@ -106,13 +106,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                     );
 
                     General.authData.emit(authDataHolder)
-                    nav.navigate(Screens.LocationGraph){
-                        popUpTo(nav.graph.id){
-                            inclusive=true
-                        }
-                    }
-                    _isLoadin.emit(false)
-
+return null;
                 }
                 is NetworkCallHandler.Error->{
                     _isLoadin.emit(false)
@@ -121,32 +115,23 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                     if (errorMessage.contains(General.BASED_URL)) {
                         errorMessage.replace(General.BASED_URL, " Server ")
                     }
-                    snackBark.showSnackbar(errorMessage.replace("\"",""))
-                }
-                else -> {
-                    _isLoadin.emit(false)
-
-                    var errorMessage = (result.toString())
-                    if (errorMessage.contains(General.BASED_URL)) {
-                        errorMessage.replace(General.BASED_URL, " Server ")
-                    }
-                    snackBark.showSnackbar(errorMessage.replace("\"",""))
-                }
+                    return errorMessage
             }
 
         }
     }
 
-    fun loginUser(
+suspend    fun loginUser(
         username: String,
         password: String,
-        snackBark: SnackbarHostState,
-        nav: NavHostController,
-        ) {
-        viewModelScope.launch {
+        ): String? {
             _isLoadin.emit(true);
+    val token = FirebaseMessaging.getInstance().token.await()?:""
 
-            val result = authRepository.login(LoginDto(username = username, password = password))
+    val result = authRepository.login(LoginDto(
+        username = username,
+        password = password,
+        deviceToken = token))
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val authData = result.data as AuthResultDto;
@@ -159,32 +144,16 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                         authDataHolder
                     )
                     General.authData.emit(authDataHolder)
-                    nav.navigate(Screens.LocationGraph){
-                        popUpTo(nav.graph.id){
-                            inclusive=true
-                        }
-                    }
-                    _isLoadin.emit(false)
 
+                    return  null;
                 }
             is NetworkCallHandler.Error->{
-                _isLoadin.emit(false)
 
                 var errorMessage = (result.data.toString())
                 if (errorMessage.contains(General.BASED_URL)) {
                     errorMessage.replace(General.BASED_URL, " Server ")
                 }
-                snackBark.showSnackbar(errorMessage.replace("\"",""))
-            }
-                else -> {
-                    _isLoadin.emit(false)
-
-                    var errorMessage = result.toString()
-                    if (errorMessage.toString().contains(General.BASED_URL)) {
-                        errorMessage.toString().replace(General.BASED_URL, " Server ")
-                    }
-                    snackBark.showSnackbar(errorMessage.replace("\"",""))
-                }
+                return errorMessage
             }
 
         }

@@ -1,7 +1,7 @@
-package com.example.eccomerce_app.ui.component
+package com.example.e_commercompose.ui.component
 
 import androidx.compose.foundation.Image
-import com.example.eccomerce_app.R
+import com.example.e_commercompose.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -34,8 +34,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.theme.CustomColor
 
 
 @Composable

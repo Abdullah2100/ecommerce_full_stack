@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.Auth
+package com.example.e_commercompose.ui.view.Auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,12 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.viewModel.AuthViewModel
+import com.example.e_commercompose.viewModel.AuthViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
@@ -31,20 +32,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.CustomAuthBotton
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.component.TextInputWithTitle
-import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.CustomAuthBotton
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
+import com.example.e_commercompose.ui.theme.CustomColor
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     nav: NavHostController,
     authKoin: AuthViewModel
 ) {
-    val isLoading = authKoin.isLoadin.collectAsState()
     val fontScall = LocalDensity.current.fontScale
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -56,6 +58,9 @@ fun LoginScreen(
     val isEmailError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
     val erroMessage = remember { mutableStateOf("") }
+
+    val isSendingData = remember { mutableStateOf(false) }
+    val coroutine = rememberCoroutineScope()
 
     val focusRequester = FocusRequester()
 
@@ -200,18 +205,44 @@ fun LoginScreen(
 
 
                 CustomAuthBotton(
-                    isLoading = isLoading.value,
+                    isLoading = isSendingData.value,
                     operation = {
-                        authKoin.loginUser(
-                            userNameOrEmail.value.text, password = password.value.text,
-                            snackbarHostState,
-                            nav
-                        )
+                        keyboardController?.hide()
+
+                        coroutine.launch {
+                            if(userNameOrEmail.value.text.isBlank()||password.value.text.isBlank())
+                            {
+                                snackbarHostState.showSnackbar("User name Or Password is Blanck")
+                            }
+                            else{
+                                isSendingData.value = true
+                                val result = async {
+                                    authKoin.loginUser(
+                                        userNameOrEmail.value.text, password = password.value.text,
+                                    )
+
+
+                                }.await()
+
+                                isSendingData.value = false
+
+                                if (!result.isNullOrEmpty()) {
+                                    snackbarHostState.showSnackbar(result)
+                                } else {
+                                    nav.navigate(Screens.LocationGraph) {
+                                        popUpTo(nav.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+
+                            }
+
+                        }
+
                     },
                     buttonTitle = "Login",
                     validationFun = {
-                        keyboardController?.hide()
-
                         validateLoginInput(
                             username = userNameOrEmail.value.text,
                             password = password.value.text

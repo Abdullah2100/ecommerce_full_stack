@@ -1,14 +1,22 @@
-package com.example.eccomerce_app.model
+package com.example.e_commercompose.model
 
-import com.example.eccomerce_app.dto.response.AddressResponseDto
-import com.example.eccomerce_app.dto.response.BannerResponseDto
-import com.example.eccomerce_app.dto.response.CategoryReponseDto
-import com.example.eccomerce_app.dto.response.ProductResponseDto
-import com.example.eccomerce_app.dto.response.ProductVarientReponseDto
-import com.example.eccomerce_app.dto.response.StoreResposeDto
-import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
-import com.example.eccomerce_app.dto.response.UserDto
-import com.example.eccomerce_app.dto.response.VarientResponseDto
+import com.example.e_commercompose.dto.response.AddressResponseDto
+import com.example.e_commercompose.dto.response.BannerResponseDto
+import com.example.e_commercompose.dto.response.CategoryReponseDto
+import com.example.e_commercompose.dto.response.ProductResponseDto
+import com.example.e_commercompose.dto.response.ProductVarientReponseDto
+import com.example.e_commercompose.dto.response.StoreResposeDto
+import com.example.e_commercompose.dto.response.SubCategoryResponseDto
+import com.example.e_commercompose.dto.response.UserDto
+import com.example.e_commercompose.dto.response.VarientResponseDto
+import com.example.eccomerce_app.dto.response.OrderItemResponseDto
+import com.example.eccomerce_app.dto.response.OrderProductResponseDto
+import com.example.eccomerce_app.dto.response.OrderResponseDto
+import com.example.eccomerce_app.dto.response.OrderVarientResponseDto
+import com.example.eccomerce_app.model.Order
+import com.example.eccomerce_app.model.OrderItem
+import com.example.eccomerce_app.model.OrderProduct
+import com.example.eccomerce_app.model.OrderVarient
 import kotlin.text.replace
 
 object DtoToModel {
@@ -100,4 +108,41 @@ object DtoToModel {
             productImages = this.productImages.map { it->if(it.isNotEmpty())it.replace("localhost","10.0.2.2") else "" }
         )
     }
+
+    fun OrderVarientResponseDto.toOrderVarient(): OrderVarient{
+        return OrderVarient(
+            varient_name=this.varient_name,
+            product_varient_name=this.product_varient_name
+        )
+    }
+
+    fun OrderProductResponseDto.toOrderProduct(): OrderProduct{
+        return OrderProduct(
+            id= this.id,
+            name = this.name,
+            thmbnail = this.name
+        )
+    }
+
+    fun OrderItemResponseDto.toOrderResponse(): OrderItem{
+        return OrderItem(
+            id=this.id,
+            quanity= this.quanity,
+            price = this.price,
+            product = this.product.toOrderProduct(),
+            productVarient = this.productVarient.map { it.toOrderVarient() }
+        )
+    }
+
+    fun OrderResponseDto.toOrder():Order{
+       return Order(
+          id = this.id,
+           latitude = this.latitude,
+           longitude = this.longitude,
+           user_phone = this.user_phone,
+           order_items = this.order_items.map { it.toOrderResponse() },
+           status = this.status
+       )
+    }
+
 }

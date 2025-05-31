@@ -1,14 +1,13 @@
-package com.example.e_commercompose.dto.request
+package com.example.eccomerce_app.model
 
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data class SubCategoryUpdateDto(
-    val name: String,
+data class OrderProduct(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
-    @Serializable(with = UUIDKserialize::class)
-    val cateogy_id: UUID
+    val name:String,
+    val thmbnail: String
 )

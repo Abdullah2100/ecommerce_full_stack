@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.checkout
+package com.example.e_commercompose.ui.view.checkout
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -49,14 +49,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.model.PaymentMethodModel
-import com.example.eccomerce_app.ui.component.CustomBotton
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.model.PaymentMethodModel
+import com.example.e_commercompose.ui.component.CustomBotton
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -131,10 +131,11 @@ fun CheckoutScreen(
                         isEnable = !isSendingData.value,
                         operation = {
                             coroutin.launch {
+                                isSendingData.value=true;
                                val  result = async {
                                    homeViewModel.submitCartTitems()
                                }.await()
-
+                                isSendingData.value= false
                                 var message  = "Order Submit Seccesffuly"
                                 if(!result.isNullOrEmpty())
                                 {
@@ -143,7 +144,8 @@ fun CheckoutScreen(
                                 snackbarHostState.showSnackbar(message)
                             }
                         },
-                        buttonTitle = "Place Order"
+                        buttonTitle = "Place Order",
+                        isLoading = isSendingData.value
                     )
                 }
             }

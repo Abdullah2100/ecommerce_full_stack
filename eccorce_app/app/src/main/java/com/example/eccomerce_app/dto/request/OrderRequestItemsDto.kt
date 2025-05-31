@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.dto.request
+package com.example.e_commercompose.dto.request
 
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDListKserialize

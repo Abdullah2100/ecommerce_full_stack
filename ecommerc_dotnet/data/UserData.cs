@@ -219,6 +219,7 @@ public class UserData
         string phone,
         string email,
         string password,
+        string deviceToken,
         int? role = 1
     )
     {
@@ -243,7 +244,8 @@ public class UserData
                 password = password,
                 created_at = DateTime.Now,
                 ID = clsUtil.generateGuid(),
-                updated_at = null
+                updated_at = null,
+                deviceToken = deviceToken
             };
 
             await _dbContext.Users.AddAsync(userData);
@@ -279,6 +281,31 @@ public class UserData
             userData.password = password ?? userData.password;
             userData.updated_at = DateTime.Now;
             userData.thumbnail = imagePath ?? userData.thumbnail;
+
+
+            await _dbContext.SaveChangesAsync();
+            return await getUser(userID: userData.ID);
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from create new User"+e.Message);
+            Console.Write("error from update User" + e.Message);
+            return null;
+        }
+    }
+    public async Task<UserInfoResponseDto?> updateUserDeviceToken(
+        Guid userId,
+        string deviceToken )
+    {
+        try
+        {
+            User? userData = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.ID == userId);
+
+            if (userData == null)
+                return null;
+
+            userData.deviceToken = deviceToken;
 
 
             await _dbContext.SaveChangesAsync();

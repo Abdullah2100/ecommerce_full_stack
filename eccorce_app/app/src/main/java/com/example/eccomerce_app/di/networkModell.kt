@@ -1,13 +1,13 @@
-package com.example.eccomerce_app.di
+package com.example.e_commercompose.di
 
 import android.util.Log
 import androidx.room.Room
-import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.eccomerce_app.data.Room.AuthDataBase
-import com.example.eccomerce_app.data.repository.AuthRepository
-import com.example.eccomerce_app.util.Secrets
-import com.example.eccomerce_app.viewModel.AuthViewModel
-import com.example.eccomerce_app.Util.General
+import com.example.e_commercompose.data.Room.AuthDao
+import com.example.e_commercompose.data.Room.AuthDataBase
+import com.example.e_commercompose.data.repository.AuthRepository
+import com.example.e_commercompose.util.Secrets
+import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.e_commercompose.Util.General
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import io.ktor.client.HttpClient

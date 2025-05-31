@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.data.Room
+package com.example.e_commercompose.data.Room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

@@ -1,4 +1,4 @@
-package com.example.eccomerce_app
+package com.example.e_commercompose
 
 import org.junit.Test
 

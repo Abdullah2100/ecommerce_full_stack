@@ -1,4 +1,4 @@
-package com.example.eccomerce_app
+package com.example.e_commercompose
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.eccomerce_app", appContext.packageName)
+        assertEquals("com.example.e_commercompose", appContext.packageName)
     }
 }

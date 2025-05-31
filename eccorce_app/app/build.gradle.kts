@@ -1,17 +1,20 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp.android)
     alias(libs.plugins.kotlin.serialize.plugin)
+    alias(libs.plugins.google.gms)
 }
 android {
-    namespace = "com.example.eccomerce_app"
+    namespace = "com.example.e_commercompose"
     compileSdk = 35
     ndkVersion = "28.0.13004108"
 
     defaultConfig {
-        applicationId = "com.example.eccomerce_app"
+        applicationId = "com.example.e_commercompose"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -133,5 +136,10 @@ dependencies {
 
     //signalR
     implementation(libs.signalr)
+
+    //firebase
+    implementation (platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging.ktx)
+    implementation (libs.firebase.messaging.directboot)
 
 }

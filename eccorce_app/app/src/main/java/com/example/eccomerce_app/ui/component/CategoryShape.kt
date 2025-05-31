@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.component
+package com.example.e_commercompose.ui.component
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.model.Category
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.model.Category
+import com.example.e_commercompose.ui.theme.CustomColor
 
 
 @Composable

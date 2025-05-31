@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.home
+package com.example.e_commercompose.ui.view.home
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -63,13 +63,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.component.Sizer
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.HomeViewModel
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.component.CustomBotton
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.e_commercompose.R
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.CustomBotton
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)

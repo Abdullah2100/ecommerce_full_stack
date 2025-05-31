@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.OnBoarding
+package com.example.e_commercompose.ui.OnBoarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.R
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.ui.theme.CustomColor
-import com.example.eccomerce_app.viewModel.AuthViewModel
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.R
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.AuthViewModel
 
 
 @Composable

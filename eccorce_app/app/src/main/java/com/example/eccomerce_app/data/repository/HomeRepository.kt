@@ -1,22 +1,23 @@
-package com.example.eccomerce_app.data.repository
+package com.example.e_commercompose.data.repository
 
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.dto.request.AddressRequestDto
-import com.example.eccomerce_app.dto.request.AddressRequestUpdateDto
-import com.example.eccomerce_app.dto.request.CartRequestDto
-import com.example.eccomerce_app.dto.request.SubCategoryRequestDto
-import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
-import com.example.eccomerce_app.dto.response.AddressResponseDto
-import com.example.eccomerce_app.dto.response.BannerResponseDto
-import com.example.eccomerce_app.dto.response.CategoryReponseDto
-import com.example.eccomerce_app.dto.response.ProductResponseDto
-import com.example.eccomerce_app.dto.response.StoreResposeDto
-import com.example.eccomerce_app.dto.response.SubCategoryResponseDto
-import com.example.eccomerce_app.dto.response.UserDto
-import com.example.eccomerce_app.dto.response.VarientResponseDto
-import com.example.eccomerce_app.model.MyInfoUpdate
-import com.example.eccomerce_app.model.ProductVarientSelection
-import com.example.eccomerce_app.util.Secrets
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.dto.request.AddressRequestDto
+import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
+import com.example.e_commercompose.dto.request.CartRequestDto
+import com.example.e_commercompose.dto.request.SubCategoryRequestDto
+import com.example.e_commercompose.dto.request.SubCategoryUpdateDto
+import com.example.e_commercompose.dto.response.AddressResponseDto
+import com.example.e_commercompose.dto.response.BannerResponseDto
+import com.example.e_commercompose.dto.response.CategoryReponseDto
+import com.example.e_commercompose.dto.response.ProductResponseDto
+import com.example.e_commercompose.dto.response.StoreResposeDto
+import com.example.e_commercompose.dto.response.SubCategoryResponseDto
+import com.example.e_commercompose.dto.response.UserDto
+import com.example.e_commercompose.dto.response.VarientResponseDto
+import com.example.e_commercompose.model.MyInfoUpdate
+import com.example.e_commercompose.model.ProductVarientSelection
+import com.example.e_commercompose.util.Secrets
+import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -171,8 +172,8 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<Boolean>())
+            if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Successful(true)
             } else {
                 NetworkCallHandler.Error(
                     result.body<String>()
@@ -243,6 +244,9 @@ class HomeRepository(val client: HttpClient) {
             }
             if (result.status == HttpStatusCode.OK) {
                 return NetworkCallHandler.Successful(result.body<List<CategoryReponseDto>>())
+            } else if (result.status == HttpStatusCode.NoContent) {
+                return NetworkCallHandler.Error("No Data Found")
+
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -261,6 +265,7 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+
     suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
         return try {
             var result = client.get(
@@ -275,6 +280,8 @@ class HomeRepository(val client: HttpClient) {
             }
             if (result.status == HttpStatusCode.OK) {
                 return NetworkCallHandler.Successful(result.body<List<VarientResponseDto>>())
+            } else if (result.status == HttpStatusCode.NoContent){
+                return NetworkCallHandler.Error("No Data Found")
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -669,8 +676,10 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.Created) {
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
+            } else if(result.status== HttpStatusCode.NoContent) {
+                NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -761,8 +770,8 @@ class HomeRepository(val client: HttpClient) {
                 }
 
             }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<String>())
+            if (result.status == HttpStatusCode.NoContent) {
+                return NetworkCallHandler.Successful("deleted Seccessfuly")
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -859,6 +868,8 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<SubCategoryResponseDto>>())
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -892,6 +903,8 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -924,6 +937,8 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -957,6 +972,8 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+            }else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1216,8 +1233,8 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<Boolean>())
+            if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Successful(true)
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1252,9 +1269,9 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
+            if (result.status == HttpStatusCode.Created) {
 
-                NetworkCallHandler.Successful(true)
+                NetworkCallHandler.Successful(result.body<OrderResponseDto>())
 
             } else {
 
@@ -1276,5 +1293,43 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+    suspend fun getMyOrders(pageNumber:Int): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+
+                NetworkCallHandler.Successful(result.body<OrderResponseDto>())
+
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
 
 }

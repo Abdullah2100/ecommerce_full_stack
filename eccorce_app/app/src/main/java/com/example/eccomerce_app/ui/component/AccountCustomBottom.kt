@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.component
+package com.example.e_commercompose.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.eccomerce_app.Util.General
-import com.example.eccomerce_app.ui.theme.CustomColor
+import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.ui.theme.CustomColor
 
 
 @Composable

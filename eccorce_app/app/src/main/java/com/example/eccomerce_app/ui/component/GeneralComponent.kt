@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.component
+package com.example.e_commercompose.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height

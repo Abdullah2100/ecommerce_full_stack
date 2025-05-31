@@ -1,16 +1,16 @@
-package com.example.eccomerce_app.dto
+package com.example.e_commercompose.dto
 
-import com.example.eccomerce_app.dto.request.AddressRequestDto
-import com.example.eccomerce_app.dto.request.CartRequestDto
-import com.example.eccomerce_app.dto.request.OrderRequestItemsDto
-import com.example.eccomerce_app.dto.request.ProductVarientRequestDto
-import com.example.eccomerce_app.dto.request.SubCategoryUpdateDto
-import com.example.eccomerce_app.model.Address
-import com.example.eccomerce_app.model.CardProductModel
-import com.example.eccomerce_app.model.CartModel
-import com.example.eccomerce_app.model.ProductVarient
-import com.example.eccomerce_app.model.ProductVarientSelection
-import com.example.eccomerce_app.model.SubCategoryUpdate
+import com.example.e_commercompose.dto.request.AddressRequestDto
+import com.example.e_commercompose.dto.request.CartRequestDto
+import com.example.e_commercompose.dto.request.OrderRequestItemsDto
+import com.example.e_commercompose.dto.request.ProductVarientRequestDto
+import com.example.e_commercompose.dto.request.SubCategoryUpdateDto
+import com.example.e_commercompose.model.Address
+import com.example.e_commercompose.model.CardProductModel
+import com.example.e_commercompose.model.CartModel
+import com.example.e_commercompose.model.ProductVarient
+import com.example.e_commercompose.model.ProductVarientSelection
+import com.example.e_commercompose.model.SubCategoryUpdate
 
 object ModelToDto {
 

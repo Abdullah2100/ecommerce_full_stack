@@ -160,7 +160,7 @@ public class BannerController : ControllerBase
     [HttpGet("")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getBanner()
+    public async Task<IActionResult> getBannerRandom()
     {
         var result = await _bannerData.getBanner(15);
         if (result == null)
