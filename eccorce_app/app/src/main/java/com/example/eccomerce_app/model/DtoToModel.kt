@@ -120,7 +120,7 @@ object DtoToModel {
         return OrderProduct(
             id= this.id,
             name = this.name,
-            thmbnail = this.name
+            thmbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("localhost","10.0.2.2") else ""
         )
     }
 

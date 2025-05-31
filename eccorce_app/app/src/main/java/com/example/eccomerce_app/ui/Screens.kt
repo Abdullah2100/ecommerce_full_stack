@@ -77,4 +77,7 @@ object Screens {
 
     @Serializable
     object Map
+
+    @Serializable
+    object Order
 }

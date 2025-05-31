@@ -178,7 +178,6 @@ public class VarientController : ControllerBase
 
 
     [HttpGet("all/{pageNumber:int}")]
-
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getVarients(int pageNumber = 1)

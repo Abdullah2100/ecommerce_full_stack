@@ -184,11 +184,11 @@ public class OrderController : ControllerBase
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         var result = await _orderData.getOrder(pageNumber, 25);
-        if (result == null||result.Count<1)
+        if (result == null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
     }
-    
+
     [HttpGet("me/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -221,9 +221,50 @@ public class OrderController : ControllerBase
         if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var result = await _orderData.getOrder(idHolder.Value,pageNumber, 25);
-        if (result == null||result.Count<1)
+        var result = await _orderData.getOrder(idHolder.Value, pageNumber, 25);
+        if (result == null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
+    }
+
+    [HttpDelete("{order_id}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> deleteOrders
+        (Guid order_id)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.isDeleted == true || user.role == 1)
+            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
+
+        var orderData = await _orderData.getOrder(order_id, idHolder.Value);
+        if (orderData == null)
+            return NotFound("الطلب غير موجود");
+        if (orderData.status != 1)
+            return BadRequest("لا يمكن الغاء هذا الطلب لانه تمت معالجته سابقا");
+        var result = await _orderData.deleteOrder(idHolder.Value,order_id);
+        if (result ==false)
+            return BadRequest("حدثة مشكلة اثناء حذف البيانات");
+        return NoContent();
     }
 }

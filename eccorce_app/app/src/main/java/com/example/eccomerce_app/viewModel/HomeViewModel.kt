@@ -247,6 +247,7 @@ class HomeViewModel(
         getStoresBanner()
         getVarients(1)
         getProducts(1)
+        getMyOrder(1)
         if (webSocket != null) {
             connection()
         }
@@ -1333,6 +1334,58 @@ class HomeViewModel(
                     UUID.randomUUID(),
                     emptyList()
                 ))
+                return null
+            }
+            is NetworkCallHandler.Error -> {
+                var errorMessage = result.data as String
+                return errorMessage
+            }
+        }
+
+    }
+
+
+      fun getMyOrder(pageNumber:Int=1) {
+       viewModelScope.launch(Dispatchers.Main) {
+           var result = homeRepository.getMyOrders(pageNumber)
+           when (result) {
+               is NetworkCallHandler.Successful<*> -> {
+                   var data = result.data as List<OrderResponseDto>
+                   var orderList = mutableListOf<Order>()
+                   orderList.addAll(data.map{it.toOrder()})
+                   if(!_orders.value.isNullOrEmpty())
+                   {
+                       orderList.addAll(_orders.value!!)
+                   }
+                   _orders.emit(orderList)
+                   _cartImes.emit(CartModel(
+                       0.0,
+                       0.0,
+                       0.0,
+                       UUID.randomUUID(),
+                       emptyList()
+                   ))
+               }
+               is NetworkCallHandler.Error -> {
+                   var errorMessage = result.data as String
+                   Log.d("errorFromGettingOrder",errorMessage)
+               }
+           }
+
+       }
+    }
+
+
+
+    suspend  fun deleteOrder(order_id: UUID): String? {
+        var result = homeRepository.deleteOrder(order_id)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var orderList = _orders.value?.filter{it.id!=order_id} ;
+
+
+                _orders.emit(orderList)
+
                 return null
             }
             is NetworkCallHandler.Error -> {

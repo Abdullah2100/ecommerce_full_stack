@@ -27,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,14 +74,14 @@ class MainActivity : ComponentActivity() {
             val currentScreen = authViewModle.currentScreen.collectAsState()
             var buttonNavItemHolder = listOf<ButtonNavItem>(
                 ButtonNavItem(name ="Home", imageId = Icons.Outlined.Home,0 ),
-                ButtonNavItem(name ="Saved", imageId = Icons.Outlined.Favorite,1 ),
+                ButtonNavItem(name ="Order", imageId = ImageVector.vectorResource(R.drawable.order),1 ),
                 ButtonNavItem(name ="Cart", imageId = Icons.Outlined.ShoppingCart,2 ),
                 ButtonNavItem(name ="Account", imageId = Icons.Outlined.Person ,3),
             )
 
             val pages = listOf(
                 Screens.Home,
-                Screens.Home,
+                Screens.Order,
                 Screens.Cart,
                 Screens.Account,
             )
@@ -97,6 +99,7 @@ class MainActivity : ComponentActivity() {
                         if(
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Cart::class) == true||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Order::class) == true||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Account::class) == true
                             )
                         {

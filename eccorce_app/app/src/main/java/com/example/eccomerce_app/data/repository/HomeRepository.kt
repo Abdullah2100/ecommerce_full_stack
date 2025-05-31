@@ -1308,10 +1308,46 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
 
-                NetworkCallHandler.Successful(result.body<OrderResponseDto>())
+                NetworkCallHandler.Successful(result.body<List<OrderResponseDto>>())
 
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+    suspend fun deleteOrder(order_Id: UUID): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/${order_Id}";
+            val result = client.delete(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.NoContent) {
+
+                NetworkCallHandler.Successful(true)
+
             } else {
 
                 NetworkCallHandler.Error(result.body<String>())

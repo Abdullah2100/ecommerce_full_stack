@@ -21,49 +21,49 @@ public class OrderData
         _config = config;
     }
 
-    public async Task<List<OrderResponseDto>?> getOrder(int pagenumber, int pagesize=25)
+    public async Task<List<OrderResponseDto>?> getOrder(int pagenumber, int pagesize = 25)
     {
         try
         {
-                var result = await (
-                    from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.user_id equals user.ID
-                    select new OrderResponseDto 
-                    {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        user_phone = user.phone,
-                        status = order.status,
-                        order_items = _dbContext.OrderItems
-                            .AsNoTracking()
-                            .Where(oi => oi.order_id == order.id)
-                            .Select(orIt => new OrderItemResponseDto
-                            {
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.product_id).Select(pr =>
-                                    new OrderProductResponseDto
-                                    {
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                                    }).FirstOrDefault(),
-                                productVarient = _dbContext.OrdersProductsVarients
-                                    .AsNoTracking()
-                                    .Where(opv => opv.order_item_id == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
-                                    {
-                                        product_varient_name = opv.productVarient.name,
-                                        varient_name = opv.productVarient.varient.name,
-                                    }).ToList(),
-                            }).ToList()
-                    }
-                ).AsNoTracking()
-                .Skip((pagenumber - 1) * pagesize)
-                .Take(pagesize)
-                .ToListAsync();
+            var result = await (
+                from order in _dbContext.Orders
+                join user in _dbContext.Users on order.user_id equals user.ID
+                select new OrderResponseDto
+                {
+                    id = order.id,
+                    longitude = order.longitude,
+                    latitude = order.latitude,
+                    user_phone = user.phone,
+                    status = order.status,
+                    order_items = _dbContext.OrderItems
+                        .AsNoTracking()
+                        .Where(oi => oi.order_id == order.id)
+                        .Select(orIt => new OrderItemResponseDto
+                        {
+                            price = orIt.price,
+                            id = orIt.id,
+                            quanity = orIt.quanity,
+                            product = _dbContext.Products.Where(p => p.id == orIt.product_id).Select(pr =>
+                                new OrderProductResponseDto
+                                {
+                                    id = pr.id,
+                                    name = pr.name,
+                                    thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                }).FirstOrDefault(),
+                            productVarient = _dbContext.OrdersProductsVarients
+                                .AsNoTracking()
+                                .Where(opv => opv.order_item_id == orIt.id)
+                                .Select(opv => new OrderVarientResponseDto
+                                {
+                                    product_varient_name = opv.productVarient.name,
+                                    varient_name = opv.productVarient.varient.name,
+                                }).ToList(),
+                        }).ToList()
+                }
+            ).AsNoTracking()
+            .Skip((pagenumber - 1) * pagesize)
+            .Take(pagesize)
+            .ToListAsync();
             return result;
         }
         catch (Exception ex)
@@ -72,50 +72,50 @@ public class OrderData
             return null;
         }
     }
-   public async Task<List<OrderResponseDto>?> getOrder(Guid userid,int pagenumber, int pagesize=25)
+    public async Task<List<OrderResponseDto>?> getOrder(Guid userid, int pagenumber, int pagesize = 25)
     {
         try
         {
-                var result = await (
-                    from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.user_id equals user.ID
-                    where user.ID == userid
-                    select new OrderResponseDto 
-                    {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        user_phone = user.phone,
-                        status = order.status,
-                        order_items = _dbContext.OrderItems
-                            .AsNoTracking()
-                            .Where(oi => oi.order_id == order.id)
-                            .Select(orIt => new OrderItemResponseDto
-                            {
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.product_id).Select(pr =>
-                                    new OrderProductResponseDto
-                                    {
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                                    }).FirstOrDefault(),
-                                productVarient = _dbContext.OrdersProductsVarients
-                                    .AsNoTracking()
-                                    .Where(opv => opv.order_item_id == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
-                                    {
-                                        product_varient_name = opv.productVarient.name,
-                                        varient_name = opv.productVarient.varient.name,
-                                    }).ToList(),
-                            }).ToList()
-                    }
-                ).AsNoTracking()
-                .Skip((pagenumber - 1) * pagesize)
-                .Take(pagesize)
-                .ToListAsync();
+            var result = await (
+                from order in _dbContext.Orders
+                join user in _dbContext.Users on order.user_id equals user.ID
+                where user.ID == userid
+                select new OrderResponseDto
+                {
+                    id = order.id,
+                    longitude = order.longitude,
+                    latitude = order.latitude,
+                    user_phone = user.phone,
+                    status = order.status,
+                    order_items = _dbContext.OrderItems
+                        .AsNoTracking()
+                        .Where(oi => oi.order_id == order.id)
+                        .Select(orIt => new OrderItemResponseDto
+                        {
+                            price = orIt.price,
+                            id = orIt.id,
+                            quanity = orIt.quanity,
+                            product = _dbContext.Products.Where(p => p.id == orIt.product_id).Select(pr =>
+                                new OrderProductResponseDto
+                                {
+                                    id = pr.id,
+                                    name = pr.name,
+                                    thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                }).FirstOrDefault(),
+                            productVarient = _dbContext.OrdersProductsVarients
+                                .AsNoTracking()
+                                .Where(opv => opv.order_item_id == orIt.id)
+                                .Select(opv => new OrderVarientResponseDto
+                                {
+                                    product_varient_name = opv.productVarient.name,
+                                    varient_name = opv.productVarient.varient.name,
+                                }).ToList(),
+                        }).ToList()
+                }
+            ).AsNoTracking()
+            .Skip((pagenumber - 1) * pagesize)
+            .Take(pagesize)
+            .ToListAsync();
             return result;
         }
         catch (Exception ex)
@@ -125,7 +125,23 @@ public class OrderData
         }
     }
 
- 
+  public async Task<bool> deleteOrder(Guid userid, Guid order_id)
+    {
+        try
+        {
+              var order =  await _dbContext.Orders.FirstOrDefaultAsync(or=>or.user_id==userid&&or.id==order_id);
+            if (order == null) return false;
+            _dbContext.Orders.Remove(order);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this excption from getting orders List " + ex.Message);
+            return false;
+        }
+    }
+
     public async Task<OrderResponseDto?> getOrder(Guid id)
     {
         try
@@ -134,7 +150,7 @@ public class OrderData
                     from order in _dbContext.Orders
                     join user in _dbContext.Users on order.user_id equals user.ID
                     where order.id == id
-                    select new OrderResponseDto 
+                    select new OrderResponseDto
                     {
                         id = order.id,
                         longitude = order.longitude,
@@ -167,7 +183,7 @@ public class OrderData
                             }).ToList()
                     }
                 ).AsNoTracking()
-                .FirstOrDefaultAsync(); 
+                .FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -175,6 +191,56 @@ public class OrderData
             return null;
         }
     }
+  public async Task<OrderResponseDto?> getOrder(Guid id,Guid userid)
+    {
+        try
+        {
+            return await (
+                    from order in _dbContext.Orders
+                    join user in _dbContext.Users on order.user_id equals user.ID
+                    where order.id == id && user.ID ==userid
+                    select new OrderResponseDto
+                    {
+                        id = order.id,
+                        longitude = order.longitude,
+                        latitude = order.latitude,
+                        user_phone = user.phone,
+                        status = order.status,
+                        order_items = _dbContext.OrderItems
+                            .AsNoTracking()
+                            .Where(oi => oi.order_id == order.id)
+                            .Select(orIt => new OrderItemResponseDto
+                            {
+                                price = orIt.price,
+                                id = orIt.id,
+                                quanity = orIt.quanity,
+                                product = _dbContext.Products.Where(p => p.id == orIt.product_id).Select(pr =>
+                                    new OrderProductResponseDto
+                                    {
+                                        id = pr.id,
+                                        name = pr.name,
+                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                    }).FirstOrDefault(),
+                                productVarient = _dbContext.OrdersProductsVarients
+                                    .AsNoTracking()
+                                      .Where(opv => opv.order_item_id == orIt.id)
+                                    .Select(opv => new OrderVarientResponseDto
+                                    {
+                                        product_varient_name = opv.productVarient.name,
+                                        varient_name = opv.productVarient.varient.name,
+                                    }).ToList(),
+                            }).ToList()
+                    }
+                ).AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this excption from getting orders List " + ex.Message);
+            return null;
+        }
+    }
+
 
     public async Task<OrderResponseDto?> createOrder
     (
