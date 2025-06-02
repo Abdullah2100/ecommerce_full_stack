@@ -27,7 +27,7 @@ public class ProductData
     {
         try
         {
-            return  _dbContext.Products
+            return _dbContext.Products
                 .AsNoTracking()
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
@@ -61,7 +61,7 @@ public class ProductData
         catch (Exception ex)
         {
             Console.WriteLine("this error occured from getting product " + ex.Message);
-             throw ex;
+            throw ex;
         }
     }
 
@@ -177,18 +177,16 @@ public class ProductData
 
     public async Task<bool> deleteProductVarient(
         List<ProductVarientRequestDto> productVarients
-        ,Guid product_Id)
+        , Guid product_Id)
     {
         try
         {
-            
             productVarients.ForEach((x) =>
             {
-                var result =  _dbContext.ProductVarients.FirstOrDefault(pv =>
+                var result = _dbContext.ProductVarients.FirstOrDefault(pv =>
                     pv.product_id == product_Id && pv.varient_id == x.varient_id && pv.name == x.name);
-               if(result!=null)
-                   _dbContext.ProductVarients.Remove(result);
-
+                if (result != null)
+                    _dbContext.ProductVarients.Remove(result);
             });
             await _dbContext.SaveChangesAsync();
             return true;
@@ -199,12 +197,13 @@ public class ProductData
             return false;
         }
     }
-  public async Task<bool> deleteProductVarient(Guid product_Id)
+
+    public async Task<bool> deleteProductVarient(Guid product_Id)
     {
         try
         {
             var result = _dbContext.ProductVarients
-                .Where(pv=>pv.product_id==product_Id);
+                .Where(pv => pv.product_id == product_Id);
             _dbContext.ProductVarients.RemoveRange(result);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -216,16 +215,15 @@ public class ProductData
         }
     }
 
-    public async  Task<bool>deleteProductImages(List<string> productImage)
+    public bool deleteProductImages(List<string> productImage)
     {
-        try {
-            
+        try
+        {
             var result = _dbContext.ProductImages.Where(x => productImage.Contains(
                 x.name));
             _dbContext.ProductImages.RemoveRange(result);
             clsUtil.deleteFile(productImage, _host);
             return true;
-            
         }
         catch (Exception ex)
         {
@@ -233,13 +231,14 @@ public class ProductData
             return false;
         }
     }
-   public async Task<bool> deleteProductImages(Guid product_id)
+
+    public bool deleteProductImages(Guid productId)
     {
         try
         {
-            var result = _dbContext.ProductImages.Where(pv=>pv.productId==product_id);
+            var result = _dbContext.ProductImages.Where(pv => pv.productId == productId);
             _dbContext.ProductImages.RemoveRange(result);
-            clsUtil.deleteFile(result.Select(x=>x.name).ToList(), _host);
+            clsUtil.deleteFile(result.Select(x => x.name).ToList(), _host);
             return true;
         }
         catch (Exception ex)
@@ -249,22 +248,22 @@ public class ProductData
         }
     }
 
-    public async Task<bool>deleteProduct(Guid product_id)
+    public async Task<bool> deleteProduct(Guid productId)
     {
         try
         {
-            var product = await _dbContext.Products.FirstOrDefaultAsync(pro=>pro.id==product_id);
+            var product = await _dbContext.Products.FirstOrDefaultAsync(pro => pro.id == productId);
 
             if (product == null) return false;
-            
+
             _dbContext.Remove(product);
-            await deleteProductImages(product_id);
-            await deleteProductVarient(product_id);
+             deleteProductImages(productId);
+            await deleteProductVarient(productId);
             return true;
         }
         catch (Exception e)
         {
-            Console.WriteLine("this error from delete product by id "+e.Message);
+            Console.WriteLine("this error from delete product by id " + e.Message);
             return false;
         }
     }
@@ -293,7 +292,6 @@ public class ProductData
                     price = pr.price,
                     productVarients = pr.productVarients
                         .Where(pv => pv.product_id == pr.id)
-                        
                         .GroupBy(pv => pv.varient_id, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResponseDto
@@ -327,7 +325,7 @@ public class ProductData
         Guid store_id,
         decimal price,
         List<string> images,
-        List<ProductVarientRequestDto>? productVarients=null
+        List<ProductVarientRequestDto>? productVarients = null
     )
     {
         try
@@ -346,17 +344,17 @@ public class ProductData
                 thmbnail = thumbnail
             });
 
-            if(productVarients!=null)
-            productVarients.ForEach(x =>
-                _dbContext.ProductVarients.AddAsync(new ProductVarient
-                {
-                    id = clsUtil.generateGuid(),
-                    name = x.name,
-                    precentage = x.precentage == 0 ? 1 : (decimal)x.precentage!,
-                    varient_id = x.varient_id,
-                    product_id = id
-                })
-            );
+            if (productVarients != null)
+                productVarients.ForEach(x =>
+                    _dbContext.ProductVarients.AddAsync(new ProductVarient
+                    {
+                        id = clsUtil.generateGuid(),
+                        name = x.name,
+                        precentage = x.precentage == 0 ? 1 : (decimal)x.precentage!,
+                        varient_id = x.varient_id,
+                        product_id = id
+                    })
+                );
             images.ForEach(x =>
                 _dbContext.ProductImages.AddAsync(new ProductImage
                 {
@@ -366,7 +364,7 @@ public class ProductData
                 })
             );
             await _dbContext.SaveChangesAsync();
-            return  getProduct(id);
+            return getProduct(id);
         }
         catch (Exception ex)
         {
@@ -377,7 +375,7 @@ public class ProductData
         }
     }
 
-    
+
     public async Task<ProductResponseDto?> updateProduct(
         Guid id,
         string? name,
@@ -423,7 +421,7 @@ public class ProductData
                     })
                 );
             await _dbContext.SaveChangesAsync();
-            return  getProduct(id);
+            return getProduct(id);
         }
         catch (Exception ex)
         {

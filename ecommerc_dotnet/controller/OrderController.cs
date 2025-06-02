@@ -69,7 +69,7 @@ public class OrderController : ControllerBase
         if (user.isDeleted == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var isTotalPriceValid = await isValideTotalPrice(order.totalPrice, order.items);
+        var isTotalPriceValid =  isValideTotalPrice(order.totalPrice, order.items);
 
         if (isTotalPriceValid == false)
             return Conflict("اجمالي السعر غير صحيح");
@@ -101,7 +101,7 @@ public class OrderController : ControllerBase
         return StatusCode(201, result);
     }
 
-    private async Task<bool> isValideTotalPrice(decimal totalPrice, List<OrderRequestItemsDto> items)
+    private bool isValideTotalPrice(decimal totalPrice, List<OrderRequestItemsDto> items)
     {
         try
         {

@@ -5,7 +5,7 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.data;
 
-public class ForgetPasswordData 
+public class ForgetPasswordData
 {
     private readonly AppDbContext _dbContext;
     // private readonly ILogger _logger;
@@ -18,11 +18,11 @@ public class ForgetPasswordData
         // _logger = logger;
     }
 
-    public async Task<bool> createNewOtp(string otp,string email)
+    public async Task<bool> createNewOtp(string otp, string email)
     {
         try
         {
-            deleteAllOtpBelongTo(email);
+           await deleteAllOtpBelongTo(email);
             var newOtp = new ReseatePasswordOtp();
             newOtp.otp = otp;
             newOtp.email = email;
@@ -40,14 +40,14 @@ public class ForgetPasswordData
         }
     }
 
-    public async Task<bool> deleteAllOtpBelongTo(string email)
+    private async Task<bool> deleteAllOtpBelongTo(string email)
     {
         try
         {
             var otpBelongList = _dbContext.ReseatPassword.Where(otp => otp.email == email);
             _dbContext.ReseatPassword.RemoveRange(otpBelongList);
-          await  _dbContext.SaveChangesAsync();
-          return true;
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
         catch (Exception e)
         {
@@ -57,7 +57,6 @@ public class ForgetPasswordData
         }
     }
 
-    
 
     public bool isExist(string otp)
     {
@@ -73,7 +72,4 @@ public class ForgetPasswordData
             return false;
         }
     }
-
-  
-    
 }

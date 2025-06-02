@@ -1,0 +1,39 @@
+{
+    "message": "Request failed with status code 400",
+    "name": "AxiosError",
+    "stack": "AxiosError@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:10459:22\nsettle@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:11731:16\nonloadend@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:12235:224\nEventHandlerNonNull*dispatchXhrRequest@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:12247:13\n[project]/node_modules/.pnpm/axios@1.9.0/node_modules/axios/lib/adapters/xhr.js [app-client] (ecmascript)/__TURBOPACK__default__export__<@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:12202:12\ndispatchRequest@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:12783:12\n_request@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:13079:239\nrequest@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:12956:31\nhttpMethod@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:13118:25\nwrap@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:8286:19\nlogin@http://localhost:3000/_next/static/chunks/_e48a8684._.js:219:220\nLogin.useMutation[loginFun]@http://localhost:3000/_next/static/chunks/_e48a8684._.js:265:198\nfn@http://localhost:3000/_next/static/chunks/_e370d6ad._.js:1644:37\nrun@http://localhost:3000/_next/static/chunks/_e370d6ad._.js:938:55\nstart@http://localhost:3000/_next/static/chunks/_e370d6ad._.js:979:17\nexecute@http://localhost:3000/_next/static/chunks/_e370d6ad._.js:1686:46\nasync*mutate@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:8178:38\nuseMutation.useCallback[mutate]@http://localhost:3000/_next/static/chunks/node_modules__pnpm_d97fff5f._.js:8256:22\nonClick@http://localhost:3000/_next/static/chunks/_e48a8684._.js:340:43\nexecuteDispatch@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:10906:21\nrunWithFiberInDEV@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:3073:131\nprocessDispatchQueue@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:10932:41\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js [app-client] (ecmascript)/dispatchEventForPluginEventSystem/<@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:11223:33\nbatchedUpdates$1@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:4384:46\ndispatchEventForPluginEventSystem@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:11008:25\ndispatchEvent@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:13121:70\ndispatchDiscreteEvent@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:13103:64\nEventListener.handleEvent*addTrappedEventListener@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:10980:30\nlistenToNativeEvent@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:10949:32\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js [app-client] (ecmascript)/listenToAllSupportedEvents/<@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:10955:96\nlistenToAllSupportedEvents@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:10954:29\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js [app-client] (ecmascript)/exports.hydrateRoot@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:16415:35\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-index.js [app-client] (ecmascript)/hydrate/<@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:19110:29\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/compiled/react/cjs/react.development.js [app-client] (ecmascript)/exports.startTransition@http://localhost:3000/_next/static/chunks/4e428_next_dist_compiled_baec69a8._.js:1636:31\nhydrate@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:19109:24\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-next-turbopack.js [app-client] (ecmascript)/<@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:19176:12\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-bootstrap.js [app-client] (ecmascript)/appBootstrap/<@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:71:9\nloadScriptsInSequence@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:30:16\nappBootstrap@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:63:26\n[project]/node_modules/.pnpm/next@15.3.3_react-dom@19.1.0_react@19.1.0__react@19.1.0/node_modules/next/dist/client/app-next-turbopack.js [app-client] (ecmascript)@http://localhost:3000/_next/static/chunks/4e428_next_dist_client_221b5aab._.js:19174:32\ninstantiateModule/<@http://localhost:3000/_next/static/chunks/_64d57500._.js:722:27\nrunModuleExecutionHooks@http://localhost:3000/_next/static/chunks/_64d57500._.js:768:22\ninstantiateModule@http://localhost:3000/_next/static/chunks/_64d57500._.js:720:32\ngetOrInstantiateRuntimeModule@http://localhost:3000/_next/static/chunks/_64d57500._.js:631:12\nregisterChunk@http://localhost:3000/_next/static/chunks/_64d57500._.js:1467:50\nasync*registerChunk@http://localhost:3000/_next/static/chunks/_64d57500._.js:577:20\n@http://localhost:3000/_next/static/chunks/_64d57500._.js:1677:18\n@http://localhost:3000/_next/static/chunks/_64d57500._.js:1681:3\n",
+    "config": {
+        "transitional": {
+            "silentJSONParsing": true,
+            "forcedJSONParsing": true,
+            "clarifyTimeoutError": false
+        },
+        "adapter": [
+            "xhr",
+            "http",
+            "fetch"
+        ],
+        "transformRequest": [
+            null
+        ],
+        "transformResponse": [
+            null
+        ],
+        "timeout": 0,
+        "xsrfCookieName": "XSRF-TOKEN",
+        "xsrfHeaderName": "X-XSRF-TOKEN",
+        "maxContentLength": -1,
+        "maxBodyLength": -1,
+        "env": {},
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Content-Type": "application/json"
+        },
+        "method": "post",
+        "url": "http://localhost:5077/api/User/login",
+        "data": "{\"username\":\"dd\",\"password\":\"dd\"}",
+        "allowAbsoluteUrls": true
+    },
+    "code": "ERR_BAD_REQUEST",
+    "status": 400
+}

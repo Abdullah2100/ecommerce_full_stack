@@ -10,5 +10,5 @@ public class LoginDto
     
     [StringNotNullOrEmptyValidation(ErrorMessage= "password must not be empty")]
     [Required] public string password { get; set; }
-    [Required] public string deviceToken { get; set; }
+    public string? deviceToken { get; set; } = null;
 }

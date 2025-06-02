@@ -35,7 +35,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult>getCatgory(int pageNumber = 1)
+    public async Task<IActionResult> getCatgory(int pageNumber = 1)
     {
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
@@ -43,7 +43,7 @@ public class CategoryController : ControllerBase
         var categories = await _categoryData.getCategories(_configuration, pageNumber);
         if (categories == null)
             return NoContent();
-        
+
         return Ok(categories);
     }
 
@@ -70,6 +70,9 @@ public class CategoryController : ControllerBase
         }
 
         var user = await _userData.getUserById(idHolder.Value);
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
@@ -92,7 +95,7 @@ public class CategoryController : ControllerBase
         return Created();
     }
 
-    
+
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -122,6 +125,7 @@ public class CategoryController : ControllerBase
         {
             return NotFound("المستخدم غير موجود");
         }
+
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
@@ -136,23 +140,22 @@ public class CategoryController : ControllerBase
         if (category?.name != null)
             isExistName = await _categoryData.isExist(category.name);
 
-        if (isExistName&&categoryHolder.id!=category.id)
+        if (isExistName && categoryHolder.id != category!.id)
             return Conflict("هناك قسم بهذا الاسم");
 
         string? imagePath = null;
 
         if (category?.image != null)
         {
-            if(categoryHolder.image_path!=null)
-                        clsUtil.deleteFile(categoryHolder.image_path, _host);
+            if (categoryHolder.image_path != null)
+                clsUtil.deleteFile(categoryHolder.image_path, _host);
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
-           
         }
 
 
         var result = await _categoryData.updateCategory(
             category!.id,
-            category.name, 
+            category.name,
             imagePath);
 
         if (result == null)
@@ -160,14 +163,14 @@ public class CategoryController : ControllerBase
 
         return NoContent();
     }
-    
-    
+
+
     [HttpPut("status/{categoryId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> blockOrUnBlockCateogry( Guid categoryId)
+    public async Task<IActionResult> blockOrUnBlockCateogry(Guid categoryId)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -184,8 +187,8 @@ public class CategoryController : ControllerBase
         }
 
         var user = await _userData.getUserById(idHolder.Value);
-       
-        if (user==null)
+
+        if (user == null)
             return NotFound("ليس لديك الصلاحية لانشاء قسم جديد");
 
         if (user.role == 1)
@@ -204,5 +207,4 @@ public class CategoryController : ControllerBase
 
         return NoContent();
     }
-
 }

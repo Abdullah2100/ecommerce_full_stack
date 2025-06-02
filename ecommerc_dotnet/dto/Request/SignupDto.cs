@@ -17,6 +17,6 @@ public class SignupDto
     
     [StringNotNullOrEmptyValidation(ErrorMessage= "password must not be empty")]
     [Required] public string password { get; set; }
-    [Required] public string deviceToken { get; set; }
+    public string? deviceToken { get; set; } = null;
      public int? role { get; set; } = 1;
 }

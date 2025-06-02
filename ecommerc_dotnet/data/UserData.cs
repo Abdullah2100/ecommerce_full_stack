@@ -67,7 +67,6 @@ public class UserData
             result.address = address;
 
             return result;
-            return null;
         }
         catch (Exception e)
         {
@@ -96,9 +95,9 @@ public class UserData
                         : _configuration.getKey("url_file") + us.thumbnail,
 
                     address = null,
-                    store_id = us.Store.id
+                    store_id =us.Store==null?null: us!.Store.id
                 }).FirstOrDefaultAsync();
-            ;
+            
             if (result != null) {
                 //result.address =await _dbContext.Address.Where(ad=>ad.owner_id==userID).ToListAsync()
                 result.address =await _dbContext.Address
@@ -219,7 +218,7 @@ public class UserData
         string phone,
         string email,
         string password,
-        string deviceToken,
+        string? deviceToken=null,
         int? role = 1
     )
     {
@@ -245,7 +244,7 @@ public class UserData
                 created_at = DateTime.Now,
                 ID = clsUtil.generateGuid(),
                 updated_at = null,
-                deviceToken = deviceToken
+                deviceToken = deviceToken??""
             };
 
             await _dbContext.Users.AddAsync(userData);
@@ -295,7 +294,7 @@ public class UserData
     }
     public async Task<UserInfoResponseDto?> updateUserDeviceToken(
         Guid userId,
-        string deviceToken )
+        string? deviceToken )
     {
         try
         {
@@ -305,7 +304,7 @@ public class UserData
             if (userData == null)
                 return null;
 
-            userData.deviceToken = deviceToken;
+            userData.deviceToken = deviceToken??userData.deviceToken;
 
 
             await _dbContext.SaveChangesAsync();

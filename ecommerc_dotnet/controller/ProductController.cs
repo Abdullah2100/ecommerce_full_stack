@@ -231,7 +231,7 @@ public class ProductController : ControllerBase
 
 
         if (product?.deletedimages?.Count > 0)
-            await _productData.deleteProductImages(product.deletedimages);
+             _productData.deleteProductImages(product.deletedimages);
 
         string? savedThumbnail = null;
         if (product?.thmbnail != null)
@@ -299,7 +299,7 @@ public class ProductController : ControllerBase
 
 
         var result = await _productData.deleteProduct(
-            product_id: product_id
+            productId: product_id
         );
 
         if (result == false)

@@ -28,22 +28,23 @@ FirebaseApp.Create(new AppOptions()
 // Other Services (Scoped)
 builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
 
-/*
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
     {
-        policy.AllowAnyOrigin()    // Allows all origins
+        policy
+.WithOrigins("http://localhost:3000")
+        .AllowAnyOrigin()    // Allows all origins
             .AllowAnyMethod()    // Allows any HTTP methods (GET, POST, etc.)
             .AllowAnyHeader();
             // ;   // Allows any headers
     });
 });
-*/
+
 builder.Services.AddControllers();
 builder.Services.AddSignalR(option =>
     option.EnableDetailedErrors = true);
-;
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
