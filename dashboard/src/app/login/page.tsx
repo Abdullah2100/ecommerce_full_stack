@@ -1,33 +1,31 @@
 "use client"
 
- 
-import { useState } from 'react'
+import Image from 'next/image'
+import Logo from '../../../public/logo.svg'
+import { Input } from '@/components/ui/input'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useMutation } from '@tanstack/react-query'
 import { login } from '../controller/auth'
 import { toast, ToastContainer } from 'react-toastify'
 import iAuthResult from '../model/iAuthResult'
 import Util from '../util/globle'
-import { Label } from '@radix-ui/react-label'
-import Link from 'next/link'
-
-import isCanBackToLogin from '../middleware/isCanBackToLogin'
-import { redirect, useRouter } from 'next/navigation'
+import { redirect } from 'next/dist/server/api-utils'
+import { Label } from '@/components/ui/label'
 import InputWithTitle from '@/components/ui/inputWithTitle'
-export interface iLoginData {
-    email: string;
+interface iLoginData {
+    name: string;
     password: string;
 }
 
-const  Login = ()=> {
-   const rout = useRouter() 
+export default function Login() {
     const [data, setData] = useState<iLoginData>({
-        email: 'ali@gmail.com',
+        name: 'ali@gmail.com',
         password: '12AS@#fs'
     });
 
     const loginFun = useMutation({
-        mutationFn: (data: iLoginData) => login({ email: data.email, password: data.password }),
+        mutationFn: (data: iLoginData) => login({ email: data.name, password: data.password }),
         onError: (e) => {
             // console.log(`error is ${e}`)
             toast.error(e.message)
@@ -35,7 +33,6 @@ const  Login = ()=> {
         onSuccess: (result) => {
             var resultData = result.data as iAuthResult
             Util.token = resultData.refreshToken
-            rout.push("/dashboard")
 
         }
     })
@@ -44,12 +41,12 @@ const  Login = ()=> {
         <div className="h-screen w-screen    flex  justify-center items-center">
 
             <div className='w-[400px] flex flex-col  items-center mb-20'>
-                <label >SignIn</label>
+                <Label className='text-5xl font-bold'>SignIn</Label>
                 <div className='h-20' />
 
                 <InputWithTitle
                     title='Email'
-                    name={data.email}
+                    name={data.name}
                     placeHolder='Enter Your Email'
                     onchange={(value: string) => { setData((data) => ({ ...data, name: value })) }}
                 />
@@ -63,7 +60,7 @@ const  Login = ()=> {
                 <div className='h-4' />
                 <Button
                     disabled={
-                        data.email.trim().length < 1 ||
+                        data.name.trim().length < 1 ||
                         data.password.trim().length < 1 ||
                         loginFun.isPending
                     }
@@ -72,22 +69,16 @@ const  Login = ()=> {
                 >
                     SignIn
                 </Button>
-                <div className='h-4' />
-
                 <div>
-                    <Label>Have No Account </Label>
-                    <Label>
-                        <Link
-                            href={'/signup'}
-                        >Regester
-                        </Link>
-                    </Label>
+                    <Label>have no Account</Label>
+                    <Label>Signup</Label>
                 </div>
+
             </div>
+
+
             <ToastContainer />
 
         </div>
     )
 }
-
-export default  isCanBackToLogin(Login)
