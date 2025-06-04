@@ -6,6 +6,6 @@ obj/
 bin/
 # appsettings.Development.json
 # appsettings.json
-images/
+# images/
 Migrations/
 firebase-adminsdk.json
