@@ -1,12 +1,10 @@
 import axios from "axios";
+import { iLoginData } from "../login/page";
 
 
-interface iLoginProp {
-    email: string;
-    password: string;
-}
 
-export async function login({ email, password }: iLoginProp) {
+
+export async function login({email, password }: iLoginData) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User/login';
     console.log(`funtion is Called ${url}`)
     try {
@@ -33,3 +31,4 @@ export async function login({ email, password }: iLoginProp) {
     }
 
 }
+

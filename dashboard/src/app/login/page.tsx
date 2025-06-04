@@ -1,30 +1,33 @@
 "use client"
 
-import Image from 'next/image'
-import Logo from '../../../public/logo.svg'
-import { Input } from '@/components/ui/input'
-import { useEffect, useState } from 'react'
-import InputWithTitle from '@/components/inputWithTitle'
+ 
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useMutation } from '@tanstack/react-query'
 import { login } from '../controller/auth'
 import { toast, ToastContainer } from 'react-toastify'
 import iAuthResult from '../model/iAuthResult'
 import Util from '../util/globle'
-import { redirect } from 'next/dist/server/api-utils'
-interface iLoginData {
-    name: string;
+import { Label } from '@radix-ui/react-label'
+import Link from 'next/link'
+
+import isCanBackToLogin from '../middleware/isCanBackToLogin'
+import { redirect, useRouter } from 'next/navigation'
+import InputWithTitle from '@/components/ui/inputWithTitle'
+export interface iLoginData {
+    email: string;
     password: string;
 }
 
-export default function Login() {
+const  Login = ()=> {
+   const rout = useRouter() 
     const [data, setData] = useState<iLoginData>({
-        name: 'ali@gmail.com',
+        email: 'ali@gmail.com',
         password: '12AS@#fs'
     });
 
     const loginFun = useMutation({
-        mutationFn: (data: iLoginData) => login({ email: data.name, password: data.password }),
+        mutationFn: (data: iLoginData) => login({ email: data.email, password: data.password }),
         onError: (e) => {
             // console.log(`error is ${e}`)
             toast.error(e.message)
@@ -32,7 +35,8 @@ export default function Login() {
         onSuccess: (result) => {
             var resultData = result.data as iAuthResult
             Util.token = resultData.refreshToken
-            
+            rout.push("/dashboard")
+
         }
     })
 
@@ -40,14 +44,12 @@ export default function Login() {
         <div className="h-screen w-screen    flex  justify-center items-center">
 
             <div className='w-[400px] flex flex-col  items-center mb-20'>
-                <Image
-                    className='h-24 w-40 object-contain'
-                    src={Logo} alt={'logo'} />
+                <label >SignIn</label>
                 <div className='h-20' />
 
                 <InputWithTitle
                     title='Email'
-                    name={data.name}
+                    name={data.email}
                     placeHolder='Enter Your Email'
                     onchange={(value: string) => { setData((data) => ({ ...data, name: value })) }}
                 />
@@ -61,7 +63,7 @@ export default function Login() {
                 <div className='h-4' />
                 <Button
                     disabled={
-                        data.name.trim().length < 1 ||
+                        data.email.trim().length < 1 ||
                         data.password.trim().length < 1 ||
                         loginFun.isPending
                     }
@@ -70,9 +72,22 @@ export default function Login() {
                 >
                     SignIn
                 </Button>
+                <div className='h-4' />
+
+                <div>
+                    <Label>Have No Account </Label>
+                    <Label>
+                        <Link
+                            href={'/signup'}
+                        >Regester
+                        </Link>
+                    </Label>
+                </div>
             </div>
             <ToastContainer />
 
         </div>
     )
 }
+
+export default  isCanBackToLogin(Login)
