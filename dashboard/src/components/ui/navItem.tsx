@@ -21,7 +21,7 @@ const NavItem = ({ name, icon, currentIndex, selectedIndex, chageSelectedIndex }
             <Image
                 src={icon}
                 alt={name}
-                className="h-6 w-6"
+                className="h-6 w-6 text-black me-2 fill-black"
             />
             <Label>{name}</Label>
             <div className="w-30" />

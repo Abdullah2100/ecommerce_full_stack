@@ -258,7 +258,6 @@ public class UserController : ControllerBase
             profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PROFILE, _host);
         }
 
-        userData.userId = idHolder;
         var result = await _userData.updateUser(
             userId: idHolder.Value,
             phone: userData.phone,

@@ -88,7 +88,7 @@ public class UserData
                 {
                     name = us.name,
                     phone = us.phone,
-                    email = us.phone,
+                    email = us.email,
                     Id = us.ID,
                     thumbnail = us.thumbnail == null
                         ? ""

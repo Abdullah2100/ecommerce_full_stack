@@ -13,12 +13,14 @@ import Util from '../util/globle'
 import { redirect } from 'next/dist/server/api-utils'
 import { Label } from '@/components/ui/label'
 import InputWithTitle from '@/components/ui/inputWithTitle'
+import { useRouter } from 'next/navigation'
 interface iLoginData {
     name: string;
     password: string;
 }
 
-export default function Login() {
+const  Login = ()=> {
+   const rout = useRouter() 
     const [data, setData] = useState<iLoginData>({
         name: 'ali@gmail.com',
         password: '12AS@#fs'
@@ -33,7 +35,8 @@ export default function Login() {
         onSuccess: (result) => {
             var resultData = result.data as iAuthResult
             Util.token = resultData.refreshToken
-
+            rout.push("/dashboard")
+            
         }
     })
 
@@ -69,10 +72,7 @@ export default function Login() {
                 >
                     SignIn
                 </Button>
-                <div>
-                    <Label>have no Account</Label>
-                    <Label>Signup</Label>
-                </div>
+               
 
             </div>
 
@@ -82,3 +82,5 @@ export default function Login() {
         </div>
     )
 }
+
+export default Login;

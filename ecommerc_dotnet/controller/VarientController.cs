@@ -187,5 +187,14 @@ public class VarientController : ControllerBase
             return NoContent();
         return Ok(result);
     }
+   
+    [HttpGet("pages")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getVarients()
+    {
+        var result = await _varientData.getVarients();
+        return Ok(result);
+    }
+
     
 }

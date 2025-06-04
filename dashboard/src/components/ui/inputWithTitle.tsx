@@ -5,6 +5,7 @@ interface iInputWithTitleProp {
     name: string,
     placeHolder: string
     isDisabled?: boolean,
+    maxLength?: number,
     onchange?: (value: string) => void | undefined,
 }
 
@@ -13,6 +14,7 @@ const InputWithTitle = ({
     name,
     placeHolder,
     isDisabled = false,
+    maxLength = undefined,
     onchange = undefined
 }: iInputWithTitleProp) => {
 
@@ -20,6 +22,7 @@ const InputWithTitle = ({
         <label>{title}</label>
         <div className='h-1' />
         <Input
+            maxLength={maxLength}
             disabled={isDisabled}
             className='w-full'
             value={name}

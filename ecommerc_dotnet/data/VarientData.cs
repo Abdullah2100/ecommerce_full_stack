@@ -61,7 +61,20 @@ public class VarientData
         }
     }
 
-  
+    public async Task<double> getVarients()
+    {
+        try
+        {
+            var result=(await _dbContext.Varients.CountAsync());
+            return (double) result / 25;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this exception occured getting varient data " + ex.Message);
+            return 0;
+        }
+    }
+ 
     public async Task<bool> isExist(string name)
     {
         try
