@@ -3,12 +3,12 @@ import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { createVarient, deleteVarient, getVarient, updateVarient } from "../controller/data";
-import deleteIcon from '../../../public/delete.svg';
-import edite from '../../../public/editeIcon.svg';
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import { iVarient } from "../model/iVarient";
 import { Button } from "@/components/ui/button";
+import { EditeIcon } from "../../../public/editeIcon";
+import { DeleteIcon } from "../../../public/delete";
 
 const VarientPage = () => {
     const [varient, setVarient] = useState<iVarient>({
@@ -72,7 +72,7 @@ const VarientPage = () => {
             <div className="h-10" />
             <div className="flex flex-col w-40">
                 <InputWithTitle
-                maxLength={40}
+                    maxLength={40}
                     title="Name"
                     name={varient.name}
                     placeHolder="Enter Your Varient"
@@ -128,25 +128,20 @@ const VarientPage = () => {
                                             </td>
                                             <td>
                                                 <div className="flex flex-row">
-                                                    <div className="bg-[#f5fafb] border-1 border-[#107980] rounded-sm">
-                                                        <Image
-                                                            onClick={() => setVarient(value)}
-                                                            className="h-8 w-8 fill-green-500 cursor-pointer mt-1 "
-                                                            src={edite}
-                                                            alt="userimage"
-
+                                                    <div 
+                                                     onClick={() => setVarient(value)}
+                                                    className="bg-[#f5fafb] border-1 border-[#107980] rounded-sm">
+                                                        <EditeIcon
+                                                            className="h-6 w-6 fill-[#107980] cursor-pointer mt-0 "
                                                         />
                                                     </div>
                                                     <div className="w-2" />
-                                                    <div className=" border-1 border-[#107980] rounded-sm relative">
-
-                                                        <Image
-                                                            onClick={() => deleteVarientFunc.mutate(value.id ?? "")}
-                                                            className="h-10 w-10  fill-red-700   cursor-pointer"
-                                                            src={deleteIcon}
-                                                            alt="userimage"
-
-                                                        />
+                                                    <div
+                                                        onClick={() => deleteVarientFunc.mutate(value.id ?? "")}
+                                                        className=" border-1 border-[#107980] rounded-sm relative">
+                                                         <DeleteIcon
+                                                            className="h-6 w-6  fill-red-700   cursor-pointer"
+                                                        /> 
                                                     </div>
                                                 </div>
 

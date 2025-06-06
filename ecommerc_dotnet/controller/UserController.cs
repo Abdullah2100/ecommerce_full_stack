@@ -203,6 +203,119 @@ public class UserController : ControllerBase
         return StatusCode(200, user);
     }
 
+    [HttpGet("{page:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getUsers(int page)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+
+        if (user.role == 1)
+            return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
+
+        if (page < 0)
+        {
+            return BadRequest("لا بد من ان تكون الصفحة اكبر من الصفر");
+        }
+
+        var users =await _userData.getUsers(page);
+
+        if (users == null)
+            return NoContent();
+
+        return StatusCode(200, users);
+    }
+
+    [HttpDelete("status/{user_id:guid}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> deleteOrUndeletedUser(Guid user_id)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+        {
+            return BadRequest("المستخدم غير موجود");
+        }
+
+        if (user.role == 1)
+            return BadRequest("ليس لديك الصلاحية ");
+
+      
+
+        var result =await _userData.deleteUser(user_id);
+
+        return Ok(result);
+    }
+
+
+    
+    [HttpGet("pages")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getUsersPagesSize()
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var userData = await _userData.getUserById(idHolder.Value);
+
+        if (userData == null || userData.role != 0)
+            return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
+
+        int size = await _userData.getUsers();
+        int userPages = Convert.ToInt32(Math.Ceiling((double)size / 24));
+
+        return StatusCode(200, userPages);
+    }
+
 
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

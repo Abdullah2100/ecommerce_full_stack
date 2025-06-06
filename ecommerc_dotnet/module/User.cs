@@ -10,11 +10,11 @@ public class User
     public string phone { get; set; }
     public string  email{ get; set; }
     public string password { get; set; }
-    public bool isDeleted { get; set; }
+    public bool isDeleted { get; set; } = false;
     public string deviceToken { get; set; }
     
     //1 :normal user ; 0: is admin
-    public int role { get; set; }
+    public int role { get; set; } = 1;
 
     
     [Column(TypeName = "Timestamp")]

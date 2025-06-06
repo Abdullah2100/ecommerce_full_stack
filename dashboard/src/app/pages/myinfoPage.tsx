@@ -18,8 +18,8 @@ const MyInfoPage = () => {
 
 
     const [userUpdate, setUserUpdate] = useState<iUserUpdateInfoDto>({
-        name: data?.name ?? "",
-        phone: data?.phone ?? "",
+        name:  "",
+        phone:  "",
         newPassword: '',
         password: '',
         thumbnail: undefined,
@@ -98,7 +98,7 @@ const MyInfoPage = () => {
             <InputWithTitle
                 title='Name'
                 name={userUpdate?.name ?? ""}
-                placeHolder='Enter Your Name'
+                placeHolder={data?.name??'Enter Your Name'}
                 onchange={
                     (value: string) => { setUserUpdate((data) => ({ ...data, name: value })) }
                 }
@@ -109,7 +109,7 @@ const MyInfoPage = () => {
             <InputWithTitle
                 title='Phone'
                 name={userUpdate?.phone ?? ""}
-                placeHolder='Enter Your Email'
+                placeHolder={data?.phone??'Enter Your Phone'}
                 onchange={
                     (value: string) => { setUserUpdate((data) => ({ ...data, phone: value ?? undefined })) }
 

@@ -242,3 +242,93 @@ export async function updateVarient(data:iVarient) {
     }
 
 }
+
+
+
+export async function getUserPages() {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/pages`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return result.data as number 
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+
+export async function getUserAtPage(pageNumber:number) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/${pageNumber}`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return (result.data as iUserInfo[]) 
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+export async function changeUserStatus(userId:string) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/status/${userId}`;
+    console.log(`funtion is Called ${url}`)
+    console.log(`token ${Util.token}`)
+    try {
+        var result = await axios.delete(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return result.data as boolean 
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+

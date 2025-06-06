@@ -9,8 +9,10 @@ public class UserInfoResponseDto
     public Guid Id { get; set; }
      public string name { get; set; }
 
+     public bool isAdmin { get; set; } = false;
      public string phone { get; set; }
      public string email { get; set; }
+     public bool isActive { get; set; } = true;
      public string thumbnail { get; set; }
      public List<AddressResponseDto>? address { get; set; }
      public Guid? store_id { get; set; }

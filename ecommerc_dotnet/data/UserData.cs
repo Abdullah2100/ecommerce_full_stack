@@ -19,6 +19,7 @@ public class UserData
     {
         _dbContext = appDbContext;
     }
+
     public UserData(AppDbContext dbContext,
         IConfig configuration
 
@@ -29,8 +30,6 @@ public class UserData
         _configuration = configuration;
         // _logger = logger;
     }
-
-   
 
 
     public async Task<UserInfoResponseDto?> getUser(string userName, string password)
@@ -51,7 +50,7 @@ public class UserData
                     store_id = u.Store.id
                 })
                 .FirstOrDefaultAsync();
-            
+
             var address = await _dbContext.Address
                 .AsNoTracking()
                 .Where(ad => ad.owner_id == result.Id)
@@ -80,9 +79,9 @@ public class UserData
     {
         try
         {
-            var result =await _dbContext.Users
+            var result = await _dbContext.Users
                 .AsNoTracking()
-                .Include(u=>u.Store)
+                .Include(u => u.Store)
                 .Where(us => us.ID == userID)
                 .Select(us => new UserInfoResponseDto
                 {
@@ -95,12 +94,13 @@ public class UserData
                         : _configuration.getKey("url_file") + us.thumbnail,
 
                     address = null,
-                    store_id =us.Store==null?null: us!.Store.id
+                    store_id = us.Store == null ? null : us!.Store.id
                 }).FirstOrDefaultAsync();
-            
-            if (result != null) {
+
+            if (result != null)
+            {
                 //result.address =await _dbContext.Address.Where(ad=>ad.owner_id==userID).ToListAsync()
-                result.address =await _dbContext.Address
+                result.address = await _dbContext.Address
                     .AsNoTracking()
                     .Where(ad => ad.owner_id == userID)
                     .Select(ad => new AddressResponseDto
@@ -111,12 +111,8 @@ public class UserData
                         title = ad.title,
                         isCurrent = ad.isCurrent,
                     }).ToListAsync();
-
-               
-
-
-
             }
+
             return result;
         }
         catch (Exception e)
@@ -126,13 +122,64 @@ public class UserData
             return null;
         }
     }
+
+    public async Task<List<UserInfoResponseDto>?> getUsers(int pageNumber, int pageSize = 25)
+    {
+        try
+        {
+            return await _dbContext.Users
+                .AsNoTracking()
+                .Include(u => u.Store)
+                .AsNoTracking()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(us => new UserInfoResponseDto
+                {
+                    name = us.name,
+                    phone = us.phone,
+                    email = us.email,
+                    Id = us.ID,
+                    isAdmin =us.role==0,
+                    isActive = us.isDeleted,
+                    thumbnail = us.thumbnail == null
+                        ? ""
+                        : _configuration.getKey("url_file") + us.thumbnail,
+
+                    address = null,
+                    store_id = us.Store == null ? null : us!.Store.id
+                })
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+
     
+    public async Task<int> getUsers()
+    {
+        try
+        {
+            return await _dbContext.Users.AsNoTracking().CountAsync();
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return 0;
+        }
+    }
+
+
     public async Task<User?> getUserById(Guid ID)
     {
         try
         {
             return await _dbContext.Users
-                .Include(st=>st.Store)
+                .Include(st => st.Store)
                 .FirstOrDefaultAsync(u => u.ID == ID);
         }
         catch (Exception e)
@@ -150,7 +197,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.ID==userid&&u.isDeleted==false) != null;
+                .FirstOrDefaultAsync(u => u.ID == userid && u.isDeleted == false) != null;
         }
         catch (Exception e)
         {
@@ -197,13 +244,12 @@ public class UserData
     {
         try
         {
-            var result = _dbContext.Users
-                .AsNoTracking()
-                .FirstOrDefault(u => u.ID == userID);
-            
-            result!.isDeleted = true;
+            var result = await _dbContext.Users
+                .FindAsync(userID);
+
+            result!.isDeleted = !result.isDeleted;
             await _dbContext.SaveChangesAsync();
-            return true;
+            return result.isDeleted;
         }
         catch (Exception e)
         {
@@ -218,7 +264,7 @@ public class UserData
         string phone,
         string email,
         string password,
-        string? deviceToken=null,
+        string? deviceToken = null,
         int? role = 1
     )
     {
@@ -244,7 +290,7 @@ public class UserData
                 created_at = DateTime.Now,
                 ID = clsUtil.generateGuid(),
                 updated_at = null,
-                deviceToken = deviceToken??""
+                deviceToken = deviceToken ?? ""
             };
 
             await _dbContext.Users.AddAsync(userData);
@@ -292,9 +338,10 @@ public class UserData
             return null;
         }
     }
+
     public async Task<UserInfoResponseDto?> updateUserDeviceToken(
         Guid userId,
-        string? deviceToken )
+        string? deviceToken)
     {
         try
         {
@@ -304,7 +351,7 @@ public class UserData
             if (userData == null)
                 return null;
 
-            userData.deviceToken = deviceToken??userData.deviceToken;
+            userData.deviceToken = deviceToken ?? userData.deviceToken;
 
 
             await _dbContext.SaveChangesAsync();

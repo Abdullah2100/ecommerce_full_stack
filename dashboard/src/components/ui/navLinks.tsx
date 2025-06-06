@@ -4,6 +4,7 @@ import homIcon from '../../../public/home.svg'
 import logo from '../../../public/logo.svg'
 import myInfo from '../../../public/user.svg'
 import varient from '../../../public/products-major.svg'
+import users from '../../../public/users.svg'
 import Image from 'next/image'
 
 export interface iNavProp {
@@ -11,8 +12,8 @@ export interface iNavProp {
     setSelectedIndex: (index: number) => void
 
 }
-const NavLink = ({selectedIndex,setSelectedIndex}:iNavProp) => {
-   
+const NavLink = ({ selectedIndex, setSelectedIndex }: iNavProp) => {
+
     const navLinkItems: iNavItemProp[] = [
         {
             name: "Home",
@@ -27,11 +28,20 @@ const NavLink = ({selectedIndex,setSelectedIndex}:iNavProp) => {
             currentIndex: 1,
             selectedIndex: selectedIndex,
             chageSelectedIndex: setSelectedIndex
-        },
-         {
+        }
+        ,
+        {
             name: "Varient",
             icon: varient,
             currentIndex: 2,
+            selectedIndex: selectedIndex,
+            chageSelectedIndex: setSelectedIndex
+        },
+
+        {
+            name: "Users",
+            icon: users,
+            currentIndex: 3,
             selectedIndex: selectedIndex,
             chageSelectedIndex: setSelectedIndex
         },
