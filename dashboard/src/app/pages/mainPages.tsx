@@ -2,6 +2,7 @@ import { Label } from "@/components/ui/label"
 import MyInfoPage from "./myinfoPage"
 import VarientPage from "./varientPage"
 import UsersPage from "./usersPage"
+import StoresPage from "./storesPage"
 
 interface iMainPageProp {
     currentPage: number
@@ -17,8 +18,10 @@ const MainPage = ({ currentPage }: iMainPageProp) => {
                     return <MyInfoPage />;
                 case 2:
                     return <VarientPage />
-            case 3:
+                case 3:
                     return <UsersPage />
+                case 4:
+                    return <StoresPage />
                 default:
                     return null;
             }

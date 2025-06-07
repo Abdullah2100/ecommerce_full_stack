@@ -12,10 +12,15 @@ namespace hotel_api.util
     {
         public enum enImageType
         {
-            PROFILE,PRODUCT,CATEGORY,STORE,
+            PROFILE,
+            PRODUCT,
+            CATEGORY,
+            STORE,
             BANNER
         };
+
         private static string localPath = "/images/";
+
         public static Guid generateGuid()
         {
             return Guid.NewGuid();
@@ -44,14 +49,15 @@ namespace hotel_api.util
             {
                 // Compute the hash of the given string
                 byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
- 
+
                 // Convert the byte array to string format
                 return BitConverter.ToString(hashValue).Replace("-", "");
-            } 
+            }
         }
-        
-        
-        public static string getFileExtention(IFormFile filename){
+
+
+        public static string getFileExtention(IFormFile filename)
+        {
             return Path.GetExtension(filename.FileName);
         }
 
@@ -64,70 +70,75 @@ namespace hotel_api.util
             }
             catch (Exception ex)
             {
-                Console.WriteLine("this the error from creating file to save image on it "+ex.Message);
+                Console.WriteLine("this the error from creating file to save image on it " + ex.Message);
                 return false;
             }
         }
 
-       public static async Task<string?>saveFile(IFormFile file,enImageType type,IWebHostEnvironment host)
+        public static async Task<string?> saveFile(IFormFile file, enImageType type, IWebHostEnvironment host)
         {
-            string filePath = localPath + type.ToString()+"/";
-            
+            // string filePath = localPath + type.ToString()+"/";
+            string filePath = Path.Combine(host.ContentRootPath, localPath, type.ToString());
             string? fileFullName = null;
             try
             {
-                if (!Directory.Exists(host.ContentRootPath+filePath))
+                if (!Directory.Exists(filePath))
                 {
-                    if (!createDirectory(host.ContentRootPath+filePath))
+                    if (!createDirectory(filePath))
                     {
                         return null;
                     }
-                    
                 }
-                fileFullName = filePath+generateGuid()+getFileExtention(file);
 
-                using (var stream = new FileStream(host.ContentRootPath+fileFullName, FileMode.Create))
+                fileFullName = Path.Combine(filePath, generateGuid() + getFileExtention(file));
+
+                using (var stream = new FileStream(host.ContentRootPath + fileFullName, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
-                return fileFullName.Replace("/images","");
 
+                switch (fileFullName.Contains("//images"))
+                {
+                    case true: return fileFullName.Replace("//images", "");
+                    default: return fileFullName.Replace("/images", "");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("this the error from saving image to local"+ex.Message);
+                Console.WriteLine("this the error from saving image to local" + ex.Message);
                 return null;
             }
-        } 
-        
-       
-        public static async Task<List<string>?>saveFile(List<IFormFile> file,enImageType type,IWebHostEnvironment host)
+        }
+
+
+        public static async Task<List<string>?> saveFile(List<IFormFile> file, enImageType type,
+            IWebHostEnvironment host)
         {
             List<string> images = new List<string>();
             foreach (var image in file)
             {
-               var path = await saveFile(image,type,host);
-               if (path == null)
-               {
-                   deleteFile(images, host);
-                   return null;
-               }
-               
-               images.Add(path);
+                var path = await saveFile(image, type, host);
+                if (path == null)
+                {
+                    deleteFile(images, host);
+                    return null;
+                }
+
+                images.Add(path);
             }
 
             return images;
-        } 
+        }
 
 
-        public static bool deleteFile(string filePath,IWebHostEnvironment host,string? addtionUrl=null)
+        public static bool deleteFile(string filePath, IWebHostEnvironment host, string? addtionUrl = null)
         {
             try
             {
-                var fileRealPath = addtionUrl!=null?filePath.Replace(addtionUrl,""):filePath;
-                if (File.Exists(host.ContentRootPath+"/images"+fileRealPath))
+                var fileRealPath = addtionUrl != null ? filePath.Replace(addtionUrl, "") : filePath;
+                if (File.Exists(host.ContentRootPath + "/images" + fileRealPath))
                 {
-                    File.Delete(host.ContentRootPath +"/images"+ fileRealPath);
+                    File.Delete(host.ContentRootPath + "/images" + fileRealPath);
                     return true;
                 }
 
@@ -135,18 +146,14 @@ namespace hotel_api.util
             }
             catch (Exception ex)
             {
-                Console.WriteLine("this the error from delete image  "+ex.Message);
+                Console.WriteLine("this the error from delete image  " + ex.Message);
                 return false;
             }
-        } 
+        }
 
-        public static void deleteFile(List<string> filePath,IWebHostEnvironment host)
+        public static void deleteFile(List<string> filePath, IWebHostEnvironment host)
         {
-             filePath.ForEach(image =>
-             {
-                 deleteFile(image,host);
-             }); 
-        } 
- 
+            filePath.ForEach(image => { deleteFile(image, host); });
+        }
     }
 }

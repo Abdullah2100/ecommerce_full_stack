@@ -43,6 +43,7 @@ import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.UserModel
 import com.example.e_commercompose.model.VarientModel
 import com.example.eccomerce_app.dto.response.OrderResponseDto
+import com.example.eccomerce_app.dto.response.StoreStatusResponseDto
 import com.example.eccomerce_app.model.Order
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
@@ -284,6 +285,20 @@ class HomeViewModel(
                         }
                     },
                     BannerResponseDto::class.java
+                )
+
+                _hub.value!!.on(
+                    "storeStatus",
+                    { result ->
+
+                        viewModelScope.launch(Dispatchers.IO) {
+                            if(result.status==true){
+                                val storeWithoutCurrentId = _stores.value?.filter { it.id!=result.storeId }
+                                _stores.emit(storeWithoutCurrentId)
+                            }
+                        }
+                    },
+                    StoreStatusResponseDto::class.java
                 )
             }
 

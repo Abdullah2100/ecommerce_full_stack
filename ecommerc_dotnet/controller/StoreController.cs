@@ -1,11 +1,13 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ecommerc_dotnet.controller;
 
@@ -16,19 +18,22 @@ public class StoreController : ControllerBase
 {
     public StoreController(AppDbContext dbContext
         , IConfig configuration,
-        IWebHostEnvironment webHostEnvironment
+        IWebHostEnvironment webHostEnvironment,
+        IHubContext<EcommercHub> hubContext
     )
     {
         _host = webHostEnvironment;
         _storeData = new StoreData(dbContext, configuration);
         _userData = new UserData(dbContext, configuration);
         _configuration = configuration;
+        _hubContext = hubContext;
     }
 
     private readonly StoreData _storeData;
     private readonly UserData _userData;
     private readonly IConfig _configuration;
     private readonly IWebHostEnvironment _host;
+    private readonly IHubContext<EcommercHub> _hubContext;
 
     [HttpPost("new")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -77,7 +82,7 @@ public class StoreController : ControllerBase
             name: store.name,
             wallpaper_image: wallperper,
             small_image: small_image,
-            user_id:idHolder.Value!=store?.user_id&&store.user_id!=null?(Guid) store.user_id : user.ID,
+            user_id: idHolder.Value != store?.user_id && store.user_id != null ? (Guid)store.user_id : user.ID,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -144,7 +149,7 @@ public class StoreController : ControllerBase
             name: store.name,
             wallpaper_image: wallperper,
             small_image: small_image,
-            user_id:  user.ID,
+            user_id: user.ID,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -155,16 +160,15 @@ public class StoreController : ControllerBase
         return StatusCode(200, result);
     }
 
-    
-    
-      [HttpPut("status/{storeId:guid}")]
+
+    [HttpPut("status/{storeId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updateStoreStatus(
         Guid storeId
-        )
+    )
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -181,25 +185,30 @@ public class StoreController : ControllerBase
         }
 
         var user = await _userData.getUserById(idHolder.Value);
-        if (user == null )
+        if (user == null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.role==1 )
+        if (user.role == 1)
             return BadRequest("المستخدم ليس لديه الصلاحية");
 
-        var isExist =await _storeData.isExist(storeId);
+        var isExist = await _storeData.isExist(storeId);
 
         if (!isExist)
             return NotFound("المتجر غير موجود");
 
-       
 
         var result = await _storeData.updateStoreStatus(
             storeId
         );
 
-        if (!result)
+        if (result==null)
             return BadRequest("حدثت مشكلة اثناء حفظ البيانات");
+        
+        await _hubContext.Clients.All.SendAsync("storeStatus", new StoreStatusResponseDto
+        {
+            storeId = storeId,
+            status = (bool)result
+        });
 
         return NoContent();
     }
@@ -225,20 +234,19 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result =await _storeData.getStoreByUser(userId);
+        var result = await _storeData.getStoreByUser(userId);
 
         if (result == null)
             return NoContent();
         return Ok(result);
     }
-    
-   
+
+
     [HttpGet("{store_Id:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult>GetStore(Guid store_Id)
+    public async Task<IActionResult> GetStore(Guid store_Id)
     {
-     
         var result = await _storeData.getStoreById(store_Id);
 
         if (result == null)
@@ -247,31 +255,57 @@ public class StoreController : ControllerBase
     }
 
 
-    [HttpGet("all/{page:int}")] 
+    [HttpGet("pages")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult>GetStores(int page = 1)
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetStorePages()
     {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
 
-        var result =await _storeData.getStore(page);
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
 
-        if (result.Count<1)
+        var userData = await _userData.getUserById(idHolder.Value);
+
+        if (userData == null || userData.role != 0)
+            return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
+
+        int pages = await _storeData.getStorePages();
+        return Ok(pages);
+    }
+
+    [HttpGet("{page:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStores(int page = 1)
+    {
+        var result = await _storeData.getStore(page);
+
+        if (result == null)
             return NoContent();
         return Ok(result);
     }
 
-   [HttpGet("address/{store_Id:guid}/{page:int}")]
+
+    [HttpGet("address/{store_Id:guid}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult>GetStoreAddress(Guid store_Id,int page )
+    public async Task<IActionResult> GetStoreAddress(Guid store_Id, int page)
     {
-     
-        var result = await _storeData.getStoreAddress(store_Id,page);
+        var result = await _storeData.getStoreAddress(store_Id, page);
 
-        if (result.Count<1)
+        if (result.Count < 1)
             return NotFound("المتجر غير موجود");
         return Ok(result);
     }
-  
-    
 }

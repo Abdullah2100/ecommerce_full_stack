@@ -23,7 +23,7 @@ const NavItem = ({ name, icon, currentIndex, selectedIndex, chageSelectedIndex }
                 alt={name}
                 className="h-6 w-6 text-black me-2 fill-black"
             />
-            <Label>{name}</Label>
+            <Label className="whitespace-nowrap">{name}</Label>
             <div className="w-30" />
 
         </div>

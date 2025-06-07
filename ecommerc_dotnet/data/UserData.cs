@@ -139,6 +139,7 @@ public class UserData
                     phone = us.phone,
                     email = us.email,
                     Id = us.ID,
+                    storeName =us.Store!=null? us.Store.name:"",
                     isAdmin =us.role==0,
                     isActive = us.isDeleted,
                     thumbnail = us.thumbnail == null

@@ -2,38 +2,39 @@ import InputWithTitle from "@/components/ui/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { changeUserStatus, createVarient, deleteVarient, getUserAtPage, getUserPages, getVarient, updateVarient } from "../controller/data";
+import { changeStoreStatus, changeUserStatus, createVarient, deleteVarient, getStoreAtPage, getStorePages, getUserAtPage, getUserPages, getVarient, updateVarient } from "../controller/data";
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "@/components/ui/button";
+import { getStaticProps } from "next/dist/build/templates/pages";
 
-const UsersPage = () => {
+const StoresPage = () => {
     const queryClient = useQueryClient()
-    const { data: userPages } = useQuery({
-        queryKey: ['usersPage'],
-        queryFn: () => getUserPages()
+    const { data: storePages } = useQuery({
+        queryKey: ['storePages'],
+        queryFn: () => getStorePages()
 
     })
 
     const [currnetPage, setCurrentPage] = useState(1);
 
     const { data, refetch, isPlaceholderData } = useQuery({
-        queryKey: ['users', currnetPage],
-        queryFn: () => getUserAtPage(currnetPage)
+        queryKey: ['stores', currnetPage],
+        queryFn: () => getStoreAtPage(currnetPage)
 
     })
 
     useEffect(() => {
         queryClient.prefetchQuery({
-            queryKey: ['users', currnetPage],
-            queryFn: () => getUserAtPage(currnetPage),
+            queryKey: ['stores', currnetPage],
+            queryFn: () => getStoreAtPage(currnetPage),
         })
     }, [currnetPage])
 
 
-    const changeUserStatusFun = useMutation(
+    const changeStoreStatusFun = useMutation(
         {
-            mutationFn: (userId: string) => changeUserStatus(userId),
+            mutationFn: (store_id: string) => changeStoreStatus(store_id),
             onError: (e) => {
                 toast.error(e.message)
             },
@@ -47,12 +48,12 @@ const UsersPage = () => {
     )
     return (
         <div className="flex flex-col w-auto h-auto">
-            <Label className="text-5xl">Users</Label>
+            <Label className="text-5xl">Stores</Label>
             <div className="h-10" />
 
             {data != undefined && <div className="w-fit">
 
-                <div className="p-3 max-w-[840px]">
+                <div className="p-3 max-w-[740px] overflow-hidden">
                     {/* Table */}
                     <div className="overflow-x-auto  border-2 border-[#F0F2F5]  rounded-[9px]">
                         <table className="table-auto min-w-full ">
@@ -71,21 +72,16 @@ const UsersPage = () => {
                                         <div className="font-medium text-left">Name</div>
                                     </th>
                                     <th className="py-4 px-10">
-                                        <div className="font-medium text-left">Phone</div>
+                                        <div className="font-medium text-left">Owner Name</div>
                                     </th>
                                     <th className="py-4 px-10">
-                                        <div className="font-medium text-left">Email</div>
+                                        <div className="font-medium text-left whitespace-nowrap">Created At</div>
+                                    </th>
+                                    <th className="py-4 px-10">
+                                        <div className="font-medium text-left">isBlock</div>
                                     </th>
 
-                                    <th className="py-4 px-10">
-                                        <div className="font-medium text-left whitespace-nowrap">Has Store</div>
-                                    </th>
-                                    <th className="py-4 px-10">
-                                        <div className="font-medium text-left whitespace-nowrap">Store Name</div>
-                                    </th>
-                                    <th className="py-4 px-10">
-                                        <div className="font-medium text-left ">Actions</div>
-                                    </th>
+
 
                                 </tr>
                             </thead>
@@ -103,7 +99,7 @@ const UsersPage = () => {
                                                 <div  >
                                                     <img
                                                         className="h-6 w-6 rounded-full"
-                                                        src={value.thumbnail}
+                                                        src={value.small_image}
                                                         alt="thumbnail"
                                                     />
                                                 </div>
@@ -118,45 +114,31 @@ const UsersPage = () => {
                                             <td className="py-4 px-10">
                                                 <div>
                                                     <Label className="font-normal">
-                                                        {value.phone}
+                                                        {value.userName}
                                                     </Label>
                                                 </div>
                                             </td>
+
+
                                             <td className="py-4 px-10">
                                                 <div>
                                                     <Label className="font-normal">
-                                                        {value.email}
+                                                        {(value.created_at.toString().split('T')[0]).replaceAll('-','/')}
                                                     </Label>
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-10">
-                                                <div>
-                                                    <Label className="font-normal">
-                                                        {value.store_id != null ? 'Yes' : 'NO'}
-                                                    </Label>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-10 whitespace-nowrap">
-                                                <div>
-                                                    <Label className="font-normal">
-                                                        {value.storeName}
-                                                    </Label>
-                                                </div>
-                                            </td>
+
                                             <td className="py-4 px-10">
                                                 <div>
                                                     {
-                                                        value.isAdmin ?
-                                                            <div className="w-full h-8 flex items-center justify-center bg-[#107980] rounded-4xl">
-                                                                <Label className="text-white font-normal ">Me</Label>
-                                                            </div> :
-                                                            <Button
-                                                                disabled={changeUserStatusFun.isPending}
-                                                                onClick={() => changeUserStatusFun.mutate(value.id)}
-                                                                className={`${!value.isActive ? 'bg-red-500' : 'bg-gray-400'} h-8 w-20`}>
-                                                                <Label className="text-white text-[12px]">  {!value.isActive ? 'Bolck' : 'UnBlock'}</Label>
 
-                                                            </Button>
+                                                        <Button
+                                                            disabled={changeStoreStatusFun.isPending}
+                                                            onClick={() => changeStoreStatusFun.mutate(value.id)}
+                                                            className={`${value.isBlocked ? 'bg-red-500' : 'bg-gray-400'} h-8 w-20`}>
+                                                            <Label className="text-white text-[12px]">  {value.isBlocked ? 'Bolck' : 'UnBlock'}</Label>
+
+                                                        </Button>
                                                     }
 
                                                 </div>
@@ -171,9 +153,9 @@ const UsersPage = () => {
                 </div>
             </div>}
 
-            {userPages != undefined && <div className="flex flex-row w-full justify-center">
+            {storePages != undefined && <div className="flex flex-row w-full justify-center items-center">
 
-                {Array.from({ length: userPages }, (_, i) => (
+                {Array.from({ length: storePages }, (_, i) => (
                     <div
                         onClick={() => setCurrentPage(i + 1)}
                         className={`py-2 px-2 border-1 border-gray-500 rounded-full mr-2 ${currnetPage == i + 1 ? 'bg-[#452CE8]' : undefined} pointer-coarse:`}
@@ -186,4 +168,4 @@ const UsersPage = () => {
     );
 
 };
-export default UsersPage;
+export default StoresPage;

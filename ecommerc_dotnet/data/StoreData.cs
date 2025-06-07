@@ -138,35 +138,13 @@ public class StoreData
         }
     */
 
-    public async Task<List<StoreResponseDto>>? getStore(int pageNumber, int pageSize = 25)
+    public async Task<List<StoreResponseDto>?> getStore(int pageNumber, int pageSize = 25)
     {
         try
         {
-            return /* await (from st in _dbContext.Store
-                    join ad in _dbContext.Address on st.id equals ad.owner_id
-
-                    select new StoreResponseDto
-                    {
-                        id = st.id,
-                        name = st.name,
-                        wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
-                        small_image = _config.getKey("url_file") + st.small_image,
-                        created_at = st.created_at,
-                        addresses = _dbContext.Address.Where(a => a.owner_id == st.id)
-                            .Select(add=>new AddressResponseDto
-                            {
-                                id=add.id,
-                                title=add.title,
-                                longitude = add.longitude,
-                                latitude = add.latitude,
-                            }).ToList(),
-
-                        user_id =st.user_id
-
-                    }
-                )*/
+            return
                 await _dbContext.Store
-                    .Include(st => st.addresses)
+                    .Include(st=>st.user)
                     .AsNoTracking()
                     .OrderByDescending(st => st.created_at)
                     .Skip((pageNumber - 1) * pageSize)
@@ -179,7 +157,8 @@ public class StoreData
                         small_image = _config.getKey("url_file") + st.small_image,
                         created_at = st.created_at,
                         user_id = st.user_id,
-                        isBlocked = st.isBlock
+                        isBlocked = st.isBlock,
+                        userName = st.user.name
                     })
                     .ToListAsync();
         }
@@ -190,6 +169,20 @@ public class StoreData
         }
     }
 
+    public async Task<int> getStorePages()
+    {
+        try
+        {
+            var storesSize = await _dbContext.Store.CountAsync();
+            if (storesSize == 0) return 0;
+            return (int)Math.Ceiling((double)storesSize / 25);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("error from getting store by id " + ex.Message);
+            return 0;
+        }
+    }
 
     public async Task<bool> isExist(string name)
     {
@@ -284,22 +277,23 @@ public class StoreData
     }
 
 
-    public async Task<bool> updateStoreStatus(Guid storeId)
+    public async Task<bool?> updateStoreStatus(Guid storeId)
     {
         try
         {
-            var store = await _dbContext.Store.FirstOrDefaultAsync(st => st.id == storeId);
+            var store = await _dbContext.Store.FindAsync( storeId);
+            if (store == null) return false;
 
             store.isBlock = !store.isBlock;
 
 
             await _dbContext.SaveChangesAsync();
-            return true;
+            return store.isBlock;
         }
         catch (Exception ex)
         {
             Console.WriteLine("error updating store " + ex.Message);
-            return false;
+            return null;
         }
     }
 

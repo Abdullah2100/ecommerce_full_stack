@@ -12,6 +12,7 @@ public class UserInfoResponseDto
      public bool isAdmin { get; set; } = false;
      public string phone { get; set; }
      public string email { get; set; }
+     public string storeName { get; set; } = "";
      public bool isActive { get; set; } = true;
      public string thumbnail { get; set; }
      public List<AddressResponseDto>? address { get; set; }
