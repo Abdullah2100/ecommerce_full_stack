@@ -293,7 +293,9 @@ class HomeViewModel(
 
                         viewModelScope.launch(Dispatchers.IO) {
                             if(result.status==true){
+                                val productNotBelongToStore = _products.value?.filter { it.store_id!=result.storeId }
                                 val storeWithoutCurrentId = _stores.value?.filter { it.id!=result.storeId }
+                                _products.emit(productNotBelongToStore)
                                 _stores.emit(storeWithoutCurrentId)
                             }
                         }
