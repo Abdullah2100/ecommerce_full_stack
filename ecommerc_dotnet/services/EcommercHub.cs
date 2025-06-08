@@ -28,7 +28,7 @@ public class EcommercHub : Hub
       }
     
     
-    public async Task sendingNewOrder(StoreStatusResponseDto status)
+    public async Task updatingStoreStatus(StoreStatusResponseDto status)
     {
         await Clients.All.SendAsync("storeStatus", status);
     }

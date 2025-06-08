@@ -19,7 +19,7 @@ namespace hotel_api.util
             BANNER
         };
 
-        private static string localPath = "/images/";
+        private static string localPath = "images";
 
         public static Guid generateGuid()
         {
@@ -92,15 +92,15 @@ namespace hotel_api.util
 
                 fileFullName = Path.Combine(filePath, generateGuid() + getFileExtention(file));
 
-                using (var stream = new FileStream(host.ContentRootPath + fileFullName, FileMode.Create))
+                using (var stream = new FileStream(fileFullName, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                switch (fileFullName.Contains("//images"))
+                switch (fileFullName.Contains("//"))
                 {
-                    case true: return fileFullName.Replace("//images", "");
-                    default: return fileFullName.Replace("/images", "");
+                    case true: return fileFullName.Replace(host.ContentRootPath+"//images", "");
+                    default: return fileFullName.Replace(host.ContentRootPath+"/images", "");
                 }
             }
             catch (Exception ex)
@@ -131,14 +131,14 @@ namespace hotel_api.util
         }
 
 
-        public static bool deleteFile(string filePath, IWebHostEnvironment host, string? addtionUrl = null)
+        public static bool deleteFile(string filePath, IWebHostEnvironment host)
         {
             try
             {
-                var fileRealPath = addtionUrl != null ? filePath.Replace(addtionUrl, "") : filePath;
-                if (File.Exists(host.ContentRootPath + "/images" + fileRealPath))
+                var fileRealPath = Path.Combine(host.ContentRootPath, filePath);
+                if (File.Exists( fileRealPath))
                 {
-                    File.Delete(host.ContentRootPath + "/images" + fileRealPath);
+                    File.Delete( fileRealPath);
                     return true;
                 }
 

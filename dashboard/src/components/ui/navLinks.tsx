@@ -6,6 +6,7 @@ import myInfo from '../../../public/user.svg'
 import varient from '../../../public/products-major.svg'
 import users from '../../../public/users.svg'
 import store from '../../../public/store.svg'
+import category from '../../../public/category.svg'
 import Image from 'next/image'
 
 export interface iNavProp {
@@ -40,17 +41,24 @@ const NavLink = ({ selectedIndex, setSelectedIndex }: iNavProp) => {
         },
 
         {
-            name: "Users",
-            icon: users,
+            name: "Category",
+            icon: category,
             currentIndex: 3,
             selectedIndex: selectedIndex,
             chageSelectedIndex: setSelectedIndex
         },
 
         {
+            name: "Users",
+            icon: users,
+            currentIndex: 4,
+            selectedIndex: selectedIndex,
+            chageSelectedIndex: setSelectedIndex
+        },
+        {
             name: "Stores",
             icon: store,
-            currentIndex: 4,
+            currentIndex: 5,
             selectedIndex: selectedIndex,
             chageSelectedIndex: setSelectedIndex
         },

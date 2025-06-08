@@ -45,7 +45,7 @@ public class CategoryController : ControllerBase
             return NoContent();
 
         return Ok(categories);
-    }
+    } 
 
 
     [HttpPost("")]
@@ -103,7 +103,8 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> updateCateogry([FromForm] CategoryRequestUpdatteDto category)
+    public async Task<IActionResult> updateCateogry(
+        [FromForm] CategoryRequestUpdatteDto category)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -137,7 +138,7 @@ public class CategoryController : ControllerBase
 
         bool isExistName = false;
 
-        if (category?.name != null)
+        if (category?.name != null&&category.name!=categoryHolder.name)
             isExistName = await _categoryData.isExist(category.name);
 
         if (isExistName && categoryHolder.id != category!.id)
@@ -152,11 +153,11 @@ public class CategoryController : ControllerBase
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
         }
 
-
         var result = await _categoryData.updateCategory(
             category!.id,
-            category.name,
-            imagePath);
+            categoryHolder.name != category.name ? category.name : null,
+            imagePath
+        );
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
@@ -165,12 +166,12 @@ public class CategoryController : ControllerBase
     }
 
 
-    [HttpPut("status/{categoryId:guid}")]
+    [HttpDelete("{categoryId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> blockOrUnBlockCateogry(Guid categoryId)
+    public async Task<IActionResult> deleteCategory(Guid categoryId)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -199,11 +200,11 @@ public class CategoryController : ControllerBase
         if (categoryHolder == null)
             return NotFound("القسم غير موجود");
 
-        var result = await _categoryData.blockOrUnBlockCategory(
+        var result = await _categoryData.deleteCategory(
             categoryId);
 
         if (result == null)
-            return BadRequest("حدثت مشكلة اثناء حفظ القسم");
+            return BadRequest("حدثت مشكلة اثناء حذف القسم");
 
         return NoContent();
     }

@@ -4,6 +4,8 @@ import { iUserInfo } from "../model/iUserInfo";
 import { iUserUpdateInfoDto } from "../dto/iUserUpdateInfoDto";
 import { iVarient } from "../model/iVarient";
 import iStore from "../model/iStore";
+import iCategory from "../model/iCategory";
+import iCategoryDto from "../dto/iCategoryDto";
 
 export async function getMyInfo() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User';
@@ -147,7 +149,7 @@ export async function deleteVarient(id: string) {
             },
             validateStatus: (status) => status >= 200 && status < 300
         })
-        
+
         if (result.status == 204) {
             return true
         } else {
@@ -171,19 +173,19 @@ export async function deleteVarient(id: string) {
 
 }
 
-export async function createVarient(data:iVarient) {
+export async function createVarient(data: iVarient) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.post(url,{
-                   id:data.id,
-                   name:data.name
-        } ,{
+        var result = await axios.post(url, {
+            id: data.id,
+            name: data.name
+        }, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },
         })
-        
+
         if (result.status == 204) {
             return true
         } else {
@@ -208,19 +210,19 @@ export async function createVarient(data:iVarient) {
 }
 
 
-export async function updateVarient(data:iVarient) {
+export async function updateVarient(data: iVarient) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.put(url,{
-                   id:data.id,
-                   name:data.name
-        } ,{
+        var result = await axios.put(url, {
+            id: data.id,
+            name: data.name
+        }, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },
         })
-        
+
         if (result.status == 204) {
             return true
         } else {
@@ -255,7 +257,7 @@ export async function getUserPages() {
                 'Authorization': `Bearer ${Util.token}`
             }
         })
-        return result.data as number 
+        return result.data as number
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -275,7 +277,7 @@ export async function getUserPages() {
 
 
 
-export async function getUserAtPage(pageNumber:number) {
+export async function getUserAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
@@ -284,7 +286,7 @@ export async function getUserAtPage(pageNumber:number) {
                 'Authorization': `Bearer ${Util.token}`
             }
         })
-        return (result.data as iUserInfo[]) 
+        return (result.data as iUserInfo[])
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -303,7 +305,7 @@ export async function getUserAtPage(pageNumber:number) {
 }
 
 
-export async function changeUserStatus(userId:string) {
+export async function changeUserStatus(userId: string) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/status/${userId}`;
     console.log(`funtion is Called ${url}`)
     console.log(`token ${userId}`)
@@ -313,7 +315,7 @@ export async function changeUserStatus(userId:string) {
                 'Authorization': `Bearer ${Util.token}`
             }
         })
-        return result.data as boolean 
+        return result.data as boolean
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -344,7 +346,7 @@ export async function getStorePages() {
                 'Authorization': `Bearer ${Util.token}`
             }
         })
-        return result.data as number 
+        return result.data as number
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -364,7 +366,7 @@ export async function getStorePages() {
 
 
 
-export async function getStoreAtPage(pageNumber:number) {
+export async function getStoreAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
@@ -373,7 +375,7 @@ export async function getStoreAtPage(pageNumber:number) {
                 'Authorization': `Bearer ${Util.token}`
             }
         })
-        return (result.data as iStore[]) 
+        return (result.data as iStore[])
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -391,18 +393,18 @@ export async function getStoreAtPage(pageNumber:number) {
 
 }
 
-export async function changeStoreStatus(store_id:string) {
+export async function changeStoreStatus(store_id: string) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/status/${store_id}`;
     console.log(`funtion is Called ${url}`)
     console.log(`token ${store_id}`)
     try {
-        var result = await axios.put(url, undefined,{
+        var result = await axios.put(url, undefined, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },
-        
+
         })
-        return result.data as boolean 
+        return result.data as boolean
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";
@@ -421,3 +423,151 @@ export async function changeStoreStatus(store_id:string) {
 }
 
 
+//category
+
+
+export async function getCategory(pageNumber: number) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Category/all/${pageNumber}`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return result.data as iCategory[]
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+export async function createCategory(data: iCategoryDto) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Category`;
+    console.log(`funtion is Called ${url}`)
+    try {
+
+        const dataHolder = new FormData();
+        dataHolder.append("name", data.name)
+        if (data.image != undefined)
+            dataHolder.append("image", data.image)
+
+        var result = await axios.post(url, dataHolder, {
+
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            },
+        })
+
+        if (result.status == 204) {
+            return true
+        } else {
+            return false
+        }
+
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+export async function deleteCategory(id: string) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Category/${id}`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.delete(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            },
+            validateStatus: (status) => status >= 200 && status < 300
+        })
+
+        if (result.status == 204) {
+            return true
+        } else {
+            return false
+        }
+
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+export async function updateCategory(data: iCategoryDto) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Category`;
+    console.log(`funtion is Called ${url}`)
+    try {
+
+        const dataHolder = new FormData();
+        dataHolder.append("id", data.id!!);
+        if (data.name.trim().length > 0)
+            dataHolder.append("name", data.name)
+        if (data.image != undefined)
+            dataHolder.append("image", data.image)
+
+        var result = await axios.put(url, dataHolder, {
+
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            },
+        })
+
+        if (result.status == 204) {
+            return true
+        } else {
+            return false
+        }
+
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}

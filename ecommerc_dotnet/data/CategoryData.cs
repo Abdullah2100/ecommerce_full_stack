@@ -19,7 +19,8 @@ public class CategoryData
     }
 
     public async Task<List<CategoryResponseDto>?>getCategories(
-        IConfig services,
+       
+        IConfig services, 
         int pageNumber = 1,
         int pageSize = 20)
     {
@@ -48,6 +49,8 @@ public class CategoryData
         }
     }
 
+    
+    
     public async Task<Category?> getCategory(
         Guid id)
     {
@@ -113,14 +116,15 @@ public class CategoryData
     }
 
 
-    public async Task<bool?> blockOrUnBlockCategory(
+    public async Task<bool?> deleteCategory(
         Guid id
     )
     {
         try
         {
             var category = await _dbContext.Category.FindAsync(id);
-            category!.isBlocked = !category.isBlocked;
+            if (category == null) return null;
+             _dbContext.Remove(category);
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -128,7 +132,7 @@ public class CategoryData
         {
             Console.Write("error from  update  category " + ex.Message);
 
-            return false;
+            return null;
         }
     }
 

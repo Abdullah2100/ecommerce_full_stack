@@ -3,6 +3,7 @@ import MyInfoPage from "./myinfoPage"
 import VarientPage from "./varientPage"
 import UsersPage from "./usersPage"
 import StoresPage from "./storesPage"
+import CategoryPage from "./CategoryPage"
 
 interface iMainPageProp {
     currentPage: number
@@ -19,8 +20,10 @@ const MainPage = ({ currentPage }: iMainPageProp) => {
                 case 2:
                     return <VarientPage />
                 case 3:
-                    return <UsersPage />
+                    return <CategoryPage />
                 case 4:
+                    return <UsersPage />
+                case 5:
                     return <StoresPage />
                 default:
                     return null;
