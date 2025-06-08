@@ -1,5 +1,6 @@
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using hotel_api.util;
@@ -108,6 +109,69 @@ public class ProductData
         {
             Console.WriteLine("this error occured from getting product " + ex.Message);
             return new List<ProductResponseDto>();
+        }
+    }
+    public async Task<List<ProductsResponseAdminDto>> getProductsAdmin(
+        int pageNumber,
+        int pageSize = 25)
+    {
+        try
+        {
+            return await _dbContext.Products
+                .AsNoTracking()
+                .Include(pro => pro.productImages)
+                .Include(pro=>pro.subCategory)
+                .Include(pro => pro.productVarients)
+                .Include(pro => pro.store)
+                .OrderByDescending(pr => pr.create_at)
+                .Select(pr => new ProductsResponseAdminDto() 
+                {
+                    id = pr.id,
+                    name = pr.name,
+                    description = pr.description,
+                    thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                    subcategory = pr.subCategory.name,
+                    store = pr.store.name,
+                    price = pr.price,
+                    productVarients = pr.productVarients
+                        .Where(pv => pv.product_id == pr.id)
+                        .GroupBy(pv => pv.varient_id, (key, g)
+                            => g.Select(
+                                pv => new ProductVarientResonseAdminDto
+                                {
+                                    name = pv.name,
+                                    precentage = pv.precentage,
+                                    varientName = _dbContext.Varients.FirstOrDefault(var=>var.id==(Guid)pv.varient_id!)!.name
+                                }
+                            ).ToList()
+                        ).ToList(),
+                    productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
+                })
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this error occured from getting product " + ex.Message);
+            return new List<ProductsResponseAdminDto>();
+        }
+    }
+
+  public async Task<int> getProduct()
+    {
+        try
+        {
+            var result = await _dbContext.Products
+                .AsNoTracking()
+                .CountAsync();
+            if (result == 0) return 0;
+            return (int)Math.Ceiling((double)result / 25);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this error occured from getting product " + ex.Message);
+            return 0;
         }
     }
 

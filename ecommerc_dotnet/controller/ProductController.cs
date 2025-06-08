@@ -94,7 +94,7 @@ public class ProductController : ControllerBase
     }
 
 
-    [HttpGet("{pageNumber:int}")]
+    [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getProducts
@@ -108,6 +108,72 @@ public class ProductController : ControllerBase
         return StatusCode(200, result);
     }
 
+    [HttpGet("{pageNumber:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getProductsAdmin
+        (int pageNumber)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid userId = Guid.Empty;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            userId = outID;
+        }
+
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+        
+        var user = await _userData.getUserById(userId);
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+        if (user.role == 1)
+            return BadRequest("ليس لديك الصلاحية");
+        var result = await _productData.getProductsAdmin(pageNumber);
+
+        if (result.Count == 0)
+            return NoContent();
+        
+        return StatusCode(200, result);
+    }
+    
+    
+    [HttpGet("pages")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> getProductsPagess()
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid userId = Guid.Empty;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            userId = outID;
+        }
+
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(userId);
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+        if (user.role == 1)
+            return BadRequest("ليس لديك الصلاحية");
+        
+        var result = await _productData.getProduct();
+
+        
+        return StatusCode(200, result);
+    }
     
 
     [HttpPost("")]

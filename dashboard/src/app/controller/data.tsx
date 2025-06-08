@@ -6,6 +6,7 @@ import { iVarient } from "../model/iVarient";
 import iStore from "../model/iStore";
 import iCategory from "../model/iCategory";
 import iCategoryDto from "../dto/iCategoryDto";
+import iProductResponseDto from "../dto/iProductResponseDto";
 
 export async function getMyInfo() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User';
@@ -571,3 +572,62 @@ export async function updateCategory(data: iCategoryDto) {
     }
 
 }
+
+
+//product
+
+export async function getProductPages() {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Product/pages`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return result.data as number
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+export async function getProductAtPage(pageNumber: number) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Product/${pageNumber}`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return (result.data as iProductResponseDto[])
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
