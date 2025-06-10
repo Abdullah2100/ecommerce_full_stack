@@ -4,6 +4,7 @@ import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.dto.request.AddressRequestDto
 import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
 import com.example.e_commercompose.dto.request.CartRequestDto
+import com.example.e_commercompose.dto.request.OrderRequestItemsDto
 import com.example.e_commercompose.dto.request.SubCategoryRequestDto
 import com.example.e_commercompose.dto.request.SubCategoryUpdateDto
 import com.example.e_commercompose.dto.response.AddressResponseDto
@@ -17,6 +18,7 @@ import com.example.e_commercompose.dto.response.VarientResponseDto
 import com.example.e_commercompose.model.MyInfoUpdate
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.util.Secrets
+import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -1348,6 +1350,45 @@ class HomeRepository(val client: HttpClient) {
 
                 NetworkCallHandler.Successful(true)
 
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getMyOrderItemForStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/${store_id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+
+                NetworkCallHandler.Successful(result.body<List<OrderItemResponseDto>>())
+
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
             } else {
 
                 NetworkCallHandler.Error(result.body<String>())

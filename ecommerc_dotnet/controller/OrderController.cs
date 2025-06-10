@@ -43,9 +43,7 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> createOrder
-    (
-        [FromBody] OrderRequestDto order
-    )
+        ([FromBody] OrderRequestDto order)
     {
         var authorizationHeader = HttpContext.Request.Headers["Authorization"];
         var id = AuthinticationServices.GetPayloadFromToken("id",
@@ -69,7 +67,7 @@ public class OrderController : ControllerBase
         if (user.isDeleted == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var isTotalPriceValid =  isValideTotalPrice(order.totalPrice, order.items);
+        var isTotalPriceValid = isValideTotalPrice(order.totalPrice, order.items);
 
         if (isTotalPriceValid == false)
             return Conflict("اجمالي السعر غير صحيح");
@@ -89,14 +87,15 @@ public class OrderController : ControllerBase
         var messagin = FirebaseMessaging.DefaultInstance;
         await messagin.SendAsync(new
             Message
+
+        {
+            Notification = new Notification
             {
-                Notification = new Notification
-                {
-                    Title = "Your order has been created",
-                    Body = "Your order has been created",
-                },
-                Token = user.deviceToken
-            });
+                Title = "Your order has been created",
+                Body = "Your order has been created",
+            },
+            Token = user.deviceToken
+        });
 
         return StatusCode(201, result);
     }
@@ -189,6 +188,46 @@ public class OrderController : ControllerBase
         return StatusCode(200, result);
     }
 
+    [HttpGet("{store_id}/{pageNumber}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getOrdersItemForStore
+    (
+        Guid store_id,
+        int pageNumber = 1
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.isDeleted == true )
+            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
+
+        var result = await _orderData.getOrderItemBelongToStore(store_id, pageNumber, 25);
+        if (result == null || result.Count < 1)
+            return NoContent();
+        return StatusCode(200, result);
+    }
+
+
     [HttpGet("me/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -227,6 +266,7 @@ public class OrderController : ControllerBase
         return StatusCode(200, result);
     }
 
+
     [HttpDelete("{order_id}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -262,9 +302,172 @@ public class OrderController : ControllerBase
             return NotFound("الطلب غير موجود");
         if (orderData.status != 1)
             return BadRequest("لا يمكن الغاء هذا الطلب لانه تمت معالجته سابقا");
-        var result = await _orderData.deleteOrder(idHolder.Value,order_id);
-        if (result ==false)
+        var result = await _orderData.deleteOrder(idHolder.Value, order_id);
+        if (result == false)
             return BadRequest("حدثة مشكلة اثناء حذف البيانات");
         return NoContent();
     }
+
+    [HttpGet("pages")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getOrderPages()
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.role == 1)
+            return BadRequest("فقط مدير النظام لديه الصلاحية");
+
+        var pages = await _orderData.getOrdersSize();
+
+        return Ok(pages);
+    }
+
+
+    [HttpPut()]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> updateOrderStatus
+    (
+        [FromBody] OrderStatusRequestDto orderStatus
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.role == 1)
+            return BadRequest("فقط مدير النظام لديه الصلاحية");
+
+        if (orderStatus.status > 6 || orderStatus.status < 0)
+            return BadRequest("رقم الحالة الذي تم ادخالة غير مدرج");
+
+        var result = await _orderData.updateOrderStatus(orderStatus.id, orderStatus.status);
+        if (result == false)
+            return BadRequest("حدثة مشكلة اثناء تعديل الحالة");
+
+        if (orderStatus.status == 2)
+        {
+            var order = await _orderData.getOrder(orderStatus.id);
+            await _hubContext.Clients.All.SendAsync("orderExcptedByAdmin", order);
+            var storesId = order!.order_items
+                .DistinctBy(or => or.product.store_id)
+                .Select(or => or.product.store_id).ToList();
+            await sendingNotificationToAllStore(storesId);
+        }
+
+        return NoContent();
+    }
+
+
+    [HttpGet("orderStatusDeffination")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getOrderStatus()
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+
+        List<string> orderStatusDefination = new List<string>
+        {
+            "Regected",
+            "Inprogress",
+            "Excpected",
+            "Inprogress",
+            "Inway",
+            "Received",
+            "Completed",
+        };
+        return Ok(orderStatusDefination);
+    }
+
+    private async Task<bool> sendingNotificationToAllStore(List<Guid> stores_id)
+    {
+        try
+        {
+            foreach (var store_id in stores_id)
+            {
+                var userData = await _userData.getUserByStoreId(store_id);
+
+                var messagin = FirebaseMessaging.DefaultInstance;
+                await messagin.SendAsync(new
+                    Message
+
+                {
+                    Notification = new Notification
+                    {
+                        Title = "There is Order Belong To Your Store",
+                        Body = "",
+                    },
+                    Token = userData.deviceToken
+                });
+            }
+
+            return true;
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this error from sending notificationToUser" + ex.Message);
+            return true;
+        }
+        ;
+    }
+
+
 }

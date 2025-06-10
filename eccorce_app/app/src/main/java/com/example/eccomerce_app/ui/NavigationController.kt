@@ -28,6 +28,7 @@ import com.example.e_commercompose.ui.view.home.OrderScreen
 import com.example.e_commercompose.ui.view.location.LocationHomeScreen
 import com.example.e_commercompose.ui.view.location.LocationsList
 import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
 
 
 @Composable
@@ -398,6 +399,26 @@ fun NavController(
                 }
             ) {
                 OrderScreen(
+                    nav = nav,
+                    homeViewModel = homeViewModle
+                )
+
+            }
+
+            composable<Screens.OrderForMyStore>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                OrderForMyStoreScreen(
                     nav = nav,
                     homeViewModel = homeViewModle
                 )

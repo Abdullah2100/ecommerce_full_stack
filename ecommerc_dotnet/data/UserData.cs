@@ -191,7 +191,22 @@ public class UserData
         }
     }
 
-
+  public async Task<User?> getUserByStoreId(Guid store_id)
+    {
+        try
+        {
+            return await _dbContext.Users
+                .Include(st => st.Store)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Store!=null&&u.Store.id == store_id);
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
     public async Task<bool> isExist(Guid userid)
     {
         try

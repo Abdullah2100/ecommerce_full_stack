@@ -39,10 +39,10 @@ import com.example.e_commercompose.viewModel.HomeViewModel
 fun AccountPage(
     nav: NavHostController,
     homeViewModel: HomeViewModel
-){
+) {
 
-    var myInfo= homeViewModel.myInfo.collectAsState()
-    var storeId=myInfo.value?.store_id
+    var myInfo = homeViewModel.myInfo.collectAsState()
+    var storeId = myInfo.value?.store_id
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -52,9 +52,9 @@ fun AccountPage(
             .background(Color.White),
         topBar = {
             CenterAlignedTopAppBar(
-               colors = TopAppBarDefaults.topAppBarColors(
-                   containerColor = Color.White
-               ),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                ),
                 title = {
                     Text(
                         "Account",
@@ -86,41 +86,48 @@ fun AccountPage(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-                Column(modifier=Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-                    .padding(top = it.calculateTopPadding()+20.dp)
-                    .padding(horizontal = 15.dp)
-                    ,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ){
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(top = it.calculateTopPadding() + 20.dp)
+                .padding(horizontal = 15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
 
-                    AccountCustomBottom("Your Profile",R.drawable.user,{
-                        nav.navigate(Screens.Profile)
-                    })
-                    AccountCustomBottom("Locations",R.drawable.location_address_list,{
-                        nav.navigate(Screens.Address)
-                    })
-                    AccountCustomBottom("My Order",R.drawable.order,{})
-                    AccountCustomBottom("Payment Me",R.drawable.credit_card,{})
-                    AccountCustomBottom("Notifications",R.drawable.notification,{})
-                    AccountCustomBottom("My Store",R.drawable.store,{
-                        nav.navigate(Screens.Store(
-                            if (storeId==null)null else storeId.toString(),
-                            false
-                        ))
-                    })
-                    LogoutBotton("Logout",R.drawable.logout,{
-                        homeViewModel.logout()
-                        nav.navigate(Screens.AuthGraph)
-                        {
-                            popUpTo(nav.graph.id){
-                                inclusive=true
-                            }
-                        }
-                    })
+            AccountCustomBottom("Your Profile", R.drawable.user, {
+                nav.navigate(Screens.Profile)
+            })
+            AccountCustomBottom("Locations", R.drawable.location_address_list, {
+                nav.navigate(Screens.Address)
+            })
+            AccountCustomBottom("My Order", R.drawable.order, {})
+            AccountCustomBottom("Payment Me", R.drawable.credit_card, {})
+            AccountCustomBottom("Notifications", R.drawable.notification_accout, {})
+            AccountCustomBottom("My Store", R.drawable.store, {
+                nav.navigate(
+                    Screens.Store(
+                        if (storeId == null) null else storeId.toString(),
+                        false
+                    )
+                )
+            })
 
+            if (myInfo.value?.store_id != null)
+                AccountCustomBottom("Order For My Store", R.drawable.order_belong_to_store, {
+                    nav.navigate(Screens.OrderForMyStore)
+                })
+            LogoutBotton("Logout", R.drawable.logout, {
+                homeViewModel.logout()
+                nav.navigate(Screens.AuthGraph)
+                {
+                    popUpTo(nav.graph.id) {
+                        inclusive = true
+                    }
                 }
+            })
+
+        }
     }
 
 }

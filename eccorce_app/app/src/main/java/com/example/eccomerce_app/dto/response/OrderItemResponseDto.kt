@@ -11,5 +11,7 @@ data class OrderItemResponseDto(
     val price: Double,
     val quanity:Int,
     val product: OrderProductResponseDto,
-    val productVarient:List<OrderVarientResponseDto>
+    val productVarient:List<OrderVarientResponseDto>,
+    val orderItemStatus: String
+
 )

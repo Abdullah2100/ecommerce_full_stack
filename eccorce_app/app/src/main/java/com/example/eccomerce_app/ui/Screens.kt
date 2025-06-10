@@ -80,4 +80,7 @@ object Screens {
 
     @Serializable
     object Order
+
+    @Serializable
+    object OrderForMyStore
 }

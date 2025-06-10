@@ -124,23 +124,24 @@ object DtoToModel {
         )
     }
 
-    fun OrderItemResponseDto.toOrderResponse(): OrderItem{
+    fun OrderItemResponseDto.toOrderItem(): OrderItem{
         return OrderItem(
             id=this.id,
             quanity= this.quanity,
             price = this.price,
             product = this.product.toOrderProduct(),
-            productVarient = this.productVarient.map { it.toOrderVarient() }
+            productVarient = this.productVarient.map { it.toOrderVarient() },
+             orderItemStatus = this.orderItemStatus
         )
     }
 
-    fun OrderResponseDto.toOrder():Order{
+    fun OrderResponseDto.toOrderItem():Order{
        return Order(
           id = this.id,
            latitude = this.latitude,
            longitude = this.longitude,
            user_phone = this.user_phone,
-           order_items = this.order_items.map { it.toOrderResponse() },
+           order_items = this.order_items.map { it.toOrderItem() },
            status = this.status
        )
     }

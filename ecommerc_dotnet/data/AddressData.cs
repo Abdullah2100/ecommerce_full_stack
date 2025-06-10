@@ -134,11 +134,11 @@ public class AddressData
         try
         {
 
-            var result = _dbContext.Address
-                .Where(ad => ad.owner_id == userId && ad.id != addressId);
-            await result
-                .ForEachAsync(u => u.isCurrent = false);
-           var currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.id==addressId);
+            var result =await _dbContext.Address
+                .Where(ad => ad.owner_id == userId && ad.id != addressId)
+                .ExecuteUpdateAsync(ad => ad.SetProperty(va => va.isCurrent, true));
+           
+            var currentAddress =await  _dbContext.Address.FindAsync(addressId);
            
            if(currentAddress!=null)
                currentAddress.isCurrent = true;

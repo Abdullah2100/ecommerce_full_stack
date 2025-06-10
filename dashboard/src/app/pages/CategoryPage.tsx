@@ -9,7 +9,7 @@ import { iVarient } from "../model/iVarient";
 import { Button } from "@/components/ui/button";
 import { EditeIcon } from "../../../public/editeIcon";
 import { DeleteIcon } from "../../../public/delete";
-import iCategoryDto from "../dto/iCategoryDto";
+import iCategoryDto from "../dto/response/iCategoryDto";
 import edite from '../../../public/edite.svg'
 
 const CategoryPage = () => {

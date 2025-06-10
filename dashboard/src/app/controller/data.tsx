@@ -1,12 +1,14 @@
 import axios from "axios";
 import Util from "../util/globle";
 import { iUserInfo } from "../model/iUserInfo";
-import { iUserUpdateInfoDto } from "../dto/iUserUpdateInfoDto";
+import { iUserUpdateInfoDto } from "../dto/response/iUserUpdateInfoDto";
 import { iVarient } from "../model/iVarient";
 import iStore from "../model/iStore";
 import iCategory from "../model/iCategory";
-import iCategoryDto from "../dto/iCategoryDto";
-import iProductResponseDto from "../dto/iProductResponseDto";
+import iCategoryDto from "../dto/response/iCategoryDto";
+import iProductResponseDto from "../dto/response/iProductResponseDto";
+import iOrderResponseDto from "../dto/response/iOrderResponseDto";
+import iOrderStatusUpdateRequestDto from "../dto/request/iOrderStatusUpdateRequestDto";
 
 export async function getMyInfo() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User';
@@ -630,4 +632,134 @@ export async function getProductAtPage(pageNumber: number) {
     }
 
 }
+
+//order
+
+
+export async function getOrderPages() {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order/pages`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return result.data as number
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+export async function getOrderAtPage(pageNumber: number) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order/all/${pageNumber}`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return (result.data as iOrderResponseDto[])
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+export async function getOrderStatusDefination(pageNumber: number) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order/orderStatusDeffination`;
+    console.log(`funtion is Called ${url}`)
+    try {
+        var result = await axios.get(url, {
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            }
+        })
+        return (result.data as string[])
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
+
+
+export async function updateOrderStatus(orderStatus:iOrderStatusUpdateRequestDto) {
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order`;
+    console.log(`funtion is Called ${url}`)
+    try {
+
+
+        const result =  await axios.put(url, {
+            id: orderStatus.id,
+            status: orderStatus.statsu
+        }, {
+
+            headers: {
+                'Authorization': `Bearer ${Util.token}`
+            },
+            validateStatus: (status) => status >= 200 && status < 300
+
+        },
+
+        )
+        if (result.status == 204) {
+            return true
+        } else {
+            return false
+        }
+
+    } catch (error) {
+        // Extract meaningful error message
+        let errorMessage = "An unexpected error occurred";
+
+        if (axios.isAxiosError(error)) {
+            // Server responded with error message
+            errorMessage = error.response?.data || error.message;
+        } else if (error instanceof Error) {
+            // Other JavaScript errors
+            errorMessage = error.message;
+        }
+
+        throw new Error(errorMessage);
+    }
+
+}
+
 

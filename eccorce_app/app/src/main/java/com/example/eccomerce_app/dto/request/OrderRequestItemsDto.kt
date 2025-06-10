@@ -14,6 +14,5 @@ data class OrderRequestItemsDto(
     @Serializable(with = UUIDKserialize::class)
     val product_Id: UUID,
     @Serializable(with = UUIDListKserialize::class)
-    val products_varient_id: List<UUID>
-
+    val products_varient_id: List<UUID>,
 )

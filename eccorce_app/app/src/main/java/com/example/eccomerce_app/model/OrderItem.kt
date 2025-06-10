@@ -11,5 +11,7 @@ data class OrderItem(
     val price: Double,
     val quanity:Int,
     val product: OrderProduct,
-    val productVarient:List<OrderVarient>
+    val productVarient:List<OrderVarient>,
+    val orderItemStatus: String
+
 )

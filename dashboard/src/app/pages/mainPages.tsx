@@ -5,6 +5,7 @@ import UsersPage from "./usersPage"
 import StoresPage from "./storesPage"
 import CategoryPage from "./CategoryPage"
 import ProductPage from "./productPage"
+import OrderPage from "./orderPage"
 
 interface iMainPageProp {
     currentPage: number
@@ -28,6 +29,8 @@ const MainPage = ({ currentPage }: iMainPageProp) => {
                     return <StoresPage />
                 case 6:
                     return <ProductPage />
+                case 7:
+                    return <OrderPage/>
                 default:
                     return null;
             }

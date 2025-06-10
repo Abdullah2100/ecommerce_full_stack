@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import InputWithTitle from "@/components/ui/inputWithTitle";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { iUserUpdateInfoDto } from "../dto/iUserUpdateInfoDto";
+import { iUserUpdateInfoDto } from "../dto/response/iUserUpdateInfoDto";
 import edite from '../../../public/edite.svg'
 import user from '../../../public/user.svg'
 import { Button } from "@/components/ui/button";

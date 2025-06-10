@@ -28,7 +28,7 @@ import com.example.e_commercompose.model.Category
 import com.example.e_commercompose.model.DtoToModel.toAddress
 import com.example.e_commercompose.model.DtoToModel.toBanner
 import com.example.e_commercompose.model.DtoToModel.toCategory
-import com.example.e_commercompose.model.DtoToModel.toOrder
+import com.example.e_commercompose.model.DtoToModel.toOrderItem
 import com.example.e_commercompose.model.DtoToModel.toProdcut
 import com.example.e_commercompose.model.DtoToModel.toStore
 import com.example.e_commercompose.model.DtoToModel.toSubCategory
@@ -42,9 +42,11 @@ import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.UserModel
 import com.example.e_commercompose.model.VarientModel
+import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.eccomerce_app.dto.response.StoreStatusResponseDto
 import com.example.eccomerce_app.model.Order
+import com.example.eccomerce_app.model.OrderItem
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -98,6 +100,8 @@ class HomeViewModel(
     private var _products = MutableStateFlow<List<ProductModel>?>(null);
     var products = _products.asStateFlow();
 
+    private var _orderItemForMyStore = MutableStateFlow<List<OrderItem>?>(null);
+    var orderItemForMyStore = _orderItemForMyStore.asStateFlow();
     private var _cartImes = MutableStateFlow<CartModel>(
         CartModel(
             0.0,
@@ -249,10 +253,12 @@ class HomeViewModel(
         getVarients(1)
         getProducts(1)
         getMyOrder(1)
+
         if (webSocket != null) {
             connection()
         }
     }
+
     override fun onCleared() {
         viewModelScope.launch(Dispatchers.IO) {
             if (_hub.value != null)
@@ -302,6 +308,29 @@ class HomeViewModel(
                     },
                     StoreStatusResponseDto::class.java
                 )
+
+                _hub.value!!.on(
+                    "orderExcptedByAdmin",
+                    {
+                        response->
+                        val orderItemList = mutableListOf<OrderItem>();
+
+                        response.order_items.forEach{ value->
+                            if(value.product.store_id == myInfo.value?.store_id){
+                                orderItemList.add(value.toOrderItem())
+                            }
+                        }
+                        if(_orderItemForMyStore.value!=null)
+                        {
+                            orderItemList.addAll(_orderItemForMyStore.value!!)
+                        }
+                        viewModelScope.launch(Dispatchers.IO) {
+                            _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }.toList())
+                        }
+                    },
+                    OrderResponseDto::class.java
+                )
+
             }
 
     }
@@ -560,6 +589,11 @@ class HomeViewModel(
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as UserDto
                     _myInfo.emit(data.toUser())
+
+                    if(_orderItemForMyStore.value==null){
+                        getMyOrderItemBelongToMyStore(myInfo.value!!.store_id,1)
+
+                    }
                 }
 
                 is NetworkCallHandler.Error -> {
@@ -1338,7 +1372,7 @@ class HomeViewModel(
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as OrderResponseDto
                 var orderList = mutableListOf<Order>()
-                orderList.add(data.toOrder())
+                orderList.add(data.toOrderItem())
                 if(!_orders.value.isNullOrEmpty())
                 {
                     orderList.addAll(_orders.value!!)
@@ -1369,7 +1403,7 @@ class HomeViewModel(
                is NetworkCallHandler.Successful<*> -> {
                    var data = result.data as List<OrderResponseDto>
                    var orderList = mutableListOf<Order>()
-                   orderList.addAll(data.map{it.toOrder()})
+                   orderList.addAll(data.map{it.toOrderItem()})
                    if(!_orders.value.isNullOrEmpty())
                    {
                        orderList.addAll(_orders.value!!)
@@ -1411,6 +1445,35 @@ class HomeViewModel(
             }
         }
 
+    }
+
+    fun getMyOrderItemBelongToMyStore(store_id: UUID , pageNumber:Int=1) {
+        viewModelScope.launch(Dispatchers.Main) {
+            var result = homeRepository.getMyOrderItemForStoreId(store_id,pageNumber)
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<OrderItemResponseDto>
+                    var orderItemList = mutableListOf<OrderItem>()
+                    orderItemList.addAll(data.map{it.toOrderItem()})
+                    if(!_orders.value.isNullOrEmpty())
+                    {
+                        orderItemList.addAll(_orderItemForMyStore.value!!)
+                    }
+                    val distinctOrderItem= orderItemList.distinctBy { it.id }.toList()
+                    _orderItemForMyStore.emit(distinctOrderItem)
+
+                }
+                is NetworkCallHandler.Error -> {
+                    var errorMessage = result.data as String
+                    Log.d("errorFromGettingOrder",errorMessage)
+                    if(_orderItemForMyStore.value==null)
+                    {
+                        _orderItemForMyStore.emit(emptyList())
+                    }
+                }
+            }
+
+        }
     }
 
 

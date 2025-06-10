@@ -1,4 +1,5 @@
 using ecommerc_dotnet.context;
+using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using Microsoft.AspNetCore.SignalR;
@@ -17,21 +18,26 @@ public class EcommercHub : Hub
         _dbContext = appDbContext;
         _config = config;
     }
+
     public async Task sendingNewBanner(BannerResponseDto banner)
     {
         await Clients.All.SendAsync("createdBanner", banner);
     }
 
     public async Task sendingNewOrder(OrderResponseDto order)
-      {
-          await Clients.All.SendAsync("createdOrder", order);
-      }
-    
-    
+    {
+        await Clients.All.SendAsync("createdOrder", order);
+    }
+
+
     public async Task updatingStoreStatus(StoreStatusResponseDto status)
     {
         await Clients.All.SendAsync("storeStatus", status);
     }
-     
-  
+
+
+    public async Task excptedOrderByAdmin(OrderResponseDto order)
+    {
+        await Clients.All.SendAsync("orderExcptedByAdmin", order);
+    }
 }
