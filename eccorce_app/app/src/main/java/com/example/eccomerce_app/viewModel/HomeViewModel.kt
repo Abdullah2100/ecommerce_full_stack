@@ -148,8 +148,6 @@ class HomeViewModel(
     }
 
 
-
-
     fun increaseCardItem(productId: UUID) {
         viewModelScope.launch {
             var copyproduct: CardProductModel? = null;
@@ -246,7 +244,7 @@ class HomeViewModel(
         initialFun()
     }
 
-    fun initialFun(){
+    fun initialFun() {
         getMyInfo()
         getCategories(1)
         getStoresBanner()
@@ -298,9 +296,11 @@ class HomeViewModel(
                     { result ->
 
                         viewModelScope.launch(Dispatchers.IO) {
-                            if(result.status==true){
-                                val productNotBelongToStore = _products.value?.filter { it.store_id!=result.storeId }
-                                val storeWithoutCurrentId = _stores.value?.filter { it.id!=result.storeId }
+                            if (result.status == true) {
+                                val productNotBelongToStore =
+                                    _products.value?.filter { it.store_id != result.storeId }
+                                val storeWithoutCurrentId =
+                                    _stores.value?.filter { it.id != result.storeId }
                                 _products.emit(productNotBelongToStore)
                                 _stores.emit(storeWithoutCurrentId)
                             }
@@ -311,17 +311,15 @@ class HomeViewModel(
 
                 _hub.value!!.on(
                     "orderExcptedByAdmin",
-                    {
-                        response->
+                    { response ->
                         val orderItemList = mutableListOf<OrderItem>();
 
-                        response.order_items.forEach{ value->
-                            if(value.product.store_id == myInfo.value?.store_id){
+                        response.order_items.forEach { value ->
+                            if (value.product.store_id == myInfo.value?.store_id) {
                                 orderItemList.add(value.toOrderItem())
                             }
                         }
-                        if(_orderItemForMyStore.value!=null)
-                        {
+                        if (_orderItemForMyStore.value != null) {
                             orderItemList.addAll(_orderItemForMyStore.value!!)
                         }
                         viewModelScope.launch(Dispatchers.IO) {
@@ -590,8 +588,8 @@ class HomeViewModel(
                     var data = result.data as UserDto
                     _myInfo.emit(data.toUser())
 
-                    if(_orderItemForMyStore.value==null){
-                        getMyOrderItemBelongToMyStore(myInfo.value!!.store_id,1)
+                    if (_orderItemForMyStore.value == null) {
+                        getMyOrderItemBelongToMyStore(myInfo.value!!.store_id, 1)
 
                     }
                 }
@@ -1365,28 +1363,29 @@ class HomeViewModel(
     }
 
 
-
-    suspend  fun submitCartTitems(): String? {
+    suspend fun submitCartTitems(): String? {
         var result = homeRepository.submitOrder(_cartImes.value.toOrderRequestDto())
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as OrderResponseDto
                 var orderList = mutableListOf<Order>()
                 orderList.add(data.toOrderItem())
-                if(!_orders.value.isNullOrEmpty())
-                {
+                if (!_orders.value.isNullOrEmpty()) {
                     orderList.addAll(_orders.value!!)
                 }
                 _orders.emit(orderList)
-                _cartImes.emit(CartModel(
-                    0.0,
-                    0.0,
-                    0.0,
-                    UUID.randomUUID(),
-                    emptyList()
-                ))
+                _cartImes.emit(
+                    CartModel(
+                        0.0,
+                        0.0,
+                        0.0,
+                        UUID.randomUUID(),
+                        emptyList()
+                    )
+                )
                 return null
             }
+
             is NetworkCallHandler.Error -> {
                 var errorMessage = result.data as String
                 return errorMessage
@@ -1396,49 +1395,51 @@ class HomeViewModel(
     }
 
 
-      fun getMyOrder(pageNumber:Int=1) {
-       viewModelScope.launch(Dispatchers.Main) {
-           var result = homeRepository.getMyOrders(pageNumber)
-           when (result) {
-               is NetworkCallHandler.Successful<*> -> {
-                   var data = result.data as List<OrderResponseDto>
-                   var orderList = mutableListOf<Order>()
-                   orderList.addAll(data.map{it.toOrderItem()})
-                   if(!_orders.value.isNullOrEmpty())
-                   {
-                       orderList.addAll(_orders.value!!)
-                   }
-                   _orders.emit(orderList)
-                   _cartImes.emit(CartModel(
-                       0.0,
-                       0.0,
-                       0.0,
-                       UUID.randomUUID(),
-                       emptyList()
-                   ))
-               }
-               is NetworkCallHandler.Error -> {
-                   var errorMessage = result.data as String
-                   Log.d("errorFromGettingOrder",errorMessage)
-               }
-           }
+    fun getMyOrder(pageNumber: Int = 1) {
+        viewModelScope.launch(Dispatchers.Main) {
+            var result = homeRepository.getMyOrders(pageNumber)
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<OrderResponseDto>
+                    var orderList = mutableListOf<Order>()
+                    orderList.addAll(data.map { it.toOrderItem() })
+                    if (!_orders.value.isNullOrEmpty()) {
+                        orderList.addAll(_orders.value!!)
+                    }
+                    _orders.emit(orderList)
+                    _cartImes.emit(
+                        CartModel(
+                            0.0,
+                            0.0,
+                            0.0,
+                            UUID.randomUUID(),
+                            emptyList()
+                        )
+                    )
+                }
 
-       }
+                is NetworkCallHandler.Error -> {
+                    var errorMessage = result.data as String
+                    Log.d("errorFromGettingOrder", errorMessage)
+                }
+            }
+
+        }
     }
 
 
-
-    suspend  fun deleteOrder(order_id: UUID): String? {
+    suspend fun deleteOrder(order_id: UUID): String? {
         var result = homeRepository.deleteOrder(order_id)
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var orderList = _orders.value?.filter{it.id!=order_id} ;
+                var orderList = _orders.value?.filter { it.id != order_id };
 
 
                 _orders.emit(orderList)
 
                 return null
             }
+
             is NetworkCallHandler.Error -> {
                 var errorMessage = result.data as String
                 return errorMessage
@@ -1447,27 +1448,26 @@ class HomeViewModel(
 
     }
 
-    fun getMyOrderItemBelongToMyStore(store_id: UUID , pageNumber:Int=1) {
+    fun getMyOrderItemBelongToMyStore(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main) {
-            var result = homeRepository.getMyOrderItemForStoreId(store_id,pageNumber)
+            var result = homeRepository.getMyOrderItemForStoreId(store_id, pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as List<OrderItemResponseDto>
                     var orderItemList = mutableListOf<OrderItem>()
-                    orderItemList.addAll(data.map{it.toOrderItem()})
-                    if(!_orders.value.isNullOrEmpty())
-                    {
-                        orderItemList.addAll(_orderItemForMyStore.value!!)
+                    orderItemList.addAll(data.map { it.toOrderItem() })
+                    if (!_orders.value.isNullOrEmpty()) {
+                        _orderItemForMyStore.value?.let { orderItemList.addAll(it) }
                     }
-                    val distinctOrderItem= orderItemList.distinctBy { it.id }.toList()
+                    val distinctOrderItem = orderItemList.distinctBy { it.id }.toList()
                     _orderItemForMyStore.emit(distinctOrderItem)
 
                 }
+
                 is NetworkCallHandler.Error -> {
                     var errorMessage = result.data as String
-                    Log.d("errorFromGettingOrder",errorMessage)
-                    if(_orderItemForMyStore.value==null)
-                    {
+                    Log.d("errorFromGettingOrder", errorMessage)
+                    if (_orderItemForMyStore.value == null) {
                         _orderItemForMyStore.emit(emptyList())
                     }
                 }
@@ -1476,6 +1476,37 @@ class HomeViewModel(
         }
     }
 
+
+    suspend fun updateOrderItemStatusFromStore(id: UUID, status: Int): String? {
+        var result = homeRepository.updateOrderItemStatus(id, status)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var orderItemStatus = when (status) {
+                    0-> "Excepted"
+                    else -> "Cancelled"
+                }
+                var updateOrderItme = _orderItemForMyStore.value?.map { it ->
+                    if (it.id == id) {
+                        it.copy(orderItemStatus = orderItemStatus)
+                    } else {
+                        it
+                    }
+                }
+                _orderItemForMyStore.emit(updateOrderItme);
+                return null
+            }
+
+            is NetworkCallHandler.Error -> {
+                var errorMessage = result.data as String
+                Log.d("errorFromGettingOrder", errorMessage)
+                if (_orderItemForMyStore.value == null) {
+                    _orderItemForMyStore.emit(emptyList())
+                }
+                return errorMessage;
+            }
+        }
+
+    }
 
 
 }

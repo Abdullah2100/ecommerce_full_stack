@@ -18,6 +18,7 @@ import com.example.e_commercompose.dto.response.VarientResponseDto
 import com.example.e_commercompose.model.MyInfoUpdate
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.util.Secrets
+import com.example.eccomerce_app.dto.request.OrderItemUpdateStatusDto
 import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -1372,7 +1373,7 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getMyOrderItemForStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/${store_id}/${pageNumber}";
+            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/${store_id}/${pageNumber}";
             val result = client.get(full_url) {
                 headers {
                     append(
@@ -1408,5 +1409,43 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
+    suspend fun updateOrderItemStatus(
+        id: UUID,
+        status: Int
+    ): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/statsu";
+            val result = client.put(full_url) {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(OrderItemUpdateStatusDto(id,status))
+            }
+
+            if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Successful(true)
+            } else {
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
 
 }

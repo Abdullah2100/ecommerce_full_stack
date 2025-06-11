@@ -75,7 +75,7 @@ public class OrderData
         }
     }
 
-    public async Task<List<OrderItemResponseDto>?> getOrderItemBelongToStore
+    public async Task<List<OrderItemResponseDto>?> getOrderItems
     (
         Guid store_id, 
         int pagenumber,
@@ -87,6 +87,7 @@ public class OrderData
             var result = await _dbContext.OrderItems
                 .Include(oi => oi.orderProductsVarients)
                 .AsNoTracking()
+                .OrderByDescending(oi=>oi.id) 
                 .Where(oi => oi.store_id == store_id)
                 .Select(oi => new OrderItemResponseDto
                 {
@@ -112,6 +113,46 @@ public class OrderData
                 .Skip((pagenumber - 1) * pagesize)
                 .Take(pagesize)
                 .ToListAsync();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this excption from getting orders List " + ex.Message);
+            return null;
+        }
+    }
+   public async Task<OrderItemResponseDto?> getOrderItem
+    (Guid id,Guid store_id)
+    {
+        try
+        {
+            var result = await _dbContext.OrderItems
+                .Include(oi => oi.orderProductsVarients)
+                .AsNoTracking()
+                .OrderByDescending(oi=>oi.id) 
+                .Where(oi => oi.id == id && oi.store_id == store_id)
+                .Select(oi => new OrderItemResponseDto
+                {
+                    id = oi.id,
+                    quanity = oi.quanity,
+                    product = _dbContext.Products.Where(ois => ois.id == oi.product_id)
+                        .Select(p => new OrderProductResponseDto
+                        {
+                            id = p.id,
+                            name = p.name,
+                            thmbnail = _config.getKey("url_file") + p.thmbnail,
+                        }).FirstOrDefault(),
+                    productVarient = _dbContext.OrdersProductsVarients
+                        .AsNoTracking()
+                        .Where(opv => opv.order_item_id ==oi.id)
+                        .Select(opv => new OrderVarientResponseDto
+                        {
+                            product_varient_name = opv.productVarient.name,
+                            varient_name = opv.productVarient.varient.name,
+                        }).ToList(),
+                    orderItemStatus = oi.Status.ToString() 
+                })
+                .FirstOrDefaultAsync();
             return result;
         }
         catch (Exception ex)
@@ -176,6 +217,28 @@ public class OrderData
         }
     }
 
+     public async Task<bool> updateOrderItemStatus(Guid id,enOrderItemStatusDto status)
+    {
+        try
+        {
+            var orderItem =await _dbContext.OrderItems.FindAsync(id);
+            if (orderItem == null) return false;
+            orderItem.Status = status switch
+            {
+                enOrderItemStatusDto.Excepted => enOrderItemStatus.Excepted,
+                _ => enOrderItemStatus.Cancelled
+            };
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this excption from getting orders List " + ex.Message);
+            return false;
+        }
+    }
+
+  
     public async Task<bool> deleteOrder(Guid userid, Guid order_id)
     {
         try

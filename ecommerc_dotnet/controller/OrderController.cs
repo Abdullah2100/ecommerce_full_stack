@@ -188,45 +188,6 @@ public class OrderController : ControllerBase
         return StatusCode(200, result);
     }
 
-    [HttpGet("{store_id}/{pageNumber}")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getOrdersItemForStore
-    (
-        Guid store_id,
-        int pageNumber = 1
-    )
-    {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
-            authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
-        {
-            idHolder = outID;
-        }
-
-        if (idHolder == null)
-        {
-            return Unauthorized("هناك مشكلة في التحقق");
-        }
-
-        var user = await _userData.getUserById(idHolder.Value);
-
-        if (user == null)
-            return NotFound("المستخدم غير موجود");
-
-        if (user.isDeleted == true )
-            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
-
-        var result = await _orderData.getOrderItemBelongToStore(store_id, pageNumber, 25);
-        if (result == null || result.Count < 1)
-            return NoContent();
-        return StatusCode(200, result);
-    }
-
 
     [HttpGet("me/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -435,6 +396,90 @@ public class OrderController : ControllerBase
         };
         return Ok(orderStatusDefination);
     }
+
+    
+     [HttpGet("orderItem/{store_id}/{pageNumber}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getOrdersItemForStore
+    (
+        Guid store_id,
+        int pageNumber = 1
+    )
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.isDeleted == true )
+            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
+
+        var result = await _orderData.getOrderItems(store_id, pageNumber, 25);
+        if (result == null || result.Count < 1)
+            return NoContent();
+        return StatusCode(200, result);
+    }
+
+    [HttpPut("orderItem/statsu")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult>updateOrderItemStatus 
+    ([FromBody]OrderItemUpdateDto orderItemDto)
+    {
+        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        var id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+
+        if (user.isDeleted == true )
+            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
+
+        if (user.Store == null)
+            return BadRequest("المستخدم لا يمتلك اي متجر");
+        
+        var orderItem = await _orderData.getOrderItem(orderItemDto.id,user.Store.id);
+        if (orderItem == null)
+            return NotFound("الطلب غير موجود");
+        var result = await _orderData.updateOrderItemStatus(orderItemDto.id, orderItemDto.status);
+
+        if (result == false)
+            return BadRequest("حدثة مشكلة اثناء تغير حالة الطلب");
+        
+        return NoContent();
+    }
+
 
     private async Task<bool> sendingNotificationToAllStore(List<Guid> stores_id)
     {
