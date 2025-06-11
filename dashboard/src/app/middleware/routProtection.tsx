@@ -1,18 +1,16 @@
 import { useEffect } from "react";
-import Util from "../util/globle"
-import { redirect } from "next/navigation"
+import Util from "../util/globle";
+import { redirect } from "next/navigation";
 
-const isAuth = (Component: any)=> {
+const isAuth = (Component: any) => {
   return function IsAuth(props: any) {
     const auth = Util.token.trim();
 
-
     useEffect(() => {
-      if (auth.length === 0) {
+      if (auth.length != 0) {
         return redirect("/login");
       }
     }, []);
-
 
     if (auth.length === 0) {
       return null;
@@ -20,6 +18,6 @@ const isAuth = (Component: any)=> {
 
     return <Component {...props} />;
   };
-}
+};
 
 export default isAuth;

@@ -41,11 +41,10 @@ const  Login = ()=> {
     })
 
     return (
-        <div className="h-screen w-screen    flex  justify-center items-center">
-
-            <div className='w-[400px] flex flex-col  items-center mb-20'>
-                <Label className='text-5xl font-bold'>SignIn</Label>
-                <div className='h-20' />
+        <div className="h-screen w-full flex justify-center items-center bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2] dark:from-[#18181b] dark:to-[#23272f]">
+            <div className='w-full max-w-md px-6 py-10 bg-white dark:bg-[#23272f] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 flex flex-col items-center mb-10 sm:mb-20'>
+                <Label className='text-4xl sm:text-5xl font-bold text-[#452CE8] dark:text-[#a5b4fc]'>Sign In</Label>
+                <div className='h-10 sm:h-20' />
 
                 <InputWithTitle
                     title='Email'
@@ -53,32 +52,27 @@ const  Login = ()=> {
                     placeHolder='Enter Your Email'
                     onchange={(value: string) => { setData((data) => ({ ...data, name: value })) }}
                 />
-                <div className='h-5' />
+                <div className='h-3 sm:h-5' />
                 <InputWithTitle
                     title='Password'
                     name={data.password}
                     placeHolder='Enter Your Password'
                     onchange={(value: string) => { setData((data) => ({ ...data, password: value })) }}
                 />
-                <div className='h-4' />
+                <div className='h-3 sm:h-4' />
                 <Button
                     disabled={
                         data.name.trim().length < 1 ||
                         data.password.trim().length < 1 ||
                         loginFun.isPending
                     }
-                    className='bg-[#452CE8]'
+                    className='w-full mt-2 py-3 bg-[#452CE8] hover:bg-[#3721b6] text-white font-semibold rounded-lg transition-colors duration-200 shadow-md disabled:opacity-60 disabled:cursor-not-allowed dark:bg-[#6366f1] dark:hover:bg-[#4f46e5]'
                     onClick={() => loginFun.mutate(data)}
                 >
-                    SignIn
+                    {loginFun.isPending ? 'Signing In...' : 'Sign In'}
                 </Button>
-               
-
             </div>
-
-
             <ToastContainer />
-
         </div>
     )
 }
