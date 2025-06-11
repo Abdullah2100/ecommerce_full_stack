@@ -123,6 +123,38 @@ public class UserData
         }
     }
 
+    public async Task<UserInfoResponseDto?> getUser(string email)
+    {
+        try
+        {
+            var result = await _dbContext.Users
+                .AsNoTracking()
+                .Include(u => u.Store)
+                .Where(us => us.email==email)
+                .Select(us => new UserInfoResponseDto
+                {
+                    name = us.name,
+                    phone = us.phone,
+                    email = us.email,
+                    Id = us.ID,
+                    thumbnail = us.thumbnail == null
+                        ? ""
+                        : _configuration.getKey("url_file") + us.thumbnail,
+
+                    address = null,
+                    store_id = us.Store == null ? null : us!.Store.id
+                }).FirstOrDefaultAsync();
+
+                return result;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from get user by username"+e.Message);
+            Console.WriteLine("error from get user by username" + e.Message);
+            return null;
+        }
+    }
+
     public async Task<List<UserInfoResponseDto>?> getUsers(int pageNumber, int pageSize = 25)
     {
         try

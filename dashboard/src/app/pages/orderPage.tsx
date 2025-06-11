@@ -147,7 +147,6 @@ const OrderPage = () => {
                                                                 <Button variant="outline">{OrderStatusDefination ? OrderStatusDefination[value.status] : "undefined"}</Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className="w-56" align="start">
-
                                                                 {
                                                                     OrderStatusDefination?.map((statusItem, index) => (
 
@@ -163,9 +162,7 @@ const OrderPage = () => {
                                                                         </DropdownMenuItem>
 
                                                                     ))
-
                                                                 }
-
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </div>

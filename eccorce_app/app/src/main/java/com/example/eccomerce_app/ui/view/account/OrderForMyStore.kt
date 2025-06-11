@@ -383,20 +383,25 @@ fun OrderForMyStoreScreen(
                                 }
 
                             }
-                            Box(
-                                modifier = Modifier
-                                    .padding(top = 5.dp)
-                                    .height(1.dp)
-                                    .fillMaxWidth()
-                                    .background(CustomColor.neutralColor200)
-                            )
+
+                            if(index+1!=orderData.value?.size){
+                                Sizer(10)
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 5.dp)
+                                        .height(1.dp)
+                                        .fillMaxWidth()
+                                        .background(CustomColor.neutralColor200)
+                                )
+                            }
+
                         }
 
 
             }
 
             item{
-                Box(modifier = Modifier.height(190.dp))
+                Box(modifier = Modifier.height(50.dp))
             }
         }
     }

@@ -4,6 +4,7 @@ using ecommerc_dotnet.midleware.ConfigImplment;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using hotel_api.Services;
+using hotel_api.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -14,19 +15,22 @@ var configuration = builder.Configuration;
 
 builder.Services.AddOptions();
 
+
+// Other Services (Scoped)
+builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
+builder.Services.AddTransient<iEmailService, EmailService>();
+
+
 var fireBaseConfig = Path.Combine(
     Directory.GetCurrentDirectory(), 
     "firebase-adminsdk.json"
-    );
+);
 
 var firebaseCredential = GoogleCredential.FromFile(fireBaseConfig);
 FirebaseApp.Create(new AppOptions()
 {
     Credential = firebaseCredential
 });
-
-// Other Services (Scoped)
-builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
 
 builder.Services.AddCors(options =>
 {

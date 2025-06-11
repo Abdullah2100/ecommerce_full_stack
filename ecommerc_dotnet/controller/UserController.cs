@@ -3,13 +3,11 @@ using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.module;
 using hotel_api.Services;
+using hotel_api.Services.EmailService;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using NetTopologySuite.Geometries;
 
 namespace ecommerc_dotnet.controller;
 
@@ -21,20 +19,24 @@ public class UserController : ControllerBase
     public UserController(
         AppDbContext dbContext,
         IConfig configuration,
-        IWebHostEnvironment webHostEnvironment
+        IWebHostEnvironment webHostEnvironment,
+        iEmailService emailService
     )
     {
         _configuration = configuration;
         _userData = new UserData(dbContext, configuration);
         _host = webHostEnvironment;
         _addressData = new AddressData(dbContext);
+        _forgetPasswordData = new ForgetPasswordData(dbContext);
+        _emailService = emailService;
     }
 
     private readonly IConfig _configuration;
+    private readonly iEmailService _emailService;
 
     private readonly UserData _userData;
 
-    // private readonly ForgetPasswordData _forgetPasswordData;
+    private readonly ForgetPasswordData _forgetPasswordData;
     private readonly AddressData _addressData;
     private readonly IWebHostEnvironment _host;
 
@@ -238,7 +240,7 @@ public class UserController : ControllerBase
             return BadRequest("لا بد من ان تكون الصفحة اكبر من الصفر");
         }
 
-        var users =await _userData.getUsers(page);
+        var users = await _userData.getUsers(page);
 
         if (users == null)
             return NoContent();
@@ -276,15 +278,13 @@ public class UserController : ControllerBase
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية ");
 
-      
 
-        var result =await _userData.deleteUser(user_id);
+        var result = await _userData.deleteUser(user_id);
 
         return Ok(result);
     }
 
 
-    
     [HttpGet("pages")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -387,42 +387,41 @@ public class UserController : ControllerBase
 
 
     //sendOtp
-    /* [AllowAnonymous]
-     [HttpPost("forgetPasswordOtp")]
-     public async Task<IActionResult> forgetPassword([FromBody] ForgetPasswordDto email)
-     {
-         User? user = _userData.getUser(email.email);
+    [AllowAnonymous]
+    [HttpPost("forgetPasswordOtp")]
+    public async Task<IActionResult> forgetPassword([FromBody] ForgetPasswordDto email)
+    {
+        UserInfoResponseDto? user = await _userData.getUser(email.email);
 
-         if (user == null)
-         {
-             BadRequest("user not exist");
-         }
+        // if (user == null)
+        // {
+        //     BadRequest("user not exist");
+        // }
 
-         string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
 
-         var isOtpExist = _forgetPasswordData.isExist(otp);
-         bool isExist = isOtpExist;
+        var isOtpExist = _forgetPasswordData.isExist(otp);
+        bool isExist = isOtpExist;
 
-         if (isExist == true)
-         {
-             do
-             {,
-   "server": "smtp.elasticemail.com",
-   "username": "ali735501225@gmail.com",
-   "password": "8CECFFB7A55CF0C3FC26E857C472B6763BC9",
-   "port": "2525"
-                 otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                 isOtpExist = _forgetPasswordData.isExist(otp);
-             } while (isOtpExist);
-         }
+        if (isExist)
+        {
+            do
+            {
+                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+                isOtpExist = _forgetPasswordData.isExist(otp);
+            } while (isOtpExist);
+        }
 
-         var result = await _emailServices.sendingEmail(otp, email.email);
+        //var result = await _emailService.sendingEmail(user.email,otp);
+        var result = await _emailService.sendingEmail(email.email,otp);
 
-         if (result == false)
-             return BadRequest("some thing wrong");
-         return StatusCode(200, user);
-     }
-     */
+        if (result == false)  // if (user == null)
+        // {
+        //     BadRequest("user not exist");
+        // }
+            return BadRequest("some thing wrong");
+        return StatusCode(200, user);
+    }
 
 
     [HttpGet("address")]
