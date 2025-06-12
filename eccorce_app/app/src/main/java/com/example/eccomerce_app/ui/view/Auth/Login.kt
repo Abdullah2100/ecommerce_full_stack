@@ -196,7 +196,7 @@ fun LoginScreen(
                         color = CustomColor.neutralColor950,
                         fontSize = (16 / fontScall).sp,
                         modifier = Modifier.clickable {
-
+                          nav.navigate(Screens.ReseatPasswordGraph)
                         }
                     )
                 }

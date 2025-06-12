@@ -394,7 +394,7 @@ public class UserData
         try
         {
             User? userData = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.ID == userId);
+                .FindAsync( userId);
 
             if (userData == null)
                 return null;
@@ -412,4 +412,32 @@ public class UserData
             return null;
         }
     }
+    
+      public async Task<UserInfoResponseDto?> updateUserPassword(
+            string  email,
+            string newPassword)
+        {
+            try
+            {
+                User? userData = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.email==email);
+    
+                if (userData == null)
+                    return null;
+    
+                userData.password = newPassword;
+    
+    
+                await _dbContext.SaveChangesAsync();
+                return await getUser(userID: userData.ID);
+            }
+            catch (Exception e)
+            {
+                //_logger.LogError("error from create new User"+e.Message);
+                Console.Write("error from update User" + e.Message);
+                return null;
+            }
+        }
+        
+        
 }

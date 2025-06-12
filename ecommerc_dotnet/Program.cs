@@ -41,7 +41,6 @@ builder.Services.AddCors(options =>
         .AllowAnyOrigin()    // Allows all origins
             .AllowAnyMethod()    // Allows any HTTP methods (GET, POST, etc.)
             .AllowAnyHeader();
-            // ;   // Allows any headers
     });
 });
 

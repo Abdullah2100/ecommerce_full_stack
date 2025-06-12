@@ -21,8 +21,16 @@ object Screens {
     object Signup
 
     @Serializable
-    object ReseatPassword
+    object ReseatPasswordGraph
 
+    @Serializable
+    object  GenerateOtp
+
+    @Serializable
+    data class  OtpVerification(val email: String)
+
+    @Serializable
+    data class  ReseatPassword(val email: String,val otp:String)
 
     @Serializable
     object LocationGraph
@@ -83,4 +91,5 @@ object Screens {
 
     @Serializable
     object OrderForMyStore
+
 }

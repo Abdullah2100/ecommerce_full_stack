@@ -386,44 +386,7 @@ public class UserController : ControllerBase
     }
 
 
-    //sendOtp
-    [AllowAnonymous]
-    [HttpPost("forgetPasswordOtp")]
-    public async Task<IActionResult> forgetPassword([FromBody] ForgetPasswordDto email)
-    {
-        UserInfoResponseDto? user = await _userData.getUser(email.email);
-
-        // if (user == null)
-        // {
-        //     BadRequest("user not exist");
-        // }
-
-        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-
-        var isOtpExist = _forgetPasswordData.isExist(otp);
-        bool isExist = isOtpExist;
-
-        if (isExist)
-        {
-            do
-            {
-                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                isOtpExist = _forgetPasswordData.isExist(otp);
-            } while (isOtpExist);
-        }
-
-        //var result = await _emailService.sendingEmail(user.email,otp);
-        var result = await _emailService.sendingEmail(email.email,otp);
-
-        if (result == false)  // if (user == null)
-        // {
-        //     BadRequest("user not exist");
-        // }
-            return BadRequest("some thing wrong");
-        return StatusCode(200, user);
-    }
-
-
+ 
     [HttpGet("address")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -656,5 +619,105 @@ public class UserController : ControllerBase
         var result = await _addressData.changeCurrentAddress(address.id, user.ID);
 
         return StatusCode(200, result);
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("generateOtp")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> generateOtp([FromBody] ForgetPasswordDto email)
+    {
+        UserInfoResponseDto? user = await _userData.getUser(email.email);
+
+        if (user == null)
+        {
+            NotFound("user not exist");
+        }
+
+        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+
+        var isOtpExist = _forgetPasswordData.isExist(otp);
+        bool isExist = isOtpExist;
+
+        if (isExist)
+        {
+            do
+            {
+                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+                isOtpExist = _forgetPasswordData.isExist(otp);
+            } while (isOtpExist);
+        }
+
+        var result = await _forgetPasswordData.createNewOtp(otp, email.email);
+        var emailSendResult = await _emailService.sendingEmail(email.email, otp);
+
+        if (emailSendResult == false || result == false)
+        {
+            BadRequest("user not exist");
+        }
+
+        return NoContent();
+    }
+
+
+    [AllowAnonymous]
+    [HttpPost("otpVerification")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> verifingOtp([FromBody] VerificationRequestDto verification)
+    {
+
+        var result = await _forgetPasswordData.isExist(verification.email, verification.otp);
+        if (!result)
+        {
+          return  NotFound("not found otp");
+        }
+
+      result = await _forgetPasswordData.updateOtpStatus(verification.otp);
+
+        if (!result)
+            return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
+
+        return NoContent();
+    }
+
+
+    [AllowAnonymous]
+    [HttpPost("reseatPassword")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> reseatPassword([FromBody] ReseatePasswordRequestDto data)
+    {
+
+        var otpValidationResult = await _forgetPasswordData.isExist(data.email, data.otp,true);
+      
+        if (!otpValidationResult)
+        {
+          return  NotFound("not found otp");
+        }
+
+        var isExist =await _userData.isExistByEmail(data.email);
+        if (!isExist)
+            return NotFound("المستخدم غير موجود");
+        var result = await _userData.updateUserPassword(data.email,
+            clsUtil.hashingText(data.password));
+        if (result==null)
+            return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
+
+        string token = "", refreshToken = "";
+
+        token = AuthinticationServices.generateToken(
+            userID: result.Id,
+            email: result.email,
+            _configuration);
+
+        refreshToken = AuthinticationServices.generateToken(
+            userID: result.Id,
+            email: result.email,
+            _configuration,
+            AuthinticationServices.enTokenMode.RefreshToken);
+
+        return StatusCode(200
+            , new { token = token, refreshToken = refreshToken });
     }
 }

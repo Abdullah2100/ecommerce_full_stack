@@ -28,6 +28,9 @@ import com.example.e_commercompose.ui.view.home.OrderScreen
 import com.example.e_commercompose.ui.view.location.LocationHomeScreen
 import com.example.e_commercompose.ui.view.location.LocationsList
 import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.ui.view.ReseatPassword.GenerateOtpScreen
+import com.example.eccomerce_app.ui.view.ReseatPassword.OtpVerificationScreen
+import com.example.eccomerce_app.ui.view.ReseatPassword.ReseatPasswordScreen
 import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
 
 
@@ -108,7 +111,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.End, tween(750)
                     )
                 }
-            ) {value->
+            ) { value ->
                 var isFromHomeLocation = value.toRoute<Screens.LocationList>()
                 LocationsList(
                     nav = nav,
@@ -120,6 +123,69 @@ fun NavController(
         }
 
 
+        navigation<Screens.ReseatPasswordGraph>(
+            startDestination = Screens.GenerateOtp
+        ) {
+
+            composable<Screens.GenerateOtp>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                GenerateOtpScreen(
+                    nav = nav,
+                    authViewModle
+                )
+            }
+            composable<Screens.OtpVerification>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {result->
+                val data = result.toRoute<Screens.OtpVerification>()
+                OtpVerificationScreen(
+                    nav = nav,
+                    authViewModle,
+                    email = data.email
+                )
+            }
+
+            composable<Screens.ReseatPassword>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {result->
+                val data = result.toRoute<Screens.ReseatPassword>()
+                ReseatPasswordScreen(
+                    nav = nav,
+                    authViewModle,
+                    email = data.email,
+                    otp = data.otp
+                )
+            }
+
+        }
 
         navigation<Screens.AuthGraph>(
             startDestination = Screens.Login
@@ -241,11 +307,11 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {navRef->
+            ) { navRef ->
                 var store_id = navRef.toRoute<Screens.Store>()
                 StoreScreen(
-                    store_idCopy= store_id.store_idCopy,
-                    isFromHome=store_id.isFromHome,
+                    store_idCopy = store_id.store_idCopy,
+                    isFromHome = store_id.isFromHome,
                     nav = nav,
                     homeViewModel = homeViewModle
                 )
@@ -263,8 +329,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {
-                navRef->
+            ) { navRef ->
 
                 var store = navRef.toRoute<Screens.CreateProduct>()
 
@@ -272,7 +337,7 @@ fun NavController(
                     nav = nav,
                     homeViewModel = homeViewModle,
                     storeId = store.store_id,
-                    productId= store.product_id
+                    productId = store.product_id
                 )
 
             }
@@ -288,8 +353,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {
-                    navRef->
+            ) { navRef ->
 
                 var store = navRef.toRoute<Screens.ProductDetails>()
 
@@ -313,8 +377,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {
-                    navRef->
+            ) { navRef ->
 
 
                 CartScreen(
@@ -336,8 +399,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {
-                    navRef->
+            ) { navRef ->
 
 
                 CheckoutScreen(

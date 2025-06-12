@@ -88,7 +88,6 @@ fun CustomBotton(
     Button(
         enabled = isEnable!!,
         modifier = Modifier
-//            .padding(bottom = 50.dp)
             .height(50.dp)
             .fillMaxWidth(),
         onClick = {

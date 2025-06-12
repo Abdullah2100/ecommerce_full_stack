@@ -28,8 +28,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     val isLoadin = _isLoadin.asStateFlow()
 
 
-
-    private  val _cuurentScreen = MutableStateFlow<Int?>(null);
+    private val _cuurentScreen = MutableStateFlow<Int?>(null);
     val currentScreen = _cuurentScreen.asStateFlow();
 
     init {
@@ -42,28 +41,31 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
             val isPassOnBoard = dao.isPassOnBoarding()
             val isLocation = dao.isPassLocationScreen();
             General.authData.emit(authData)
-          when(isPassOnBoard){
-              false->{
-                  _cuurentScreen.emit(1)
-              }
-              else->{
-                  when(authData==null){
-                      true->{
-                          _cuurentScreen.emit(2)
-                      }
-                      else->{
-                          when(isLocation==false){
-                              true->{
-                                  _cuurentScreen.emit(3)
-                              }
-                              else->{
-                                  _cuurentScreen.emit(4)
-                              }
-                          }
-                      }
-                  }
-              }
-          }
+            when (isPassOnBoard) {
+                false -> {
+                    _cuurentScreen.emit(1)
+                }
+
+                else -> {
+                    when (authData == null) {
+                        true -> {
+                            _cuurentScreen.emit(2)
+                        }
+
+                        else -> {
+                            when (isLocation == false) {
+                                true -> {
+                                    _cuurentScreen.emit(3)
+                                }
+
+                                else -> {
+                                    _cuurentScreen.emit(4)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
         }
     }
@@ -75,7 +77,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     }
 
 
-suspend    fun signUpUser(
+    suspend fun signUpUser(
         email: String,
         name: String,
         phone: String,
@@ -83,71 +85,162 @@ suspend    fun signUpUser(
 
         ): String? {
 
-             val token = FirebaseMessaging.getInstance().token.await()?:""
-            val result = authRepository.signup(
-                SignupDto(
-                    name = name,
-                    password = password,
-                    phone = phone,
-                    email = email,
-                    deviceToken = token
-                )
+        val token = FirebaseMessaging.getInstance().token.await() ?: ""
+        val result = authRepository.signup(
+            SignupDto(
+                name = name,
+                password = password,
+                phone = phone,
+                email = email,
+                deviceToken = token
             )
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    val authData = result.data as AuthResultDto;
-                    var authDataHolder =   AuthModleEntity(
-                        id = 0,
-                        token = authData.accessToken,
-                        refreshToken = authData.refreshToken
-                    )
-                    dao.saveAuthData(
-                        authDataHolder
-                    );
+        )
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                val authData = result.data as AuthResultDto;
+                var authDataHolder = AuthModleEntity(
+                    id = 0,
+                    token = authData.accessToken,
+                    refreshToken = authData.refreshToken
+                )
+                dao.saveAuthData(
+                    authDataHolder
+                );
 
-                    General.authData.emit(authDataHolder)
-return null;
+                General.authData.emit(authDataHolder)
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoadin.emit(false)
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
                 }
-                is NetworkCallHandler.Error->{
-                    _isLoadin.emit(false)
-
-                    var errorMessage = (result.data.toString())
-                    if (errorMessage.contains(General.BASED_URL)) {
-                        errorMessage.replace(General.BASED_URL, " Server ")
-                    }
-                    return errorMessage
+                return errorMessage
             }
 
         }
     }
 
-suspend    fun loginUser(
+    suspend fun loginUser(
         username: String,
         password: String,
-        ): String? {
-            _isLoadin.emit(true);
-    val token = FirebaseMessaging.getInstance().token.await()?:""
+    ): String? {
+        _isLoadin.emit(true);
+        val token = FirebaseMessaging.getInstance().token.await() ?: ""
 
-    val result = authRepository.login(LoginDto(
-        username = username,
-        password = password,
-        deviceToken = token))
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    val authData = result.data as AuthResultDto;
-                    var authDataHolder =   AuthModleEntity(
-                        id = 0,
-                        token = authData.accessToken,
-                        refreshToken = authData.refreshToken
-                    )
-                    dao.saveAuthData(
-                        authDataHolder
-                    )
-                    General.authData.emit(authDataHolder)
+        val result = authRepository.login(
+            LoginDto(
+                username = username,
+                password = password,
+                deviceToken = token
+            )
+        )
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                val authData = result.data as AuthResultDto;
+                var authDataHolder = AuthModleEntity(
+                    id = 0,
+                    token = authData.accessToken,
+                    refreshToken = authData.refreshToken
+                )
+                dao.saveAuthData(
+                    authDataHolder
+                )
+                General.authData.emit(authDataHolder)
 
-                    return  null;
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
                 }
-            is NetworkCallHandler.Error->{
+                return errorMessage
+            }
+
+        }
+    }
+
+
+    suspend fun getOtp(
+        email: String,
+    ): String? {
+        _isLoadin.emit(true);
+
+        val result = authRepository.getOtp(email)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage
+            }
+
+        }
+    }
+
+    suspend fun otpVerifing(
+        email: String,
+        otp: String
+    ): String? {
+        _isLoadin.emit(true);
+
+        val result = authRepository.verifingOtp(email,otp)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage
+            }
+
+        }
+    }
+
+
+    suspend fun reseatPassword(
+        email:String,
+        otp:String,
+        newPassword: String
+
+    ): String? {
+        val token = FirebaseMessaging.getInstance().token.await() ?: ""
+
+        val result = authRepository.reasetPassword(email,otp,newPassword)
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                val authData = result.data as AuthResultDto;
+                var authDataHolder = AuthModleEntity(
+                    id = 0,
+                    token = authData.accessToken,
+                    refreshToken = authData.refreshToken
+                )
+                dao.saveAuthData(
+                    authDataHolder
+                )
+                General.authData.emit(authDataHolder)
+
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
 
                 var errorMessage = (result.data.toString())
                 if (errorMessage.contains(General.BASED_URL)) {
