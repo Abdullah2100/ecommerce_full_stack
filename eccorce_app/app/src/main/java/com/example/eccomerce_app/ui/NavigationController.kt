@@ -32,6 +32,7 @@ import com.example.eccomerce_app.ui.view.ReseatPassword.GenerateOtpScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.OtpVerificationScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.ReseatPasswordScreen
 import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
+import com.example.eccomerce_app.ui.view.home.CategoryScreen
 
 
 @Composable
@@ -257,6 +258,24 @@ fun NavController(
                 )
             }
 
+            composable<Screens.Category>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                CategoryScreen(
+                    nav = nav,
+                    homeViewModel = homeViewModle
+                )
+            }
+
 
             composable<Screens.Account>(
                 enterTransition = {
@@ -310,7 +329,7 @@ fun NavController(
             ) { navRef ->
                 var store_id = navRef.toRoute<Screens.Store>()
                 StoreScreen(
-                    store_idCopy = store_id.store_idCopy,
+                    store_idCopy = store_id.store_id,
                     isFromHome = store_id.isFromHome,
                     nav = nav,
                     homeViewModel = homeViewModle

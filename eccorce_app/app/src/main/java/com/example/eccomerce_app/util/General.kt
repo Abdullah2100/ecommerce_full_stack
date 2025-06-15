@@ -3,6 +3,7 @@ package com.example.e_commercompose.Util
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -99,6 +100,22 @@ object General {
         }catch(ex: Exception)
         {
             return null;
+        }
+    }
+    fun LazyListState.reachedBottom(): Boolean {
+        val visibleItemsInfo = layoutInfo.visibleItemsInfo // Get the visible items
+        return if (layoutInfo.totalItemsCount == 0) {
+            false // Return false if there are no items
+        } else {
+            val lastVisibleItem = visibleItemsInfo.last() // Get the last visible item
+            val viewportHeight =
+                layoutInfo.viewportEndOffset +
+                        layoutInfo.viewportStartOffset // Calculate the viewport height
+
+            // Check if the last visible item is the last item in the list and fully visible
+            // This indicates that the user has scrolled to the bottom
+            (lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
+                    lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight)
         }
     }
 

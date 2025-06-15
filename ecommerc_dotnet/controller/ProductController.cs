@@ -61,6 +61,30 @@ public class ProductController : ControllerBase
     }
 
 
+    [HttpGet("category/{category_id}/{pageNumber:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> getProductsByCategory
+    (
+        Guid category_id, int pageNumber
+    )
+    {
+      
+        if(pageNumber<=0)
+            return BadRequest("Page Number must be greater than zero");
+
+        var result = await _productData.getProductsByCategory(
+            category_id, pageNumber
+        );
+
+        if (result == null)
+            return NoContent();
+
+
+        return StatusCode(200, result);
+    }
+
     [HttpGet("{store_id:guid}/{subCategory_id:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

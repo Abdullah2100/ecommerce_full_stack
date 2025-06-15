@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.e_commercompose.Util.General
@@ -81,9 +82,9 @@ fun CustomBotton(
     operation: () -> Unit,
     buttonTitle: String,
     color: Color?=null,
-    isEnable: Boolean?=true
+    isEnable: Boolean?=true,
+    lableSize:Int?=16
 ){
-    val fontScall = LocalDensity.current.fontScale
 
     Button(
         enabled = isEnable!!,
@@ -115,7 +116,8 @@ fun CustomBotton(
                     buttonTitle,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = (16 / fontScall).sp
+                    fontSize = (lableSize!!).sp,
+                    textAlign = TextAlign.Center
                 )
             }
         }

@@ -81,558 +81,7 @@ class HomeRepository(val client: HttpClient) {
     }
 */
 
-    suspend fun userAddNewAddress(locationData: AddressRequestDto): NetworkCallHandler {
-        return try {
-            var result = client.post(
-                Secrets.getBaseUrl() + "/User/address"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(
-                    locationData
-                )
-                contentType(ContentType.Application.Json)
-
-            }
-
-            if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    suspend fun userUpdateAddress(locationData: AddressRequestUpdateDto): NetworkCallHandler {
-        return try {
-            var result = client.put(
-                Secrets.getBaseUrl() + "/User/address"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(
-                    locationData
-                )
-                contentType(ContentType.Application.Json)
-
-            }
-
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
-        return try {
-            var result = client.delete(
-                Secrets.getBaseUrl() + "/User/address/${addressID}"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-
-            }
-
-            if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Successful(true)
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    suspend fun setAddressAsCurrent(addressId: UUID): NetworkCallHandler {
-        return try {
-            var result = client.post(
-                Secrets.getBaseUrl() + "/User/address/active${addressId}"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<Boolean>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun getCategory(pageNumber: Int = 1): NetworkCallHandler {
-        return try {
-            var result = client.get(
-                Secrets.getBaseUrl() + "/Category/all/${pageNumber}"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<CategoryReponseDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                return NetworkCallHandler.Error("No Data Found")
-
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
-        return try {
-            var result = client.get(
-                Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<VarientResponseDto>>())
-            } else if (result.status == HttpStatusCode.NoContent){
-                return NetworkCallHandler.Error("No Data Found")
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    //user
-    suspend fun getMyInfo(): NetworkCallHandler {
-        return try {
-            var result = client.get(
-                Secrets.getBaseUrl() + "/User"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<UserDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun UpdateMyInfo(data: MyInfoUpdate): NetworkCallHandler {
-        return try {
-            var result = client.put(
-                Secrets.getBaseUrl() + "/User"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(
-                    MultiPartFormDataContent(
-                        formData {
-                            if (!data.name.isNullOrEmpty())
-                                append("name", data.name!!)
-
-                            if (!data.oldPassword.isNullOrEmpty())
-                                append("name", data.oldPassword!!)
-
-
-                            if (!data.phone.isNullOrEmpty())
-                                append("phone", data.phone!!)
-
-
-                            if (!data.newPassword.isNullOrEmpty())
-                                append("name", data.newPassword!!)
-
-                            if (data.thumbnail != null)
-                                append(
-                                    key = "thumbnail", // Must match backend expectation
-                                    value = data.thumbnail!!.readBytes(),
-                                    headers = Headers.build {
-                                        append(
-                                            HttpHeaders.ContentType,
-                                            "image/${data.thumbnail!!.extension}"
-                                        )
-                                        append(
-                                            HttpHeaders.ContentDisposition,
-                                            "filename=${data.thumbnail!!.name}"
-                                        )
-                                    }
-                                )
-
-                        }
-                    )
-                )
-            }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<UserDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun createStore(
-        name: String,
-        wallpaper_image: File,
-        small_image: File,
-        longitude: Double,
-        latitude: Double
-    ): NetworkCallHandler {
-        return try {
-            var result = client.post(
-                Secrets.getBaseUrl() + "/Store/new"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(
-                    MultiPartFormDataContent(
-                        formData {
-                            append("name", name)
-                            append("longitude", latitude)
-                            append("latitude", longitude)
-                            append(
-                                key = "wallpaper_image", // Must match backend expectation
-                                value = wallpaper_image.readBytes(),
-                                headers = Headers.build {
-                                    append(
-                                        HttpHeaders.ContentType,
-                                        "image/${wallpaper_image.extension}"
-                                    )
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=${wallpaper_image.name}"
-                                    )
-                                }
-                            )
-                            append(
-                                key = "small_image", // Must match backend expectation
-                                value = small_image.readBytes(),
-                                headers = Headers.build {
-                                    append(
-                                        HttpHeaders.ContentType,
-                                        "image/${small_image.extension}"
-                                    )
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=${small_image.name}"
-                                    )
-                                }
-                            )
-
-                        }
-                    )
-                )
-            }
-            if (result.status == HttpStatusCode.Created) {
-                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun updateStore(
-        name: String,
-        wallpaper_image: File?,
-        small_image: File?,
-        longitude: Double,
-        latitude: Double
-    ): NetworkCallHandler {
-        return try {
-            var result = client.put(
-                Secrets.getBaseUrl() + "/Store"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(
-                    MultiPartFormDataContent(
-                        formData {
-                            if (name.trim().length > 0)
-                                append("name", name)
-                            if (latitude != 0.0)
-                                append("longitude", latitude)
-                            if (longitude != 0.0)
-                                append("latitude", longitude)
-                            if (wallpaper_image != null)
-                                append(
-                                    key = "wallpaper_image", // Must match backend expectation
-                                    value = wallpaper_image.readBytes(),
-                                    headers = Headers.build {
-                                        append(
-                                            HttpHeaders.ContentType,
-                                            "image/${wallpaper_image.extension}"
-                                        )
-                                        append(
-                                            HttpHeaders.ContentDisposition,
-                                            "filename=${wallpaper_image.name}"
-                                        )
-                                    }
-                                )
-                            if (small_image != null)
-                                append(
-                                    key = "small_image", // Must match backend expectation
-                                    value = small_image.readBytes(),
-                                    headers = Headers.build {
-                                        append(
-                                            HttpHeaders.ContentType,
-                                            "image/${small_image.extension}"
-                                        )
-                                        append(
-                                            HttpHeaders.ContentDisposition,
-                                            "filename=${small_image.name}"
-                                        )
-                                    }
-                                )
-
-                        }
-                    )
-                )
-            }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun createSubCategory(data: SubCategoryRequestDto): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory/new";
-            val result = client.post(full_url) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(data)
-                contentType(ContentType.Application.Json)
-
-            }
-
-            if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
-    suspend fun updateSubCategory(data: SubCategoryUpdateDto): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory";
-            val result = client.put(full_url) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-                setBody(data)
-                contentType(ContentType.Application.Json)
-
-            }
-
-            if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-
+    //Banner
     suspend fun getBannerByStoreId(store_id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Banner/${store_id}/${pageNumber}";
@@ -702,10 +151,7 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun createBanner(
-        endDate: String,
-        image: File,
-    ): NetworkCallHandler {
+    suspend fun createBanner(endDate: String, image: File, ): NetworkCallHandler {
         return try {
             var result = client.post(
                 Secrets.getBaseUrl() + "/Banner"
@@ -758,9 +204,7 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteBanner(
-        banner_id: UUID
-    ): NetworkCallHandler {
+    suspend fun deleteBanner(banner_id: UUID): NetworkCallHandler {
         return try {
             var result = client.delete(
                 Secrets.getBaseUrl() + "/Banner/${banner_id}"
@@ -793,10 +237,13 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun getStoreById(id: UUID): NetworkCallHandler {
+
+    //category
+    suspend fun getCategory(pageNumber: Int = 1): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Store/${id}";
-            val result = client.get(full_url) {
+            var result = client.get(
+                Secrets.getBaseUrl() + "/Category/all/${pageNumber}"
+            ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -804,9 +251,204 @@ class HomeRepository(val client: HttpClient) {
                     )
                 }
             }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<List<CategoryReponseDto>>())
+            } else if (result.status == HttpStatusCode.NoContent) {
+                return NetworkCallHandler.Error("No Data Found")
+
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    //order
+
+    suspend fun submitOrder(cartData: CartRequestDto): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order";
+            val result = client.post(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                contentType(ContentType.Application.Json)
+                setBody(cartData)
+
+            }
+
+            if (result.status == HttpStatusCode.Created) {
+
+                NetworkCallHandler.Successful(result.body<OrderResponseDto>())
+
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getMyOrders(pageNumber:Int): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+
+                NetworkCallHandler.Successful(result.body<List<OrderResponseDto>>())
+
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+    suspend fun deleteOrder(order_Id: UUID): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/${order_Id}";
+            val result = client.delete(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.NoContent) {
+
+                NetworkCallHandler.Successful(true)
+
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getMyOrderItemForStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/${store_id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+
+                NetworkCallHandler.Successful(result.body<List<OrderItemResponseDto>>())
+
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
+            } else {
+
+                NetworkCallHandler.Error(result.body<String>())
+
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun updateOrderItemStatus(
+        id: UUID,
+        status: Int
+    ): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/statsu";
+            val result = client.put(full_url) {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(OrderItemUpdateStatusDto(id,status))
+            }
+
+            if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Successful(true)
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -825,9 +467,12 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
+
+    //product
+
+    suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}";
+            val full_url = Secrets.getBaseUrl() + "/Product/all/${pageNumber}";
             val result = client.get(full_url) {
                 headers {
                     append(
@@ -838,39 +483,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<AddressResponseDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    suspend fun getStoreSubCategory(id: UUID, pageNumber: Int): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory/${id}/${pageNumber}";
-            val result = client.get(full_url) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<SubCategoryResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -890,11 +503,9 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
-
-    suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
+    suspend fun getProductByCategoryId(category_id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product/${pageNumber}";
+            val full_url = Secrets.getBaseUrl() + "/Product/category/${category_id}/${pageNumber}";
             val result = client.get(full_url) {
                 headers {
                     append(
@@ -1223,7 +834,6 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-
     suspend fun deleteProduct(store_id: UUID, product_id: UUID): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Product/${store_id}/${product_id}";
@@ -1257,9 +867,271 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun submitOrder(cartData: CartRequestDto): NetworkCallHandler {
+
+    //store
+    suspend fun createStore(
+        name: String,
+        wallpaper_image: File,
+        small_image: File,
+        longitude: Double,
+        latitude: Double
+    ): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order";
+            var result = client.post(
+                Secrets.getBaseUrl() + "/Store/new"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("name", name)
+                            append("longitude", latitude)
+                            append("latitude", longitude)
+                            append(
+                                key = "wallpaper_image", // Must match backend expectation
+                                value = wallpaper_image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${wallpaper_image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${wallpaper_image.name}"
+                                    )
+                                }
+                            )
+                            append(
+                                key = "small_image", // Must match backend expectation
+                                value = small_image.readBytes(),
+                                headers = Headers.build {
+                                    append(
+                                        HttpHeaders.ContentType,
+                                        "image/${small_image.extension}"
+                                    )
+                                    append(
+                                        HttpHeaders.ContentDisposition,
+                                        "filename=${small_image.name}"
+                                    )
+                                }
+                            )
+
+                        }
+                    )
+                )
+            }
+            if (result.status == HttpStatusCode.Created) {
+                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun updateStore(
+        name: String,
+        wallpaper_image: File?,
+        small_image: File?,
+        longitude: Double,
+        latitude: Double
+    ): NetworkCallHandler {
+        return try {
+            var result = client.put(
+                Secrets.getBaseUrl() + "/Store"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            if (name.trim().length > 0)
+                                append("name", name)
+                            if (latitude != 0.0)
+                                append("longitude", latitude)
+                            if (longitude != 0.0)
+                                append("latitude", longitude)
+                            if (wallpaper_image != null)
+                                append(
+                                    key = "wallpaper_image", // Must match backend expectation
+                                    value = wallpaper_image.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${wallpaper_image.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${wallpaper_image.name}"
+                                        )
+                                    }
+                                )
+                            if (small_image != null)
+                                append(
+                                    key = "small_image", // Must match backend expectation
+                                    value = small_image.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${small_image.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${small_image.name}"
+                                        )
+                                    }
+                                )
+
+                        }
+                    )
+                )
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getStoreById(id: UUID): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Store/${id}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+            } else {
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<AddressResponseDto>())
+            } else {
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+
+
+
+    //subCategory
+
+    suspend fun getStoreSubCategory(id: UUID, pageNumber: Int): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/SubCategory/${id}/${pageNumber}";
+            val result = client.get(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<List<SubCategoryResponseDto>>())
+            } else if(result.status == HttpStatusCode.NoContent){
+                NetworkCallHandler.Error("No Data Found")
+            } else {
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun createSubCategory(data: SubCategoryRequestDto): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/SubCategory/new";
             val result = client.post(full_url) {
                 headers {
                     append(
@@ -1267,19 +1139,15 @@ class HomeRepository(val client: HttpClient) {
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
+                setBody(data)
                 contentType(ContentType.Application.Json)
-                setBody(cartData)
 
             }
 
             if (result.status == HttpStatusCode.Created) {
-
-                NetworkCallHandler.Successful(result.body<OrderResponseDto>())
-
+                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
             } else {
-
                 NetworkCallHandler.Error(result.body<String>())
-
             }
 
         } catch (e: UnknownHostException) {
@@ -1296,139 +1164,24 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getMyOrders(pageNumber:Int): NetworkCallHandler {
+
+    suspend fun updateSubCategory(data: SubCategoryUpdateDto): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
-            val result = client.get(full_url) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-
-            }
-
-            if (result.status == HttpStatusCode.OK) {
-
-                NetworkCallHandler.Successful(result.body<List<OrderResponseDto>>())
-
-            } else if(result.status == HttpStatusCode.NoContent){
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-
-                NetworkCallHandler.Error(result.body<String>())
-
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-    suspend fun deleteOrder(order_Id: UUID): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/${order_Id}";
-            val result = client.delete(full_url) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-
-            }
-
-            if (result.status == HttpStatusCode.NoContent) {
-
-                NetworkCallHandler.Successful(true)
-
-            } else {
-
-                NetworkCallHandler.Error(result.body<String>())
-
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    suspend fun getMyOrderItemForStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/${store_id}/${pageNumber}";
-            val result = client.get(full_url) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-
-            }
-
-            if (result.status == HttpStatusCode.OK) {
-
-                NetworkCallHandler.Successful(result.body<List<OrderItemResponseDto>>())
-
-            } else if(result.status == HttpStatusCode.NoContent){
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-
-                NetworkCallHandler.Error(result.body<String>())
-
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-
-    suspend fun updateOrderItemStatus(
-        id: UUID,
-        status: Int
-    ): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/statsu";
+            val full_url = Secrets.getBaseUrl() + "/SubCategory";
             val result = client.put(full_url) {
-                contentType(ContentType.Application.Json)
                 headers {
                     append(
                         HttpHeaders.Authorization,
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
-                setBody(OrderItemUpdateStatusDto(id,status))
+                setBody(data)
+                contentType(ContentType.Application.Json)
+
             }
 
-            if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Successful(true)
+            if (result.status == HttpStatusCode.Created) {
+                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1446,6 +1199,295 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
+
+
+    //user
+    suspend fun userAddNewAddress(locationData: AddressRequestDto): NetworkCallHandler {
+        return try {
+            var result = client.post(
+                Secrets.getBaseUrl() + "/User/address"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    locationData
+                )
+                contentType(ContentType.Application.Json)
+
+            }
+
+            if (result.status == HttpStatusCode.Created) {
+                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
+            } else {
+                NetworkCallHandler.Error(
+                    result.body<String>()
+                )
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun userUpdateAddress(locationData: AddressRequestUpdateDto): NetworkCallHandler {
+        return try {
+            var result = client.put(
+                Secrets.getBaseUrl() + "/User/address"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    locationData
+                )
+                contentType(ContentType.Application.Json)
+
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
+            } else {
+                NetworkCallHandler.Error(
+                    result.body<String>()
+                )
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
+        return try {
+            var result = client.delete(
+                Secrets.getBaseUrl() + "/User/address/${addressID}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+
+            }
+
+            if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Successful(true)
+            } else {
+                NetworkCallHandler.Error(
+                    result.body<String>()
+                )
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun setAddressAsCurrent(addressId: UUID): NetworkCallHandler {
+        return try {
+            var result = client.post(
+                Secrets.getBaseUrl() + "/User/address/active${addressId}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if (result.status == HttpStatusCode.OK) {
+                NetworkCallHandler.Successful(result.body<Boolean>())
+            } else {
+                NetworkCallHandler.Error(
+                    result.body<String>()
+                )
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun getMyInfo(): NetworkCallHandler {
+        return try {
+            var result = client.get(
+                Secrets.getBaseUrl() + "/User"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<UserDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    suspend fun UpdateMyInfo(data: MyInfoUpdate): NetworkCallHandler {
+        return try {
+            var result = client.put(
+                Secrets.getBaseUrl() + "/User"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            if (!data.name.isNullOrEmpty())
+                                append("name", data.name!!)
+
+                            if (!data.oldPassword.isNullOrEmpty())
+                                append("name", data.oldPassword!!)
+
+
+                            if (!data.phone.isNullOrEmpty())
+                                append("phone", data.phone!!)
+
+
+                            if (!data.newPassword.isNullOrEmpty())
+                                append("name", data.newPassword!!)
+
+                            if (data.thumbnail != null)
+                                append(
+                                    key = "thumbnail", // Must match backend expectation
+                                    value = data.thumbnail!!.readBytes(),
+                                    headers = Headers.build {
+                                        append(
+                                            HttpHeaders.ContentType,
+                                            "image/${data.thumbnail!!.extension}"
+                                        )
+                                        append(
+                                            HttpHeaders.ContentDisposition,
+                                            "filename=${data.thumbnail!!.name}"
+                                        )
+                                    }
+                                )
+
+                        }
+                    )
+                )
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<UserDto>())
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+    //varient
+    suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
+        return try {
+            var result = client.get(
+                Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<List<VarientResponseDto>>())
+            } else if (result.status == HttpStatusCode.NoContent){
+                return NetworkCallHandler.Error("No Data Found")
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
 
 
 }

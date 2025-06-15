@@ -130,51 +130,7 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpDelete("{userID:guid}")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> deleteUser(Guid userID)
-    {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
-            authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
-        {
-            idHolder = outID;
-        }
-
-        if (idHolder == null)
-        {
-            return Unauthorized("هناك مشكلة في التحقق");
-        }
-
-        var currentUser = await _userData.getUserById(idHolder.Value);
-
-        if (currentUser == null)
-        {
-            return BadRequest("المستخدم غير موجود");
-        }
-
-        if (userID != idHolder && (currentUser == null || currentUser.role == 1))
-        {
-            return BadRequest("ليس لديك الصلاحية لحذف الحساب");
-        }
-
-        if (currentUser.isDeleted)
-        {
-            return BadRequest("المستخدم محذوف");
-        }
-
-        bool result = await _userData.deleteUser(idHolder.Value);
-        if (result)
-            return Ok("تم حذف المستخدم بنجاح");
-
-        return BadRequest(" حدثت مشكلة اثناء الحذف");
-    }
-
-    [HttpGet("")]
+   [HttpGet("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]

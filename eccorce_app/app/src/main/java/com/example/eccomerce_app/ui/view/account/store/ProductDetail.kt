@@ -1,5 +1,6 @@
 package com.example.e_commercompose.ui.view.account.store
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -51,9 +56,12 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.model.CardProductModel
 import com.example.e_commercompose.model.ProductVarient
+import com.example.e_commercompose.ui.Screens
+import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -71,7 +79,11 @@ fun ProductDetail(
 
     val products = homeViewModel.products.collectAsState()
     val varients = homeViewModel.varients.collectAsState()
+    val stores = homeViewModel.stores.collectAsState()
+
     val productData = products.value?.firstOrNull { it.id == product_id }
+    val storeData = stores.value?.firstOrNull { it.id == productData?.store_id }
+
     val context = LocalContext.current
 
     val selectedImage = remember { mutableStateOf(productData?.thmbnail) }
@@ -117,6 +129,16 @@ fun ProductDetail(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    Log.d("isFromHomeValue", isFromHome.toString())
+    if (!isFromHome) {
+        LaunchedEffect(Unit) {
+            homeViewModel.getStoreInfoByStoreId(
+                store_id = productData?.store_id ?: UUID.randomUUID()
+            )
+            delay(3000)
+
+        }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -164,51 +186,51 @@ fun ProductDetail(
             )
         },
         bottomBar = {
-            //  if(isFromHome &&(myInfo.value==null||(myInfo.value!=null&&myInfo.value?.store_id!=productData?.store_id)) )
-            BottomAppBar(
-                containerColor = Color.White,
-                modifier = Modifier.padding(horizontal = 15.dp)
-            ) {
-                Button(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        homeViewModel.addToCart(
-                            product = CardProductModel(
-                                id = UUID.randomUUID(),
-                                productId = productData!!.id,
-                                name = productData.name,
-                                thmbnail = productData.thmbnail,
-                                price = productData.price,
-                                productvarients = selectedProdcutVarients.value,
-                                store_id = productData.store_id
+            if (isFromHome && (myInfo.value == null || (myInfo.value != null && myInfo.value?.store_id != productData?.store_id)))
+                BottomAppBar(
+                    containerColor = Color.White,
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .height(50.dp)
+                            .fillMaxWidth(),
+                        onClick = {
+                            homeViewModel.addToCart(
+                                product = CardProductModel(
+                                    id = UUID.randomUUID(),
+                                    productId = productData!!.id,
+                                    name = productData.name,
+                                    thmbnail = productData.thmbnail,
+                                    price = productData.price,
+                                    productvarients = selectedProdcutVarients.value,
+                                    store_id = productData.store_id
+                                )
                             )
+                            coroutine.launch {
+                                snackbarHostState.showSnackbar("Item Added to Cart")
+
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = CustomColor.primaryColor400
+                        ),
+
+                        ) {
+
+
+                        Text(
+                            "Add To Cart",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (16).sp
                         )
-                        coroutine.launch {
-                            snackbarHostState.showSnackbar("Item Added to Cart")
-
-                        }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CustomColor.primaryColor400
-                    ),
-
-                    ) {
 
 
-                    Text(
-                        "Add To Cart",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (16).sp
-                    )
-
+                    }
 
                 }
-
-            }
         }
 
     ) {
@@ -227,8 +249,7 @@ fun ProductDetail(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .height(250.dp)
-                        .fillMaxWidth()
-                      ,
+                        .fillMaxWidth(),
                     model = General.handlingImageForCoil(
                         selectedImage.value,
                         context
@@ -266,7 +287,7 @@ fun ProductDetail(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
 
-                        ) {
+                            ) {
                             items(images.value?.size ?: 0) { index ->
                                 Box(
                                     modifier = Modifier
@@ -462,9 +483,86 @@ fun ProductDetail(
                     }
                 }
             }
-           item {
-               Sizer(50)
-           }
+
+
+            if (storeData != null)
+                item {
+                    Sizer(10)
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 15.dp)
+                    ) {
+                        SubcomposeAsyncImage(
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+//                                                .padding(top = 35.dp)
+                                .height(50.dp)
+                                .width(50.dp)
+                                .clip(RoundedCornerShape(50.dp)),
+                            model = General.handlingImageForCoil(
+                                storeData.small_image,
+                                context
+                            ),
+                            contentDescription = "",
+                            loading = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = Color.Black,
+                                        modifier = Modifier.size(54.dp) // Adjust the size here
+                                    )
+                                }
+                            },
+                        )
+                        Column(
+                            horizontalAlignment = Alignment.Start
+                        ) {
+
+                            Text(
+                                storeData.name,
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .height(35.dp)
+                            ) {
+                                CustomBotton(
+                                    buttonTitle = "Visit Store",
+                                    operation = {
+                                        if (productData != null)
+                                            homeViewModel
+                                                .getProducts(
+                                                    pageNumber = mutableStateOf(1),
+                                                    store_id = productData.store_id
+                                                )
+                                        nav.navigate(
+                                            Screens.Store(
+                                                store_id = storeData.id.toString(),
+                                                isFromHome = true
+                                            )
+                                        )
+                                    },
+                                    color = CustomColor.primaryColor700,
+                                    lableSize = 13
+                                )
+                            }
+
+                        }
+                    }
+                }
+            item {
+                Sizer(50)
+            }
         }
     }
 

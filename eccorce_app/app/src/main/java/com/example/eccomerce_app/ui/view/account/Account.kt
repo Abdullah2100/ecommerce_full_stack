@@ -101,10 +101,12 @@ fun AccountPage(
             AccountCustomBottom("Locations", R.drawable.location_address_list, {
                 nav.navigate(Screens.Address)
             })
-            AccountCustomBottom("My Order", R.drawable.order, {})
+//           AccountCustomBottom("My Order", R.drawable.order, {})
             AccountCustomBottom("Payment Me", R.drawable.credit_card, {})
             AccountCustomBottom("Notifications", R.drawable.notification_accout, {})
             AccountCustomBottom("My Store", R.drawable.store, {
+//                if (myInfo.value != null)
+//                    homeViewModel.kgetProducts(store_id = myInfo.value!!.store_id, pageNumber = 1)
                 nav.navigate(
                     Screens.Store(
                         if (storeId == null) null else storeId.toString(),

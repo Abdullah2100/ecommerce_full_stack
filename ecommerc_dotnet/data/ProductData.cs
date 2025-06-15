@@ -379,6 +379,54 @@ public class ProductData
             return new List<ProductResponseDto>();
         }
     }
+   public async Task<List<ProductResponseDto>?> getProductsByCategory(
+        Guid category_Id,
+        int pageNumber,
+        int pageSize = 25)
+    {
+        try
+        {
+            return await _dbContext.Products
+                .AsNoTracking()
+                .Include(pro=>pro.subCategory)
+                .Include(pro => pro.productImages)
+                .Include(pro => pro.productVarients)
+                .Where(pr => pr.subCategory.categori_id==category_Id)
+                .Select(pr => new ProductResponseDto
+                {
+                    id = pr.id,
+                    name = pr.name,
+                    description = pr.description,
+                    thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                    subcategory_id = pr.subcategory_id,
+                    store_id = pr.store_id,
+                    price = pr.price,
+                    productVarients = pr.productVarients
+                        .Where(pv => pv.product_id == pr.id)
+                        .GroupBy(pv => pv.varient_id, (key, g)
+                            => g.Select(
+                                pv => new ProductVarientResponseDto
+                                {
+                                    id = pv.id,
+                                    name = pv.name,
+                                    precentage = pv.precentage,
+                                    varient_id = pv.varient_id
+                                }
+                            ).ToList()
+                        ).ToList(),
+                    productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
+                })
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this error occured from getting product " + ex.Message);
+            return null;
+        }
+    }
+
 
 
     public async Task<ProductResponseDto?> createProduct(

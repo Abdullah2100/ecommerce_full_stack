@@ -13,4 +13,5 @@ data class ProductVarientReponseDto(
 
     @Serializable(with = UUIDKserialize::class)
     val varient_id: UUID,
+
     )

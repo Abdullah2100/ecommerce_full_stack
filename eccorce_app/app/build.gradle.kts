@@ -52,6 +52,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs = freeCompilerArgs + listOf(
+            "-Xlanguage-features=UnionTypes"
+        )
+
     }
     buildFeatures {
         compose = true
@@ -138,8 +142,15 @@ dependencies {
     implementation(libs.signalr)
 
     //firebase
-    implementation (platform(libs.firebase.bom))
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.ktx)
-    implementation (libs.firebase.messaging.directboot)
+    implementation(libs.firebase.messaging.directboot)
+
+
+
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.compose.runntime)
+
 
 }

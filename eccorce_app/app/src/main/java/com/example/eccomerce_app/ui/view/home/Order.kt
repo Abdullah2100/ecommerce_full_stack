@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -30,7 +31,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,6 +59,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.R
+import com.example.e_commercompose.Util.General.reachedBottom
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import kotlinx.coroutines.async
@@ -76,6 +80,28 @@ fun OrderScreen(
     val deletedId = remember { mutableStateOf<UUID?>(null) }
     val coroutin = rememberCoroutineScope()
 
+
+    val lazyState = rememberLazyListState()
+    val reachedBottom = remember {
+        derivedStateOf {
+            lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
+        }
+    }
+    var page = remember { mutableStateOf(1) }
+    val isLoadingMore = remember { mutableStateOf(false) }
+
+
+    Log.d("loadingState",isLoadingMore.value.toString())
+    LaunchedEffect(reachedBottom.value) {
+
+        if(!orders.value.isNullOrEmpty() && reachedBottom.value){
+            homeViewModel.getMyOrder(
+                page,
+                isLoadingMore
+            )
+        }
+
+    }
 
 
     Scaffold(
@@ -123,6 +149,7 @@ fun OrderScreen(
         it.calculateTopPadding()
         it.calculateBottomPadding()
         LazyColumn(
+            state = lazyState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
@@ -274,6 +301,20 @@ fun OrderScreen(
 
                 }
             }
+
+            if (isLoadingMore.value) {
+                item {
+                    Box(modifier = Modifier
+                        .padding(top = 15.dp)
+                        .fillMaxWidth(),
+                        contentAlignment = Alignment.Center)
+                    {
+                        CircularProgressIndicator(color = CustomColor.primaryColor700)
+                    }
+                    Sizer(40)
+                }
+            }
+
 
             item {
                 Box(modifier = Modifier.height(90.dp))
