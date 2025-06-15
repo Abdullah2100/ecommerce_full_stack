@@ -62,7 +62,7 @@ import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.Util.General.reachedBottom
 import kotlinx.coroutines.delay
 
-@SuppressLint("ConfigurationScreenWidthHeight")
+@SuppressLint("ConfigurationScreenWidthHeight", "SuspiciousIndentation")
 @Composable
 fun HomePage(
     nav: NavHostController,
@@ -106,8 +106,8 @@ fun HomePage(
 
 
     LaunchedEffect(reachedBottom.value) {
-        if(!products.value.isNullOrEmpty() && reachedBottom.value){
-            Log.d("scrollReachToBotton","true")
+        if (!products.value.isNullOrEmpty() && reachedBottom.value) {
+            Log.d("scrollReachToBotton", "true")
             homeViewModel.getProducts(
                 page,
                 isLoadingMore
@@ -242,53 +242,56 @@ fun HomePage(
 
                 }
             }
-            if(categories.value.isNullOrEmpty()==false)
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        "Category",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center
+            if (categories.value.isNullOrEmpty() == false)
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp, bottom = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Category",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center
 
-                    )
-                    Text(
-                        "View All",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.clickable{
-                            nav.navigate(Screens.Category)
-                        }
+                        )
+                        Text(
+                            "View All",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.clickable {
+                                nav.navigate(Screens.Category)
+                            }
 
-                    )
-                }
-
-                when (categories.value == null) {
-                    true -> {
-                        CategoryLoadingShape(20)
+                        )
                     }
 
-                    else -> {
+                    when (categories.value == null) {
+                        true -> {
+                            CategoryLoadingShape(20)
+                        }
 
-                        when (categories.value!!.isEmpty()) {
-                            true -> {}
-                            else -> {
-                                CategoryShape(categories.value!!.take(4))
+                        else -> {
+
+                            when (categories.value!!.isEmpty()) {
+                                true -> {}
+                                else -> {
+                                    CategoryShape(
+                                        categories.value!!.take(4),
+                                        homeViewModel,
+                                        nav)
+                                }
                             }
                         }
                     }
                 }
-            }
 
             if (bannel.value != null) {
                 item {
@@ -318,10 +321,12 @@ fun HomePage(
 
             if (isLoadingMore.value) {
                 item {
-                    Box(modifier = Modifier
-                        .padding(top = 15.dp)
-                        .fillMaxWidth(),
-                        contentAlignment = Alignment.Center)
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 15.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    )
                     {
                         CircularProgressIndicator(color = CustomColor.primaryColor700)
                     }
@@ -329,7 +334,7 @@ fun HomePage(
                 }
             }
 
-            item{
+            item {
                 Sizer(140)
             }
         }

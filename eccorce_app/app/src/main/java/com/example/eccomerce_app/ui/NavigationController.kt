@@ -25,6 +25,7 @@ import com.example.e_commercompose.ui.view.checkout.CheckoutScreen
 import com.example.e_commercompose.ui.view.home.CartScreen
 import com.example.e_commercompose.ui.view.home.HomePage
 import com.example.e_commercompose.ui.view.home.OrderScreen
+import com.example.e_commercompose.ui.view.home.ProductCategoryScreen
 import com.example.e_commercompose.ui.view.location.LocationHomeScreen
 import com.example.e_commercompose.ui.view.location.LocationsList
 import com.example.e_commercompose.viewModel.HomeViewModel
@@ -276,6 +277,27 @@ fun NavController(
                 )
             }
 
+            composable<Screens.ProductCategory>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {result->
+                val data =result.toRoute<Screens.ProductCategory>()
+                ProductCategoryScreen(
+                    nav = nav,
+                    homeViewModel = homeViewModle,
+                    category_id = data.cateogry_id
+                )
+            }
+
+
 
             composable<Screens.Account>(
                 enterTransition = {
@@ -360,6 +382,7 @@ fun NavController(
                 )
 
             }
+
             composable<Screens.ProductDetails>(
 
                 enterTransition = {
@@ -384,6 +407,7 @@ fun NavController(
                 )
 
             }
+
             composable<Screens.Cart>(
 
                 enterTransition = {
@@ -427,6 +451,7 @@ fun NavController(
                 )
 
             }
+
             composable<Screens.Address>(
 
                 enterTransition = {
@@ -446,6 +471,7 @@ fun NavController(
                 )
 
             }
+
             composable<Screens.Map>(
 
                 enterTransition = {

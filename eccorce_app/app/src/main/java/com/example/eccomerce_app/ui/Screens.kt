@@ -1,6 +1,7 @@
 package com.example.e_commercompose.ui
 
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 object Screens {
 
@@ -46,6 +47,9 @@ object Screens {
 
     @Serializable
     object Category
+
+    @Serializable
+    data class ProductCategory(val cateogry_id: String)
 
     @Serializable
     object Account

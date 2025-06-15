@@ -61,7 +61,7 @@ public class ProductController : ControllerBase
     }
 
 
-    [HttpGet("category/{category_id}/{pageNumber:int}")]
+    [HttpGet("{category_id}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -85,6 +85,7 @@ public class ProductController : ControllerBase
         return StatusCode(200, result);
     }
 
+    
     [HttpGet("{store_id:guid}/{subCategory_id:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

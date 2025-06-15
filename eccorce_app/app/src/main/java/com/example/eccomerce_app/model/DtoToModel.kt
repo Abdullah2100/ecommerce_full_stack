@@ -102,6 +102,7 @@ object DtoToModel {
             subcategory_id = this.subcategory_id,
             store_id = this.store_id,
             price = this.price,
+            category_id = this.category_id,
             productVarients = this.productVarients?.map {
                 it.map { it.toProductVarient() }
             },

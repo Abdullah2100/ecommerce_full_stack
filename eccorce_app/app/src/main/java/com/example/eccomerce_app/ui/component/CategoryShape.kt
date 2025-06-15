@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,17 +27,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.model.Category
+import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.e_commercompose.viewModel.HomeViewModel
 
 
 @Composable
 fun CategoryShape(
-    categories:List<Category>
+    categories:List<Category>,
+    viewModel: HomeViewModel,
+    nav: NavHostController
 ){
     Log.d("category_image",categories[0].image)
     var context = LocalContext.current
@@ -54,7 +60,16 @@ fun CategoryShape(
                 modifier = Modifier
                     .padding(end = 5.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable{},
+                    .clickable{
+                        viewModel.getProductsByCategoryID(
+                            pageNumber = mutableStateOf(1),
+                            cateogry_id = categories[index].id
+                        )
+                        nav.navigate(Screens.ProductCategory(
+                            categories[index].id.toString()
+                        ))
+
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 

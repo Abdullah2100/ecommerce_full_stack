@@ -30,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +50,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.model.MyInfoUpdate
+import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
@@ -129,6 +131,15 @@ fun CategoryScreen(
                             modifier = Modifier
                                 .background(Color.White)
                                 .width(80.dp)
+                                .clickable{
+                                    homeViewModel.getProductsByCategoryID(
+                                        mutableStateOf(1),
+                                        category.value!!.get(index).id,
+                                    )
+                                    nav.navigate(Screens.ProductCategory(
+                                        category.value!!.get(index).id.toString()
+                                    ))
+                                }
                             ,
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally

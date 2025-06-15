@@ -30,6 +30,7 @@ public class ProductData
         {
             return _dbContext.Products
                 .AsNoTracking()
+                .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
                 .Where(pr => pr.id == id)
@@ -42,6 +43,7 @@ public class ProductData
                     subcategory_id = pr.subcategory_id,
                     store_id = pr.store_id,
                     price = pr.price,
+                    category_id = pr.subCategory.categori_id,
                     productVarients = pr.productVarients
                         .Where(pv => pv.product_id == pr.id)
                         .GroupBy(pv => pv.varient_id, (key, g)
@@ -74,6 +76,8 @@ public class ProductData
         {
             return await _dbContext.Products
                 .AsNoTracking()
+                .Include(pro=>pro.subCategory)
+ 
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
                 .OrderByDescending(pr => pr.create_at)
@@ -86,6 +90,7 @@ public class ProductData
                     subcategory_id = pr.subcategory_id,
                     store_id = pr.store_id,
                     price = pr.price,
+                    category_id = pr.subCategory.categori_id,
                     productVarients = pr.productVarients
                         .Where(pv => pv.product_id == pr.id)
                         .GroupBy(pv => pv.varient_id, (key, g)
@@ -186,6 +191,7 @@ public class ProductData
         {
             return await _dbContext.Products
                 .AsNoTracking()
+                .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
                 .Where(pr => pr.store_id == storeId && pr.subcategory_id == subCategory_id)
@@ -198,6 +204,7 @@ public class ProductData
                     subcategory_id = pr.subcategory_id,
                     store_id = pr.store_id,
                     price = pr.price,
+                    category_id = pr.subCategory.categori_id,
                     productVarients = pr.productVarients
                         .Where(pv => pv.product_id == pr.id)
                         .GroupBy(pv => pv.varient_id, (key, g)

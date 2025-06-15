@@ -11,6 +11,7 @@ public class ProductResponseDto
     public string description { get; set; }
     public string  thmbnail { get; set; }
     public Guid subcategory_id { get; set; }
+    public Guid category_id { get; set; }
     public Guid store_id { get; set; }
     public decimal price { get; set; }
     public List<List<ProductVarientResponseDto>>? productVarients { get; set; }

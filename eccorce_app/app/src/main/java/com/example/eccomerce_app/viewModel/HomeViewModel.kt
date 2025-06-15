@@ -1198,6 +1198,58 @@ class HomeViewModel(
 
     }
 
+    fun getProductsByCategoryID(
+        pageNumber: MutableState<Int>,
+        cateogry_id: UUID,
+        isLoading: MutableState<Boolean>? = null
+    ) {
+        if (isLoading != null) isLoading.value = true;
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository
+                .getProductByCategoryId(
+                    cateogry_id,
+                    pageNumber.value
+                );
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<ProductResponseDto>
+
+                    var holder = mutableListOf<ProductModel>()
+                    var addressResponse = data.map { it.toProdcut() }.toList()
+
+                    holder.addAll(addressResponse)
+                    if (_products.value != null) {
+                        holder.addAll(_products.value!!)
+                    }
+
+                    var distinticSubCategories = holder.distinctBy { it.id }.toMutableList()
+
+                    if (distinticSubCategories.size > 0)
+                        _products.emit(distinticSubCategories)
+                    else
+                        _products.emit(emptyList())
+                    if (isLoading != null) isLoading.value = false;
+                    if (data.size == 25)
+                        pageNumber.value++
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    if (_products.value == null)
+                        _products.emit(emptyList())
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                    if (isLoading != null) isLoading.value = false;
+                }
+            }
+        }
+
+    }
+
 
     fun getProducts(
         pageNumber: MutableState<Int>,
@@ -1507,9 +1559,8 @@ class HomeViewModel(
     ) {
 
         viewModelScope.launch(Dispatchers.IO) {
-            if(isLoading!=null)
-            {
-                isLoading.value=true
+            if (isLoading != null) {
+                isLoading.value = true
                 delay(500)
             }
             var result = homeRepository.getMyOrderItemForStoreId(store_id, pageNumber.value)
@@ -1523,17 +1574,16 @@ class HomeViewModel(
                     }
                     val distinctOrderItem = orderItemList.distinctBy { it.id }.toList()
                     _orderItemForMyStore.emit(distinctOrderItem)
-                    if(isLoading!=null)isLoading.value=false
-                    if(data.size==25)pageNumber.value++
+                    if (isLoading != null) isLoading.value = false
+                    if (data.size == 25) pageNumber.value++
 
                 }
 
                 is NetworkCallHandler.Error -> {
-                    if(_orderItemForMyStore.value==null)
-                    {
+                    if (_orderItemForMyStore.value == null) {
                         _orderItemForMyStore.emit(emptyList())
                     }
-                    if(isLoading!=null)isLoading.value=false
+                    if (isLoading != null) isLoading.value = false
 
                     var errorMessage = result.data as String
                     Log.d("errorFromGettingOrder", errorMessage)

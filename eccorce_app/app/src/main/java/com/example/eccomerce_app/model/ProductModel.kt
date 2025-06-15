@@ -9,6 +9,7 @@ data class ProductModel(
     val thmbnail:String,
     val subcategory_id: UUID,
     val store_id: UUID,
+    val category_id: UUID,
     val price: Double,
     val productVarients:List<List<ProductVarient>>?=null,
     val productImages:List<String>

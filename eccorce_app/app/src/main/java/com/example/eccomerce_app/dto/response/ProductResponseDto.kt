@@ -16,6 +16,8 @@ data class ProductResponseDto(
     val subcategory_id: UUID,
     @Serializable(with = UUIDKserialize::class)
     val store_id: UUID,
+    @Serializable(with = UUIDKserialize::class)
+    val category_id: UUID,
     val price: Double,
     val productVarients:List<List<ProductVarientReponseDto>>?=null,
     val productImages:List<String>

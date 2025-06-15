@@ -503,6 +503,7 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
+
     suspend fun getProductByCategoryId(category_id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Product/category/${category_id}/${pageNumber}";
