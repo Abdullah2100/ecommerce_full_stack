@@ -22,7 +22,7 @@ public class VarientData
     {
         try
         {
-            var result = await _dbContext.Varients.FindAsync(id);
+            Varient? result = await _dbContext.Varients.FindAsync(id);
             if (result == null) return null;
             return new VarientResposeDto
             {

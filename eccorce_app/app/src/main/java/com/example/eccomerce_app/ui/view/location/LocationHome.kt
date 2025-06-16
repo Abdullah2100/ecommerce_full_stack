@@ -285,6 +285,7 @@ fun LocationHomeScreen(
             Sizer(20)
             CustomTitleBotton(
                 operation = {
+                    homeViewModle.getMyInfo()
                     nav.navigate(Screens.LocationList(true))
                 },
                 buttonTitle = "Enter Location Manually",

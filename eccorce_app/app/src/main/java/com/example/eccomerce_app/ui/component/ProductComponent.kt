@@ -62,7 +62,7 @@ fun  ProductShape(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        repeat(product.size*50) { index ->
+        repeat(product.size) { index ->
             ConstraintLayout {
                 val (rightRef, leftRef) = createRefs()
                 Card(
@@ -78,8 +78,8 @@ fun  ProductShape(
                         .clip(RoundedCornerShape(8.dp))
                         .clickable{
                             nav.navigate(Screens.ProductDetails(
-                               // product[index].id.toString(),
-                                product[0].id.toString(),
+                                product[index].id.toString(),
+//                                product[0].id.toString(),
                                 isFromHome = isFromHome)
                             )
                         }
@@ -108,8 +108,8 @@ fun  ProductShape(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp)),
                             model = General.handlingImageForCoil(
-                                //product[index].thmbnail,
-                                product[0].thmbnail,
+                                product[index].thmbnail,
+//                                product[0].thmbnail,
                                 context
                             ),
                             contentDescription = "",
@@ -137,8 +137,8 @@ fun  ProductShape(
                     ) {
                         Sizer(10)
                         Text(
-                            //product[index].name,
-                            product[0].name,
+                            product[index].name,
+//                            product[0].name,
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = (16).sp, color = CustomColor.neutralColor950,
@@ -147,8 +147,8 @@ fun  ProductShape(
                         )
                         Sizer(10)
                         Text(
-                            //"${product[index].price}",
-                            "${product[0].price}",
+                            "${product[index].price}",
+//                            "${product[0].price}",
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = (16).sp, color = CustomColor.neutralColor950

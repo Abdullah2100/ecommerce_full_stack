@@ -59,10 +59,10 @@ public class clsTokenUtil
         long lIssuDate = long.Parse(issuAt);
         long lExpireDate = long.Parse(expireAt);
         
-        var issuDateTime = DateTimeOffset.FromUnixTimeSeconds(lIssuDate).DateTime;
-        var expireTime =DateTimeOffset.FromUnixTimeSeconds(lExpireDate).DateTime;
+        DateTime issuDateTime = DateTimeOffset.FromUnixTimeSeconds(lIssuDate).DateTime;
+        DateTime expireTime =DateTimeOffset.FromUnixTimeSeconds(lExpireDate).DateTime;
         
-        var rsult = issuDateTime-expireTime;
+        TimeSpan rsult = issuDateTime-expireTime;
         return rsult.Days>=29;
     }
 

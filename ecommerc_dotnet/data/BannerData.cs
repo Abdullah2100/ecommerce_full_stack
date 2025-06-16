@@ -118,8 +118,8 @@ public class BannerData
     {
         try
         {
-            var id = clsUtil.generateGuid();
-            var categoryObj = new Bannel
+            Guid id = clsUtil.generateGuid();
+            Bannel categoryObj = new Bannel
             {
                 id = id,
                 end_at = end_at,
@@ -144,7 +144,7 @@ public class BannerData
     {
         try
         {
-            var result = await _dbContext.Banner.FindAsync(banner_id);
+            Bannel? result = await _dbContext.Banner.FindAsync(banner_id);
 
             if (result == null)
             {

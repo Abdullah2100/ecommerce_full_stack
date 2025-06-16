@@ -142,57 +142,64 @@ fun HomePage(
                     }
 
                     else -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.height(sizeAnimation.value)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .width(width = (configuration.screenWidthDp - 30 - 34).dp)
-                                    .clickable(
-                                        enabled = true,
-                                        interactionSource = interactionSource,
-                                        indication = null,
-                                        onClick = {
-                                            nav.navigate(Screens.Address)
-                                        }
-                                    )
-                            ) {
-                                Text(
-                                    "Loaction",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp,
-                                    color = CustomColor.neutralColor800,
-                                    textAlign = TextAlign.Center
+                        when (myInfo.value?.address.isNullOrEmpty()) {
+                            true -> {
 
-                                )
-                                Sizer(1)
-                                Text(
-                                    myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
-                                        ?: "",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 18.sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.Center
-
-                                )
                             }
 
-                            Icon(
-                                Icons.Outlined.Notifications,
-                                "",
-                                tint = CustomColor.neutralColor950,
-                                modifier = Modifier.size(30.dp)
+                            else -> {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.height(sizeAnimation.value)
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .width(width = (configuration.screenWidthDp - 30 - 34).dp)
+                                            .clickable(
+                                                enabled = true,
+                                                interactionSource = interactionSource,
+                                                indication = null,
+                                                onClick = {
+                                                    nav.navigate(Screens.Address)
+                                                }
+                                            )
+                                    ) {
+                                        Text(
+                                            "Loaction",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 16.sp,
+                                            color = CustomColor.neutralColor800,
+                                            textAlign = TextAlign.Center
 
-                            )
+                                        )
+                                        Sizer(1)
+                                        Text(
+                                            myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
+                                                ?: "",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 18.sp,
+                                            color = CustomColor.neutralColor950,
+                                            textAlign = TextAlign.Center
+
+                                        )
+                                    }
+
+                                    Icon(
+                                        Icons.Outlined.Notifications,
+                                        "",
+                                        tint = CustomColor.neutralColor950,
+                                        modifier = Modifier.size(30.dp)
+
+                                    )
+                                }
+
+                            }
                         }
                     }
                 }
-
-
             }
 
             item {
@@ -286,7 +293,8 @@ fun HomePage(
                                     CategoryShape(
                                         categories.value!!.take(4),
                                         homeViewModel,
-                                        nav)
+                                        nav
+                                    )
                                 }
                             }
                         }

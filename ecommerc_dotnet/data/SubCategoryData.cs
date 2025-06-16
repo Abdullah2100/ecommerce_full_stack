@@ -79,7 +79,7 @@ public class SubCategoryData
        {
            try
            {
-               var result = (from st in _dbContext.Store
+               IQueryable<bool> result = (from st in _dbContext.Store
                        join sub in _dbContext.SubCategory on st.id equals sub.id
                        where st.id==store_id
                        select sub.id == subCategory_id 
@@ -186,8 +186,9 @@ public class SubCategoryData
        {
            try
            {
-               var result = await  _dbContext
-                   .SubCategory.FirstOrDefaultAsync(sub=>sub.id==id);
+               SubCategory? result = await  _dbContext
+                   .SubCategory.FindAsync(id);
+               if (result == null) return null;
                
                result.updated_at = DateTime.Now;
                result.name = name;
@@ -202,6 +203,23 @@ public class SubCategoryData
            }
        }
       
-    
+     public async Task<bool?> deleteSubCategory(Guid id)
+           {
+               try
+               {
+                   SubCategory? result = await  _dbContext
+                       .SubCategory.FindAsync(id);
+                   if (result == null) return null;
+                   _dbContext.Remove(result);
+                   await _dbContext.SaveChangesAsync();
+                   return true;
+               }
+               catch (Exception ex)
+               {
+                   Console.WriteLine("this error from update sub category by id "+ex.Message);
+                   return null;
+               }
+           }
+        
     
 }

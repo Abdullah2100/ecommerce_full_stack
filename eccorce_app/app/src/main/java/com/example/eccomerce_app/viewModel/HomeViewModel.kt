@@ -338,6 +338,130 @@ class HomeViewModel(
     }
 
 
+    //banner
+    private fun getStoresBanner() {
+        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+            var result = homeRepository.getRandomBanner();
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var data = result.data as List<BannerResponseDto>
+
+                    var bannersHolder = mutableListOf<BannerModel>()
+                    var bannersResponse = data.map { it.toBanner() }.toList()
+
+                    bannersHolder.addAll(bannersResponse)
+                    if (_banners.value != null) {
+                        bannersHolder.addAll(_banners.value!!)
+                    }
+
+                    var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
+                    if (distinticBanner.size > 0)
+                        _banners.emit(distinticBanner)
+                    else
+                        _banners.emit(emptyList<BannerModel>())
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    _banners.emit(emptyList<BannerModel>())
+
+                    _isLoading.emit(false)
+
+                    var errorMessage = (result.data.toString())
+                    if (errorMessage.contains(General.BASED_URL)) {
+                        errorMessage.replace(General.BASED_URL, " Server ")
+                    }
+                    Log.d("errorFromGettingStoreData", errorMessage)
+                }
+            }
+        }
+
+    }
+
+
+    suspend fun createBanner(
+        end_date: String,
+        image: File,
+
+        ): String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.createBanner(
+            end_date,
+            image
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var data = result.data as BannerResponseDto
+
+                var bannersHolder = mutableListOf<BannerModel>()
+                var bannersResponse = data.toBanner()
+
+                bannersHolder.add(bannersResponse)
+                if (_banners.value != null) {
+                    bannersHolder.addAll(_banners.value!!)
+                }
+
+                var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
+                if (distinticBanner.size > 0)
+                    _banners.emit(distinticBanner)
+                else
+                    _banners.emit(emptyList<BannerModel>())
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString().replace("", ""))
+                if (errorMessage.contains(General.BASED_URL.substring(8, 20))) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"", "")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
+
+    suspend fun deleteBanner(
+        banner_id: UUID,
+
+        ): String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.deleteBanner(banner_id);
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                var copyBanner = _banners.value?.filter { it.id != banner_id }
+                if (!copyBanner.isNullOrEmpty())
+                    _banners.emit(copyBanner)
+                else
+                    _banners.emit(emptyList())
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString().replace("", ""))
+                if (errorMessage.contains(General.BASED_URL.substring(8, 20))) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"", "")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
+
+
+    
+
     fun getCategories(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
         viewModelScope.launch(Dispatchers.IO) {
@@ -599,6 +723,17 @@ class HomeViewModel(
                 }
 
                 is NetworkCallHandler.Error -> {
+                    if(_myInfo.value==null){
+                        _myInfo.emit(UserModel(
+                            id = UUID.randomUUID(),
+                            name = "",
+                            phone = "",
+                            email = "",
+                            thumbnail = "",
+                            address = emptyList(),
+                            store_id = UUID.randomUUID()
+                        ))
+                    }
                     var resultError = result.data as String
                     Log.d("errorFromNetowrk", resultError)
                 }
@@ -819,6 +954,37 @@ class HomeViewModel(
         }
     }
 
+
+    suspend fun deleteSubCategory (
+        id: UUID
+    ): String? {
+        _isLoading.emit(true)
+
+        var result = homeRepository.deleteSubCategory(
+            id
+        );
+        when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                val filterdSubCateogry = _SubCategories.value?.filter { it.id!=id }
+                _SubCategories.emit(filterdSubCateogry)
+                return null;
+            }
+
+            is NetworkCallHandler.Error -> {
+                _isLoading.emit(false)
+
+                var errorMessage = (result.data.toString())
+                if (errorMessage.contains(General.BASED_URL)) {
+                    errorMessage.replace(General.BASED_URL, " Server ")
+                }
+                return errorMessage.replace("\"", "")
+            }
+
+            else -> {
+                return null;
+            }
+        }
+    }
     fun getStoreInfoByStoreId(store_id: UUID) {
         getStoreData(store_id)
         getStoreBanner(store_id)
@@ -897,125 +1063,6 @@ class HomeViewModel(
 
     }
 
-    private fun getStoresBanner() {
-        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
-            var result = homeRepository.getRandomBanner();
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<BannerResponseDto>
-
-                    var bannersHolder = mutableListOf<BannerModel>()
-                    var bannersResponse = data.map { it.toBanner() }.toList()
-
-                    bannersHolder.addAll(bannersResponse)
-                    if (_banners.value != null) {
-                        bannersHolder.addAll(_banners.value!!)
-                    }
-
-                    var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
-                    if (distinticBanner.size > 0)
-                        _banners.emit(distinticBanner)
-                    else
-                        _banners.emit(emptyList<BannerModel>())
-
-                }
-
-                is NetworkCallHandler.Error -> {
-                    _banners.emit(emptyList<BannerModel>())
-
-                    _isLoading.emit(false)
-
-                    var errorMessage = (result.data.toString())
-                    if (errorMessage.contains(General.BASED_URL)) {
-                        errorMessage.replace(General.BASED_URL, " Server ")
-                    }
-                    Log.d("errorFromGettingStoreData", errorMessage)
-                }
-            }
-        }
-
-    }
-
-
-    suspend fun createBanner(
-        end_date: String,
-        image: File,
-
-        ): String? {
-        _isLoading.emit(true)
-
-        var result = homeRepository.createBanner(
-            end_date,
-            image
-        );
-        when (result) {
-            is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as BannerResponseDto
-
-                var bannersHolder = mutableListOf<BannerModel>()
-                var bannersResponse = data.toBanner()
-
-                bannersHolder.add(bannersResponse)
-                if (_banners.value != null) {
-                    bannersHolder.addAll(_banners.value!!)
-                }
-
-                var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
-                if (distinticBanner.size > 0)
-                    _banners.emit(distinticBanner)
-                else
-                    _banners.emit(emptyList<BannerModel>())
-                return null;
-            }
-
-            is NetworkCallHandler.Error -> {
-                _isLoading.emit(false)
-
-                var errorMessage = (result.data.toString().replace("", ""))
-                if (errorMessage.contains(General.BASED_URL.substring(8, 20))) {
-                    errorMessage.replace(General.BASED_URL, " Server ")
-                }
-                return errorMessage.replace("\"", "")
-            }
-
-            else -> {
-                return null;
-            }
-        }
-    }
-
-    suspend fun deleteBanner(
-        banner_id: UUID,
-
-        ): String? {
-        _isLoading.emit(true)
-
-        var result = homeRepository.deleteBanner(banner_id);
-        when (result) {
-            is NetworkCallHandler.Successful<*> -> {
-                var copyBanner = _banners.value?.filter { it.id != banner_id }
-                if (!copyBanner.isNullOrEmpty())
-                    _banners.emit(copyBanner)
-                else
-                    _banners.emit(emptyList())
-                return null;
-            }
-
-            is NetworkCallHandler.Error -> {
-                _isLoading.emit(false)
-
-                var errorMessage = (result.data.toString().replace("", ""))
-                if (errorMessage.contains(General.BASED_URL.substring(8, 20))) {
-                    errorMessage.replace(General.BASED_URL, " Server ")
-                }
-                return errorMessage.replace("\"", "")
-            }
-
-            else -> {
-                return null;
-            }
-        }
-    }
 
     fun getStoreAddress(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
@@ -1076,8 +1123,6 @@ class HomeViewModel(
 
                     if (distinticSubCategories.size > 0)
                         _SubCategories.emit(distinticSubCategories)
-                    else
-                        _SubCategories.emit(emptyList())
 
                 }
 

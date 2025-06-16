@@ -1,13 +1,16 @@
+using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -44,8 +47,8 @@ public class StoreController : ControllerBase
     public async Task<IActionResult> CreateNewStore(
         [FromForm] StoreRequestDto store)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
@@ -58,7 +61,7 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
@@ -78,7 +81,7 @@ public class StoreController : ControllerBase
         if (small_image == null || wallperper == null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصور");
 
-        var result = await _storeData.createStore(
+        StoreResponseDto? result = await _storeData.createStore(
             name: store.name,
             wallpaper_image: wallperper,
             small_image: small_image,
@@ -103,9 +106,10 @@ public class StoreController : ControllerBase
     public async Task<IActionResult> updateStore(
         [FromForm] StoreUpdateDto store)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -117,7 +121,7 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
@@ -145,7 +149,7 @@ public class StoreController : ControllerBase
             wallperper = await clsUtil.saveFile(store.wallpaper_image, clsUtil.enImageType.STORE, _host);
 
 
-        var result = await _storeData.updateStore(
+        StoreResponseDto? result = await _storeData.updateStore(
             name: store.name,
             wallpaper_image: wallperper,
             small_image: small_image,
@@ -170,9 +174,10 @@ public class StoreController : ControllerBase
         Guid storeId
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -184,20 +189,20 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
         if (user.role == 1)
             return BadRequest("المستخدم ليس لديه الصلاحية");
 
-        var isExist = await _storeData.isExist(storeId);
+        bool isExist = await _storeData.isExist(storeId);
 
         if (!isExist)
             return NotFound("المتجر غير موجود");
 
 
-        var result = await _storeData.updateStoreStatus(
+        bool? result = await _storeData.updateStoreStatus(
             storeId
         );
 
@@ -220,9 +225,10 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> GetStore()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -234,7 +240,7 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _storeData.getStoreByUser(userId);
+        StoreResponseDto? result = await _storeData.getStoreByUser(userId);
 
         if (result == null)
             return NoContent();
@@ -247,7 +253,7 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStore(Guid store_Id)
     {
-        var result = await _storeData.getStoreById(store_Id);
+        StoreResponseDto? result = await _storeData.getStoreById(store_Id);
 
         if (result == null)
             return NotFound("المتجر غير موجود");
@@ -261,9 +267,10 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetStorePages()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -275,7 +282,7 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userData = await _userData.getUserById(idHolder.Value);
+        User? userData = await _userData.getUserById(idHolder.Value);
 
         if (userData == null || userData.role != 0)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
@@ -289,7 +296,7 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStores(int page = 1)
     {
-        var result = await _storeData.getStore(page);
+        List<StoreResponseDto>? result = await _storeData.getStore(page);
 
         if (result == null)
             return NoContent();
@@ -302,7 +309,7 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStoreAddress(Guid store_Id, int page)
     {
-        var result = await _storeData.getStoreAddress(store_Id, page);
+        List<AddressResponseDto>? result = await _storeData.getStoreAddress(store_Id, page);
 
         if (result.Count < 1)
             return NotFound("المتجر غير موجود");

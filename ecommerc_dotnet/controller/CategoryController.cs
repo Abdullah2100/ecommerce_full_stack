@@ -1,11 +1,14 @@
+using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -40,7 +43,7 @@ public class CategoryController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        var categories = await _categoryData.getCategories(_configuration, pageNumber);
+        List<CategoryResponseDto>? categories = await _categoryData.getCategories(_configuration, pageNumber);
         if (categories == null)
             return NoContent();
 
@@ -55,8 +58,8 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> createCateogry([FromForm] CategoryRequestDto category)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
@@ -69,7 +72,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
@@ -81,13 +84,13 @@ public class CategoryController : ControllerBase
         if (isExist)
             return Conflict("هناك قسم بهذا الاسم");
 
-        var imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
+        string imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
         // var imagePath = await MinIoServices.uploadFile(_configuration,category.image,MinIoServices.enBucketName.CATEGORY); ;
 
         if (imagePath == null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصورة");
 
-        var result = await _categoryData.addNewCategory(category.name, imagePath, user.ID);
+        bool? result = await _categoryData.addNewCategory(category.name, imagePath, user.ID);
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
@@ -106,8 +109,8 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> updateCateogry(
         [FromForm] CategoryRequestUpdatteDto category)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
@@ -120,7 +123,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
         {
@@ -130,7 +133,7 @@ public class CategoryController : ControllerBase
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
-        var categoryHolder = await _categoryData.getCategory(category.id);
+        Category? categoryHolder = await _categoryData.getCategory(category.id);
 
         if (categoryHolder == null)
             return BadRequest("القسم غير موجود");
@@ -153,7 +156,7 @@ public class CategoryController : ControllerBase
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
         }
 
-        var result = await _categoryData.updateCategory(
+        bool? result = await _categoryData.updateCategory(
             category!.id,
             categoryHolder.name != category.name ? category.name : null,
             imagePath
@@ -173,9 +176,10 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> deleteCategory(Guid categoryId)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -187,7 +191,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("ليس لديك الصلاحية لانشاء قسم جديد");
@@ -195,12 +199,12 @@ public class CategoryController : ControllerBase
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
-        var categoryHolder = await _categoryData.getCategory(categoryId);
+        Category? categoryHolder = await _categoryData.getCategory(categoryId);
 
         if (categoryHolder == null)
             return NotFound("القسم غير موجود");
 
-        var result = await _categoryData.deleteCategory(
+        bool? result = await _categoryData.deleteCategory(
             categoryId);
 
         if (result == null)

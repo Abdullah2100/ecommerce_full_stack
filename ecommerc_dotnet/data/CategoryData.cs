@@ -26,7 +26,7 @@ public class CategoryData
     {
         try
         {
-            var result = _dbContext.Category
+            IQueryable<CategoryResponseDto> result = _dbContext.Category
                 .AsNoTracking()
                 .Where(c => c.isBlocked == false)
                 .OrderBy(c => c.created_at)
@@ -75,9 +75,13 @@ public class CategoryData
     {
         try
         {
-            var categoryObj = new Category
+            Category categoryObj = new Category
             {
-                id = clsUtil.generateGuid(), name = name, image_path = filePath, isBlocked = false, owner_id = userId
+                id = clsUtil.generateGuid(), 
+                name = name, 
+                image_path = filePath,
+                isBlocked = false,
+                owner_id = userId
             };
             await _dbContext.Category.AddAsync(categoryObj);
             await _dbContext.SaveChangesAsync();
@@ -100,7 +104,7 @@ public class CategoryData
     {
         try
         {
-            var category = await _dbContext.Category.FindAsync(id);
+            Category? category = await _dbContext.Category.FindAsync(id);
             category!.name = name ?? category.name;
             category.image_path = filePath ?? category.image_path;
 
@@ -122,7 +126,7 @@ public class CategoryData
     {
         try
         {
-            var category = await _dbContext.Category.FindAsync(id);
+            Category? category = await _dbContext.Category.FindAsync(id);
             if (category == null) return null;
              _dbContext.Remove(category);
             await _dbContext.SaveChangesAsync();

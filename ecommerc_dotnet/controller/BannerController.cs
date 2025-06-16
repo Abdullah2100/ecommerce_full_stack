@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Response;
@@ -7,6 +8,7 @@ using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -45,9 +47,10 @@ public class BannerController : ControllerBase
         [FromForm] BannerRequestDto banner
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+     
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -59,7 +62,7 @@ public class BannerController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userHolder = await _userData.getUser(idHolder.Value);
+        UserInfoResponseDto? userHolder = await _userData.getUser(idHolder.Value);
         if (userHolder == null)
         {
             return NotFound("المستخدم غير موجود");
@@ -70,7 +73,7 @@ public class BannerController : ControllerBase
             return NotFound("لا بد من انشاء متجر قبل اضافة اي لوحة اعلانية");
         }
 
-        var imagePath = await clsUtil.saveFile(banner.image, clsUtil.enImageType.BANNER, _host);
+        string? imagePath = await clsUtil.saveFile(banner.image, clsUtil.enImageType.BANNER, _host);
 
         if (imagePath == null)
         {
@@ -78,7 +81,7 @@ public class BannerController : ControllerBase
         }
 
 
-        var result = await _bannerData.addNewBanner(banner.end_at, imagePath, (Guid)userHolder.store_id!);
+        BannerResponseDto? result = await _bannerData.addNewBanner(banner.end_at, imagePath, (Guid)userHolder.store_id!);
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حقظ الوحة الاعلانية");
@@ -97,9 +100,10 @@ public class BannerController : ControllerBase
         Guid banner_id
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -111,7 +115,7 @@ public class BannerController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userHolder = await _userData.getUser(idHolder.Value);
+        UserInfoResponseDto? userHolder = await _userData.getUser(idHolder.Value);
         if (userHolder == null)
         {
             return NotFound("المستخدم غير موجود");
@@ -122,7 +126,7 @@ public class BannerController : ControllerBase
             return NotFound("ليس لديك اي متجر");
         }
 
-        var banner = await _bannerData.getBanner((Guid)userHolder.store_id!, banner_id);
+        BannerResponseDto? banner = await _bannerData.getBanner((Guid)userHolder.store_id!, banner_id);
 
         if ((banner == null))
         {
@@ -133,7 +137,7 @@ public class BannerController : ControllerBase
         clsUtil.deleteFile(banner.image, _host);
 
 
-        var result = await _bannerData.deleteBanner(banner.id);
+        bool result = await _bannerData.deleteBanner(banner.id);
 
         if (result == false)
             return BadRequest("حدثت مشكلة اثناء حذف الوحة الاعلانية");
@@ -149,7 +153,10 @@ public class BannerController : ControllerBase
         Guid store_Id, int pageNumber
     )
     {
-        var result = await _bannerData.getBanner(store_Id, pageNumber);
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+        List<BannerResponseDto>? result = await _bannerData.getBanner(store_Id, pageNumber);
 
         if (result == null)
             return NoContent();

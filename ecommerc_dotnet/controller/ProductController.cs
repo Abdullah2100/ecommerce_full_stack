@@ -1,13 +1,16 @@
+using System.Security.Claims;
 using System.Xml.Linq;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -43,6 +46,9 @@ public class ProductController : ControllerBase
         Guid store_id, int pageNumber
     )
     {
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
         var isExist = await _storeData.isExist(store_id);
         if (!isExist)
         {
@@ -71,8 +77,8 @@ public class ProductController : ControllerBase
     )
     {
       
-        if(pageNumber<=0)
-            return BadRequest("Page Number must be greater than zero");
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         var result = await _productData.getProductsByCategory(
             category_id, pageNumber
@@ -98,6 +104,9 @@ public class ProductController : ControllerBase
         int pageNumber
     )
     {
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
         var isExist = await _storeData.isExist(store_id, subCategory_id);
         if (!isExist)
         {
@@ -121,10 +130,14 @@ public class ProductController : ControllerBase
 
     [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getProducts
         (int pageNumber)
     {
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
         var result = await _productData.getProducts(pageNumber);
 
         if (result.Count == 0)
@@ -135,13 +148,18 @@ public class ProductController : ControllerBase
 
     [HttpGet("{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getProductsAdmin
         (int pageNumber)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -153,7 +171,7 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
         
-        var user = await _userData.getUserById(userId);
+        User? user = await _userData.getUserById(userId);
         if (user == null)
             return NotFound("المستخدم غير موجود");
         if (user.role == 1)
@@ -174,9 +192,10 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> getProductsPagess()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -188,7 +207,7 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(userId);
+        User? user = await _userData.getUserById(userId);
         if (user == null)
             return NotFound("المستخدم غير موجود");
         if (user.role == 1)
@@ -211,9 +230,10 @@ public class ProductController : ControllerBase
         [FromForm] ProductRequestDto product
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -280,9 +300,10 @@ public class ProductController : ControllerBase
         [FromForm] ProductRequestUpdateDto product
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -362,9 +383,10 @@ public class ProductController : ControllerBase
         Guid product_id
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {

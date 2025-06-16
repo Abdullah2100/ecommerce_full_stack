@@ -117,11 +117,13 @@ fun StoreScreen(
     isFromHome: Boolean?
 ) {
     val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
-    val isUpdate = remember { mutableStateOf(false) }
+    val isUpdated = remember { mutableStateOf(false) }
+    val isDeleted = remember { mutableStateOf(false) }
     val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
     val isSubCategoryCreateError = remember { mutableStateOf(false) }
     val isChangeSubCategory = remember { mutableStateOf(false) }
+    var isExpandedCategory = remember { mutableStateOf(false) }
 
 
     var store_id = if (store_idCopy == null) null else UUID.fromString(store_idCopy)
@@ -173,7 +175,6 @@ fun StoreScreen(
     val isPressAddNewAddress = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    var isExpandedCategory = remember { mutableStateOf(false) }
     val currutine = rememberCoroutineScope()
     val isNotEnablePermission = remember { mutableStateOf(false) }
 
@@ -190,8 +191,9 @@ fun StoreScreen(
     val currentTime = Calendar.getInstance().timeInMillis;
     val isSendingData = remember { mutableStateOf(false) }
 
+
     var animated = animateDpAsState(
-        if (isExpandedCategory.value) ((categories.value?.size ?: 1) * 45).dp else 0.dp
+        if (isExpandedCategory.value) ((categories.value?.size ?: 1) * 35).dp else 0.dp
     )
 
     var rotation = animateFloatAsState(
@@ -388,166 +390,225 @@ fun StoreScreen(
                 }
             }
 
-            if (isShownSubCategoryBottomSheet.value) ModalBottomSheet(
-                onDismissRequest = {
-                    isPressAddNewAddress.value = false
-                }, sheetState = sheetState, containerColor = Color.White
-            ) {
+            if (isShownSubCategoryBottomSheet.value)
+                ModalBottomSheet(
+                    onDismissRequest = {
 
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .fillMaxWidth()
+                        isShownSubCategoryBottomSheet.value = false
+                        isExpandedCategory.value = false
+                        categoryName.value = TextFieldValue("")
+                        subCategoryName.value = TextFieldValue("")
+
+                    },
+                    sheetState = sheetState,
+                    containerColor = Color.White
                 ) {
+
                     Column(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth()
                     ) {
-
-                        Row(
-                            modifier = Modifier
-                                .height(65.dp)
-                                .fillMaxWidth()
-                                .border(
-                                    1.dp, CustomColor.neutralColor400, RoundedCornerShape(8.dp)
-                                )
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable {
-                                    isExpandedCategory.value = !isExpandedCategory.value
-                                }
-                                .padding(horizontal = 5.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                if (categoryName.value.text.isEmpty()) "Select Category Name"
-                                else categoryName.value.text
-                            )
-                            Icon(
-                                Icons.Default.KeyboardArrowDown,
-                                "",
-                                modifier = Modifier.rotate(rotation.value)
-                            )
-                        }
-
                         Column(
-                            modifier = Modifier
-                                .padding(bottom = 19.dp)
-                                .fillMaxWidth()
-                                .height(animated.value)
-                                .border(
-                                    1.dp, CustomColor.neutralColor200, RoundedCornerShape(
-                                        topStart = 4.dp,
-                                        topEnd = 4.dp,
-                                        bottomStart = 8.dp,
-                                        bottomEnd = 8.dp
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                "Category",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.End
+
+                            )
+                            Sizer(10)
+                            Row(
+                                modifier = Modifier
+                                    .height(65.dp)
+                                    .fillMaxWidth()
+                                    .border(
+                                        1.dp, CustomColor.neutralColor400, RoundedCornerShape(8.dp)
                                     )
-                                ),
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        isExpandedCategory.value = !isExpandedCategory.value
+                                    }
+                                    .padding(horizontal = 5.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically) {
 
-                            ) {
-                            categories.value!!.forEach { option: Category ->
                                 Text(
-                                    option.name,
-                                    modifier = Modifier
-                                        .height(50.dp)
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .clickable {
-                                            isExpandedCategory.value = false
-                                            categoryName.value = TextFieldValue(option.name)
-                                        }
-                                        .padding(top = 12.dp, start = 5.dp)
-
+                                    if (categoryName.value.text.isEmpty()) "Select Category Name"
+                                    else categoryName.value.text
                                 )
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    "",
+                                    modifier = Modifier.rotate(rotation.value)
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .padding(bottom = 19.dp)
+                                    .fillMaxWidth()
+                                    .height(animated.value)
+                                    .border(
+                                        1.dp, CustomColor.neutralColor200, RoundedCornerShape(
+                                            topStart = 4.dp,
+                                            topEnd = 4.dp,
+                                            bottomStart = 8.dp,
+                                            bottomEnd = 8.dp
+                                        )
+                                    ),
+
+                                ) {
+                                categories.value?.forEach { option: Category ->
+                                    Text(
+                                        option.name,
+                                        modifier = Modifier
+                                            .height(50.dp)
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable {
+                                                isExpandedCategory.value = false
+                                                categoryName.value = TextFieldValue(option.name)
+                                            }
+                                            .padding(top = 12.dp, start = 5.dp)
+
+                                    )
+                                }
                             }
                         }
-                    }
 
 
-                    TextInputWithTitle(
-                        title = "Name",
-                        value = subCategoryName,
-                        placHolder = "Enter Sub Category Name",
-                    )
+                        TextInputWithTitle(
+                            title = "Name",
+                            value = subCategoryName,
+                            placHolder = "Enter Sub Category Name",
+                        )
 
-                    CustomBotton(
-                        isLoading = isLoading.value,
-                        operation = {
-                            currutine.launch {
-                                keyboardController?.hide()
-                                var result = async {
+                        CustomBotton(
+                            isLoading = !isDeleted.value && isSendingData.value,
+                            operation = {
+                                currutine.launch {
                                     keyboardController?.hide()
+                                    var result = async {
+                                        isSendingData.value = true;
+                                        if (isUpdated.value) homeViewModel.updateSubCategory(
+                                            SubCategoryUpdate(
+                                                name = subCategoryName.value.text,
+                                                cateogy_id = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id,
+                                                id = selectedSubCategoryId.value!!
 
-                                    if (isUpdate.value) homeViewModel.updateSubCategory(
-                                        SubCategoryUpdate(
-                                            name = subCategoryName.value.text,
-                                            cateogy_id = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id,
-                                            id = selectedSubCategoryId.value!!
-
+                                            )
                                         )
-                                    )
-                                    else homeViewModel.createSubCategory(
-                                        name = subCategoryName.value.text,
-                                        categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
-                                    )
-                                }.await()
-                                if (result.isNullOrEmpty()) {
-                                    isShownSubCategoryBottomSheet.value = false
-                                    categoryName.value = TextFieldValue("")
-                                    subCategoryName.value = TextFieldValue("")
-                                    if (isUpdate.value) {
-                                        isUpdate.value = false
-                                        selectedSubCategoryId.value = UUID.randomUUID()
+                                        else homeViewModel.createSubCategory(
+                                            name = subCategoryName.value.text,
+                                            categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
+                                        )
+                                    }.await()
+                                    isSendingData.value = false
+                                    if (result.isNullOrEmpty()) {
+                                        isShownSubCategoryBottomSheet.value = false
+                                        isExpandedCategory.value = false
+                                        categoryName.value = TextFieldValue("")
+                                        subCategoryName.value = TextFieldValue("")
+                                        if (isUpdated.value) {
+                                            isUpdated.value = false
+                                            selectedSubCategoryId.value = UUID.randomUUID()
+                                        }
+                                    } else {
+                                        isSubCategoryCreateError.value = true
+                                        errorMessage.value = result
                                     }
-                                } else {
-                                    isSubCategoryCreateError.value = true
-                                    errorMessage.value = result
+
                                 }
-
-                            }
-                        },
-                        buttonTitle = if (isUpdate.value) "Update" else "Create",
-                        color = null,
-                        isEnable = subCategoryName.value.text.isNotEmpty() && categoryName.value.text.isNotEmpty()
-
-                    )
-
-                    if (isSubCategoryCreateError.value) {
-                        AlertDialog(
-                            containerColor = Color.White, onDismissRequest = {
-                                isSubCategoryCreateError.value = false
                             },
+                            buttonTitle = if (isUpdated.value) "Update" else "Create",
+                            color = null,
+                            isEnable = isDeleted.value == false &&
+                                    (
+                                            subCategoryName.value.text.isNotEmpty() &&
+                                                    categoryName.value.text.isNotEmpty()
+                                            )
+                        )
 
-                            text = {
+                        if (isUpdated.value) {
+                            Sizer(10)
+                            CustomBotton(
+                                isLoading = isDeleted.value && isSendingData.value,
+                                operation = {
+                                    currutine.launch {
+                                        isSendingData.value = true
+                                        isDeleted.value = true
+                                        keyboardController?.hide()
+                                        var result = async {
+                                            homeViewModel.deleteSubCategory(
+                                                id = selectedSubCategoryId.value!!
+                                            )
+                                        }.await()
+                                        isSendingData.value = false
+                                        isDeleted.value = false
+                                        if (result.isNullOrEmpty()) {
+                                            isShownSubCategoryBottomSheet.value = false
+                                            isExpandedCategory.value = false
+                                            categoryName.value = TextFieldValue("")
+                                            subCategoryName.value = TextFieldValue("")
+                                            if (isUpdated.value) {
+                                                isUpdated.value = false
+                                                selectedSubCategoryId.value = UUID.randomUUID()
+                                            }
+                                        } else {
+                                            isSubCategoryCreateError.value = true
+                                            errorMessage.value = result
+                                        }
 
-                                Text(
-                                    errorMessage.value,
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (16).sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.End
-
-                                )
-                            }, confirmButton = {
-
-                            }, dismissButton = {
-                                TextButton(onClick = {
+                                    }
+                                },
+                                buttonTitle = "Deleted",
+                                color = CustomColor.alertColor_1_600,
+                                isEnable = isSendingData.value == false
+                            )
+                        }
+                        if (isSubCategoryCreateError.value) {
+                            AlertDialog(
+                                containerColor = Color.White, onDismissRequest = {
                                     isSubCategoryCreateError.value = false
-                                }) {
+                                },
+
+                                text = {
 
                                     Text(
-                                        "cencle",
+                                        errorMessage.value,
                                         fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Normal,
+                                        fontWeight = FontWeight.Bold,
                                         fontSize = (16).sp,
-                                        color = CustomColor.neutralColor700,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            })
-                    }
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.End
 
+                                    )
+                                }, confirmButton = {
+
+                                }, dismissButton = {
+                                    TextButton(onClick = {
+                                        isSubCategoryCreateError.value = false
+                                    }) {
+
+                                        Text(
+                                            "cencle",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = (16).sp,
+                                            color = CustomColor.neutralColor700,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                })
+                        }
+
+                    }
                 }
-            }
 
 
         }, modifier = Modifier
@@ -1424,7 +1485,7 @@ fun StoreScreen(
                                                     .combinedClickable(onClick = {
                                                         currutine.launch {
                                                             if (
-                                                                 selectedSubCategoryId.value !=
+                                                                selectedSubCategoryId.value !=
                                                                 subcategories.value?.get(index)?.id
                                                             ) {
                                                                 isChangeSubCategory.value = true
@@ -1443,12 +1504,16 @@ fun StoreScreen(
 
                                                     }, onLongClick = {
                                                         if (isFromHome == false) {
+                                                            val name = categories.value?.firstOrNull{it.id==
+                                                                    subcategories.value!!.get(index).category_id}?.name?:""
 
-                                                            isShownSubCategoryBottomSheet.value =
-                                                                true
-                                                            isUpdate.value = true
+                                                            categoryName.value= TextFieldValue(name)
+                                                            subCategoryName.value= TextFieldValue(subcategories.value!!.get(index).name)
+                                                            isUpdated.value = true
                                                             selectedSubCategoryId.value =
                                                                 storeSubCategories.get(index).id
+                                                            isShownSubCategoryBottomSheet.value =
+                                                                true
 
                                                         }
                                                     }), contentAlignment = Alignment.Center
@@ -1482,7 +1547,9 @@ fun StoreScreen(
                                         )
                                         .clip(RoundedCornerShape(8.dp))
                                         .clickable {
+                                            isUpdated.value = false
                                             isShownSubCategoryBottomSheet.value = true
+
                                         }, contentAlignment = Alignment.Center
 
                                 ) {
@@ -1512,44 +1579,59 @@ fun StoreScreen(
                             }
 
                             else -> {
-                                when (products.value == null) {
-                                    true -> {
-                                        ProductLoading(50)
+                                if (isLoadingMore.value) {
+
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 15.dp)
+                                            .fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = CustomColor.primaryColor700)
                                     }
+                                    Sizer(40)
+                                } else
+                                    when (products.value == null) {
+                                        true -> {
+                                            ProductLoading(50)
+                                        }
 
-                                    else -> {
-                                        if (storeFilter.isNotEmpty()) {
-                                            ProductShape(
-                                                storeFilter,
-                                                nav = nav,
-                                                delFun = if (isFromHome == true) null else { it ->
-                                                    currutine.launch {
-                                                        isSendingData.value = true
-                                                        var result = homeViewModel.deleteProduct(
-                                                            store_id!!, it
-                                                        )
+                                        else -> {
+                                            if (storeFilter.isNotEmpty()) {
+                                                ProductShape(
+                                                    storeFilter,
+                                                    nav = nav,
+                                                    delFun = if (isFromHome == true) null else { it ->
+                                                        currutine.launch {
+                                                            isSendingData.value = true
+                                                            var result =
+                                                                homeViewModel.deleteProduct(
+                                                                    store_id!!, it
+                                                                )
 
-                                                        isSendingData.value = false
-                                                        var resultMessage = ""
-                                                        if (result == null) {
-                                                            resultMessage =
-                                                                "Product is Deleted successfuly"
-                                                        } else {
-                                                            resultMessage = result
+                                                            isSendingData.value = false
+                                                            var resultMessage = ""
+                                                            if (result == null) {
+                                                                resultMessage =
+                                                                    "Product is Deleted successfuly"
+                                                            } else {
+                                                                resultMessage = result
+                                                            }
+                                                            snackbarHostState.showSnackbar(
+                                                                resultMessage
+                                                            )
                                                         }
-                                                        snackbarHostState.showSnackbar(resultMessage)
-                                                    }
-                                                },
-                                                updFun = if (isFromHome == true) null else { it ->
-                                                    nav.navigate(
-                                                        Screens.CreateProduct(
-                                                            store_id.toString(), it.toString()
+                                                    },
+                                                    updFun = if (isFromHome == true) null else { it ->
+                                                        nav.navigate(
+                                                            Screens.CreateProduct(
+                                                                store_id.toString(), it.toString()
+                                                            )
                                                         )
-                                                    )
-                                                })
+                                                    })
+                                            }
                                         }
                                     }
-                                }
 
 
                             }
@@ -1559,24 +1641,10 @@ fun StoreScreen(
 
                 }
             }
-
-            if (isLoadingMore.value) {
+            if (!isLoadingMore.value)
                 item {
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 15.dp)
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = CustomColor.primaryColor700)
-                    }
-                    Sizer(40)
+                    Sizer(140)
                 }
-            }
-
-            item {
-                Sizer(140)
-            }
 
         }
 

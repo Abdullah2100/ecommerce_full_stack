@@ -117,7 +117,7 @@ namespace hotel_api.util
             List<string> images = new List<string>();
             foreach (var image in file)
             {
-                var path = await saveFile(image, type, host);
+                string? path = await saveFile(image, type, host);
                 if (path == null)
                 {
                     deleteFile(images, host);
@@ -135,7 +135,7 @@ namespace hotel_api.util
         {
             try
             {
-                var fileRealPath = Path.Combine(host.ContentRootPath, filePath);
+                string fileRealPath = Path.Combine(host.ContentRootPath, filePath);
                 if (File.Exists( fileRealPath))
                 {
                     File.Delete( fileRealPath);

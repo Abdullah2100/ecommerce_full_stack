@@ -173,7 +173,7 @@ public class StoreData
     {
         try
         {
-            var storesSize = await _dbContext.Store.CountAsync();
+            int storesSize = await _dbContext.Store.CountAsync();
             if (storesSize == 0) return 0;
             return (int)Math.Ceiling((double)storesSize / 25);
         }
@@ -241,7 +241,7 @@ public class StoreData
     {
         try
         {
-            var storeId = clsUtil.generateGuid();
+            Guid storeId = clsUtil.generateGuid();
             await _dbContext.Store.AddAsync(new Store
             {
                 id = storeId,
@@ -281,7 +281,7 @@ public class StoreData
     {
         try
         {
-            var store = await _dbContext.Store.FindAsync( storeId);
+            Store? store = await _dbContext.Store.FindAsync( storeId);
             if (store == null) return false;
 
             store.isBlock = !store.isBlock;
@@ -308,7 +308,7 @@ public class StoreData
     {
         try
         {
-            var store = await _dbContext.Store.FirstOrDefaultAsync(st => st.user_id == user_id);
+            Store? store = await _dbContext.Store.FirstOrDefaultAsync(st => st.user_id == user_id);
 
             store.small_image = small_image ?? store.small_image;
             store.wallpaper_image = wallpaper_image ?? store.wallpaper_image;
@@ -316,7 +316,7 @@ public class StoreData
 
             if (longitude != null && latitude != null)
             {
-                var address = _dbContext.Address.Where(ad => ad.owner_id == store.id);
+                IQueryable<Address>? address = _dbContext.Address.Where(ad => ad.owner_id == store.id);
                 _dbContext.Address.RemoveRange(address);
                 _dbContext.Address.Add(new Address
                 {

@@ -1,13 +1,16 @@
+using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
 using hotel_api.Services;
 using hotel_api.Services.EmailService;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -136,8 +139,8 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUser()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
@@ -150,7 +153,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUser(idHolder.Value);
+        UserInfoResponseDto? user = await _userData.getUser(idHolder.Value);
 
         if (user == null)
         {
@@ -167,9 +170,10 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUsers(int page)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -181,7 +185,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
         {
@@ -196,7 +200,7 @@ public class UserController : ControllerBase
             return BadRequest("لا بد من ان تكون الصفحة اكبر من الصفر");
         }
 
-        var users = await _userData.getUsers(page);
+        List<UserInfoResponseDto>? users = await _userData.getUsers(page);
 
         if (users == null)
             return NoContent();
@@ -204,15 +208,16 @@ public class UserController : ControllerBase
         return StatusCode(200, users);
     }
 
-    [HttpDelete("status/{user_id:guid}")]
+    [HttpDelete("{user_id:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> deleteOrUndeletedUser(Guid user_id)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -224,7 +229,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
         {
@@ -235,9 +240,11 @@ public class UserController : ControllerBase
             return BadRequest("ليس لديك الصلاحية ");
 
 
-        var result = await _userData.deleteUser(user_id);
+        bool result = await _userData.deleteUser(user_id);
 
-        return Ok(result);
+        if (result == false)
+            return BadRequest("حدثة مشكلة اثناء حذف المستخدم");
+        return NoContent();
     }
 
 
@@ -247,9 +254,10 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUsersPagesSize()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -261,7 +269,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userData = await _userData.getUserById(idHolder.Value);
+        User? userData = await _userData.getUserById(idHolder.Value);
 
         if (userData == null || userData.role != 0)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
@@ -281,9 +289,10 @@ public class UserController : ControllerBase
         [FromForm] UpdateUserInfo userData
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -295,7 +304,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
         {
@@ -327,7 +336,7 @@ public class UserController : ControllerBase
             profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PROFILE, _host);
         }
 
-        var result = await _userData.updateUser(
+        UserInfoResponseDto? result = await _userData.updateUser(
             userId: idHolder.Value,
             phone: userData.phone,
             password: userData.password == null ? null : clsUtil.hashingText(userData.password),
@@ -351,9 +360,10 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getUserLocations()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -365,7 +375,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null || user.isDeleted)
         {
@@ -373,7 +383,7 @@ public class UserController : ControllerBase
         }
 
 
-        var locations = await _addressData.getUserAddressByUserId(user.ID);
+        List<AddressResponseDto>? locations = await _addressData.getUserAddressByUserId(user.ID);
 
         if (locations == null)
             return NoContent();
@@ -391,9 +401,10 @@ public class UserController : ControllerBase
         [FromBody] AddressRequestDto address
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -405,18 +416,18 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        var userLocationCount = await _addressData.addressCountForUser(idHolder.Value);
+        int userLocationCount = await _addressData.addressCountForUser(idHolder.Value);
         if (userLocationCount > 10)
             return BadRequest("اقصى حد للاماكن التي يمكن للمستخدم ادخالها هي 10");
 
-        var location = await _addressData.addUserLocation(
+        AddressResponseDto? location = await _addressData.addUserLocation(
             title: address.title,
             longitude: address.longitude,
             latitude: address.latitude,
@@ -437,9 +448,10 @@ public class UserController : ControllerBase
         [FromBody] AddressRequestUpdateDto address
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -451,14 +463,14 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        var addressResult = await _addressData.getAddressData(address.id);
+        Address? addressResult = await _addressData.getAddressData(address.id);
 
         if (addressResult == null)
         {
@@ -470,7 +482,7 @@ public class UserController : ControllerBase
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
 
-        var location = await _addressData.updateAddress(
+        AddressResponseDto? location = await _addressData.updateAddress(
             addressId: addressResult.id,
             titile: address.title,
             longitude: address.longitude,
@@ -492,9 +504,10 @@ public class UserController : ControllerBase
         Guid addre_id
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -506,14 +519,14 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        var addressResult = await _addressData.getAddressData(addre_id);
+        Address? addressResult = await _addressData.getAddressData(addre_id);
 
         if (addressResult == null)
         {
@@ -528,7 +541,7 @@ public class UserController : ControllerBase
         if (addressResult.isCurrent)
             return BadRequest("لا يمكن حذف العنوان الحالي");
 
-        var result = await _addressData.deleteDaddress(
+        bool result = await _addressData.deleteDaddress(
             addressId: addressResult.id);
 
         if (result == false)
@@ -544,9 +557,10 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> setUserLocation(Guid addressID)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id.Value.ToString(), out Guid outID))
         {
@@ -558,21 +572,21 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null || user.isDeleted)
         {
             return BadRequest("المستخدم غير موجود");
         }
 
-        var address = await _addressData.getUserAddressByAddressId(addressID);
+        AddressResponseDto? address = await _addressData.getUserAddressByAddressId(addressID);
 
         if (address == null)
         {
             return BadRequest("العنوان غير موجود");
         }
 
-        var result = await _addressData.changeCurrentAddress(address.id, user.ID);
+        bool? result = await _addressData.changeCurrentAddress(address.id, user.ID);
 
         return StatusCode(200, result);
     }
@@ -592,7 +606,7 @@ public class UserController : ControllerBase
 
         string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
 
-        var isOtpExist = _forgetPasswordData.isExist(otp);
+        bool isOtpExist = _forgetPasswordData.isExist(otp);
         bool isExist = isOtpExist;
 
         if (isExist)
@@ -604,8 +618,8 @@ public class UserController : ControllerBase
             } while (isOtpExist);
         }
 
-        var result = await _forgetPasswordData.createNewOtp(otp, email.email);
-        var emailSendResult = await _emailService.sendingEmail(email.email, otp);
+        bool result = await _forgetPasswordData.createNewOtp(otp, email.email);
+        bool emailSendResult = await _emailService.sendingEmail(email.email, otp);
 
         if (emailSendResult == false || result == false)
         {
@@ -623,7 +637,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> verifingOtp([FromBody] VerificationRequestDto verification)
     {
 
-        var result = await _forgetPasswordData.isExist(verification.email, verification.otp);
+        bool result = await _forgetPasswordData.isExist(verification.email, verification.otp);
         if (!result)
         {
           return  NotFound("not found otp");
@@ -645,17 +659,17 @@ public class UserController : ControllerBase
     public async Task<IActionResult> reseatPassword([FromBody] ReseatePasswordRequestDto data)
     {
 
-        var otpValidationResult = await _forgetPasswordData.isExist(data.email, data.otp,true);
+        bool otpValidationResult = await _forgetPasswordData.isExist(data.email, data.otp,true);
       
         if (!otpValidationResult)
         {
           return  NotFound("not found otp");
         }
 
-        var isExist =await _userData.isExistByEmail(data.email);
+        bool isExist =await _userData.isExistByEmail(data.email);
         if (!isExist)
             return NotFound("المستخدم غير موجود");
-        var result = await _userData.updateUserPassword(data.email,
+        UserInfoResponseDto? result = await _userData.updateUserPassword(data.email,
             clsUtil.hashingText(data.password));
         if (result==null)
             return BadRequest("حدثة مشكلة اثناء حفظ البيانات");

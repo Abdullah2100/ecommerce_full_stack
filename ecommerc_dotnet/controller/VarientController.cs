@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
@@ -8,6 +9,7 @@ using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -34,9 +36,10 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> createVarient([FromBody] VarientRequestDto varient)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -48,7 +51,7 @@ public class VarientController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userHolder = await _userData.getUserById(idHolder.Value);
+        User? userHolder = await _userData.getUserById(idHolder.Value);
         if (userHolder == null)
         {
             return NotFound("المستخدم غير موجود");
@@ -66,7 +69,7 @@ public class VarientController : ControllerBase
             return Conflict("هذا الخيار تم ادخاله سابقا");
 
 
-        var result = await _varientData.createVarient(varient.name);
+        VarientResposeDto? result = await _varientData.createVarient(varient.name);
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ الخيار");
@@ -82,9 +85,10 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> updateVarient([FromBody] VarientRequestDto varient)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -136,9 +140,10 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> deleteVarient(Guid varient_id)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -179,9 +184,13 @@ public class VarientController : ControllerBase
 
     [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getVarients(int pageNumber = 1)
     {
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+        
         var result = await _varientData.getVarients(pageNumber);
         if (result.Count < 1)
             return NoContent();

@@ -25,7 +25,7 @@ public class ForgetPasswordData
         try
         {
             await deleteAllOtpBelongTo(email);
-            var newOtp = new ReseatePasswordOtp();
+            ReseatePasswordOtp newOtp = new ReseatePasswordOtp();
             newOtp.isValidated = false;
             newOtp.otp = otp;
             newOtp.email = email;
@@ -49,7 +49,7 @@ public class ForgetPasswordData
     {
         try
         {
-            var result = _dbContext.ReseatPassword.FirstOrDefault(u => u.otp == otp);
+            ReseatePasswordOtp? result = _dbContext.ReseatPassword.FirstOrDefault(u => u.otp == otp);
             if (result == null)
             {
                 return false;
@@ -70,7 +70,7 @@ public class ForgetPasswordData
     {
         try
         {
-            var otpBelongList = _dbContext.ReseatPassword.Where(otp => otp.email == email);
+            IQueryable<ReseatePasswordOtp>? otpBelongList = _dbContext.ReseatPassword.Where(otp => otp.email == email);
             _dbContext.ReseatPassword.RemoveRange(otpBelongList);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -103,11 +103,11 @@ public class ForgetPasswordData
     {
         try
         {
-            var result = await _dbContext.ReseatPassword.Where(u =>
+            ReseatePasswordOtp? result = await _dbContext.ReseatPassword.Where(u =>
             u.otp == otp&&u.isValidated==status).FirstOrDefaultAsync();
 
             if (result == null) return false;
-            var otpTime =result.createdAt.AddHours(1);
+            DateTime otpTime =result.createdAt.AddHours(1);
 
             return  result.email == email && (otpTime.Date == DateTime.Now.Date && otpTime.TimeOfDay > DateTime.Now.TimeOfDay);
         }

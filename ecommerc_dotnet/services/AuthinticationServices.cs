@@ -19,18 +19,18 @@ namespace hotel_api.Services
         )
         {
             if (userID == null) return "";
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = config.getKey("credentials:key");
-            var issuer = config.getKey("credentials:Issuer");
-            var audience = config.getKey("credentials:Audience");
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            string key = config.getKey("credentials:key");
+            string issuer = config.getKey("credentials:Issuer");
+            string audience = config.getKey("credentials:Audience");
 
-            var claims = new List<Claim>(){
+            List<Claim> claims = new List<Claim>(){
                 new (JwtRegisteredClaimNames.Jti,clsUtil.generateGuid().ToString()),
                 new (JwtRegisteredClaimNames.Sub,userID.ToString()??""),
                 new (JwtRegisteredClaimNames.Email,email)
             };
 
-            var tokenDescip = new SecurityTokenDescriptor{
+            SecurityTokenDescriptor tokenDescip = new SecurityTokenDescriptor{
                 Subject = new ClaimsIdentity(claims),
                 Expires = clsUtil.generateDateTime(enTokenMode),
                 Issuer = issuer,
@@ -42,7 +42,7 @@ namespace hotel_api.Services
             };
             
           
-            var token = tokenHandler.CreateToken(tokenDescip);
+            SecurityToken? token = tokenHandler.CreateToken(tokenDescip);
             return tokenHandler.WriteToken(token);
 
         }
@@ -52,9 +52,9 @@ namespace hotel_api.Services
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
+                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         
-                var jwtToken = tokenHandler.ReadJwtToken(token);
+                JwtSecurityToken? jwtToken = tokenHandler.ReadJwtToken(token);
                 return clsTokenUtil.getClaimType(jwtToken.Claims, key);
             }
             catch (Exception ex)

@@ -1,14 +1,17 @@
+using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
 using FirebaseAdmin.Messaging;
 using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
@@ -45,9 +48,10 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> createOrder
         ([FromBody] OrderRequestDto order)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -59,7 +63,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -160,9 +164,13 @@ public class OrderController : ControllerBase
         int pageNumber = 1
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -174,7 +182,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -199,9 +207,13 @@ public class OrderController : ControllerBase
         int pageNumber = 1
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -213,7 +225,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -236,9 +248,10 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> deleteOrders
         (Guid order_id)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -250,7 +263,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -276,9 +289,10 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getOrderPages()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -290,7 +304,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -314,9 +328,10 @@ public class OrderController : ControllerBase
         [FromBody] OrderStatusRequestDto orderStatus
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -328,7 +343,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -364,9 +379,10 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getOrderStatus()
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -378,7 +394,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -409,9 +425,13 @@ public class OrderController : ControllerBase
         int pageNumber = 1
     )
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -423,7 +443,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");
@@ -444,9 +464,10 @@ public class OrderController : ControllerBase
     public async Task<IActionResult>updateOrderItemStatus 
     ([FromBody]OrderItemUpdateDto orderItemDto)
     {
-        var authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        var id = AuthinticationServices.GetPayloadFromToken("id",
+          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
+    
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
         {
@@ -458,7 +479,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userData.getUserById(idHolder.Value);
 
         if (user == null)
             return NotFound("المستخدم غير موجود");

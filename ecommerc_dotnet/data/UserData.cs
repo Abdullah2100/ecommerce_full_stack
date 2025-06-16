@@ -36,7 +36,7 @@ public class UserData
     {
         try
         {
-            var result = await _dbContext.Users
+            UserInfoResponseDto? result = await _dbContext.Users
                 .AsNoTracking()
                 .Where(u => (u.email == userName) && u.password == password)
                 .Select(u => new UserInfoResponseDto
@@ -51,7 +51,7 @@ public class UserData
                 })
                 .FirstOrDefaultAsync();
 
-            var address = await _dbContext.Address
+            List<AddressResponseDto>? address = await _dbContext.Address
                 .AsNoTracking()
                 .Where(ad => ad.owner_id == result.Id)
                 .OrderByDescending(ad => ad.created_at)
@@ -79,7 +79,7 @@ public class UserData
     {
         try
         {
-            var result = await _dbContext.Users
+            UserInfoResponseDto? result = await _dbContext.Users
                 .AsNoTracking()
                 .Include(u => u.Store)
                 .Where(us => us.ID == userID)
@@ -127,7 +127,7 @@ public class UserData
     {
         try
         {
-            var result = await _dbContext.Users
+            UserInfoResponseDto? result = await _dbContext.Users
                 .AsNoTracking()
                 .Include(u => u.Store)
                 .Where(us => us.email==email)
@@ -292,7 +292,7 @@ public class UserData
     {
         try
         {
-            var result = await _dbContext.Users
+            User? result = await _dbContext.Users
                 .FindAsync(userID);
 
             result!.isDeleted = !result.isDeleted;
@@ -320,7 +320,7 @@ public class UserData
         {
             if (role == 0)
             {
-                var result = await _dbContext.Users
+                User? result = await _dbContext.Users
                     .FirstOrDefaultAsync(u => u.role == 1);
                 if (result != null)
                 {

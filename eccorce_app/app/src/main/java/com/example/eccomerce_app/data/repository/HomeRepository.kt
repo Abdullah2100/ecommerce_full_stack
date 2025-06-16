@@ -1181,8 +1181,41 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.Created) {
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
+            } else {
+                NetworkCallHandler.Error(result.body<String>())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
+
+
+    suspend fun deleteSubCategory(subCategoryID: UUID): NetworkCallHandler {
+        return try {
+            val full_url = Secrets.getBaseUrl() + "/SubCategory/${subCategoryID}";
+            val result = client.delete(full_url) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+
+            if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Successful(true)
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
