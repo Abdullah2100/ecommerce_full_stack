@@ -52,10 +52,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs = freeCompilerArgs + listOf(
-            "-Xlanguage-features=UnionTypes"
-        )
-
     }
     buildFeatures {
         compose = true

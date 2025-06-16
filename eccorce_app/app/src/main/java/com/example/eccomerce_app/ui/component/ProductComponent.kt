@@ -79,7 +79,6 @@ fun  ProductShape(
                         .clickable{
                             nav.navigate(Screens.ProductDetails(
                                 product[index].id.toString(),
-//                                product[0].id.toString(),
                                 isFromHome = isFromHome)
                             )
                         }
@@ -109,7 +108,6 @@ fun  ProductShape(
                                 .clip(RoundedCornerShape(8.dp)),
                             model = General.handlingImageForCoil(
                                 product[index].thmbnail,
-//                                product[0].thmbnail,
                                 context
                             ),
                             contentDescription = "",
@@ -138,7 +136,6 @@ fun  ProductShape(
                         Sizer(10)
                         Text(
                             product[index].name,
-//                            product[0].name,
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = (16).sp, color = CustomColor.neutralColor950,
@@ -148,7 +145,6 @@ fun  ProductShape(
                         Sizer(10)
                         Text(
                             "${product[index].price}",
-//                            "${product[0].price}",
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = (16).sp, color = CustomColor.neutralColor950
@@ -167,7 +163,7 @@ fun  ProductShape(
                             )
                             .clip(RoundedCornerShape(15.dp))
                             .clickable {
-//                                delFun(product[index].id)
+                                delFun(product[index].id)
                             }
                             .constrainAs(rightRef) {
                                 start.linkTo(parent.start)
@@ -194,7 +190,7 @@ fun  ProductShape(
                             )
                             .clip(RoundedCornerShape(15.dp))
                             .clickable {
-//                                updFun(product[index].id)
+                                updFun(product[index].id)
                             }
                             .constrainAs(leftRef) {
                                 end.linkTo(parent.end)
