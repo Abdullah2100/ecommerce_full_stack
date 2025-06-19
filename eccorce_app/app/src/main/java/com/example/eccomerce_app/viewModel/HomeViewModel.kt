@@ -1,6 +1,7 @@
 package com.example.e_commercompose.viewModel
 
 import android.R
+import android.location.Location
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import com.example.e_commercompose.model.Category
 import com.example.e_commercompose.model.DtoToModel.toAddress
 import com.example.e_commercompose.model.DtoToModel.toBanner
 import com.example.e_commercompose.model.DtoToModel.toCategory
+import com.example.e_commercompose.model.DtoToModel.toGeneralSetting
 import com.example.e_commercompose.model.DtoToModel.toOrderItem
 import com.example.e_commercompose.model.DtoToModel.toProdcut
 import com.example.e_commercompose.model.DtoToModel.toStore
@@ -45,9 +47,11 @@ import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.UserModel
 import com.example.e_commercompose.model.VarientModel
+import com.example.eccomerce_app.dto.response.GeneralSettingResponseDto
 import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.eccomerce_app.dto.response.StoreStatusResponseDto
+import com.example.eccomerce_app.model.GeneralSetting
 import com.example.eccomerce_app.model.Order
 import com.example.eccomerce_app.model.OrderItem
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -58,6 +62,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
@@ -68,7 +73,6 @@ class HomeViewModel(
     val dao: AuthDao,
     var webSocket: HubConnection?
 ) : ViewModel() {
-
 
     private val _hub = MutableStateFlow<HubConnection?>(null)
 
@@ -117,9 +121,14 @@ class HomeViewModel(
     );
     var cartImes = _cartImes.asStateFlow();
 
+    private var _distance = MutableStateFlow<Double>(0.0);
+    var distance = _distance.asStateFlow();
 
     private var _orders = MutableStateFlow<List<Order>?>(null);
     var orders = _orders.asStateFlow();
+
+    private var _generalSetting = MutableStateFlow<List<GeneralSetting>?>(null);
+    var generalSetting = _generalSetting.asStateFlow();
 
 
     private var _coroutinExption = CoroutineExceptionHandler { _, message ->
@@ -128,7 +137,7 @@ class HomeViewModel(
 
 
     fun addToCart(product: CardProductModel) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main+_coroutinExption) {
             var cardProducts = mutableListOf<CardProductModel>()
 
             cardProducts.add(product)
@@ -148,6 +157,7 @@ class HomeViewModel(
                 )
                 _cartImes.emit(copyCardItme)
             }
+            calculateOrderDistanceToUser()
         }
     }
 
@@ -243,6 +253,22 @@ class HomeViewModel(
         }
     }
 
+  suspend   fun calculateOrderDistanceToUser(){
+             _cartImes.value.cartProducts.distinctBy { it.store_id }.forEach { product->
+                 val result = FloatArray(1)
+                 Location.distanceBetween(
+                     _stores.value?.firstOrNull { it.id==product.store_id }!!.latitude,
+                     _stores.value?.firstOrNull { it.id==product.store_id }!!.longitude,
+                     _myInfo.value?.address?.firstOrNull{it.isCurrnt==true}!!.latitude,
+                     _myInfo.value?.address?.firstOrNull{it.isCurrnt==true}!!.longitude,
+                     result
+                 )
+
+                 val copyDistance = _distance.value + (result[0]/1000)
+                 _distance.emit(Math.ceil(copyDistance))
+         }
+    }
+
 
     init {
         initialFun()
@@ -250,6 +276,7 @@ class HomeViewModel(
 
     fun initialFun() {
         getMyInfo()
+        getGeneral(1)
         getCategories(1)
         getStoresBanner()
         getVarients(1)
@@ -271,8 +298,9 @@ class HomeViewModel(
 
     fun connection() {
 
-        if (webSocket != null)
-            viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+        if (webSocket != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+
                 _hub.emit(webSocket)
                 _hub.value!!.start().blockingAwait()
                 _hub.value!!.send("streamBanners") // Start streaming
@@ -332,9 +360,9 @@ class HomeViewModel(
                     },
                     OrderResponseDto::class.java
                 )
-
             }
 
+        }
     }
 
 
@@ -460,11 +488,10 @@ class HomeViewModel(
     }
 
 
-    
-
+    //category
     fun getCategories(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -484,10 +511,8 @@ class HomeViewModel(
                         _categories.emit(
                             mutableCategories
                         )
-                    } else {
-                        if (_categories.value == null)
-                            _categories.emit(mutableListOf())
                     }
+
                 }
 
                 is NetworkCallHandler.Error -> {
@@ -498,10 +523,43 @@ class HomeViewModel(
         }
     }
 
+    //general
+    fun getGeneral(pageNumber: Int = 1) {
+        if (pageNumber == 1 && _categories.value != null) return;
+        viewModelScope.launch(Dispatchers.Default) {
+            var result = homeRepository.getGeneral(pageNumber)
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    var generalSettings = result.data as List<GeneralSettingResponseDto>
 
+                    var mutableGeneralSetting = mutableListOf<GeneralSetting>()
+
+                    mutableGeneralSetting.addAll(generalSettings.map { it.toGeneralSetting() })
+
+                    if (_generalSetting.value != null) {
+                        mutableGeneralSetting.addAll(_generalSetting.value!!.toList())
+                    }
+
+                    if (mutableGeneralSetting.isNotEmpty()) {
+                        _generalSetting.emit(
+                            mutableGeneralSetting.distinctBy { it.id }.toList()
+                        )
+                    }
+
+                }
+
+                is NetworkCallHandler.Error -> {
+                    if (_categories.value == null)
+                        _categories.emit(mutableListOf())
+                }
+            }
+        }
+    }
+
+    //order
     fun getVarients(pageNumber: Int = 1) {
         if (pageNumber == 1 && _varients.value != null) return;
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             var result = homeRepository.getVarient(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -723,16 +781,18 @@ class HomeViewModel(
                 }
 
                 is NetworkCallHandler.Error -> {
-                    if(_myInfo.value==null){
-                        _myInfo.emit(UserModel(
-                            id = UUID.randomUUID(),
-                            name = "",
-                            phone = "",
-                            email = "",
-                            thumbnail = "",
-                            address = emptyList(),
-                            store_id = UUID.randomUUID()
-                        ))
+                    if (_myInfo.value == null) {
+                        _myInfo.emit(
+                            UserModel(
+                                id = UUID.randomUUID(),
+                                name = "",
+                                phone = "",
+                                email = "",
+                                thumbnail = "",
+                                address = emptyList(),
+                                store_id = UUID.randomUUID()
+                            )
+                        )
                     }
                     var resultError = result.data as String
                     Log.d("errorFromNetowrk", resultError)
@@ -927,14 +987,16 @@ class HomeViewModel(
                 var listSubCategory = mutableListOf<SubCategory>()
 
                 if (_SubCategories.value != null) {
-                    listSubCategory.add(data.toSubCategory())
-                    listSubCategory.addAll(_SubCategories.value!!);
-                } else {
-                    listSubCategory.add(data.toSubCategory())
+                    listSubCategory.addAll(_SubCategories.value!!.filter { it.id != data.id });
                 }
+
+                listSubCategory.add(data.toSubCategory())
+
+
                 var distincetSubCategory = listSubCategory.distinctBy { it.id }.toList()
 
-                _SubCategories.emit(distincetSubCategory)
+                _SubCategories.update { distincetSubCategory }
+
                 return null;
             }
 
@@ -955,7 +1017,7 @@ class HomeViewModel(
     }
 
 
-    suspend fun deleteSubCategory (
+    suspend fun deleteSubCategory(
         id: UUID
     ): String? {
         _isLoading.emit(true)
@@ -965,7 +1027,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                val filterdSubCateogry = _SubCategories.value?.filter { it.id!=id }
+                val filterdSubCateogry = _SubCategories.value?.filter { it.id != id }
                 _SubCategories.emit(filterdSubCateogry)
                 return null;
             }
@@ -985,6 +1047,7 @@ class HomeViewModel(
             }
         }
     }
+
     fun getStoreInfoByStoreId(store_id: UUID) {
         getStoreData(store_id)
         getStoreBanner(store_id)
@@ -993,7 +1056,7 @@ class HomeViewModel(
     }
 
     fun getStoreData(store_id: UUID) {
-        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             var result = homeRepository.getStoreById(store_id);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -1146,7 +1209,7 @@ class HomeViewModel(
         pageNumber: MutableState<Int>,
         isLoading: MutableState<Boolean>? = null
     ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             if (isLoading != null) isLoading.value = true;
             delay(500)
 
@@ -1541,7 +1604,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
         if (isLoading != null) isLoading.value = true
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             if (isLoading != null)
                 delay(500)
             var result = homeRepository.getMyOrders(pageNumber.value)
@@ -1603,7 +1666,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             if (isLoading != null) {
                 isLoading.value = true
                 delay(500)

@@ -9,10 +9,12 @@ import com.example.e_commercompose.dto.response.StoreResposeDto
 import com.example.e_commercompose.dto.response.SubCategoryResponseDto
 import com.example.e_commercompose.dto.response.UserDto
 import com.example.e_commercompose.dto.response.VarientResponseDto
+import com.example.eccomerce_app.dto.response.GeneralSettingResponseDto
 import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderProductResponseDto
 import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.eccomerce_app.dto.response.OrderVarientResponseDto
+import com.example.eccomerce_app.model.GeneralSetting
 import com.example.eccomerce_app.model.Order
 import com.example.eccomerce_app.model.OrderItem
 import com.example.eccomerce_app.model.OrderProduct
@@ -53,6 +55,8 @@ object DtoToModel {
             user_id = this.user_id,
             pig_image = this.wallpaper_image.replace("localhost", "10.0.2.2"),
             small_image = this.small_image.replace("localhost", "10.0.2.2"),
+            latitude = this.latitude,
+            longitude = this.longitude
         )
     }
 
@@ -145,6 +149,14 @@ object DtoToModel {
            order_items = this.order_items.map { it.toOrderItem() },
            status = this.status
        )
+    }
+
+    fun GeneralSettingResponseDto.toGeneralSetting(): GeneralSetting{
+        return GeneralSetting(
+            id = this.id,
+            name=this.name,
+            value =this.value
+        )
     }
 
 }

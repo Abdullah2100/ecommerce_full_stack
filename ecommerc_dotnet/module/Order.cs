@@ -12,6 +12,7 @@ public class Order
     public Guid user_id { get; set; }
     public decimal totalPrice { get; set; }
     public int status { get; set; }
+    public decimal distanceToUser { get; set; } = 0;
 
     [Column(TypeName = "Timestamp")]
     public DateTime created_at { get; set; } = DateTime.Now;

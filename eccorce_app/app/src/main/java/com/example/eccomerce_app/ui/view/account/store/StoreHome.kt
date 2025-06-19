@@ -1465,19 +1465,19 @@ fun StoreScreen(
                                             }
 
                                         }
-                                        items(storeSubCategories.size) { index ->
+                                        items(storeSubCategories?.size?:0) { index ->
                                             Box(
                                                 modifier = Modifier
                                                     .padding(end = 4.dp)
                                                     .height(40.dp)
                                                     .width(70.dp)
                                                     .background(
-                                                        if (selectedSubCategoryId.value == storeSubCategories[index].id) CustomColor.alertColor_3_300 else Color.White,
+                                                        if (selectedSubCategoryId.value == storeSubCategories?.get(index)?.id) CustomColor.alertColor_3_300 else Color.White,
                                                         RoundedCornerShape(8.dp)
                                                     )
                                                     .border(
                                                         width = 1.dp,
-                                                        color = if (selectedSubCategoryId.value == storeSubCategories[index].id) Color.White else CustomColor.neutralColor200,
+                                                        color = if (selectedSubCategoryId.value == storeSubCategories?.get(index)?.id) Color.White else CustomColor.neutralColor200,
                                                         RoundedCornerShape(8.dp)
 
                                                     )
@@ -1489,14 +1489,9 @@ fun StoreScreen(
                                                                 subcategories.value?.get(index)?.id
                                                             ) {
                                                                 isChangeSubCategory.value = true
-//                                                            homeViewModel.getProducts(
-//                                                                1,
-//                                                                store_id!!,
-//                                                                storeSubCategories[index].id
-//                                                            )
-                                                                delay(500)
+//                                                                                                                         delay(500)
                                                                 selectedSubCategoryId.value =
-                                                                    storeSubCategories[index].id
+                                                                    storeSubCategories?.get(index)?.id
                                                                 isChangeSubCategory.value = false
                                                             }
 
@@ -1510,8 +1505,7 @@ fun StoreScreen(
                                                             categoryName.value= TextFieldValue(name)
                                                             subCategoryName.value= TextFieldValue(subcategories.value!!.get(index).name)
                                                             isUpdated.value = true
-                                                            selectedSubCategoryId.value =
-                                                                storeSubCategories.get(index).id
+
                                                             isShownSubCategoryBottomSheet.value =
                                                                 true
 
@@ -1524,7 +1518,8 @@ fun StoreScreen(
                                                     fontFamily = General.satoshiFamily,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = (18).sp,
-                                                    color = if (selectedSubCategoryId.value == storeSubCategories[index].id) Color.White else CustomColor.neutralColor200,
+                                                    color = if (selectedSubCategoryId.value ==storeSubCategories.get(index).id) Color.White else CustomColor.neutralColor200,
+
                                                     textAlign = TextAlign.Center,
                                                 )
                                             }

@@ -1,6 +1,7 @@
 package com.example.e_commercompose.ui.view.checkout
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -82,6 +83,12 @@ fun CheckoutScreen(
     val isSendingData = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val generalSetting = homeViewModel.generalSetting.collectAsState()
+    val kiloPrice = generalSetting.value?.firstOrNull{it.name=="one_kilo_price"}?.value
+    val distancToUser = homeViewModel.distance.collectAsState();
+
+    val totalDeclivaryPrice = (distancToUser.value) *(kiloPrice?:0.0);
+    Log.d("UserDistanc",distancToUser.value.toString())
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -378,6 +385,31 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+                        Sizer(15)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Delivery Fee",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "\$${(totalDeclivaryPrice).toString()}",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
                     }
 
 

@@ -186,7 +186,7 @@ fun ProductDetail(
             )
         },
         bottomBar = {
-            if (isFromHome && (myInfo.value == null || (myInfo.value != null && myInfo.value?.store_id != productData?.store_id)))
+//            if (isFromHome && (myInfo.value == null || (myInfo.value != null && myInfo.value?.store_id != productData?.store_id)))
                 BottomAppBar(
                     containerColor = Color.White,
                     modifier = Modifier.padding(horizontal = 15.dp)
@@ -561,7 +561,7 @@ fun ProductDetail(
                     }
                 }
             item {
-                Sizer(50)
+                Sizer(70)
             }
         }
     }

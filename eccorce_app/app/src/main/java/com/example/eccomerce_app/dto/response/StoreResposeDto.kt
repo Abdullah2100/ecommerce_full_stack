@@ -15,4 +15,6 @@ data class StoreResposeDto(
     val name: String,
     val wallpaper_image: String,
     val small_image: String,
-    )
+    val longitude: Double,
+    val latitude: Double,
+)

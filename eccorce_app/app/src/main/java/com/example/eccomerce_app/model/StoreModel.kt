@@ -8,4 +8,6 @@ data class StoreModel(
     val name: String,
     val pig_image: String,
     val small_image: String,
+    val longitude: Double,
+    val latitude: Double,
 )

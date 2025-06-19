@@ -36,7 +36,11 @@ public class StoreData
                     small_image = _config.getKey("url_file") + st.small_image,
                     created_at = st.created_at,
                     user_id = st.user_id,
-                    isBlocked = st.isBlock
+                    isBlocked = st.isBlock,
+                    longitude = _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude,
+                    latitude =_dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude, 
                 })
                 .FirstOrDefaultAsync();
         }
@@ -62,7 +66,11 @@ public class StoreData
                     wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
                     small_image = _config.getKey("url_file") + st.small_image,
                     created_at = st.created_at,
-                    user_id = st.user_id
+                    user_id = st.user_id,
+                    longitude = _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude,
+                    latitude =_dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude, 
                 })
                 .FirstOrDefaultAsync();
         }
@@ -158,7 +166,11 @@ public class StoreData
                         created_at = st.created_at,
                         user_id = st.user_id,
                         isBlocked = st.isBlock,
-                        userName = st.user.name
+                        userName = st.user.name,
+                        longitude = _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
+                            _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude,
+                        latitude =_dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
+                            _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude, 
                     })
                     .ToListAsync();
         }

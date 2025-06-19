@@ -19,6 +19,7 @@ import com.example.e_commercompose.model.MyInfoUpdate
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.util.Secrets
 import com.example.eccomerce_app.dto.request.OrderItemUpdateStatusDto
+import com.example.eccomerce_app.dto.response.GeneralSettingResponseDto
 import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderResponseDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
@@ -274,9 +275,43 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+    //general
+    suspend fun getGeneral(pageNumber: Int = 1): NetworkCallHandler {
+        return try {
+            var result = client.get(
+                Secrets.getBaseUrl() + "/General/all/${pageNumber}"
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer ${General.authData.value?.refreshToken}"
+                    )
+                }
+            }
+            if (result.status == HttpStatusCode.OK) {
+                return NetworkCallHandler.Successful(result.body<List<GeneralSettingResponseDto>>())
+            } else if (result.status == HttpStatusCode.NoContent) {
+                return NetworkCallHandler.Error("No Data Found")
+
+            } else {
+                return NetworkCallHandler.Error(result.body())
+            }
+
+        } catch (e: UnknownHostException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: IOException) {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception) {
+
+            return NetworkCallHandler.Error(e.message)
+        }
+    }
 
     //order
-
     suspend fun submitOrder(cartData: CartRequestDto): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Order";
@@ -315,7 +350,6 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
     suspend fun getMyOrders(pageNumber:Int): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
@@ -390,7 +424,6 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
     suspend fun getMyOrderItemForStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Order/orderItem/${store_id}/${pageNumber}";
@@ -429,11 +462,7 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
-    suspend fun updateOrderItemStatus(
-        id: UUID,
-        status: Int
-    ): NetworkCallHandler {
+    suspend fun updateOrderItemStatus(id: UUID, status: Int): NetworkCallHandler {
         return try {
             val full_url = Secrets.getBaseUrl() + "/Order/orderItem/statsu";
             val result = client.put(full_url) {
