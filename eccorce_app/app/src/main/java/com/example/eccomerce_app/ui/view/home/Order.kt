@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -90,6 +91,7 @@ fun OrderScreen(
     var page = remember { mutableStateOf(1) }
     val isLoadingMore = remember { mutableStateOf(false) }
 
+    val isRefresh = remember { mutableStateOf(false) }
 
     Log.d("loadingState",isLoadingMore.value.toString())
     LaunchedEffect(reachedBottom.value) {
@@ -148,179 +150,186 @@ fun OrderScreen(
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
-        LazyColumn(
-            state = lazyState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
-                .background(Color.White),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        PullToRefreshBox(
+            isRefreshing = isRefresh.value,
+            onRefresh = {homeViewModel.getMyOrder(mutableStateOf(1))}
         ) {
-            item {
-                orders.value?.forEach { order ->
-                    Log.d("imageUrl", order.toString())
+            LazyColumn(
+                state = lazyState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
+                    .background(Color.White),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item {
+                    orders.value?.forEach { order ->
+                        Log.d("imageUrl", order.toString())
 
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 15.dp, vertical = 5.dp)
-                            .border(
-                                1.dp,
-                                CustomColor.neutralColor200,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .padding(horizontal = 5.dp, vertical = 10.dp)
-
-                    ) {
-                        order.order_items.forEach { value ->
-                            Row {
-                                SubcomposeAsyncImage(
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .height(80.dp)
-                                        .width(80.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
-                                    model = General.handlingImageForCoil(
-                                        value.product.thmbnail,
-                                        context
-                                    ),
-                                    contentDescription = "",
-                                    loading = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize(),
-                                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                        ) {
-                                            CircularProgressIndicator(
-                                                color = Color.Black,
-                                                modifier = Modifier.size(53.dp) // Adjust the size here
-                                            )
-                                        }
-                                    },
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 15.dp, vertical = 5.dp)
+                                .border(
+                                    1.dp,
+                                    CustomColor.neutralColor200,
+                                    RoundedCornerShape(8.dp)
                                 )
+                                .padding(horizontal = 5.dp, vertical = 10.dp)
 
-                                Sizer(width = 5)
-
-                                Column {
-                                    Text(
-                                        value.product.name,
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = (16).sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Start
+                        ) {
+                            order.order_items.forEach { value ->
+                                Row {
+                                    SubcomposeAsyncImage(
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .width(80.dp)
+                                            .clip(RoundedCornerShape(8.dp)),
+                                        model = General.handlingImageForCoil(
+                                            value.product.thmbnail,
+                                            context
+                                        ),
+                                        contentDescription = "",
+                                        loading = {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize(),
+                                                contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                            ) {
+                                                CircularProgressIndicator(
+                                                    color = Color.Black,
+                                                    modifier = Modifier.size(53.dp) // Adjust the size here
+                                                )
+                                            }
+                                        },
                                     )
-                                    if (value.productVarient.isNotEmpty())
-                                        Sizer(5)
 
-                                    value.productVarient.forEach { varient ->
+                                    Sizer(width = 5)
 
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
+                                    Column {
+                                        Text(
+                                            value.product.name,
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = (16).sp,
+                                            color = CustomColor.neutralColor950,
+                                            textAlign = TextAlign.Start
+                                        )
+                                        if (value.productVarient.isNotEmpty())
+                                            Sizer(5)
 
-                                            Text(
-                                                varient.varient_name + " :",
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = (16).sp,
-                                                color = CustomColor.neutralColor950,
-                                                textAlign = TextAlign.Center
-                                            )
-                                            Sizer(width = 5)
-                                            when (varient.varient_name == "Color") {
-                                                true -> {
-                                                    val colorValue =
-                                                        General.convertColorToInt(varient.product_varient_name)
+                                        value.productVarient.forEach { varient ->
 
-                                                    if (colorValue != null)
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+
+                                                Text(
+                                                    varient.varient_name + " :",
+                                                    fontFamily = General.satoshiFamily,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = (16).sp,
+                                                    color = CustomColor.neutralColor950,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Sizer(width = 5)
+                                                when (varient.varient_name == "Color") {
+                                                    true -> {
+                                                        val colorValue =
+                                                            General.convertColorToInt(varient.product_varient_name)
+
+                                                        if (colorValue != null)
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .height(20.dp)
+                                                                    .width(20.dp)
+                                                                    .background(
+                                                                        colorValue,
+                                                                        RoundedCornerShape(20.dp)
+                                                                    )
+
+                                                                    .clip(RoundedCornerShape(20.dp))
+//                                                    .padding(5.dp)
+                                                            )
+                                                    }
+
+                                                    else -> {
                                                         Box(
                                                             modifier = Modifier
-                                                                .height(20.dp)
-                                                                .width(20.dp)
-                                                                .background(
-                                                                    colorValue,
-                                                                    RoundedCornerShape(20.dp)
-                                                                )
 
-                                                                .clip(RoundedCornerShape(20.dp))
-//                                                    .padding(5.dp)
-                                                        )
-                                                }
-
-                                                else -> {
-                                                    Box(
-                                                        modifier = Modifier
-
-                                                            .clip(RoundedCornerShape(20.dp)),
-                                                        contentAlignment = Alignment.Center
-                                                    ) {
-                                                        Text(
-                                                            text = varient.product_varient_name,
-                                                            fontFamily = General.satoshiFamily,
-                                                            fontWeight = FontWeight.Normal,
-                                                            fontSize = (16).sp,
-                                                            color = CustomColor.neutralColor800,
-                                                            textAlign = TextAlign.Center
-                                                        )
+                                                                .clip(RoundedCornerShape(20.dp)),
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            Text(
+                                                                text = varient.product_varient_name,
+                                                                fontFamily = General.satoshiFamily,
+                                                                fontWeight = FontWeight.Normal,
+                                                                fontSize = (16).sp,
+                                                                color = CustomColor.neutralColor800,
+                                                                textAlign = TextAlign.Center
+                                                            )
+                                                        }
                                                     }
                                                 }
+
                                             }
-
                                         }
-                                    }
 
+                                    }
                                 }
                             }
-                        }
-                        if (order.status == 1) {
-                            Sizer(10)
-                            CustomBotton(
+                            if (order.status == 1) {
+                                Sizer(10)
+                                CustomBotton(
 
-                                buttonTitle = "Cencle Order",
-                                operation = {
-                                    deletedId.value =order.id
-                                    coroutin.launch {
-                                        isSendingData.value = true;
-                                        val result = async {
-                                            homeViewModel.deleteOrder(order.id)
-                                        }.await()
-                                        isSendingData.value = false
-                                        var message = "Order deleted Seccesffuly"
-                                        if (!result.isNullOrEmpty()) {
-                                            message = result
+                                    buttonTitle = "Cencle Order",
+                                    operation = {
+                                        deletedId.value = order.id
+                                        coroutin.launch {
+                                            isSendingData.value = true;
+                                            val result = async {
+                                                homeViewModel.deleteOrder(order.id)
+                                            }.await()
+                                            isSendingData.value = false
+                                            var message = "Order deleted Seccesffuly"
+                                            if (!result.isNullOrEmpty()) {
+                                                message = result
+                                            }
+                                            snackbarHostState.showSnackbar(message)
                                         }
-                                        snackbarHostState.showSnackbar(message)
-                                    }
 
-                                },
-                                color = CustomColor.alertColor_1_600,
-                                isLoading = isSendingData.value&&deletedId.value==order.id
-                            )
+                                    },
+                                    color = CustomColor.alertColor_1_600,
+                                    isLoading = isSendingData.value && deletedId.value == order.id
+                                )
+                            }
                         }
+
                     }
-
                 }
-            }
 
-            if (isLoadingMore.value) {
+                if (isLoadingMore.value) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 15.dp)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            CircularProgressIndicator(color = CustomColor.primaryColor700)
+                        }
+                        Sizer(40)
+                    }
+                }
+
+
                 item {
-                    Box(modifier = Modifier
-                        .padding(top = 15.dp)
-                        .fillMaxWidth(),
-                        contentAlignment = Alignment.Center)
-                    {
-                        CircularProgressIndicator(color = CustomColor.primaryColor700)
-                    }
-                    Sizer(40)
+                    Box(modifier = Modifier.height(90.dp))
                 }
             }
 
-
-            item {
-                Box(modifier = Modifier.height(90.dp))
-            }
         }
-
         if(isSendingData.value)
             Dialog(
                 onDismissRequest = {}

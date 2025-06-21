@@ -561,7 +561,7 @@ fun ProductDetail(
                     }
                 }
             item {
-                Sizer(70)
+                Sizer(130)
             }
         }
     }

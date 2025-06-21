@@ -35,6 +35,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -88,6 +89,7 @@ fun AddressScreen(
     val addressTitle = remember { mutableStateOf(TextFieldValue("")) }
 
     val sheetState = rememberModalBottomSheetState()
+    val isRefresh = remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {
@@ -131,13 +133,12 @@ fun AddressScreen(
         bottomBar = {
             when (!isPressAddNewAddress.value) {
                 true -> {
-                    BottomAppBar{
+                    BottomAppBar(
+                        containerColor = Color.White
+                    ){
                         Box(
                             modifier = Modifier
-
-                                .padding(bottom = 50.dp)
                                 .fillMaxWidth()
-                                .background(Color.White)
                                 .padding(horizontal = 10.dp)
                         ) {
                             CustomBotton(
@@ -253,76 +254,165 @@ fun AddressScreen(
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
+        PullToRefreshBox(
+            isRefreshing = isRefresh.value,
+            onRefresh = {homeViewModle.getMyInfo()}
+        ) {
+            when (locationss.value?.address.isNullOrEmpty()) {
+                true -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
 
-        when (locationss.value?.address.isNullOrEmpty()) {
-            true -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-
-                    Icon(
-                        imageVector = ImageVector
-                            .vectorResource(R.drawable.location_arrow), contentDescription = "",
-                        tint = CustomColor.primaryColor700,
-                        modifier = Modifier.size(40.dp)
-                    )
-
-                    Sizer(10)
-                    Text(
-                        "There is No Locations Found",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 20.sp,
-                        color = CustomColor.neutralColor500,
-                        textAlign = TextAlign.Center
-
-                    )
-                }
-            }
-
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .background(Color.White)
-                        .padding(top = 100.dp)
-                        .padding(horizontal = 15.dp)
-                        .fillMaxHeight()
-                        .fillMaxWidth()
-                ) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .background(CustomColor.neutralColor200)
-                                .fillMaxWidth()
-                                .height(1.dp)
+                        Icon(
+                            imageVector = ImageVector
+                                .vectorResource(R.drawable.location_arrow), contentDescription = "",
+                            tint = CustomColor.primaryColor700,
+                            modifier = Modifier.size(40.dp)
                         )
-                    }
-                    item {
-                        Sizer(30)
 
+                        Sizer(10)
                         Text(
-                            "Saved Address",
+                            "There is No Locations Found",
                             fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = CustomColor.neutralColor950,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 20.sp,
+                            color = CustomColor.neutralColor500,
                             textAlign = TextAlign.Center
+
                         )
-
-                        Sizer(20)
                     }
+                }
 
-                    items(locationss.value!!.address!!.size)
-                    { index ->
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .background(Color.White)
+                            .padding(top = 100.dp)
+                            .padding(horizontal = 15.dp)
+                            .fillMaxHeight()
+                            .fillMaxWidth()
+                    ) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .background(CustomColor.neutralColor200)
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                            )
+                        }
+                        item {
+                            Sizer(30)
 
-                        Row(
-                            modifier = Modifier
-                                .padding(bottom = 5.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .combinedClickable(
+                            Text(
+                                "Saved Address",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+
+                            Sizer(20)
+                        }
+
+                        items(locationss.value!!.address!!.size)
+                        { index ->
+
+                            Row(
+                                modifier = Modifier
+                                    .padding(bottom = 5.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .combinedClickable(
+                                        onClick = {
+                                            if (!locationss.value!!.address!![index].isCurrnt) {
+                                                coroutine.launch {
+                                                    isLoading.value = true
+                                                    var result = async {
+                                                        homeViewModle.setCurrentActiveUserAddress(
+                                                            locationss.value!!.address!![index].id!!,
+                                                        )
+                                                    }.await()
+                                                    isLoading.value = false
+                                                    var message =
+                                                        "update Current Address Seccessfuly"
+                                                    if (result != null) {
+                                                        message = result
+                                                    }
+                                                    snackbarHostState.showSnackbar(message)
+                                                }
+
+                                            }
+
+
+                                        },
+                                        onLongClick = {
+                                            addressHolder.value = locationss.value?.address!![index]
+                                            isPressAddNewAddress.value = true
+                                        }
+                                    )
+                                    .border(
+                                        1.dp,
+                                        CustomColor.neutralColor200,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 10.dp, vertical = 10.dp)
+                                    .fillMaxWidth(),
+
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row {
+                                    Icon(
+                                        imageVector = ImageVector
+                                            .vectorResource(R.drawable.location_address_list),
+                                        contentDescription = "",
+                                        tint = CustomColor.neutralColor600,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Sizer(width = 20)
+                                    Row() {
+                                        Text(
+                                            locationss.value!!.address!![index].title.toString(),
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 16.sp,
+                                            color = CustomColor.neutralColor950,
+                                            textAlign = TextAlign.Center
+
+                                        )
+                                        if (locationss.value!!.address!![index].isCurrnt) {
+                                            Sizer(width = 5)
+                                            Box(
+                                                modifier = Modifier
+                                                    .background(
+                                                        CustomColor.neutralColor100,
+                                                        RoundedCornerShape(8.dp)
+                                                    )
+                                                    .height(20.dp)
+                                                    .width(50.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    "Default",
+                                                    fontFamily = General.satoshiFamily,
+                                                    fontWeight = FontWeight.Medium,
+                                                    fontSize = 11.sp,
+                                                    color = CustomColor.neutralColor950,
+                                                    textAlign = TextAlign.Center
+
+                                                )
+                                            }
+
+                                        }
+                                    }
+                                }
+
+                                RadioButton(
+                                    selected = locationss.value!!.address!![index].isCurrnt,
                                     onClick = {
                                         if (!locationss.value!!.address!![index].isCurrnt) {
                                             coroutine.launch {
@@ -341,120 +431,35 @@ fun AddressScreen(
                                             }
 
                                         }
-
-
-                                    },
-                                    onLongClick = {
-                                        addressHolder.value = locationss.value?.address!![index]
-                                        isPressAddNewAddress.value = true
                                     }
                                 )
-                                .border(
-                                    1.dp,
-                                    CustomColor.neutralColor200,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 10.dp, vertical = 10.dp)
-                                .fillMaxWidth(),
-
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row {
-                                Icon(
-                                    imageVector = ImageVector
-                                        .vectorResource(R.drawable.location_address_list),
-                                    contentDescription = "",
-                                    tint = CustomColor.neutralColor600,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Sizer(width = 20)
-                                Row() {
-                                    Text(
-                                        locationss.value!!.address!![index].title.toString(),
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 16.sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center
-
-                                    )
-                                    if (locationss.value!!.address!![index].isCurrnt) {
-                                        Sizer(width = 5)
-                                        Box(
-                                            modifier = Modifier
-                                                .background(
-                                                    CustomColor.neutralColor100,
-                                                    RoundedCornerShape(8.dp)
-                                                )
-                                                .height(20.dp)
-                                                .width(50.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                "Default",
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Medium,
-                                                fontSize = 11.sp,
-                                                color = CustomColor.neutralColor950,
-                                                textAlign = TextAlign.Center
-
-                                            )
-                                        }
-
-                                    }
-                                }
                             }
 
-                            RadioButton(
-                                selected = locationss.value!!.address!![index].isCurrnt,
-                                onClick = {
-                                    if (!locationss.value!!.address!![index].isCurrnt) {
-                                        coroutine.launch {
-                                            isLoading.value = true
-                                            var result = async {
-                                                homeViewModle.setCurrentActiveUserAddress(
-                                                    locationss.value!!.address!![index].id!!,
-                                                )
-                                            }.await()
-                                            isLoading.value = false
-                                            var message = "update Current Address Seccessfuly"
-                                            if (result != null) {
-                                                message = result
-                                            }
-                                            snackbarHostState.showSnackbar(message)
-                                        }
-
-                                    }
-                                }
-                            )
                         }
-
                     }
+
+                    if (isLoading.value == true)
+                        Dialog(
+                            onDismissRequest = {}
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .height(90.dp)
+                                    .width(90.dp)
+                                    .background(
+                                        Color.White,
+                                        RoundedCornerShape(15.dp)
+                                    ), contentAlignment = Alignment.Center
+                            )
+                            {
+                                CircularProgressIndicator(
+                                    color = CustomColor.primaryColor700,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                        }
                 }
-
-                if (isLoading.value == true)
-                    Dialog(
-                        onDismissRequest = {}
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .height(90.dp)
-                                .width(90.dp)
-                                .background(
-                                    Color.White,
-                                    RoundedCornerShape(15.dp)
-                                ), contentAlignment = Alignment.Center
-                        )
-                        {
-                            CircularProgressIndicator(
-                                color = CustomColor.primaryColor700,
-                                modifier = Modifier.size(40.dp)
-                            )
-                        }
-                    }
             }
         }
-
     }
 }

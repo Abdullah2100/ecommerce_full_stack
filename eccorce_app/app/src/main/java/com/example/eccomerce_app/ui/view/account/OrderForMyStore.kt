@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -98,6 +99,7 @@ fun OrderForMyStoreScreen(
     var page = remember { mutableStateOf(1) }
 
     val isLoadingMore = remember { mutableStateOf(false) }
+    val isRefresh = remember { mutableStateOf(false) }
 
 
     LaunchedEffect(reachedBottom.value) {
@@ -160,6 +162,17 @@ fun OrderForMyStoreScreen(
      ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
+        PullToRefreshBox(
+            isRefreshing = isRefresh.value,
+            onRefresh = {
+                homeViewModel.getMyOrderItemBelongToMyStore(
+                    store_id = myInfo.value!!.store_id!!,
+                    mutableStateOf(1),
+                    null
+                )
+            },
+        )
+        {
         LazyColumn(
             state = lazyState,
             modifier = Modifier
@@ -446,6 +459,8 @@ fun OrderForMyStoreScreen(
             item{
                 Box(modifier = Modifier.height(50.dp))
             }
-        }
+        }}
+
+
     }
 }

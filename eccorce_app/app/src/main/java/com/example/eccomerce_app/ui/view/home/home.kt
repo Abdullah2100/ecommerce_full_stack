@@ -29,9 +29,12 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,6 +65,7 @@ import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.Util.General.reachedBottom
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ConfigurationScreenWidthHeight", "SuspiciousIndentation")
 @Composable
 fun HomePage(
@@ -96,7 +100,7 @@ fun HomePage(
         if (!isClickingSearch.value) 80.dp else 0.dp,
     )
     val isLoadingMore = remember { mutableStateOf(false) }
-
+    val isRefresh = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -125,219 +129,224 @@ fun HomePage(
         it.calculateBottomPadding()
 
 
-        LazyColumn(
-            state = lazyState,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(horizontal = 15.dp)
-                .padding(top = 50.dp)
+        PullToRefreshBox(
+            isRefreshing = isRefresh.value,
+            onRefresh = {homeViewModel.initialFun()}
+        ){
+            LazyColumn(
+                state = lazyState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(horizontal = 15.dp)
+                    .padding(top = 50.dp)
 
-        ) {
+            ) {
 
-            item {
-                when (myInfo.value?.address == null) {
-                    true -> {
-                        LocationLoadingShape((configuration.screenWidthDp))
-                    }
-
-                    else -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.height(sizeAnimation.value)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .width(width = (configuration.screenWidthDp - 30 - 34).dp)
-                                    .clickable(
-                                        enabled = true,
-                                        interactionSource = interactionSource,
-                                        indication = null,
-                                        onClick = {
-                                            nav.navigate(Screens.Address)
-                                        }
-                                    )
-                            ) {
-                                Text(
-                                    "Loaction",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp,
-                                    color = CustomColor.neutralColor800,
-                                    textAlign = TextAlign.Center
-
-                                )
-                                Sizer(1)
-                                Text(
-                                    myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
-                                        ?: "",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 18.sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.Center
-
-                                )
-                            }
-
-                            Icon(
-                                Icons.Outlined.Notifications,
-                                "",
-                                tint = CustomColor.neutralColor950,
-                                modifier = Modifier.size(30.dp)
-
-                            )
-                        }
-                    }
-                }
-
-
-            }
-
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(top = 5.dp, bottom = 10.dp)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = {
-                                isClickingSearch.value = !isClickingSearch.value
-                            }
-                        ), colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    ),
-                    elevation = CardDefaults.elevatedCardElevation(
-                        defaultElevation = 5.dp,
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(top = 15.dp, bottom = 15.dp, start = 4.dp)
-
-                    ) {
-
-                        Icon(
-                            Icons.Outlined.Search, "",
-                            tint = CustomColor.neutralColor950,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Sizer(width = 5)
-                        Text(
-                            "Find your favorite items",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = CustomColor.neutralColor800,
-                            textAlign = TextAlign.Center
-
-                        )
-
-                    }
-
-                }
-            }
-            if (categories.value.isNullOrEmpty() == false)
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp, bottom = 5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            "Category",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = CustomColor.neutralColor950,
-                            textAlign = TextAlign.Center
-
-                        )
-                        Text(
-                            "View All",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp,
-                            color = CustomColor.neutralColor950,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.clickable {
-                                nav.navigate(Screens.Category)
-                            }
-
-                        )
-                    }
-
-                    when (categories.value == null) {
+                    when (myInfo.value?.address == null) {
                         true -> {
-                            CategoryLoadingShape(20)
+                            LocationLoadingShape((configuration.screenWidthDp))
                         }
 
                         else -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.height(sizeAnimation.value)
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .width(width = (configuration.screenWidthDp - 30 - 34).dp)
+                                        .clickable(
+                                            enabled = true,
+                                            interactionSource = interactionSource,
+                                            indication = null,
+                                            onClick = {
+                                                nav.navigate(Screens.Address)
+                                            }
+                                        )
+                                ) {
+                                    Text(
+                                        "Loaction",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 16.sp,
+                                        color = CustomColor.neutralColor800,
+                                        textAlign = TextAlign.Center
 
-                            when (categories.value!!.isEmpty()) {
-                                true -> {}
-                                else -> {
-                                    CategoryShape(
-                                        categories.value!!.take(4),
-                                        homeViewModel,
-                                        nav)
+                                    )
+                                    Sizer(1)
+                                    Text(
+                                        myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
+                                            ?: "",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 18.sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+
+                                    )
+                                }
+
+                                Icon(
+                                    Icons.Outlined.Notifications,
+                                    "",
+                                    tint = CustomColor.neutralColor950,
+                                    modifier = Modifier.size(30.dp)
+
+                                )
+                            }
+                        }
+                    }
+
+
+                }
+
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(top = 5.dp, bottom = 10.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null,
+                                onClick = {
+                                    isClickingSearch.value = !isClickingSearch.value
+                                }
+                            ), colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        ),
+                        elevation = CardDefaults.elevatedCardElevation(
+                            defaultElevation = 5.dp,
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 15.dp, bottom = 15.dp, start = 4.dp)
+
+                        ) {
+
+                            Icon(
+                                Icons.Outlined.Search, "",
+                                tint = CustomColor.neutralColor950,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Sizer(width = 5)
+                            Text(
+                                "Find your favorite items",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp,
+                                color = CustomColor.neutralColor800,
+                                textAlign = TextAlign.Center
+
+                            )
+
+                        }
+
+                    }
+                }
+                if (categories.value.isNullOrEmpty() == false)
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp, bottom = 5.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Category",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+
+                            )
+                            Text(
+                                "View All",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 14.sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.clickable {
+                                    nav.navigate(Screens.Category)
+                                }
+
+                            )
+                        }
+
+                        when (categories.value == null) {
+                            true -> {
+                                CategoryLoadingShape(20)
+                            }
+
+                            else -> {
+
+                                when (categories.value!!.isEmpty()) {
+                                    true -> {}
+                                    else -> {
+                                        CategoryShape(
+                                            categories.value!!.take(4),
+                                            homeViewModel,
+                                            nav)
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-            if (bannel.value != null) {
-                item {
-                    BannerBage(
-                        banners = bannel.value!!,
-                        isMe = false,
-                        nav = nav
-                    )
-                }
-            }
-
-            item {
-
-                Sizer(10)
-                when (products.value == null) {
-                    true -> {
-                        ProductLoading(50)
+                if (bannel.value != null) {
+                    item {
+                        BannerBage(
+                            banners = bannel.value!!,
+                            isMe = false,
+                            nav = nav
+                        )
                     }
+                }
 
-                    else -> {
-                        if (products.value!!.isNotEmpty()) {
-                            ProductShape(products.value!!, nav = nav)
+                item {
+
+                    Sizer(10)
+                    when (products.value == null) {
+                        true -> {
+                            ProductLoading(50)
+                        }
+
+                        else -> {
+                            if (products.value!!.isNotEmpty()) {
+                                ProductShape(products.value!!, nav = nav)
+                            }
                         }
                     }
                 }
-            }
 
-            if (isLoadingMore.value) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 15.dp)
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    )
-                    {
-                        CircularProgressIndicator(color = CustomColor.primaryColor700)
+                if (isLoadingMore.value) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 15.dp)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        )
+                        {
+                            CircularProgressIndicator(color = CustomColor.primaryColor700)
+                        }
+                        Sizer(40)
                     }
-                    Sizer(40)
+                }
+
+                item {
+                    Sizer(140)
                 }
             }
 
-            item {
-                Sizer(140)
-            }
         }
-
     }
 }
