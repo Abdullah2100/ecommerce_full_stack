@@ -13,6 +13,7 @@ public class Order
     public decimal totalPrice { get; set; }
     public int status { get; set; }
     public decimal distanceToUser { get; set; } = 0;
+    public Guid? delevery_id { get; set; } = null;
 
     [Column(TypeName = "Timestamp")]
     public DateTime created_at { get; set; } = DateTime.Now;
@@ -21,5 +22,6 @@ public class Order
     public DateTime? updated_at { get; set; } = null;
     
     public User user { get; set; }
+    public Delivery? delivered_by { get; set; }
     public ICollection<OrderItem> items { get; set; }
 }

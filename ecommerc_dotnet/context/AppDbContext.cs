@@ -31,6 +31,9 @@ public class AppDbContext : DbContext
     public DbSet<OrderProductsVarient> OrdersProductsVarients { get; set; }
     public DbSet<General> GeneralSetting { get; set; }
     
+    public DbSet<Delivery> Deleiveries { get; set; }
+    
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,9 +55,17 @@ public class AppDbContext : DbContext
                     .HasForeignKey<Store>(st=>st.user_id)
                     .HasPrincipalKey<User>(u=>u.ID)
                     .OnDelete(DeleteBehavior.Restrict);
-                
             }
         );
+
+        modelBuilder.Entity<Delivery>(delev =>
+        {
+            delev.HasOne(de => de.user)
+                .WithOne(u => u.delivery)
+                .HasForeignKey<Delivery>(de => de.user_Id)
+                .HasPrincipalKey<User>(u => u.ID)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<Category>(ca =>
         {

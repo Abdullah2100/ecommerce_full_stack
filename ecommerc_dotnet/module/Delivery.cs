@@ -3,18 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ecommerc_dotnet.module;
 
-public class User
+public class Delivery 
 {
     [Key] public Guid ID { get; set; }
-    public string name { get; set; }
-    public string phone { get; set; }
-    public string  email{ get; set; }
-    public string password { get; set; }
-    public bool isDeleted { get; set; } = false;
+     public Guid user_Id { get; set; }
     public string deviceToken { get; set; }
-    
-    //1 :normal user ; 0: is admin
-    public int role { get; set; } = 1;
+    public bool isAvaliable { get; set; } = true;
 
     
     [Column(TypeName = "Timestamp")]
@@ -25,10 +19,8 @@ public class User
      public DateTime? updated_at { get; set; } = null;
     
     public string? thumbnail { get; set; }
-    public ICollection<Address>? addresses { get; set; }
-    public ICollection<Category>? categories { get; set; }
+    public Address? address { get; set; }
+    public User user { get; set; }
+   
     public ICollection<Order>? orders { get; set; }
-
-    public Store? Store { get; set; } = null;
-    public Delivery? delivery { get; set; } = null;
 }
