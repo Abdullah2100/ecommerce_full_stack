@@ -1,10 +1,10 @@
 package com.example.e_commercompose
 
 import android.app.Application
-import com.example.eccomerce_app.di.dataBaseModule
+import com.example.e_commercompose.di.dataBaseModule
 import com.example.e_commercompose.di.httpClientModule
-import com.example.eccomerce_app.di.repositoryModel
-import com.example.eccomerce_app.di.viewModelModel
+import com.example.e_commercompose.di.repositoryModel
+import com.example.e_commercompose.di.viewModelModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 

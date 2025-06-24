@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.ui.OnBoarding.OnBoardingScreen
 import com.example.e_commercompose.ui.view.Auth.LoginScreen
 import com.example.e_commercompose.View.Pages.SignUpPage
@@ -28,12 +29,11 @@ import com.example.e_commercompose.ui.view.home.OrderScreen
 import com.example.e_commercompose.ui.view.home.ProductCategoryScreen
 import com.example.e_commercompose.ui.view.location.LocationHomeScreen
 import com.example.e_commercompose.ui.view.location.LocationsList
-import com.example.e_commercompose.viewModel.HomeViewModel
-import com.example.eccomerce_app.ui.view.ReseatPassword.GenerateOtpScreen
-import com.example.eccomerce_app.ui.view.ReseatPassword.OtpVerificationScreen
-import com.example.eccomerce_app.ui.view.ReseatPassword.ReseatPasswordScreen
-import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
-import com.example.eccomerce_app.ui.view.home.CategoryScreen
+import com.example.e_commercompose.ui.view.ReseatPassword.GenerateOtpScreen
+import com.example.e_commercompose.ui.view.ReseatPassword.OtpVerificationScreen
+import com.example.e_commercompose.ui.view.ReseatPassword.ReseatPasswordScreen
+import com.example.e_commercompose.ui.view.account.OrderForMyStoreScreen
+import com.example.e_commercompose.ui.view.home.CategoryScreen
 
 
 @Composable

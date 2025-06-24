@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.di
+package com.example.e_commercompose.di
 
 import com.example.e_commercompose.data.repository.AuthRepository
 import com.example.e_commercompose.data.repository.HomeRepository

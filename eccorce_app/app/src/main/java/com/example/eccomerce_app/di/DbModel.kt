@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.di
+package com.example.e_commercompose.di
 
 import android.content.Context
 import androidx.room.Room

@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.ReseatPassword
+package com.example.e_commercompose.ui.view.ReseatPassword
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

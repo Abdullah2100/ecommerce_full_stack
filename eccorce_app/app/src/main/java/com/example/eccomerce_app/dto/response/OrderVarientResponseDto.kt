@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.dto.response
+package com.example.e_commercompose.dto.response
 
 import kotlinx.serialization.Serializable
 

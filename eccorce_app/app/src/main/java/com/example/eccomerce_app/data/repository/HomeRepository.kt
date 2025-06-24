@@ -18,10 +18,10 @@ import com.example.e_commercompose.dto.response.VarientResponseDto
 import com.example.e_commercompose.model.MyInfoUpdate
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.util.Secrets
-import com.example.eccomerce_app.dto.request.OrderItemUpdateStatusDto
-import com.example.eccomerce_app.dto.response.GeneralSettingResponseDto
-import com.example.eccomerce_app.dto.response.OrderItemResponseDto
-import com.example.eccomerce_app.dto.response.OrderResponseDto
+import com.example.e_commercompose.dto.request.OrderItemUpdateStatusDto
+import com.example.e_commercompose.dto.response.GeneralSettingResponseDto
+import com.example.e_commercompose.dto.response.OrderItemResponseDto
+import com.example.e_commercompose.dto.response.OrderResponseDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

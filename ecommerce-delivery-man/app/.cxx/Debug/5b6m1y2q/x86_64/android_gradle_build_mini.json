@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/src/main/jni/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/abdullah/Android/Sdk/cmake/3.31.5/bin/ninja",
+      "-C",
+      "/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/.cxx/Debug/5b6m1y2q/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/abdullah/Android/Sdk/cmake/3.31.5/bin/ninja",
+    "-C",
+    "/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/.cxx/Debug/5b6m1y2q/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "keys::@6890427a1f51a3e7e1df": {
+      "artifactName": "keys",
+      "abi": "x86_64",
+      "output": "/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/build/intermediates/cxx/Debug/5b6m1y2q/obj/x86_64/libkeys.so",
+      "runtimeFiles": []
+    }
+  }
+}

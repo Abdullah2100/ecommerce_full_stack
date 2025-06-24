@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.home
+package com.example.e_commercompose.ui.view.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

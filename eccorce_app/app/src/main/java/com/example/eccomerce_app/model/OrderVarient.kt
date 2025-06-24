@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.model
+package com.example.e_commercompose.model
 
 import kotlinx.serialization.Serializable
 

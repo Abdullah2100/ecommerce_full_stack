@@ -1,4 +1,4 @@
-package com.example.eccomerce_app.ui.view.account
+package com.example.e_commercompose.ui.view.account
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState

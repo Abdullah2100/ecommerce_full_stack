@@ -9,16 +9,16 @@ import com.example.e_commercompose.dto.response.StoreResposeDto
 import com.example.e_commercompose.dto.response.SubCategoryResponseDto
 import com.example.e_commercompose.dto.response.UserDto
 import com.example.e_commercompose.dto.response.VarientResponseDto
-import com.example.eccomerce_app.dto.response.GeneralSettingResponseDto
-import com.example.eccomerce_app.dto.response.OrderItemResponseDto
-import com.example.eccomerce_app.dto.response.OrderProductResponseDto
-import com.example.eccomerce_app.dto.response.OrderResponseDto
-import com.example.eccomerce_app.dto.response.OrderVarientResponseDto
-import com.example.eccomerce_app.model.GeneralSetting
-import com.example.eccomerce_app.model.Order
-import com.example.eccomerce_app.model.OrderItem
-import com.example.eccomerce_app.model.OrderProduct
-import com.example.eccomerce_app.model.OrderVarient
+import com.example.e_commercompose.dto.response.GeneralSettingResponseDto
+import com.example.e_commercompose.dto.response.OrderItemResponseDto
+import com.example.e_commercompose.dto.response.OrderProductResponseDto
+import com.example.e_commercompose.dto.response.OrderResponseDto
+import com.example.e_commercompose.dto.response.OrderVarientResponseDto
+import com.example.e_commercompose.model.GeneralSetting
+import com.example.e_commercompose.model.Order
+import com.example.e_commercompose.model.OrderItem
+import com.example.e_commercompose.model.OrderProduct
+import com.example.e_commercompose.model.OrderVarient
 import kotlin.text.replace
 
 object DtoToModel {

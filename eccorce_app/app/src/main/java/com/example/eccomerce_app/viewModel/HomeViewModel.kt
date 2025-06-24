@@ -8,9 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.data.Room.AuthDao
-import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
 import com.example.e_commercompose.data.repository.HomeRepository
+import com.example.e_commercompose.data.Room.AuthDao
 import com.example.e_commercompose.dto.ModelToDto.toOrderRequestDto
 import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
 import com.example.e_commercompose.dto.request.AddressRequestDto
@@ -47,13 +46,13 @@ import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.UserModel
 import com.example.e_commercompose.model.VarientModel
-import com.example.eccomerce_app.dto.response.GeneralSettingResponseDto
-import com.example.eccomerce_app.dto.response.OrderItemResponseDto
-import com.example.eccomerce_app.dto.response.OrderResponseDto
-import com.example.eccomerce_app.dto.response.StoreStatusResponseDto
-import com.example.eccomerce_app.model.GeneralSetting
-import com.example.eccomerce_app.model.Order
-import com.example.eccomerce_app.model.OrderItem
+import com.example.e_commercompose.dto.response.GeneralSettingResponseDto
+import com.example.e_commercompose.dto.response.OrderItemResponseDto
+import com.example.e_commercompose.dto.response.OrderResponseDto
+import com.example.e_commercompose.dto.response.StoreStatusResponseDto
+import com.example.e_commercompose.model.GeneralSetting
+import com.example.e_commercompose.model.Order
+import com.example.e_commercompose.model.OrderItem
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -137,7 +136,7 @@ class HomeViewModel(
 
 
     fun addToCart(product: CardProductModel) {
-        viewModelScope.launch(Dispatchers.Main+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
             var cardProducts = mutableListOf<CardProductModel>()
 
             cardProducts.add(product)
@@ -163,7 +162,7 @@ class HomeViewModel(
 
 
     fun increaseCardItem(productId: UUID) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
             var copyproduct: CardProductModel? = null;
             var productHolders = _cartImes.value.cartProducts.map { product ->
                 if (product.id == productId) {
@@ -192,7 +191,7 @@ class HomeViewModel(
 
 
     fun decreaseCardItem(productId: UUID) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
             var productList = _cartImes.value.cartProducts;
             var fristProduct = productList.first { it.id == productId }
             var varientPrice = fristProduct!!.price
@@ -230,7 +229,7 @@ class HomeViewModel(
     }
 
     fun removeItemFromCard(productId: UUID) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
             var productList = _cartImes.value.cartProducts;
             var fristProduct = productList.first { it.id == productId }
             var varientPrice = fristProduct!!.price
@@ -289,7 +288,7 @@ class HomeViewModel(
     }
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
             if (_hub.value != null)
                 _hub.value!!.stop()
         }
@@ -299,12 +298,12 @@ class HomeViewModel(
     fun connection() {
 
         if (webSocket != null) {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
 
                 _hub.emit(webSocket)
-                _hub.value!!.start().blockingAwait()
-                _hub.value!!.send("streamBanners") // Start streaming
-                _hub.value!!.on(
+                _hub.value?.start()?.blockingAwait()
+                _hub.value?.send("streamBanners") // Start streaming
+                _hub.value?.on(
                     "createdBanner",
                     { result ->
                         var banners = mutableListOf<BannerModel>();
@@ -314,7 +313,7 @@ class HomeViewModel(
                             banners.add(result.toBanner())
                             banners.addAll(_banners.value!!)
                         }
-                        viewModelScope.launch(Dispatchers.IO) {
+                        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
                             Log.d("bannerCreationData", banners.toString())
 
                             _banners.emit(banners)
@@ -323,11 +322,11 @@ class HomeViewModel(
                     BannerResponseDto::class.java
                 )
 
-                _hub.value!!.on(
+                _hub.value?.on(
                     "storeStatus",
                     { result ->
 
-                        viewModelScope.launch(Dispatchers.IO) {
+                        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
                             if (result.status == true) {
                                 val productNotBelongToStore =
                                     _products.value?.filter { it.store_id != result.storeId }
@@ -341,7 +340,7 @@ class HomeViewModel(
                     StoreStatusResponseDto::class.java
                 )
 
-                _hub.value!!.on(
+                _hub.value?.on(
                     "orderExcptedByAdmin",
                     { response ->
                         val orderItemList = mutableListOf<OrderItem>();
@@ -354,7 +353,7 @@ class HomeViewModel(
                         if (_orderItemForMyStore.value != null) {
                             orderItemList.addAll(_orderItemForMyStore.value!!)
                         }
-                        viewModelScope.launch(Dispatchers.IO) {
+                        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
                             _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }.toList())
                         }
                     },
@@ -491,7 +490,7 @@ class HomeViewModel(
     //category
     fun getCategories(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -526,7 +525,7 @@ class HomeViewModel(
     //general
     fun getGeneral(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
             var result = homeRepository.getGeneral(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -559,7 +558,7 @@ class HomeViewModel(
     //order
     fun getVarients(pageNumber: Int = 1) {
         if (pageNumber == 1 && _varients.value != null) return;
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
             var result = homeRepository.getVarient(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -628,12 +627,7 @@ class HomeViewModel(
                     var copyMyInfo = _myInfo.value?.copy(address = locationsCopy.toList())
                     _myInfo.emit(copyMyInfo)
 
-                    dao.savePassingLocation(
-                        IsPassSetLocationScreen(
-                            0,
-                            true
-                        )
-                    )
+
                 } else {
 
                 }
@@ -674,12 +668,7 @@ class HomeViewModel(
                     _myInfo.emit(copyMyAddress)
                 }
 
-                dao.savePassingLocation(
-                    IsPassSetLocationScreen(
-                        0,
-                        true
-                    )
-                )
+
 
                 return null
 
@@ -767,7 +756,7 @@ class HomeViewModel(
 
     fun getMyInfo() {
         if (_myInfo.value != null) return;
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
             var result = homeRepository.getMyInfo();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -1560,9 +1549,8 @@ class HomeViewModel(
 
 
     fun logout() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
             dao.nukeTable()
-            dao.nukePassLocationTable()
         }
     }
 
@@ -1604,7 +1592,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
         if (isLoading != null) isLoading.value = true
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
             if (isLoading != null)
                 delay(500)
             var result = homeRepository.getMyOrders(pageNumber.value)
@@ -1666,7 +1654,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
 
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
             if (isLoading != null) {
                 isLoading.value = true
                 delay(500)

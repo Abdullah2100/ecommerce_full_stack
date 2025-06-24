@@ -4,9 +4,9 @@ import com.example.e_commercompose.Dto.AuthResultDto
 import com.example.e_commercompose.dto.request.LoginDto
 import com.example.e_commercompose.dto.request.SignupDto
 import com.example.e_commercompose.util.Secrets
-import com.example.eccomerce_app.dto.request.ForgetPasswordDto
-import com.example.eccomerce_app.dto.request.ReseatPasswordRequestDto
-import com.example.eccomerce_app.dto.request.VerificationRequestDto
+import com.example.e_commercompose.dto.request.ForgetPasswordDto
+import com.example.e_commercompose.dto.request.ReseatPasswordRequestDto
+import com.example.e_commercompose.dto.request.VerificationRequestDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

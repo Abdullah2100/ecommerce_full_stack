@@ -51,10 +51,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.BannerBage
 import com.example.e_commercompose.ui.component.CategoryLoadingShape
@@ -64,6 +64,7 @@ import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.Util.General.reachedBottom
 import kotlinx.coroutines.delay
+import kotlin.collections.isNullOrEmpty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ConfigurationScreenWidthHeight", "SuspiciousIndentation")
