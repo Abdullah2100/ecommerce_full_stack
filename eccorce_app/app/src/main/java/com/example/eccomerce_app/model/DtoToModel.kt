@@ -14,11 +14,6 @@ import com.example.e_commercompose.dto.response.OrderItemResponseDto
 import com.example.e_commercompose.dto.response.OrderProductResponseDto
 import com.example.e_commercompose.dto.response.OrderResponseDto
 import com.example.e_commercompose.dto.response.OrderVarientResponseDto
-import com.example.e_commercompose.model.GeneralSetting
-import com.example.e_commercompose.model.Order
-import com.example.e_commercompose.model.OrderItem
-import com.example.e_commercompose.model.OrderProduct
-import com.example.e_commercompose.model.OrderVarient
 import kotlin.text.replace
 
 object DtoToModel {
@@ -36,15 +31,15 @@ object DtoToModel {
         return Category(
             id= this.id,
             name =this.name,
-            image=this.image_path.replace("localhost","10.0.2.2")
+            image=this.image.replace("localhost","10.0.2.2")
         );
     }
     fun SubCategoryResponseDto.toSubCategory(): SubCategory{
         return SubCategory(
             id = this.id,
             name=this.name,
-            category_id=this.category_id,
-            store_id=this.store_id)
+            category_id=this.categoryId,
+            store_id=this.storeId)
     }
 
 
@@ -52,9 +47,9 @@ object DtoToModel {
         return StoreModel(
             id = this.id,
             name = this.name,
-            user_id = this.user_id,
-            pig_image = this.wallpaper_image.replace("localhost", "10.0.2.2"),
-            small_image = this.small_image.replace("localhost", "10.0.2.2"),
+            user_id = this.userId,
+            pig_image = this.wallpaperImage.replace("localhost", "10.0.2.2"),
+            small_image = this.smallImage.replace("localhost", "10.0.2.2"),
             latitude = this.latitude,
             longitude = this.longitude
         )
@@ -68,7 +63,7 @@ object DtoToModel {
             email = this.email,
             thumbnail=if(this.thumbnail!=null)this.thumbnail.replace("localhost","10.0.2.2") else "",
             address = this.address?.map { it.toAddress() }?.toList(),
-            store_id = this.store_id
+            store_id = this.storeId
         )
     }
 
@@ -77,7 +72,7 @@ object DtoToModel {
         return BannerModel(
             id=this.id,
             image=if(this.image.isNotEmpty())this.image.replace("localhost","10.0.2.2") else "",
-            store_id = this.store_id
+            store_id = this.storeId
         )
     }
 
@@ -93,7 +88,7 @@ object DtoToModel {
             id = this.id,
             name=this.name,
             precentage = this.precentage,
-            varient_id =this.varient_id
+            varient_id =this.varientId
         )
     }
 
@@ -103,10 +98,10 @@ object DtoToModel {
             name = this.name,
             description = this.description,
             thmbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("localhost","10.0.2.2") else "",
-            subcategory_id = this.subcategory_id,
-            store_id = this.store_id,
+            subcategory_id = this.subcategoryId,
+            store_id = this.storeId,
             price = this.price,
-            category_id = this.category_id,
+            category_id = this.categoryId,
             productVarients = this.productVarients?.map {
                 it.map { it.toProductVarient() }
             },
@@ -116,8 +111,8 @@ object DtoToModel {
 
     fun OrderVarientResponseDto.toOrderVarient(): OrderVarient{
         return OrderVarient(
-            varient_name=this.varient_name,
-            product_varient_name=this.product_varient_name
+            varient_name=this.varientName,
+            product_varient_name=this.productVarientName
         )
     }
 
@@ -145,8 +140,8 @@ object DtoToModel {
           id = this.id,
            latitude = this.latitude,
            longitude = this.longitude,
-           user_phone = this.user_phone,
-           order_items = this.order_items.map { it.toOrderItem() },
+           user_phone = this.userPhone,
+           order_items = this.orderItems.map { it.toOrderItem() },
            status = this.status
        )
     }

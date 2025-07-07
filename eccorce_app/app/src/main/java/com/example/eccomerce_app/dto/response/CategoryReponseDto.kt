@@ -9,5 +9,5 @@ data class CategoryReponseDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
     val name: String,
-    val image_path: String
+    val image: String
 )

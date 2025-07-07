@@ -36,27 +36,27 @@ public class ProductController : ControllerBase
     private readonly StoreData _storeData;
     private readonly IWebHostEnvironment _host;
 
-    [HttpGet("{store_id}/{pageNumber:int}")]
+    [HttpGet("store/{storeId}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> getProducts
     (
-        Guid store_id, int pageNumber
+        Guid storeId, int pageNumber
     )
     {
         if(pageNumber<1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var isExist = await _storeData.isExist(store_id);
+        var isExist = await _storeData.isExist(storeId);
         if (!isExist)
         {
             return BadRequest("المتجر غير موجود");
         }
 
         var result = await _productData.getProducts(
-            store_id, pageNumber
+            storeId, pageNumber
         );
         
         if (result.Count < 1)
@@ -67,7 +67,7 @@ public class ProductController : ControllerBase
     }
 
 
-    [HttpGet("{category_id}/{pageNumber:int}")]
+    [HttpGet("category/{category_id}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,30 +92,30 @@ public class ProductController : ControllerBase
     }
 
     
-    [HttpGet("{store_id:guid}/{subCategory_id:guid}/{pageNumber:int}")]
+    [HttpGet("{storeId:guid}/{subcategoryId:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getProducts
     (
-        Guid store_id,
-        Guid subCategory_id,
+        Guid storeId,
+        Guid subcategoryId,
         int pageNumber
     )
     {
         if(pageNumber<1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var isExist = await _storeData.isExist(store_id, subCategory_id);
+        var isExist = await _storeData.isExist(storeId, subcategoryId);
         if (!isExist)
         {
             return BadRequest("المتجر غير موجود");
         }
 
         var result = await _productData.getProducts(
-            store_id,
-            subCategory_id
+            storeId,
+            subcategoryId
             , pageNumber
         );
 
@@ -249,7 +249,7 @@ public class ProductController : ControllerBase
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.store_id != product.store_id)
+        if (user.storeId != product.storeId)
             return BadRequest("فقط صاحب المتجر بأمكانه اضافة المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
@@ -275,8 +275,8 @@ public class ProductController : ControllerBase
             name: product.name,
             description: product.description,
             thumbnail: (string)savedThumbnail!,
-            subcategory_id: product.subcategory_id,
-            store_id: product.store_id,
+            subcategoryId: product.subcategoryId,
+            storeId: product.storeId,
             price: product.price,
             images: savedImage,
             productVarients: product.productVarients
@@ -319,7 +319,7 @@ public class ProductController : ControllerBase
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.store_id != product.store_id)
+        if (user.storeId != product.storeId)
             return Conflict("فقط صاحب المتجر بأمكانه  المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
@@ -359,7 +359,7 @@ public class ProductController : ControllerBase
             name: product.name,
             description: product.description,
             thumbnail: (string)savedThumbnail!,
-            subcategory_id: product.subcategory_id,
+            subcategoryId: product.subcategoryId,
             price: product.price,
             productVarients: product.productVarients,
             images: savedImage
@@ -371,7 +371,7 @@ public class ProductController : ControllerBase
         return StatusCode(200, result);
     }
 
-    [HttpDelete("{store_id:guid}/{product_id:guid}")]
+    [HttpDelete("{storeId:guid}/{productId:guid}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -379,8 +379,8 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> deleteProduct
     (
-        Guid store_id,
-        Guid product_id
+        Guid storeId,
+        Guid productId
     )
     {
           StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -402,17 +402,17 @@ public class ProductController : ControllerBase
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.store_id != store_id)
+        if (user.storeId != storeId)
             return Conflict("فقط صاحب المتجر بأمكانه حذف المنتجات ");
 
-        var isExistProduct = await _productData.isExist(product_id);
+        var isExistProduct = await _productData.isExist(productId);
 
         if (!isExistProduct)
             return NotFound("المنتج غير موجو");
 
 
         var result = await _productData.deleteProduct(
-            productId: product_id
+            productId: productId
         );
 
         if (result == false)

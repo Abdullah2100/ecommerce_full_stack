@@ -18,11 +18,11 @@ public class Address
     public bool isCurrent { get; set; } = false;
     
     [Column(TypeName = "Timestamp")]
-    public DateTime created_at { get; set; } = DateTime.Now;
+    public DateTime createdAt { get; set; } = DateTime.Now;
 
      
     [Column(TypeName = "Timestamp")]
-    public DateTime? updated_at { get; set; } = null;
-    public Guid owner_id { get; set; }
+    public DateTime? updatedAt { get; set; } = null;
+    public Guid ownerId { get; set; }
     
 }

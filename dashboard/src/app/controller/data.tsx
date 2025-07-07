@@ -14,7 +14,7 @@ export async function getMyInfo() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User';
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -91,7 +91,7 @@ export async function getVarient(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient/all/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -119,7 +119,7 @@ export async function getVarientPageLenght() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient/pages`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -146,7 +146,7 @@ export async function deleteVarient(id: string) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient/${id}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.delete(url, {
+        const result = await axios.delete(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },
@@ -180,7 +180,7 @@ export async function createVarient(data: iVarient) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.post(url, {
+        const result = await axios.post(url, {
             id: data.id,
             name: data.name
         }, {
@@ -217,7 +217,7 @@ export async function updateVarient(data: iVarient) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.put(url, {
+        const result = await axios.put(url, {
             id: data.id,
             name: data.name
         }, {
@@ -255,7 +255,7 @@ export async function getUserPages() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/pages`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -284,7 +284,7 @@ export async function getUserAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/User/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -313,7 +313,7 @@ export async function changeUserStatus(userId: string) {
     console.log(`funtion is Called ${url}`)
     console.log(`token ${userId}`)
     try {
-        var result = await axios.delete(url, {
+        const result = await axios.delete(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -344,7 +344,7 @@ export async function getStorePages() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/pages`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -373,7 +373,7 @@ export async function getStoreAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -401,7 +401,7 @@ export async function changeStoreStatus(store_id: string) {
     console.log(`funtion is Called ${url}`)
     console.log(`token ${store_id}`)
     try {
-        var result = await axios.put(url, undefined, {
+        const result = await axios.put(url, undefined, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },
@@ -433,7 +433,7 @@ export async function getCategory(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Category/all/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+         const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -467,7 +467,7 @@ export async function createCategory(data: iCategoryDto) {
         if (data.image != undefined)
             dataHolder.append("image", data.image)
 
-        var result = await axios.post(url, dataHolder, {
+        const result = await axios.post(url, dataHolder, {
 
             headers: {
                 'Authorization': `Bearer ${Util.token}`
@@ -502,7 +502,7 @@ export async function deleteCategory(id: string) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Category/${id}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.delete(url, {
+        const  result = await axios.delete(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             },
@@ -539,13 +539,15 @@ export async function updateCategory(data: iCategoryDto) {
     try {
 
         const dataHolder = new FormData();
-        dataHolder.append("id", data.id!!);
+        if (data.id) {
+            dataHolder.append("id", data.id);
+        }
         if (data.name.trim().length > 0)
             dataHolder.append("name", data.name)
         if (data.image != undefined)
             dataHolder.append("image", data.image)
 
-        var result = await axios.put(url, dataHolder, {
+        const result = await axios.put(url, dataHolder, {
 
             headers: {
                 'Authorization': `Bearer ${Util.token}`
@@ -582,7 +584,7 @@ export async function getProductPages() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Product/pages`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -610,7 +612,7 @@ export async function getProductAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Product/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -640,7 +642,7 @@ export async function getOrderPages() {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order/pages`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -668,7 +670,7 @@ export async function getOrderAtPage(pageNumber: number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order/all/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }
@@ -691,11 +693,11 @@ export async function getOrderAtPage(pageNumber: number) {
 
 }
 
-export async function getOrderStatusDefination(pageNumber: number) {
+export async function getOrderStatusDefination(currentPage:number) {
     const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Order/orderStatusDeffination`;
     console.log(`funtion is Called ${url}`)
     try {
-        var result = await axios.get(url, {
+        const result = await axios.get(url, {
             headers: {
                 'Authorization': `Bearer ${Util.token}`
             }

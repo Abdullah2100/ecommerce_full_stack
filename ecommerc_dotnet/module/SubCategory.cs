@@ -8,16 +8,16 @@ public class SubCategory
     public string name { get; set; }
 
     [Column(TypeName = "Timestamp")]
-    public DateTime created_at { get; set; } = DateTime.Now;
+    public DateTime createdAt { get; set; } = DateTime.Now;
 
      
     [Column(TypeName = "Timestamp")]
-    public DateTime? updated_at { get; set; } = null;
+    public DateTime? updatedAt { get; set; } = null;
     
-    public Guid store_id { get; set; }
+    public Guid storeId { get; set; }
     public Store? Store { get; set; }
     
-    public Guid categori_id { get; set; }
+    public Guid categoriId { get; set; }
     public Category? category { get; set; } 
     
     public ICollection<Product>? products { get; set; }

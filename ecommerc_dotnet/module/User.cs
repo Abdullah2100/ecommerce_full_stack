@@ -5,7 +5,7 @@ namespace ecommerc_dotnet.module;
 
 public class User
 {
-    [Key] public Guid ID { get; set; }
+    [Key] public Guid id { get; set; }
     public string name { get; set; }
     public string phone { get; set; }
     public string  email{ get; set; }
@@ -18,17 +18,17 @@ public class User
 
     
     [Column(TypeName = "Timestamp")]
-     public DateTime created_at { get; set; } = DateTime.Now;
+     public DateTime createdAt { get; set; } = DateTime.Now;
 
      
     [Column(TypeName = "Timestamp")]
-     public DateTime? updated_at { get; set; } = null;
+     public DateTime? updatedAt { get; set; } = null;
     
     public string? thumbnail { get; set; }
     public ICollection<Address>? addresses { get; set; }
     public ICollection<Category>? categories { get; set; }
     public ICollection<Order>? orders { get; set; }
 
-    public Store? Store { get; set; } = null;
+    public Store? store { get; set; } = null;
     public Delivery? delivery { get; set; } = null;
 }

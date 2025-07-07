@@ -1,13 +1,10 @@
-import InputWithTitle from "@/components/ui/inputWithTitle";
 import { Label } from "@/components/ui/label";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { createCategory, createVarient, deleteCategory, deleteVarient, getCategory, getVarient, updateCategory, updateVarient } from "../controller/data";
 import Image from "next/image";
-import { toast, ToastContainer } from "react-toastify";
-import { iVarient } from "../model/iVarient";
+import { createCategory, deleteCategory, getCategory, updateCategory } from "../controller/data";
+import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
-import { EditeIcon } from "../../../public/editeIcon";
 import { DeleteIcon } from "../../../public/delete";
 import iCategoryDto from "../dto/response/iCategoryDto";
 import edite from '../../../public/edite.svg'
@@ -19,17 +16,13 @@ const CategoryPage = () => {
         image: undefined
     });
     const [fileUrlHolder, setFileUrlHolder] = useState('')
-
-
     const inputRef = useRef<HTMLInputElement>(null);
-
-    const [currnetPage, setCurrentPage] = useState(1);
+    const [currentPage] = useState(1);
 
 
     const { data, refetch } = useQuery({
-        queryKey: ['categoies'],
-        queryFn: () => getCategory(currnetPage)
-
+        queryKey: ['categories'],
+        queryFn: () => getCategory(currentPage)
     })
 
     const deleteCategoryFunc = useMutation(
@@ -38,9 +31,9 @@ const CategoryPage = () => {
             onError: (e) => {
                 toast.error(e.message)
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 refetch()
-                toast.success("تم  الحذف بنجاح")
+                toast.success("تم الحذف بنجاح")
             }
         }
     )
@@ -50,25 +43,26 @@ const CategoryPage = () => {
             onError: (e) => {
                 toast.error(e.message)
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 refetch()
-                toast.success("تم  الاضافة بنجاح")
+                toast.success("تمت الإضافة بنجاح")
                 setCategory({ name: '', image: undefined })
+                setFileUrlHolder('')
             }
         }
     )
 
     const updateCategoryFun = useMutation(
         {
-            mutationFn: (data: iVarient) => updateCategory(data),
+            mutationFn: (data: iCategoryDto) => updateCategory(data),
             onError: (e) => {
                 toast.error(e.message)
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 refetch()
-                toast.success("تم  التعديل بنجاح")
+                toast.success("تم التعديل بنجاح")
                 setCategory({ name: '', image: undefined })
-
+                setFileUrlHolder('')
             }
         }
     )
@@ -91,46 +85,56 @@ const CategoryPage = () => {
 
             <div className="h-10" />
             <div className="relative h-40 w-40">
-                <div
-                    className="h-40 w-40 rounded-4xl border-2 flex justify-center items-center"
-                >
-                    {
-                       category.image==undefined&& fileUrlHolder.length > 0 ? <Image
-                            className="h-30 w-30  rounded-full"
-                            src={fileUrlHolder}
-                            alt="userimage"
-                            fill={true}
-                        />
-                            :
-                            category.image != undefined && <img
-                                className="h-30 w-30  rounded-full"
-                                src={URL.createObjectURL(category.image)}
-                                alt="userimage"
+                <div className="h-40 w-40 rounded-4xl border-2 flex justify-center items-center">
+                    {category.image === undefined && fileUrlHolder.length > 0 ? (
+                        <div className="relative w-full h-full">
+                            <Image
+                                src={fileUrlHolder}
+                                alt="Category preview"
+                                fill
+                                className="rounded-full object-cover"
                             />
-                    }
+                        </div>
+                    ) : category.image !== undefined ? (
+                        <div className="relative w-full h-full">
+                            <Image
+                                src={URL.createObjectURL(category.image)}
+                                alt="Category preview"
+                                fill
+                                className="rounded-full object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <span className="text-gray-400">No image</span>
+                    )}
                 </div>
-                <Image
-                    onClick={() => {
-                        inputRef.current?.click();
-                    }}
-                    className="h-10 w-10 absolute bottom-0 right-0 bg-white cursor-pointer"
-                    src={edite}
-                    alt="userimage"
-                    fill={false}
-                />
+                <button
+                    onClick={() => inputRef.current?.click()}
+                    className="h-10 w-10 absolute bottom-0 right-0 bg-white cursor-pointer rounded-full flex items-center justify-center border"
+                >
+                    <div className="relative w-5 h-5">
+                        <Image 
+                            src={edite} 
+                            alt="Edit" 
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                </button>
             </div>
 
 
 
-            <div className="flex flex-col w-40">
-                <InputWithTitle
+            <div className="flex flex-col w-40 mt-4">
+                <Label className="mb-2">Name</Label>
+                <input
+                    type="text"
                     maxLength={40}
-                    title="Name"
                     name={category.name}
-                    placeHolder="Enter Your Category"
-                    onchange={
-                        (value: string) => { setCategory((data) => ({ ...data, name: value })) }
-                    }
+                    placeholder="Enter Your Category"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setCategory((data) => ({ ...data, name: e.target.value }));
+                    }}
                 />
                 <div className="h-2" />
 
@@ -183,11 +187,14 @@ const CategoryPage = () => {
                                             <td className="py-4 px-10">
                                                 <div>
 
-                                                    <img
-                                                        className="h-12 w-12 rounded-full"
-                                                        src={value.image_path}
-                                                        alt="thumbnail"
-                                                    />
+                                                    <div className="relative h-12 w-12">
+                                                        <Image
+                                                            src={value.image_path}
+                                                            alt="thumbnail"
+                                                            fill
+                                                            className="rounded-full object-cover"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </td>
 
@@ -200,12 +207,17 @@ const CategoryPage = () => {
                                                         onClick={() => {
                                                             setFileUrlHolder(value.image_path)
                                                             setCategory({ id: value.id, name: value.name })
-                                                        }
-                                                        }
-                                                        className="bg-[#f5fafb] border-1 border-[#107980] rounded-sm">
-                                                        <EditeIcon
-                                                            className="h-6 w-6 fill-[#107980] cursor-pointer mt-0 "
-                                                        />
+                                                        }}
+                                                        className="bg-[#f5fafb] border border-[#107980] rounded-sm p-1 cursor-pointer"
+                                                    >
+                                                        <div className="relative h-6 w-6">
+                                                            <Image 
+                                                                src={edite} 
+                                                                alt="Edit" 
+                                                                fill
+                                                                className="object-contain"
+                                                            />
+                                                        </div>
                                                     </div>
                                                     <div className="w-2" />
                                                     <div
@@ -227,7 +239,7 @@ const CategoryPage = () => {
                     </div>
                 </div>
             </div>}
-            <ToastContainer />
+
 
         </div>
     );

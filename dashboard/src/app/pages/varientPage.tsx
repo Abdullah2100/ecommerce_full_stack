@@ -1,3 +1,4 @@
+"use client"
 import InputWithTitle from "@/components/ui/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";

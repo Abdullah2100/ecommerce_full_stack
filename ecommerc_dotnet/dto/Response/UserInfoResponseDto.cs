@@ -16,5 +16,5 @@ public class UserInfoResponseDto
      public bool isActive { get; set; } = true;
      public string thumbnail { get; set; }
      public List<AddressResponseDto>? address { get; set; }
-     public Guid? store_id { get; set; }
+     public Guid? storeId { get; set; }
 }

@@ -22,12 +22,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.withContext
 
 
 class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : ViewModel() {
-    private val _isLoadin = MutableStateFlow<Boolean>(false)
-    val isLoadin = _isLoadin.asStateFlow()
+//    private val _errorMessage = MutableStateFlow<String?>(null)
+//    val errorMessage = _errorMessage.asStateFlow()
 
 
     private val _cuurentScreen = MutableStateFlow<Int?>(null);
@@ -63,7 +63,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         username: String,
         password: String,
     ): String? {
-        _isLoadin.emit(true);
+
         val token = FirebaseMessaging.getInstance().token.await() ?: ""
 
         val result = authRepository.login(

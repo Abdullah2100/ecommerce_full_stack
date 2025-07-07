@@ -6,7 +6,7 @@ public class SubCategoryResponseDto
 {
     public Guid id { get; set; }
     public string name { get; set; }
-    public Guid category_id { get; set; } 
-    public Guid store_id { get; set; } 
+    public Guid categoryId { get; set; } 
+    public Guid storeId { get; set; } 
     
 }

@@ -9,7 +9,7 @@ data class OrderProductResponseDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val store_id: UUID,
+    val storeId: UUID,
     val name: String,
     val thmbnail: String
 )

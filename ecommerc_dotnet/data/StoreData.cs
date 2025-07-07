@@ -25,22 +25,22 @@ public class StoreData
     {
         try
         {
-            return await _dbContext.Store
+            return await _dbContext.Stores
                 .AsNoTracking()
-                .Where(st => st.user_id == userId)
+                .Where(st => st.userId == userId)
                 .Select(st => new StoreResponseDto
                 {
                     id = st.id,
                     name = st.name,
-                    wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
-                    small_image = _config.getKey("url_file") + st.small_image,
-                    created_at = st.created_at,
-                    user_id = st.user_id,
+                    wallpaperImage = _config.getKey("url_file") + st.wallpaperImage,
+                    smallImage = _config.getKey("url_file") + st.smallImage,
+                    createdAt = st.createdAt,
+                    userId = st.userId,
                     isBlocked = st.isBlock,
-                    longitude = _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
-                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude,
-                    latitude =_dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
-                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude, 
+                    longitude = _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude,
+                    latitude =_dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude, 
                 })
                 .FirstOrDefaultAsync();
         }
@@ -55,22 +55,22 @@ public class StoreData
     {
         try
         {
-            return await _dbContext.Store
+            return await _dbContext.Stores
                 .AsNoTracking()
                 .Where(st => st.id == id)
-                .OrderByDescending(st => st.created_at)
+                .OrderByDescending(st => st.createdAt)
                 .Select(st => new StoreResponseDto
                 {
                     id = st.id,
                     name = st.name,
-                    wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
-                    small_image = _config.getKey("url_file") + st.small_image,
-                    created_at = st.created_at,
-                    user_id = st.user_id,
-                    longitude = _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
-                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude,
-                    latitude =_dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
-                        _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude, 
+                    wallpaperImage = _config.getKey("url_file") + st.wallpaperImage,
+                    smallImage = _config.getKey("url_file") + st.smallImage,
+                    createdAt = st.createdAt,
+                    userId = st.userId,
+                    longitude = _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude,
+                    latitude =_dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
+                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude, 
                 })
                 .FirstOrDefaultAsync();
         }
@@ -92,8 +92,8 @@ public class StoreData
         {
             return await _dbContext.Address
                 .AsNoTracking()
-                .Where(ad => ad.owner_id == id)
-                .OrderByDescending(st => st.created_at)
+                .Where(ad => ad.ownerId == id)
+                .OrderByDescending(st => st.createdAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(ad => new AddressResponseDto
@@ -121,21 +121,21 @@ public class StoreData
             {
                 return       (from st in dbContext.Store
                         join ad in dbContext.Address on st.id equals ad.id
-                        where st.user_id == id
+                        where st.userId == id
                         select new StoreResponseDto
                         {
                             id = st.id,
                             name = st.name,
-                            wallpaper_image = config.getKey("url_file") +st.wallpaper_image,
-                            small_image = config.getKey("url_file") + st.small_image,
-                            created_at = st.created_at,
+                            wallpaperImage = config.getKey("url_file") +st.wallpaperImage,
+                            smallImage = config.getKey("url_file") + st.smallImage,
+                            createdAt = st.createdAt,
                             latitude = ad.latitude,
                             longitide = ad.longitude,
-                            user = UserData.getUser(st.user_id,dbContext,config)
+                            user = UserData.getUser(st.userId,dbContext,config)
                         }
                     )
                     .AsNoTracking()
-                    .OrderByDescending(st=>st.created_at)
+                    .OrderByDescending(st=>st.createdAt)
                     .FirstOrDefault();
             }
             catch (Exception ex)
@@ -151,26 +151,26 @@ public class StoreData
         try
         {
             return
-                await _dbContext.Store
+                await _dbContext.Stores
                     .Include(st=>st.user)
                     .AsNoTracking()
-                    .OrderByDescending(st => st.created_at)
+                    .OrderByDescending(st => st.createdAt)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .Select(st => new StoreResponseDto
                     {
                         id = st.id,
                         name = st.name,
-                        wallpaper_image = _config.getKey("url_file") + st.wallpaper_image,
-                        small_image = _config.getKey("url_file") + st.small_image,
-                        created_at = st.created_at,
-                        user_id = st.user_id,
+                        wallpaperImage = _config.getKey("url_file") + st.wallpaperImage,
+                        smallImage = _config.getKey("url_file") + st.smallImage,
+                        createdAt = st.createdAt,
+                        userId = st.userId,
                         isBlocked = st.isBlock,
                         userName = st.user.name,
-                        longitude = _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
-                            _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude,
-                        latitude =_dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)==null?null:
-                            _dbContext.Address.FirstOrDefault(ad=>ad.owner_id==st.id)!.longitude, 
+                        longitude = _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
+                            _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude,
+                        latitude =_dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
+                            _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude, 
                     })
                     .ToListAsync();
         }
@@ -185,7 +185,7 @@ public class StoreData
     {
         try
         {
-            int storesSize = await _dbContext.Store.CountAsync();
+            int storesSize = await _dbContext.Stores.CountAsync();
             if (storesSize == 0) return 0;
             return (int)Math.Ceiling((double)storesSize / 25);
         }
@@ -200,7 +200,7 @@ public class StoreData
     {
         try
         {
-            return await _dbContext.Store.AsNoTracking()
+            return await _dbContext.Stores.AsNoTracking()
                 .FirstOrDefaultAsync(st => st.name == name) != null;
         }
         catch (Exception ex)
@@ -214,7 +214,7 @@ public class StoreData
     {
         try
         {
-            return await _dbContext.Store.AsNoTracking()
+            return await _dbContext.Stores.AsNoTracking()
                 .FirstOrDefaultAsync(st => st.id == storeId) != null;
         }
         catch (Exception ex)
@@ -224,14 +224,14 @@ public class StoreData
         }
     }
     
-    public async Task<bool> isExist(Guid storeId,Guid subCategory_id)
+    public async Task<bool> isExist(Guid storeId,Guid subcategoryId)
     {
         try
         {
-            return await _dbContext.Store
+            return await _dbContext.Stores
                 .Include(st=>st.SubCategories)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(st => st.id == storeId&& st.SubCategories.FirstOrDefault(sbu=>sbu.id==subCategory_id)!=null) != null;
+                .FirstOrDefaultAsync(st => st.id == storeId&& st.SubCategories.FirstOrDefault(sbu=>sbu.id==subcategoryId)!=null) != null;
         }
         catch (Exception ex)
         {
@@ -244,9 +244,9 @@ public class StoreData
 
     public async Task<StoreResponseDto?> createStore(
         string name,
-        string wallpaper_image,
-        string small_image,
-        Guid user_id,
+        string wallpaperImage,
+        string smallImage,
+        Guid userId,
         decimal longitude,
         decimal latitude
     )
@@ -254,16 +254,16 @@ public class StoreData
         try
         {
             Guid storeId = clsUtil.generateGuid();
-            await _dbContext.Store.AddAsync(new Store
+            await _dbContext.Stores.AddAsync(new Store
             {
                 id = storeId,
                 name = name,
-                wallpaper_image = wallpaper_image,
-                small_image = small_image,
+                wallpaperImage = wallpaperImage,
+                smallImage = smallImage,
                 isBlock = true,
-                user_id = user_id,
-                created_at = DateTime.Now,
-                updated_at = null,
+                userId = userId,
+                createdAt = DateTime.Now,
+                updatedAt = null,
             });
 
             await _dbContext.Address.AddAsync(new Address
@@ -273,13 +273,13 @@ public class StoreData
                 latitude = latitude,
                 longitude = longitude,
                 title = name,
-                created_at = DateTime.Now,
-                updated_at = null,
-                owner_id = storeId
+                createdAt = DateTime.Now,
+                updatedAt = null,
+                ownerId = storeId
             });
 
             await _dbContext.SaveChangesAsync();
-            return await getStoreByUser(user_id);
+            return await getStoreByUser(userId);
         }
         catch (Exception ex)
         {
@@ -293,7 +293,7 @@ public class StoreData
     {
         try
         {
-            Store? store = await _dbContext.Store.FindAsync( storeId);
+            Store? store = await _dbContext.Stores.FindAsync( storeId);
             if (store == null) return false;
 
             store.isBlock = !store.isBlock;
@@ -311,24 +311,24 @@ public class StoreData
 
     public async Task<StoreResponseDto?> updateStore(
         string? name,
-        string? wallpaper_image,
-        string? small_image,
-        Guid user_id,
+        string? wallpaperImage,
+        string? smallImage,
+        Guid userId,
         decimal? longitude,
         decimal? latitude
     )
     {
         try
         {
-            Store? store = await _dbContext.Store.FirstOrDefaultAsync(st => st.user_id == user_id);
+            Store? store = await _dbContext.Stores.FirstOrDefaultAsync(st => st.userId == userId);
 
-            store.small_image = small_image ?? store.small_image;
-            store.wallpaper_image = wallpaper_image ?? store.wallpaper_image;
+            store.smallImage = smallImage ?? store.smallImage;
+            store.wallpaperImage = wallpaperImage ?? store.wallpaperImage;
             store.name = name ?? store.name;
 
             if (longitude != null && latitude != null)
             {
-                IQueryable<Address>? address = _dbContext.Address.Where(ad => ad.owner_id == store.id);
+                IQueryable<Address>? address = _dbContext.Address.Where(ad => ad.ownerId == store.id);
                 _dbContext.Address.RemoveRange(address);
                 _dbContext.Address.Add(new Address
                 {
@@ -336,13 +336,13 @@ public class StoreData
                     isCurrent = true,
                     latitude = (decimal)latitude,
                     longitude = (decimal)longitude,
-                    owner_id = store.id,
+                    ownerId = store.id,
                     title = store.name
                 });
             }
 
             await _dbContext.SaveChangesAsync();
-            return await getStoreByUser(user_id);
+            return await getStoreByUser(userId);
         }
         catch (Exception ex)
         {

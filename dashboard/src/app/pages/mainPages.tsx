@@ -1,4 +1,5 @@
-import { Label } from "@/components/ui/label"
+'use client';
+
 import MyInfoPage from "./myinfoPage"
 import VarientPage from "./varientPage"
 import UsersPage from "./usersPage"

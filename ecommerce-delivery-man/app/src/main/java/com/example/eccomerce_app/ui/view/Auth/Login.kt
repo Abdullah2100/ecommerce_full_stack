@@ -1,10 +1,6 @@
 package com.example.e_commerc_delivery_man.ui.view.Auth
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -20,8 +16,8 @@ import androidx.navigation.NavHostController
 import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -31,7 +27,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.CustomAuthBotton
@@ -45,7 +40,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     nav: NavHostController,
-    authKoin: AuthViewModel
+    authViewModel: AuthViewModel
 ) {
     val fontScall = LocalDensity.current.fontScale
 
@@ -57,7 +52,7 @@ fun LoginScreen(
 
     val isEmailError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
-    val erroMessage = remember { mutableStateOf("") }
+    val erroMessage = remember { mutableStateOf<String>("") }
 
     val isSendingData = remember { mutableStateOf(false) }
     val coroutine = rememberCoroutineScope()
@@ -86,6 +81,8 @@ fun LoginScreen(
     }
 
 
+
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -97,86 +94,89 @@ fun LoginScreen(
 
 
 
-              Column(
-                modifier = Modifier
-                    .fillMaxHeight(0.9f)
-                    .fillMaxWidth()
-                    .padding(top = 50.dp)
-                    .padding(horizontal = 10.dp),
-                horizontalAlignment = Alignment.Start,
-            ) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxHeight(0.9f)
+                .fillMaxWidth()
+                .padding(top = 50.dp)
+                .padding(horizontal = 10.dp),
+            horizontalAlignment = Alignment.Start,
+        ) {
 
-                Text(
-                    "Login",
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Bold,
-                    color = CustomColor.neutralColor950,
-                    fontSize = (44 / fontScall).sp
-                )
+            Text(
+                "Login",
+                fontFamily = General.satoshiFamily,
+                fontWeight = FontWeight.Bold,
+                color = CustomColor.neutralColor950,
+                fontSize = (44 / fontScall).sp
+            )
 
-                Sizer(heigh = 30)
-                TextInputWithTitle(
-                    userNameOrEmail,
-                    title = "Email",
-                    placHolder = "Enter Your email",
-                    isHasError = isEmailError.value,
-                    erroMessage = erroMessage.value,
-                    focusRequester = focusRequester
-                )
-                TextSecureInputWithTitle(
-                    password,
-                    "Password",
-                    isPasswordError.value,
-                    erroMessage.value
-                )
+            Sizer(heigh = 30)
+            TextInputWithTitle(
+                userNameOrEmail,
+                title = "Email",
+                placHolder = "Enter Your email",
+                isHasError = isEmailError.value,
+                erroMessage = erroMessage.value,
+                focusRequester = focusRequester
+            )
+            TextSecureInputWithTitle(
+                password,
+                "Password",
+                isPasswordError.value,
+                erroMessage.value
+            )
 
-                Sizer(heigh = 30)
-
-
-                CustomAuthBotton(
-                    isLoading = isSendingData.value,
-                    operation = {
-                        keyboardController?.hide()
-
-                        coroutine.launch {
-                            if(userNameOrEmail.value.text.isBlank()||password.value.text.isBlank())
-                            {
-                                snackbarHostState.showSnackbar("User name Or Password is Blanck")
-                            }
-                            else{
-                                isSendingData.value = true
-                                val result = async {
-                                    authKoin.loginUser(
-                                        userNameOrEmail.value.text, password = password.value.text,
-                                    )
+            Sizer(heigh = 30)
 
 
-                                }.await()
+            CustomAuthBotton(
+                isLoading = isSendingData.value,
+                operation = {
+                    keyboardController?.hide()
 
-                                isSendingData.value = false
+                    coroutine.launch {
+                        if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
+                            snackbarHostState.showSnackbar("User name Or Password is Blanck")
+                        } else {
+                            isSendingData.value = true
+                            val result = async {
+                                authViewModel.loginUser(
+                                    userNameOrEmail.value.text, password = password.value.text,
+                                )
 
-                                if (!result.isNullOrEmpty()) {
-                                    snackbarHostState.showSnackbar(result)
-                                } else {
 
+                            }.await()
+
+                            isSendingData.value = false
+
+                            if (!result.isNullOrEmpty()) {
+                                snackbarHostState.showSnackbar(result)
+                            } else {
+                                nav.navigate(Screens.HomeGraph) {
+                                    popUpTo(nav.graph.id) {
+                                        inclusive = true
+                                    }
                                 }
-
                             }
 
                         }
 
-                    },
-                    buttonTitle = "Login",
-                    validationFun = {
-                        validateLoginInput(
-                            username = userNameOrEmail.value.text,
-                            password = password.value.text
-                        )
-
                     }
-                )
 
-            }
+                },
+                buttonTitle = "Login",
+                validationFun = {
+                    validateLoginInput(
+                        username = userNameOrEmail.value.text,
+                        password = password.value.text
+                    )
+
+                }
+            )
+
+        }
 
 
     }

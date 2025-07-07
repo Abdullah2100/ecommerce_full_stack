@@ -65,7 +65,9 @@ public class StoreController : ControllerBase
         if (user == null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.ID != store.user_id && user.role == 1)
+        if (user.isDeleted
+        //|| (user.id != store.userId && store.userId != null && user.role == 1)
+        )
             return BadRequest("ليس لديك الصلاحية لانشاء متجر جديد");
 
         bool isExist = await _storeData.isExist(store.name);
@@ -73,19 +75,19 @@ public class StoreController : ControllerBase
         if (isExist)
             return Conflict("اسم التمتجر تم استخدامه يمكنك استخدام اسم اخر");
 
-        string? wallperper = null, small_image = null;
+        string? wallperper = null, smallImage = null;
 
-        small_image = await clsUtil.saveFile(store.small_image, clsUtil.enImageType.STORE, _host);
-        wallperper = await clsUtil.saveFile(store.wallpaper_image, clsUtil.enImageType.STORE, _host);
+        smallImage = await clsUtil.saveFile(store.smallImage, clsUtil.enImageType.STORE, _host);
+        wallperper = await clsUtil.saveFile(store.wallpaperImage, clsUtil.enImageType.STORE, _host);
 
-        if (small_image == null || wallperper == null)
+        if (smallImage == null || wallperper == null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصور");
 
         StoreResponseDto? result = await _storeData.createStore(
             name: store.name,
-            wallpaper_image: wallperper,
-            small_image: small_image,
-            user_id: idHolder.Value != store?.user_id && store.user_id != null ? (Guid)store.user_id : user.ID,
+            wallpaperImage: wallperper,
+            smallImage: smallImage,
+            userId: idHolder.Value != store?.userId && store.userId != null ? (Guid)store.userId : user.id,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -126,34 +128,34 @@ public class StoreController : ControllerBase
             return NotFound("المستخدم غير موجود");
 
 
-        if (user.Store == null)
+        if (user.store == null)
             return NotFound("المتجر غير موجود");
 
-        if (user.Store.name != store.name && await _storeData.isExist(store.name))
+        if (user.store.name != store.name && await _storeData.isExist(store.name))
         {
             return Conflict("اسم المتجر تم استخدامه اختر اسما اخر");
         }
 
-        if (store.wallpaper_image != null)
-            clsUtil.deleteFile(user.Store.wallpaper_image, _host);
+        if (store.wallpaperImage != null)
+            clsUtil.deleteFile(user.store.wallpaperImage, _host);
 
-        if (store.small_image != null)
-            clsUtil.deleteFile(user.Store.small_image, _host);
+        if (store.smallImage != null)
+            clsUtil.deleteFile(user.store.smallImage, _host);
 
 
-        string? wallperper = null, small_image = null;
+        string? wallperper = null, smallImage = null;
 
-        if (store.small_image != null)
-            small_image = await clsUtil.saveFile(store.small_image, clsUtil.enImageType.STORE, _host);
-        if (store.wallpaper_image != null)
-            wallperper = await clsUtil.saveFile(store.wallpaper_image, clsUtil.enImageType.STORE, _host);
+        if (store.smallImage != null)
+            smallImage = await clsUtil.saveFile(store.smallImage, clsUtil.enImageType.STORE, _host);
+        if (store.wallpaperImage != null)
+            wallperper = await clsUtil.saveFile(store.wallpaperImage, clsUtil.enImageType.STORE, _host);
 
 
         StoreResponseDto? result = await _storeData.updateStore(
             name: store.name,
-            wallpaper_image: wallperper,
-            small_image: small_image,
-            user_id: user.ID,
+            wallpaperImage: wallperper,
+            smallImage: smallImage,
+            userId: user.id,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -248,12 +250,12 @@ public class StoreController : ControllerBase
     }
 
 
-    [HttpGet("{store_Id:guid}")]
+    [HttpGet("{storeId:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetStore(Guid store_Id)
+    public async Task<IActionResult> GetStore(Guid storeId)
     {
-        StoreResponseDto? result = await _storeData.getStoreById(store_Id);
+        StoreResponseDto? result = await _storeData.getStoreById(storeId);
 
         if (result == null)
             return NotFound("المتجر غير موجود");
@@ -304,12 +306,12 @@ public class StoreController : ControllerBase
     }
 
 
-    [HttpGet("address/{store_Id:guid}/{page:int}")]
+    [HttpGet("address/{storeId:guid}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetStoreAddress(Guid store_Id, int page)
+    public async Task<IActionResult> GetStoreAddress(Guid storeId, int page)
     {
-        List<AddressResponseDto>? result = await _storeData.getStoreAddress(store_Id, page);
+        List<AddressResponseDto>? result = await _storeData.getStoreAddress(storeId, page);
 
         if (result.Count < 1)
             return NotFound("المتجر غير موجود");

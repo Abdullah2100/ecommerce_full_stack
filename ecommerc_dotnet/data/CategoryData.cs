@@ -26,17 +26,17 @@ public class CategoryData
     {
         try
         {
-            IQueryable<CategoryResponseDto> result = _dbContext.Category
+            IQueryable<CategoryResponseDto> result = _dbContext.Categories
                 .AsNoTracking()
                 .Where(c => c.isBlocked == false)
-                .OrderBy(c => c.created_at)
+                .OrderBy(c => c.createdAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(u => new CategoryResponseDto
                 {
                     id = u.id,
                     name = u.name,
-                    image_path = services.getKey("url_file") + u.image_path,
+                    image = services.getKey("url_file") + u.image,
                 });
 
             return await result.ToListAsync();
@@ -56,7 +56,7 @@ public class CategoryData
     {
         try
         {
-            return await _dbContext.Category
+            return await _dbContext.Categories
                 .FindAsync(id);
         }
         catch (Exception ex)
@@ -79,11 +79,11 @@ public class CategoryData
             {
                 id = clsUtil.generateGuid(), 
                 name = name, 
-                image_path = filePath,
+                image = filePath,
                 isBlocked = false,
-                owner_id = userId
+                ownerId = userId
             };
-            await _dbContext.Category.AddAsync(categoryObj);
+            await _dbContext.Categories.AddAsync(categoryObj);
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -104,9 +104,9 @@ public class CategoryData
     {
         try
         {
-            Category? category = await _dbContext.Category.FindAsync(id);
+            Category? category = await _dbContext.Categories.FindAsync(id);
             category!.name = name ?? category.name;
-            category.image_path = filePath ?? category.image_path;
+            category.image = filePath ?? category.image;
 
             await _dbContext.SaveChangesAsync();
             return true;
@@ -126,7 +126,7 @@ public class CategoryData
     {
         try
         {
-            Category? category = await _dbContext.Category.FindAsync(id);
+            Category? category = await _dbContext.Categories.FindAsync(id);
             if (category == null) return null;
              _dbContext.Remove(category);
             await _dbContext.SaveChangesAsync();
@@ -147,7 +147,7 @@ public class CategoryData
     {
         try
         {
-            return await _dbContext.Category.FirstOrDefaultAsync(c => c.name == name) != null;
+            return await _dbContext.Categories.FirstOrDefaultAsync(c => c.name == name) != null;
         }
         catch (Exception ex)
         {
@@ -163,7 +163,7 @@ public class CategoryData
         {
             try
             {
-                return await _dbContext.Category.FirstOrDefaultAsync(c => c.id == id) != null;
+                return await _dbContext.Categories.FirstOrDefaultAsync(c => c.id == id) != null;
             }
             catch (Exception ex)
             {

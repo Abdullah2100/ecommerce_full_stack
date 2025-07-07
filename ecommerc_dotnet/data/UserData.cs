@@ -41,20 +41,20 @@ public class UserData
                 .Where(u => (u.email == userName) && u.password == password)
                 .Select(u => new UserInfoResponseDto
                 {
-                    Id = u.ID,
+                    Id = u.id,
                     name = u.name,
                     phone = u.phone,
                     email = u.email,
                     thumbnail = _configuration.getKey("url_file") + u.thumbnail,
                     address = null,
-                    store_id = u.Store.id
+                    storeId = u.store.id
                 })
                 .FirstOrDefaultAsync();
 
             List<AddressResponseDto>? address = await _dbContext.Address
                 .AsNoTracking()
-                .Where(ad => ad.owner_id == result.Id)
-                .OrderByDescending(ad => ad.created_at)
+                .Where(ad => ad.ownerId == result.Id)
+                .OrderByDescending(ad => ad.createdAt)
                 .Select(ad => new AddressResponseDto()
                 {
                     id = ad.id,
@@ -81,28 +81,28 @@ public class UserData
         {
             UserInfoResponseDto? result = await _dbContext.Users
                 .AsNoTracking()
-                .Include(u => u.Store)
-                .Where(us => us.ID == userID)
+                .Include(u => u.store)
+                .Where(us => us.id == userID)
                 .Select(us => new UserInfoResponseDto
                 {
                     name = us.name,
                     phone = us.phone,
                     email = us.email,
-                    Id = us.ID,
+                    Id = us.id,
                     thumbnail = us.thumbnail == null
                         ? ""
                         : _configuration.getKey("url_file") + us.thumbnail,
 
                     address = null,
-                    store_id = us.Store == null ? null : us!.Store.id
+                    storeId = us.store == null ? null : us!.store.id
                 }).FirstOrDefaultAsync();
 
             if (result != null)
             {
-                //result.address =await _dbContext.Address.Where(ad=>ad.owner_id==userID).ToListAsync()
+                //result.address =await _dbContext.Address.Where(ad=>ad.ownerId==userID).ToListAsync()
                 result.address = await _dbContext.Address
                     .AsNoTracking()
-                    .Where(ad => ad.owner_id == userID)
+                    .Where(ad => ad.ownerId == userID)
                     .Select(ad => new AddressResponseDto
                     {
                         id = ad.id,
@@ -129,20 +129,20 @@ public class UserData
         {
             UserInfoResponseDto? result = await _dbContext.Users
                 .AsNoTracking()
-                .Include(u => u.Store)
+                .Include(u => u.store)
                 .Where(us => us.email==email)
                 .Select(us => new UserInfoResponseDto
                 {
                     name = us.name,
                     phone = us.phone,
                     email = us.email,
-                    Id = us.ID,
+                    Id = us.id,
                     thumbnail = us.thumbnail == null
                         ? ""
                         : _configuration.getKey("url_file") + us.thumbnail,
 
                     address = null,
-                    store_id = us.Store == null ? null : us!.Store.id
+                    storeId = us.store == null ? null : us!.store.id
                 }).FirstOrDefaultAsync();
 
                 return result;
@@ -161,7 +161,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .Include(u => u.Store)
+                .Include(u => u.store)
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -170,8 +170,8 @@ public class UserData
                     name = us.name,
                     phone = us.phone,
                     email = us.email,
-                    Id = us.ID,
-                    storeName =us.Store!=null? us.Store.name:"",
+                    Id = us.id,
+                    storeName =us.store!=null? us.store.name:"",
                     isAdmin =us.role==0,
                     isActive = us.isDeleted,
                     thumbnail = us.thumbnail == null
@@ -179,7 +179,7 @@ public class UserData
                         : _configuration.getKey("url_file") + us.thumbnail,
 
                     address = null,
-                    store_id = us.Store == null ? null : us!.Store.id
+                    storeId = us.store == null ? null : us!.store.id
                 })
                 .ToListAsync();
         }
@@ -212,8 +212,9 @@ public class UserData
         try
         {
             return await _dbContext.Users
-                .Include(st => st.Store)
-                .FirstOrDefaultAsync(u => u.ID == ID);
+                .Include(st => st.store)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.id == ID);
         }
         catch (Exception e)
         {
@@ -223,14 +224,14 @@ public class UserData
         }
     }
 
-  public async Task<User?> getUserByStoreId(Guid store_id)
+  public async Task<User?> getUserByStoreId(Guid storeId)
     {
         try
         {
             return await _dbContext.Users
-                .Include(st => st.Store)
+                .Include(st => st.store)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Store!=null&&u.Store.id == store_id);
+                .FirstOrDefaultAsync(u => u.store!=null&&u.store.id == storeId);
         }
         catch (Exception e)
         {
@@ -245,7 +246,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.ID == userid && u.isDeleted == false) != null;
+                .FirstOrDefaultAsync(u => u.id == userid && u.isDeleted == false) != null;
         }
         catch (Exception e)
         {
@@ -335,15 +336,15 @@ public class UserData
                 email = email,
                 phone = phone,
                 password = password,
-                created_at = DateTime.Now,
-                ID = clsUtil.generateGuid(),
-                updated_at = null,
+                createdAt = DateTime.Now,
+                id = clsUtil.generateGuid(),
+                updatedAt = null,
                 deviceToken = deviceToken ?? ""
             };
 
             await _dbContext.Users.AddAsync(userData);
             await _dbContext.SaveChangesAsync();
-            return await getUser(userData.ID);
+            return await getUser(userData.id);
         }
         catch (Exception e)
         {
@@ -364,7 +365,7 @@ public class UserData
         try
         {
             User? userData = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.ID == userId);
+                .FirstOrDefaultAsync(u => u.id == userId);
 
             if (userData == null)
                 return null;
@@ -372,12 +373,12 @@ public class UserData
             userData.name = name ?? userData.name;
             userData.phone = phone ?? userData.phone;
             userData.password = password ?? userData.password;
-            userData.updated_at = DateTime.Now;
+            userData.updatedAt = DateTime.Now;
             userData.thumbnail = imagePath ?? userData.thumbnail;
 
 
             await _dbContext.SaveChangesAsync();
-            return await getUser(userID: userData.ID);
+            return await getUser(userID: userData.id);
         }
         catch (Exception e)
         {
@@ -403,7 +404,7 @@ public class UserData
 
 
             await _dbContext.SaveChangesAsync();
-            return await getUser(userID: userData.ID);
+            return await getUser(userID: userData.id);
         }
         catch (Exception e)
         {
@@ -429,7 +430,7 @@ public class UserData
     
     
                 await _dbContext.SaveChangesAsync();
-                return await getUser(userID: userData.ID);
+                return await getUser(userID: userData.id);
             }
             catch (Exception e)
             {

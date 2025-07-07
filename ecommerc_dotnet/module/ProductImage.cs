@@ -5,9 +5,9 @@ namespace ecommerc_dotnet.module;
 public class ProductImage
 {
     [Key]
-    public Guid? ID { get; set; }
+    public Guid? id { get; set; }
     public string name { get; set; }
     public Guid productId { get; set; }
     
-    public Product  Product { get; set; }
+    public Product  product { get; set; }
 }

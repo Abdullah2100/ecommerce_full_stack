@@ -11,11 +11,11 @@ public class Bannel
     public String image { get; set; }
     
     [Column(TypeName = "Timestamp")]
-    public DateTime  end_at{ get; set; }
+    public DateTime  endAt{ get; set; }
     
     [Column(TypeName = "Timestamp")]
-    public DateTime create_at { get; set; }
+    public DateTime createdAt { get; set; }
 
-    public Guid store_id { get; set; }
+    public Guid storeId { get; set; }
     public Store store { get; set; }
 }

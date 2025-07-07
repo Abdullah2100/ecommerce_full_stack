@@ -7,7 +7,7 @@ public class OrderResponseDto
     public decimal latitude { get; set; }
     public decimal totalPrice { get; set; }
     public String name { get; set; }
-    public String user_phone { get; set; }
+    public String userPhone { get; set; }
     public int status { get; set; }
-    public List<OrderItemResponseDto> order_items { get; set; }
+    public List<OrderItemResponseDto> orderItems { get; set; }
 }

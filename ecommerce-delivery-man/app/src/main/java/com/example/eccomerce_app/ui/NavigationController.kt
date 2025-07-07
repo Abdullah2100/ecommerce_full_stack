@@ -2,7 +2,6 @@ package com.example.e_commerc_delivery_man.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
@@ -20,9 +19,9 @@ import com.example.e_commerc_delivery_man.ui.view.account.store.CreateProductScr
 import com.example.e_commerc_delivery_man.ui.view.account.store.ProductDetail
 import com.example.e_commerc_delivery_man.ui.view.account.store.StoreScreen
 import com.example.e_commerc_delivery_man.ui.view.checkout.CheckoutScreen
-import com.example.e_commerc_delivery_man.ui.view.home.CartScreen
+import com.example.e_commerc_delivery_man.ui.view.home.MyOrdersScreen
 import com.example.e_commerc_delivery_man.ui.view.home.HomePage
-import com.example.e_commerc_delivery_man.ui.view.home.OrderScreen
+import com.example.e_commerc_delivery_man.ui.view.home.OrdersScreen
 import com.example.e_commerc_delivery_man.ui.view.home.ProductCategoryScreen
 import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
 import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
@@ -69,7 +68,7 @@ fun NavController(
             ) {
                 LoginScreen(
                     nav = nav,
-                    authKoin = authViewModle
+                    authViewModel = authViewModle
                 )
             }
 
@@ -246,7 +245,7 @@ fun NavController(
 
             }
 
-            composable<Screens.Cart>(
+            composable<Screens.MyOrder>(
 
                 enterTransition = {
                     return@composable slideIntoContainer(
@@ -259,9 +258,7 @@ fun NavController(
                     )
                 }
             ) { navRef ->
-
-
-                CartScreen(
+                MyOrdersScreen(
                     nav = nav,
                     homeViewModel = homeViewModle,
                 )
@@ -330,7 +327,7 @@ fun NavController(
 
             }
 
-            composable<Screens.Order>(
+            composable<Screens.Orders>(
 
                 enterTransition = {
                     return@composable slideIntoContainer(
@@ -343,7 +340,7 @@ fun NavController(
                     )
                 }
             ) {
-                OrderScreen(
+                OrdersScreen(
                     nav = nav,
                     homeViewModel = homeViewModle
                 )

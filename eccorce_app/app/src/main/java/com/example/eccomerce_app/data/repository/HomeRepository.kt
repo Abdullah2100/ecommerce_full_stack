@@ -96,7 +96,7 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.Created) {
+            if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -923,7 +923,7 @@ class HomeRepository(val client: HttpClient) {
                             append("longitude", latitude)
                             append("latitude", longitude)
                             append(
-                                key = "wallpaper_image", // Must match backend expectation
+                                key = "wallpaperImage", // Must match backend expectation
                                 value = wallpaper_image.readBytes(),
                                 headers = Headers.build {
                                     append(
@@ -937,7 +937,7 @@ class HomeRepository(val client: HttpClient) {
                                 }
                             )
                             append(
-                                key = "small_image", // Must match backend expectation
+                                key = "smallImage", // Must match backend expectation
                                 value = small_image.readBytes(),
                                 headers = Headers.build {
                                     append(

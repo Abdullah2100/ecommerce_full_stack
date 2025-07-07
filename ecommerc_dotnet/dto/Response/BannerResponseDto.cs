@@ -6,8 +6,8 @@ public class BannerResponseDto
     
     public String image { get; set; }
     
-    public DateTime  end_at{ get; set; }
-    public DateTime create_at { get; set; }
+    public DateTime  endAt{ get; set; }
+    public DateTime createdAt { get; set; }
 
-    public Guid store_id { get; set; }
+    public Guid storeId { get; set; }
 }

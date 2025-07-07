@@ -1,6 +1,5 @@
 package com.example.e_commercompose.viewModel
 
-import android.R
 import android.location.Location
 import android.util.Log
 import androidx.compose.runtime.MutableState
@@ -10,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.data.repository.HomeRepository
 import com.example.e_commercompose.data.Room.AuthDao
+import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
 import com.example.e_commercompose.dto.ModelToDto.toOrderRequestDto
 import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
 import com.example.e_commercompose.dto.request.AddressRequestDto
@@ -58,7 +58,6 @@ import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -345,8 +344,8 @@ class HomeViewModel(
                     { response ->
                         val orderItemList = mutableListOf<OrderItem>();
 
-                        response.order_items.forEach { value ->
-                            if (value.product.store_id == myInfo.value?.store_id) {
+                        response.orderItems.forEach { value ->
+                            if (value.product.storeId == myInfo.value?.store_id) {
                                 orderItemList.add(value.toOrderItem())
                             }
                         }
@@ -654,8 +653,6 @@ class HomeViewModel(
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 _isLoading.emit(false)
-
-
                 if (myInfo.value?.address.isNullOrEmpty() == false) {
                     var addresses = _myInfo.value?.address?.map { address ->
                         if (address.id == addressId) {
@@ -666,14 +663,11 @@ class HomeViewModel(
                     }
                     var copyMyAddress = _myInfo.value?.copy(address = addresses);
                     _myInfo.emit(copyMyAddress)
+                    dao.savePassingLocation(IsPassSetLocationScreen(0,true))
+
                 }
-
-
-
                 return null
-
             }
-
             is NetworkCallHandler.Error -> {
                 var errorMessage = result.data
                 return errorMessage.toString()
@@ -764,7 +758,7 @@ class HomeViewModel(
                     _myInfo.emit(data.toUser())
 
                     if (_orderItemForMyStore.value == null) {
-                        getMyOrderItemBelongToMyStore(myInfo.value!!.store_id, mutableStateOf(1))
+                        getMyOrderItemBelongToMyStore(myInfo.value!!.store_id!!, mutableStateOf(1))
 
                     }
                 }
@@ -779,7 +773,7 @@ class HomeViewModel(
                                 email = "",
                                 thumbnail = "",
                                 address = emptyList(),
-                                store_id = UUID.randomUUID()
+                                store_id =null
                             )
                         )
                     }
@@ -1077,7 +1071,7 @@ class HomeViewModel(
     }
 
     private fun getStoreBanner(store_id: UUID, pageNumber: Int = 1) {
-        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             var result = homeRepository.getBannerByStoreId(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {

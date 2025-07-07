@@ -68,7 +68,7 @@ public class BannerController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.store_id == null)
+        if (userHolder.storeId == null)
         {
             return NotFound("لا بد من انشاء متجر قبل اضافة اي لوحة اعلانية");
         }
@@ -81,7 +81,7 @@ public class BannerController : ControllerBase
         }
 
 
-        BannerResponseDto? result = await _bannerData.addNewBanner(banner.end_at, imagePath, (Guid)userHolder.store_id!);
+        BannerResponseDto? result = await _bannerData.addNewBanner(banner.endAt, imagePath, (Guid)userHolder.storeId!);
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حقظ الوحة الاعلانية");
@@ -121,12 +121,12 @@ public class BannerController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.store_id == null)
+        if (userHolder.storeId == null)
         {
             return NotFound("ليس لديك اي متجر");
         }
 
-        BannerResponseDto? banner = await _bannerData.getBanner((Guid)userHolder.store_id!, banner_id);
+        BannerResponseDto? banner = await _bannerData.getBanner((Guid)userHolder.storeId!, banner_id);
 
         if ((banner == null))
         {
@@ -146,17 +146,17 @@ public class BannerController : ControllerBase
     }
 
 
-    [HttpGet("{store_Id:guid}/{pageNumber:int}")]
+    [HttpGet("{storeId:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getBanner(
-        Guid store_Id, int pageNumber
+        Guid storeId, int pageNumber
     )
     {
         if(pageNumber<1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        List<BannerResponseDto>? result = await _bannerData.getBanner(store_Id, pageNumber);
+        List<BannerResponseDto>? result = await _bannerData.getBanner(storeId, pageNumber);
 
         if (result == null)
             return NoContent();

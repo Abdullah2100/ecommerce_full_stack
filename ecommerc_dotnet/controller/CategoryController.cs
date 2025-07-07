@@ -90,7 +90,7 @@ public class CategoryController : ControllerBase
         if (imagePath == null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصورة");
 
-        bool? result = await _categoryData.addNewCategory(category.name, imagePath, user.ID);
+        bool? result = await _categoryData.addNewCategory(category.name, imagePath, user.id);
 
         if (result == null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
@@ -151,8 +151,8 @@ public class CategoryController : ControllerBase
 
         if (category?.image != null)
         {
-            if (categoryHolder.image_path != null)
-                clsUtil.deleteFile(categoryHolder.image_path, _host);
+            if (categoryHolder.image != null)
+                clsUtil.deleteFile(categoryHolder.image, _host);
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
         }
 

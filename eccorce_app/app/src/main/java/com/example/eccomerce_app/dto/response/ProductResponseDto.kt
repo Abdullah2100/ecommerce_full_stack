@@ -1,6 +1,5 @@
 package com.example.e_commercompose.dto.response
 
-import androidx.compose.runtime.Composable
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
@@ -13,11 +12,11 @@ data class ProductResponseDto(
     val description:String,
     val thmbnail:String,
     @Serializable(with = UUIDKserialize::class)
-    val subcategory_id: UUID,
+    val subcategoryId: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val store_id: UUID,
+    val storeId: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val category_id: UUID,
+    val categoryId: UUID,
     val price: Double,
     val productVarients:List<List<ProductVarientReponseDto>>?=null,
     val productImages:List<String>

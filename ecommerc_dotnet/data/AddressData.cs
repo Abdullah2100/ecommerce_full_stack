@@ -69,8 +69,8 @@ public class AddressData
         {
              return await   _dbContext.Address
                 .AsNoTracking()
-                .Where(ad => ad.owner_id == userId)
-                .OrderByDescending(ad=>ad.created_at )
+                .Where(ad => ad.ownerId == userId)
+                .OrderByDescending(ad=>ad.createdAt )
                 .Select(ad =>
                     new AddressResponseDto
                     {
@@ -107,8 +107,8 @@ public class AddressData
                 title = title,
                 isCurrent = true,
                 id = clsUtil.generateGuid(),
-                created_at = DateTime.Now,
-                owner_id = userId
+                createdAt = DateTime.Now,
+                ownerId = userId
             };
             
             await _dbContext.Address.AddAsync(addressObj);
@@ -135,8 +135,8 @@ public class AddressData
         {
 
             await _dbContext.Address
-                .Where(ad => ad.owner_id == userId && ad.id != addressId)
-                .ExecuteUpdateAsync(ad => ad.SetProperty(va => va.isCurrent, true));
+                .Where(ad => ad.ownerId == userId && ad.id != addressId)
+                .ExecuteUpdateAsync(ad => ad.SetProperty(va => va.isCurrent, false));
            
             Address? currentAddress =await  _dbContext.Address.FindAsync(addressId);
            
@@ -220,7 +220,7 @@ public class AddressData
 
            return await  _dbContext.Address
                .AsNoTracking()
-               .CountAsync(u => u.owner_id == userId && u.id != userId);
+               .CountAsync(u => u.ownerId == userId && u.id != userId);
         }
         catch (Exception ex)
         {
@@ -237,8 +237,8 @@ public class AddressData
     //     {
     //         var result =  _dbContext.Address
     //             .AsNoTracking()
-    //             .Where(ad => ad.owner_id == id)
-    //             .OrderByDescending(ad=>ad.created_at )
+    //             .Where(ad => ad.ownerId == id)
+    //             .OrderByDescending(ad=>ad.createdAt )
     //             .Select(ad =>
     //                 new AddressResponseDto
     //                 {

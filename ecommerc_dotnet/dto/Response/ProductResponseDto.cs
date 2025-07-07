@@ -10,9 +10,9 @@ public class ProductResponseDto
     [StringNotNullOrEmptyValidation(ErrorMessage= "description must not be empty")]
     public string description { get; set; }
     public string  thmbnail { get; set; }
-    public Guid subcategory_id { get; set; }
-    public Guid category_id { get; set; }
-    public Guid store_id { get; set; }
+    public Guid subcategoryId { get; set; }
+    public Guid categoryId { get; set; }
+    public Guid storeId { get; set; }
     public decimal price { get; set; }
     public List<List<ProductVarientResponseDto>>? productVarients { get; set; }
     public List<string> productImages { get; set; }

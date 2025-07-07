@@ -12,6 +12,6 @@ data class ProductVarientReponseDto(
     val precentage: Double,
 
     @Serializable(with = UUIDKserialize::class)
-    val varient_id: UUID,
+    val varientId: UUID,
 
     )

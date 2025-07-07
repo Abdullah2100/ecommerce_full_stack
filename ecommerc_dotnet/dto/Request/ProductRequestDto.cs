@@ -9,8 +9,8 @@ public class ProductRequestDto
     [StringNotNullOrEmptyValidation(ErrorMessage= "description must not be empty")]
     public string description { get; set; }
     public IFormFile  thmbnail { get; set; }
-    public Guid subcategory_id { get; set; }
-    public Guid store_id { get; set; }
+    public Guid subcategoryId { get; set; }
+    public Guid storeId { get; set; }
     public decimal price { get; set; }
     public List<ProductVarientRequestDto>? productVarients { get; set; }
     public List<IFormFile> images { get; set; }

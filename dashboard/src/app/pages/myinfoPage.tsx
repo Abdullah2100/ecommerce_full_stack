@@ -8,10 +8,10 @@ import { iUserUpdateInfoDto } from "../dto/response/iUserUpdateInfoDto";
 import edite from '../../../public/edite.svg'
 import user from '../../../public/user.svg'
 import { Button } from "@/components/ui/button";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 const MyInfoPage = () => {
-    const { data, isLoading, refetch } = useQuery({
+    const { data, refetch } = useQuery({
         queryKey: ['myinfo'],
         queryFn: () => getMyInfo()
     })
@@ -34,11 +34,15 @@ const MyInfoPage = () => {
             onError: (e) => {
                 toast.error(e.message)
             },
-            onSuccess: (res) => {
-                refetch
-                toast.success("تم التعديل بنجاح")
-                setUserUpdate((data) => ({ ...data, thumbnail: undefined }))
-
+            onSuccess: () => {
+                refetch();
+                toast.success("تم التعديل بنجاح");
+                setUserUpdate(prev => ({
+                    ...prev, 
+                    thumbnail: undefined,
+                    password: '',
+                    newPassword: ''
+                }));
             }
         }
     )
@@ -157,7 +161,7 @@ const MyInfoPage = () => {
             >
                 update info
             </Button>
-            <ToastContainer />
+
         </div>
     )
 }

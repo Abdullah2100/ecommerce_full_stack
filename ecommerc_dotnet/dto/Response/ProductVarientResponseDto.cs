@@ -5,5 +5,5 @@ public class ProductVarientResponseDto
     public Guid id { get; set; }
     public string? name { get; set; }
     public decimal precentage { get; set; }
-    public Guid varient_id { get; set; }
+    public Guid varientId { get; set; }
 }

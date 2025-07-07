@@ -2,6 +2,6 @@ namespace ecommerc_dotnet.dto.Response;
 
 public class OrderVarientResponseDto
 {
-    public string? varient_name { get; set; }
-    public string? product_varient_name { get; set; }
+    public string? varientName { get; set; }
+    public string? productVarientName { get; set; }
 }

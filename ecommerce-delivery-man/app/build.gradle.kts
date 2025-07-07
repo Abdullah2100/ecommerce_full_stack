@@ -148,5 +148,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.compose.runntime)
 
+    //googleMap
+    implementation(libs.google.map)
 
 }

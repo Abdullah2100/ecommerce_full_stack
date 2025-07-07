@@ -1,7 +1,6 @@
 package com.example.e_commerc_delivery_man.ui
 
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 object Screens {
 
@@ -62,7 +61,8 @@ object Screens {
     )
 
     @Serializable
-    object Cart
+    object MyOrder
+
 
     @Serializable
     object Checkout
@@ -74,7 +74,7 @@ object Screens {
     object Map
 
     @Serializable
-    object Order
+    object Orders
 
     @Serializable
     object OrderForMyStore

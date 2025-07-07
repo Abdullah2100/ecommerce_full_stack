@@ -9,8 +9,8 @@ public class ProductRequestUpdateDto
     public string? name { get; set; }= null;
     public string? description { get; set; }= null;
     public IFormFile?  thmbnail { get; set; }= null;
-    public Guid? subcategory_id { get; set; }= null;
-    [Required] public Guid store_id { get; set; }
+    public Guid? subcategoryId { get; set; }= null;
+    [Required] public Guid storeId { get; set; }
     public decimal? price { get; set; }= null;
     public List<ProductVarientRequestDto>? productVarients { get; set; } = null;
     public List<ProductVarientRequestDto>? deletedProductVarients { get; set; } = null;

@@ -9,5 +9,5 @@ data class BannerResponseDto(
     val id: UUID,
     val image:String,
     @Serializable(with= UUIDKserialize::class)
-    val store_id: UUID,
+    val storeId: UUID,
 )

@@ -68,7 +68,7 @@ public class GeneralController : ControllerBase
 
 
 
-        General? result =
+        GeneralSettings? result =
             await _generalData.createGeneralSetting(
                generalSetting.name,
                generalSetting.value
@@ -116,7 +116,7 @@ public class GeneralController : ControllerBase
             return NotFound("ليس لديك الصلاحية لحذف البيانات");
         }
 
-        General? banner = await _generalData
+        GeneralSettings? banner = await _generalData
             .getGeneralSettings(genralSettingId);
 
         if ((banner == null))
@@ -171,7 +171,7 @@ public class GeneralController : ControllerBase
             return NotFound("ليس لديك الصلاحية لحذف البيانات");
         }
 
-        General? generalSettings = await _generalData
+        GeneralSettings? generalSettings = await _generalData
             .getGeneralSettings(genralSettingId);
 
         if ((generalSettings == null))
@@ -182,7 +182,7 @@ public class GeneralController : ControllerBase
 
 
 
-        General? result = await _generalData.updateGeneralSetting(
+        GeneralSettings? result = await _generalData.updateGeneralSetting(
             genralSettingId,
             generalSettings.name, 
             generalSettings.value);

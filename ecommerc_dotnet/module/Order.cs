@@ -9,19 +9,19 @@ public class Order
     public Guid id { get; set; }
     public decimal longitude { get; set; }
     public decimal latitude { get; set; }
-    public Guid user_id { get; set; }
+    public Guid userId { get; set; }
     public decimal totalPrice { get; set; }
     public int status { get; set; }
     public decimal distanceToUser { get; set; } = 0;
-    public Guid? delevery_id { get; set; } = null;
+    public Guid? deleveryId { get; set; } = null;
 
     [Column(TypeName = "Timestamp")]
-    public DateTime created_at { get; set; } = DateTime.Now;
+    public DateTime createdAt { get; set; } = DateTime.Now;
     
     [Column(TypeName = "Timestamp")]
-    public DateTime? updated_at { get; set; } = null;
+    public DateTime? updatedAt { get; set; } = null;
     
     public User user { get; set; }
-    public Delivery? delivered_by { get; set; }
+    public Delivery? deliveredBy { get; set; }
     public ICollection<OrderItem> items { get; set; }
 }

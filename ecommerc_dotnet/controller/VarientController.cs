@@ -133,12 +133,12 @@ public class VarientController : ControllerBase
         return StatusCode(200, result);
     }
 
-    [HttpDelete("{varient_id:guid}")]
+    [HttpDelete("{varientId:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> deleteVarient(Guid varient_id)
+    public async Task<IActionResult> deleteVarient(Guid varientId)
     {
           StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -167,13 +167,13 @@ public class VarientController : ControllerBase
         }
 
 
-        var isExistByID = await _varientData.isExist(varient_id);
+        var isExistByID = await _varientData.isExist(varientId);
 
         if (!isExistByID)
             return NotFound("هذا الخيار غير موجود");
 
 
-        var result = await _varientData.deleteVarient(varient_id);
+        var result = await _varientData.deleteVarient(varientId);
 
         if (result == false)
             return BadRequest("يحتوي هذا الخيار على علاقات مرتبطة به يجب اولا حذف العناصر المرتبطة به اولا قبل حذفه");

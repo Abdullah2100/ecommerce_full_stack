@@ -8,14 +8,14 @@ public class Category
     [Key]
     public Guid id { get; set; }
     public string name { get; set; }
-    public Guid  owner_id { get; set; }
+    public Guid  ownerId { get; set; }
     public bool isBlocked { get; set; }=false;
     [Column(TypeName = "Timestamp")]
-    public DateTime created_at { get; set; } = DateTime.Now;
+    public DateTime createdAt { get; set; } = DateTime.Now;
     [Column(TypeName = "Timestamp")]
-    public DateTime? updated_at { get; set; } = null;
+    public DateTime? updatedAt { get; set; } = null;
 
-    public string image_path { get; set; }
+    public string image { get; set; }
     public User user { get; set; }
     public ICollection<SubCategory>? subCategories {get;set;}
 }

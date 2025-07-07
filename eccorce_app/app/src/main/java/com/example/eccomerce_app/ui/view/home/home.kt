@@ -132,8 +132,8 @@ fun HomePage(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = {homeViewModel.initialFun()}
-        ){
+            onRefresh = { homeViewModel.initialFun() }
+        ) {
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
@@ -203,55 +203,57 @@ fun HomePage(
 
 
                 }
-
-                item {
-                    Card(
-                        modifier = Modifier
-                            .padding(top = 5.dp, bottom = 10.dp)
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = null,
-                                onClick = {
-                                    isClickingSearch.value = !isClickingSearch.value
-                                }
-                            ), colors = CardDefaults.cardColors(
-                            containerColor = Color.White
-                        ),
-                        elevation = CardDefaults.elevatedCardElevation(
-                            defaultElevation = 5.dp,
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                if (!products.value.isNullOrEmpty())
+                    item {
+                        Card(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 15.dp, bottom = 15.dp, start = 4.dp)
-
+                                .padding(top = 5.dp, bottom = 10.dp)
+                                .clickable(
+                                    interactionSource = interactionSource,
+                                    indication = null,
+                                    onClick = {
+                                        isClickingSearch.value = !isClickingSearch.value
+                                    }
+                                ), colors = CardDefaults.cardColors(
+                                containerColor = Color.White
+                            ),
+                            elevation = CardDefaults.elevatedCardElevation(
+                                defaultElevation = 5.dp,
+                            ),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
 
-                            Icon(
-                                Icons.Outlined.Search, "",
-                                tint = CustomColor.neutralColor950,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Sizer(width = 5)
-                            Text(
-                                "Find your favorite items",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp,
-                                color = CustomColor.neutralColor800,
-                                textAlign = TextAlign.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(top = 15.dp, bottom = 15.dp, start = 4.dp)
 
-                            )
+                            ) {
+
+                                Icon(
+                                    Icons.Outlined.Search, "",
+                                    tint = CustomColor.neutralColor950,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Sizer(width = 5)
+                                Text(
+                                    "Find your favorite items",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 16.sp,
+                                    color = CustomColor.neutralColor800,
+                                    textAlign = TextAlign.Center
+
+                                )
+
+                            }
 
                         }
-
                     }
-                }
-                if (categories.value.isNullOrEmpty() == false)
+
+
+//                if (categories.value.isNullOrEmpty() == false)
                     item {
                         Row(
                             modifier = Modifier
@@ -295,7 +297,8 @@ fun HomePage(
                                         CategoryShape(
                                             categories.value!!.take(4),
                                             homeViewModel,
-                                            nav)
+                                            nav
+                                        )
                                     }
                                 }
                             }

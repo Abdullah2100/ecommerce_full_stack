@@ -40,20 +40,20 @@ public class ProductData
                     name = pr.name,
                     description = pr.description,
                     thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                    subcategory_id = pr.subcategory_id,
-                    store_id = pr.store_id,
+                    subcategoryId = pr.subcategoryId,
+                    storeId = pr.storeId,
                     price = pr.price,
-                    category_id = pr.subCategory.categori_id,
+                    categoryId = pr.subCategory.categoriId,
                     productVarients = pr.productVarients
-                        .Where(pv => pv.product_id == pr.id)
-                        .GroupBy(pv => pv.varient_id, (key, g)
+                        .Where(pv => pv.productId == pr.id)
+                        .GroupBy(pv => pv.varientId, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResponseDto
                                 {
                                     id = pv.id,
                                     name = pv.name,
                                     precentage = pv.precentage,
-                                    varient_id = pv.varient_id
+                                    varientId = pv.varientId
                                 }
                             ).ToList()
                         ).ToList(),
@@ -80,27 +80,27 @@ public class ProductData
  
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
-                .OrderByDescending(pr => pr.create_at)
+                .OrderByDescending(pr => pr.createdAt)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
                     name = pr.name,
                     description = pr.description,
                     thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                    subcategory_id = pr.subcategory_id,
-                    store_id = pr.store_id,
+                    subcategoryId = pr.subcategoryId,
+                    storeId = pr.storeId,
                     price = pr.price,
-                    category_id = pr.subCategory.categori_id,
+                    categoryId = pr.subCategory.categoriId,
                     productVarients = pr.productVarients
-                        .Where(pv => pv.product_id == pr.id)
-                        .GroupBy(pv => pv.varient_id, (key, g)
+                        .Where(pv => pv.productId == pr.id)
+                        .GroupBy(pv => pv.varientId, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResponseDto
                                 {
                                     id = pv.id,
                                     name = pv.name,
                                     precentage = pv.precentage,
-                                    varient_id = pv.varient_id
+                                    varientId = pv.varientId
                                 }
                             ).ToList()
                         ).ToList(),
@@ -128,7 +128,7 @@ public class ProductData
                 .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productVarients)
                 .Include(pro => pro.store)
-                .OrderByDescending(pr => pr.create_at)
+                .OrderByDescending(pr => pr.createdAt)
                 .Select(pr => new ProductsResponseAdminDto() 
                 {
                     id = pr.id,
@@ -139,14 +139,14 @@ public class ProductData
                     store = pr.store.name,
                     price = pr.price,
                     productVarients = pr.productVarients
-                        .Where(pv => pv.product_id == pr.id)
-                        .GroupBy(pv => pv.varient_id, (key, g)
+                        .Where(pv => pv.productId == pr.id)
+                        .GroupBy(pv => pv.varientId, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResonseAdminDto
                                 {
                                     name = pv.name,
                                     precentage = pv.precentage,
-                                    varientName = _dbContext.Varients.FirstOrDefault(var=>var.id==(Guid)pv.varient_id!)!.name
+                                    varientName = _dbContext.Varients.FirstOrDefault(var=>var.id==(Guid)pv.varientId!)!.name
                                 }
                             ).ToList()
                         ).ToList(),
@@ -183,7 +183,7 @@ public class ProductData
 
     public async Task<List<ProductResponseDto>> getProducts(
         Guid storeId,
-        Guid subCategory_id,
+        Guid subcategoryId,
         int pageNumber,
         int pageSize = 25)
     {
@@ -194,27 +194,27 @@ public class ProductData
                 .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
-                .Where(pr => pr.store_id == storeId && pr.subcategory_id == subCategory_id)
+                .Where(pr => pr.storeId == storeId && pr.subcategoryId == subcategoryId)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
                     name = pr.name,
                     description = pr.description,
                     thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                    subcategory_id = pr.subcategory_id,
-                    store_id = pr.store_id,
+                    subcategoryId = pr.subcategoryId,
+                    storeId = pr.storeId,
                     price = pr.price,
-                    category_id = pr.subCategory.categori_id,
+                    categoryId = pr.subCategory.categoriId,
                     productVarients = pr.productVarients
-                        .Where(pv => pv.product_id == pr.id)
-                        .GroupBy(pv => pv.varient_id, (key, g)
+                        .Where(pv => pv.productId == pr.id)
+                        .GroupBy(pv => pv.varientId, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResponseDto
                                 {
                                     id = pv.id,
                                     name = pv.name,
                                     precentage = pv.precentage,
-                                    varient_id = pv.varient_id
+                                    varientId = pv.varientId
                                 }
                             ).ToList()
                         ).ToList(),
@@ -248,14 +248,14 @@ public class ProductData
 
     public async Task<bool> deleteProductVarient(
         List<ProductVarientRequestDto> productVarients
-        , Guid product_Id)
+        , Guid productId)
     {
         try
         {
             productVarients.ForEach((x) =>
             {
                 var result = _dbContext.ProductVarients.FirstOrDefault(pv =>
-                    pv.product_id == product_Id && pv.varient_id == x.varient_id && pv.name == x.name);
+                    pv.productId == productId && pv.varientId == x.varientId && pv.name == x.name);
                 if (result != null)
                     _dbContext.ProductVarients.Remove(result);
             });
@@ -269,12 +269,12 @@ public class ProductData
         }
     }
 
-    public async Task<bool> deleteProductVarient(Guid product_Id)
+    public async Task<bool> deleteProductVarient(Guid productId)
     {
         try
         {
             var result = _dbContext.ProductVarients
-                .Where(pv => pv.product_id == product_Id);
+                .Where(pv => pv.productId == productId);
             _dbContext.ProductVarients.RemoveRange(result);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -351,26 +351,26 @@ public class ProductData
                 .AsNoTracking()
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
-                .Where(pr => pr.store_id == storeId)
+                .Where(pr => pr.storeId == storeId)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
                     name = pr.name,
                     description = pr.description,
                     thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                    subcategory_id = pr.subcategory_id,
-                    store_id = pr.store_id,
+                    subcategoryId = pr.subcategoryId,
+                    storeId = pr.storeId,
                     price = pr.price,
                     productVarients = pr.productVarients
-                        .Where(pv => pv.product_id == pr.id)
-                        .GroupBy(pv => pv.varient_id, (key, g)
+                        .Where(pv => pv.productId == pr.id)
+                        .GroupBy(pv => pv.varientId, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResponseDto
                                 {
                                     id = pv.id,
                                     name = pv.name,
                                     precentage = pv.precentage,
-                                    varient_id = pv.varient_id
+                                    varientId = pv.varientId
                                 }
                             ).ToList()
                         ).ToList(),
@@ -398,26 +398,26 @@ public class ProductData
                 .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
-                .Where(pr => pr.subCategory.categori_id==category_Id)
+                .Where(pr => pr.subCategory.categoriId==category_Id)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
                     name = pr.name,
                     description = pr.description,
                     thmbnail = _config.getKey("url_file") + pr.thmbnail,
-                    subcategory_id = pr.subcategory_id,
-                    store_id = pr.store_id,
+                    subcategoryId = pr.subcategoryId,
+                    storeId = pr.storeId,
                     price = pr.price,
                     productVarients = pr.productVarients
-                        .Where(pv => pv.product_id == pr.id)
-                        .GroupBy(pv => pv.varient_id, (key, g)
+                        .Where(pv => pv.productId == pr.id)
+                        .GroupBy(pv => pv.varientId, (key, g)
                             => g.Select(
                                 pv => new ProductVarientResponseDto
                                 {
                                     id = pv.id,
                                     name = pv.name,
                                     precentage = pv.precentage,
-                                    varient_id = pv.varient_id
+                                    varientId = pv.varientId
                                 }
                             ).ToList()
                         ).ToList(),
@@ -440,8 +440,8 @@ public class ProductData
         string name,
         string description,
         string thumbnail,
-        Guid subcategory_id,
-        Guid store_id,
+        Guid subcategoryId,
+        Guid storeId,
         decimal price,
         List<string> images,
         List<ProductVarientRequestDto>? productVarients = null
@@ -455,11 +455,11 @@ public class ProductData
                 id = id,
                 name = name,
                 description = description,
-                subcategory_id = subcategory_id,
-                store_id = store_id,
+                subcategoryId = subcategoryId,
+                storeId = storeId,
                 price = price,
-                create_at = DateTime.Now,
-                update_at = null,
+                createdAt = DateTime.Now,
+                updatedAt = null,
                 thmbnail = thumbnail
             });
 
@@ -470,14 +470,14 @@ public class ProductData
                         id = clsUtil.generateGuid(),
                         name = x.name,
                         precentage = x.precentage == 0 ? 1 : (decimal)x.precentage!,
-                        varient_id = x.varient_id,
-                        product_id = id
+                        varientId = x.varientId,
+                        productId = id
                     })
                 );
             images.ForEach(x =>
                 _dbContext.ProductImages.AddAsync(new ProductImage
                 {
-                    ID = clsUtil.generateGuid(),
+                    id = clsUtil.generateGuid(),
                     name = x,
                     productId = id
                 })
@@ -500,7 +500,7 @@ public class ProductData
         string? name,
         string? description,
         string? thumbnail,
-        Guid? subcategory_id,
+        Guid? subcategoryId,
         decimal? price,
         List<ProductVarientRequestDto>? productVarients,
         List<string>? images
@@ -514,10 +514,10 @@ public class ProductData
 
             product.name = name ?? product.name;
             product.description = description ?? product.description;
-            product.subcategory_id = subcategory_id ?? product.subcategory_id;
+            product.subcategoryId = subcategoryId ?? product.subcategoryId;
             product.price = price ?? product.price;
             product.thmbnail = thumbnail ?? product.thmbnail;
-            product.update_at = DateTime.Now;
+            product.updatedAt = DateTime.Now;
 
             if (productVarients != null)
                 productVarients.ForEach(x =>
@@ -526,15 +526,15 @@ public class ProductData
                         id = clsUtil.generateGuid(),
                         name = x.name,
                         precentage = x.precentage == 0 ? 1 : (decimal)x.precentage!,
-                        varient_id = x.varient_id,
-                        product_id = id
+                        varientId = x.varientId,
+                        productId = id
                     })
                 );
             if (images != null)
                 images.ForEach(x =>
                     _dbContext.ProductImages.AddAsync(new ProductImage
                     {
-                        ID = clsUtil.generateGuid(),
+                        id = clsUtil.generateGuid(),
                         name = x,
                         productId = id
                     })

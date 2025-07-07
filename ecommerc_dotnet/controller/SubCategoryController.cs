@@ -72,14 +72,14 @@ public class SubCategoryController : ControllerBase
             return BadRequest("لا يمكنك انشاء فئة جديد يمكنك مراجعة مدير النظام لحل المشكلة");
         }
 
-        Guid? storeData = user.store_id;
+        Guid? storeData = user.storeId;
 
         if (storeData == null)
         {
             return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
-        int? store_subCateogry_size = await _subCategoryData.countByStoreId(user.store_id);
+        int? store_subCateogry_size = await _subCategoryData.countByStoreId(user.storeId);
         if (store_subCateogry_size == null)
             return BadRequest("حدثة مشكلة اثناء التاكد من عدد الفئات الفرعية للمتجر");
         if(store_subCateogry_size>19)
@@ -88,7 +88,7 @@ public class SubCategoryController : ControllerBase
 
         SubCategoryResponseDto? result = await _subCategoryData
             .createSubCategory(cateogy_id: subCategory.cateogy_id,
-                store_id: (Guid)user.store_id!,
+                storeId: (Guid)user.storeId!,
                 name: subCategory.name);
 
         if (result == null)
@@ -138,14 +138,14 @@ public class SubCategoryController : ControllerBase
             return BadRequest("لا يمكنك انشاء فئة جديد يمكنك مراجعة مدير النظام لحل المشكلة");
         }
 
-        Guid? storeData = user.store_id;
+        Guid? storeData = user.storeId;
 
         if (storeData == null)
         {
             return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
-        if (await _subCategoryData.isExist((Guid)user.store_id!, (Guid)subCategory.id!) == null)
+        if (await _subCategoryData.isExist((Guid)user.storeId!, (Guid)subCategory.id!) == null)
             return BadRequest("الفئة التي ادخلتها غير موجودة");
 
 
@@ -198,14 +198,14 @@ public class SubCategoryController : ControllerBase
             return BadRequest("لا يمكنك انشاء فئة جديد يمكنك مراجعة مدير النظام لحل المشكلة");
         }
 
-        Guid? storeData = user.store_id;
+        Guid? storeData = user.storeId;
 
         if (storeData == null)
         {
             return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
-        if (await _subCategoryData.isExist((Guid)user.store_id!, subCateogyId) == null)
+        if (await _subCategoryData.isExist((Guid)user.storeId!, subCateogyId) == null)
             return BadRequest("الفئة التي ادخلتها غير موجودة");
 
 
@@ -218,13 +218,13 @@ public class SubCategoryController : ControllerBase
 
   
     
-    [HttpGet("{store_id}/{page:int}")]
+    [HttpGet("{storeId}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getSubCategory(Guid store_id, int page)
+    public async Task<IActionResult> getSubCategory(Guid storeId, int page)
     {
         List<SubCategoryResponseDto>? result = await _subCategoryData
-            .getSubCategory(store_id, page);
+            .getSubCategory(storeId, page);
         if (result.Count < 1)
             return NoContent();
 

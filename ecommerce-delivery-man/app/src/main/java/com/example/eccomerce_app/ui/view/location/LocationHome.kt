@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.SnapPosition.Center.position
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,13 @@ import com.example.e_commerc_delivery_man.ui.component.CustomBotton
 import com.example.e_commerc_delivery_man.ui.component.CustomTitleBotton
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -129,6 +137,18 @@ fun LocationHomeScreen(
             }
         }
     )
+
+    val atasehir = LatLng(40.9971, 29.1007)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(atasehir, 15f)
+    }
+
+    var uiSettings = remember {
+        mutableStateOf(MapUiSettings(zoomControlsEnabled = true))
+    }
+    var properties = remember {
+        mutableStateOf(MapProperties(mapType = MapType.SATELLITE))
+    }
 
     LaunchedEffect(Unit) {
         homeViewModle.getMyInfo()
@@ -225,7 +245,14 @@ fun LocationHomeScreen(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        Column(
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = properties.value,
+            uiSettings = uiSettings.value
+        )
+
+      /*  Column(
             modifier = Modifier
                 .padding(horizontal = 15.dp)
                 .background(Color.White)
@@ -309,11 +336,7 @@ fun LocationHomeScreen(
                         Text("You need to approve this permission in order to...")
                     },
                     confirmButton = {
-//                        TextButton(onClick = {
-//                            Logic when user confirms to accept permissions
-//                        }) {
-//                            Text("Confirm")
-//                        }
+
                     },
                     dismissButton = {
                         TextButton(onClick = {
@@ -345,6 +368,9 @@ fun LocationHomeScreen(
                     )
                 }
             }
+
+  */
+
     }
 
 }

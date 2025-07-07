@@ -63,7 +63,6 @@ import com.example.e_commerc_delivery_man.ui.component.LocationLoadingShape
 import com.example.e_commerc_delivery_man.ui.component.ProductLoading
 import com.example.e_commerc_delivery_man.ui.component.ProductShape
 import com.example.e_commerc_delivery_man.Util.General.reachedBottom
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ConfigurationScreenWidthHeight", "SuspiciousIndentation")

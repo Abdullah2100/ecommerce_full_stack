@@ -22,6 +22,7 @@ public class OrderController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly OrderData _orderData;
+    private readonly DeliveryData _deliveryData;
     private readonly UserData _userData;
     private readonly ProductData _productData;
     private readonly IHubContext<EcommercHub> _hubContext;
@@ -36,6 +37,7 @@ public class OrderController : ControllerBase
         _orderData = new OrderData(dbContext, config);
         _userData = new UserData(dbContext, config);
         _productData = new ProductData(dbContext, config, host);
+        _deliveryData = new DeliveryData(dbContext);
         _hubContext = hubContext;
     }
 
@@ -113,13 +115,13 @@ public class OrderController : ControllerBase
 
             items.ForEach(item =>
             {
-                var product = _productData.getProduct(item.product_Id);
+                var product = _productData.getProduct(item.productId);
                 decimal varientPrice = 1;
 
-                item.products_varient_id.ForEach(pvi =>
+                item.products_varientId.ForEach(pvi =>
                 {
                     var productVairntPrice = _dbContext.ProductVarients
-                        .FirstOrDefault(pv => pv.product_id == product.id && pv.id == pvi);
+                        .FirstOrDefault(pv => pv.productId == product.id && pv.id == pvi);
                     if (productVairntPrice == null)
                     {
                         isAmbiguous = true;
@@ -240,13 +242,13 @@ public class OrderController : ControllerBase
     }
 
 
-    [HttpDelete("{order_id}")]
+    [HttpDelete("{orderId}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> deleteOrders
-        (Guid order_id)
+        (Guid orderId)
     {
           StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -271,12 +273,12 @@ public class OrderController : ControllerBase
         if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var orderData = await _orderData.getOrder(order_id, idHolder.Value);
+        var orderData = await _orderData.getOrder(orderId, idHolder.Value);
         if (orderData == null)
             return NotFound("الطلب غير موجود");
         if (orderData.status != 1)
             return BadRequest("لا يمكن الغاء هذا الطلب لانه تمت معالجته سابقا");
-        var result = await _orderData.deleteOrder(idHolder.Value, order_id);
+        var result = await _orderData.deleteOrder(idHolder.Value, orderId);
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء حذف البيانات");
         return NoContent();
@@ -362,9 +364,9 @@ public class OrderController : ControllerBase
         {
             var order = await _orderData.getOrder(orderStatus.id);
             await _hubContext.Clients.All.SendAsync("orderExcptedByAdmin", order);
-            var storesId = order!.order_items
-                .DistinctBy(or => or.product.store_id)
-                .Select(or => or.product.store_id).ToList();
+            var storesId = order!.orderItems
+                .DistinctBy(or => or.product.storeId)
+                .Select(or => or.product.storeId).ToList();
             await sendingNotificationToAllStore(storesId);
         }
 
@@ -414,14 +416,14 @@ public class OrderController : ControllerBase
     }
 
     
-     [HttpGet("orderItem/{store_id}/{pageNumber}")]
+     [HttpGet("orderItem/{storeId}/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getOrdersItemForStore
     (
-        Guid store_id,
+        Guid storeId,
         int pageNumber = 1
     )
     {
@@ -451,7 +453,7 @@ public class OrderController : ControllerBase
         if (user.isDeleted == true )
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var result = await _orderData.getOrderItems(store_id, pageNumber, 25);
+        var result = await _orderData.getOrderItems(storeId, pageNumber, 25);
         if (result == null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
@@ -487,10 +489,10 @@ public class OrderController : ControllerBase
         if (user.isDeleted == true )
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        if (user.Store == null)
+        if (user.store == null)
             return BadRequest("المستخدم لا يمتلك اي متجر");
         
-        var orderItem = await _orderData.getOrderItem(orderItemDto.id,user.Store.id);
+        var orderItem = await _orderData.getOrderItem(orderItemDto.id,user.store.id);
         if (orderItem == null)
             return NotFound("الطلب غير موجود");
         var result = await _orderData.updateOrderItemStatus(orderItemDto.id, orderItemDto.status);
@@ -506,9 +508,9 @@ public class OrderController : ControllerBase
     {
         try
         {
-            foreach (var store_id in stores_id)
+            foreach (var storeId in stores_id)
             {
-                var userData = await _userData.getUserByStoreId(store_id);
+                var userData = await _userData.getUserByStoreId(storeId);
 
                 var messagin = FirebaseMessaging.DefaultInstance;
                 await messagin.SendAsync(new
@@ -533,6 +535,57 @@ public class OrderController : ControllerBase
             return true;
         }
         ;
+    }
+
+
+    
+    
+    
+    //delivery
+    [HttpGet("delivery/{pageNumber}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getOrderNotTakedByDelivery
+    (
+        int pageNumber = 1
+    )
+    {
+        if(pageNumber<1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+
+        Guid? idHolder = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        {
+            idHolder = outID;
+        }
+
+        if (idHolder == null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        User? user = await _userData.getUserById(idHolder.Value);
+
+        if (user == null)
+            return NotFound("المستخدم غير موجود");
+        bool isDeliveryMan = await _deliveryData.isExistByUserId(user.id);
+        
+        if (isDeliveryMan == false)
+            return NotFound("الموصل غير موجو");
+        
+        if (user.isDeleted == true || user.role == 1)
+            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
+
+        var result = await _orderData.getOrderForDelivery( pageNumber, 25);
+        if (result == null || result.Count < 1)
+            return NoContent();
+        return StatusCode(200, result);
     }
 
 

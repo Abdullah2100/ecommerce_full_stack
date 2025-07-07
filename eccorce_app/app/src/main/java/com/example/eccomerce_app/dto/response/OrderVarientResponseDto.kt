@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OrderVarientResponseDto(
-    val varient_name:String,
-    val product_varient_name:String
+    val varientName:String,
+    val productVarientName:String
 )

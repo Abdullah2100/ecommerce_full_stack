@@ -31,7 +31,7 @@ public class ForgetPasswordData
             newOtp.email = email;
             newOtp.createdAt = DateTime.Now;
             newOtp.id = Guid.NewGuid();
-            _dbContext.ReseatPassword.Add(newOtp);
+            _dbContext.ReseatPasswords.Add(newOtp);
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -49,7 +49,7 @@ public class ForgetPasswordData
     {
         try
         {
-            ReseatePasswordOtp? result = _dbContext.ReseatPassword.FirstOrDefault(u => u.otp == otp);
+            ReseatePasswordOtp? result = _dbContext.ReseatPasswords.FirstOrDefault(u => u.otp == otp);
             if (result == null)
             {
                 return false;
@@ -70,8 +70,8 @@ public class ForgetPasswordData
     {
         try
         {
-            IQueryable<ReseatePasswordOtp>? otpBelongList = _dbContext.ReseatPassword.Where(otp => otp.email == email);
-            _dbContext.ReseatPassword.RemoveRange(otpBelongList);
+            IQueryable<ReseatePasswordOtp>? otpBelongList = _dbContext.ReseatPasswords.Where(otp => otp.email == email);
+            _dbContext.ReseatPasswords.RemoveRange(otpBelongList);
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -88,7 +88,7 @@ public class ForgetPasswordData
     {
         try
         {
-            return _dbContext.ReseatPassword.FirstOrDefault(u =>
+            return _dbContext.ReseatPasswords.FirstOrDefault(u =>
                 (u.otp == otp) && (u.createdAt.AddHours(1).Microsecond > DateTime.Now.Microsecond)) != null;
         }
         catch (Exception e)
@@ -103,7 +103,7 @@ public class ForgetPasswordData
     {
         try
         {
-            ReseatePasswordOtp? result = await _dbContext.ReseatPassword.Where(u =>
+            ReseatePasswordOtp? result = await _dbContext.ReseatPasswords.Where(u =>
             u.otp == otp&&u.isValidated==status).FirstOrDefaultAsync();
 
             if (result == null) return false;

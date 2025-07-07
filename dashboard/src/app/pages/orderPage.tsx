@@ -19,6 +19,7 @@ import iOrderStatusUpdateRequestDto from "../dto/request/iOrderStatusUpdateReque
 
 const OrderPage = () => {
 
+    const [currnetPage, setCurrentPage] = useState(1);
     const queryClient = useQueryClient()
 
     const { data: OrderStatusDefination } = useQuery({
@@ -34,7 +35,6 @@ const OrderPage = () => {
 
     })
 
-    const [currnetPage, setCurrentPage] = useState(1);
 
     const { data, refetch, isPlaceholderData } = useQuery({
         queryKey: ['orders', currnetPage],

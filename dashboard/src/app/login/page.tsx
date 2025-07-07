@@ -1,20 +1,16 @@
 "use client"
 
-import Image from 'next/image'
-import Logo from '../../../public/logo.svg'
-import { Input } from '@/components/ui/input'
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { login } from '../controller/auth'
 import { toast, ToastContainer } from 'react-toastify'
-import iAuthResult from '../model/iAuthResult'
-import Util from '../util/globle'
-import { redirect } from 'next/dist/server/api-utils'
+import { useRouter } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import InputWithTitle from '@/components/ui/inputWithTitle'
-import { useRouter } from 'next/navigation'
-interface iLoginData {
+import { login } from '../controller/auth'
+import iAuthResult from '../model/iAuthResult'
+import Util from '../util/globle'
+import { Button } from '@/components/ui/button'
+export interface iLoginData {
     name: string;
     password: string;
 }
@@ -27,16 +23,15 @@ const  Login = ()=> {
     });
 
     const loginFun = useMutation({
-        mutationFn: (data: iLoginData) => login({ email: data.name, password: data.password }),
+        mutationFn: (data: iLoginData) => login({ name: data.name, password: data.password }),
         onError: (e) => {
             // console.log(`error is ${e}`)
             toast.error(e.message)
         },
         onSuccess: (result) => {
-            var resultData = result.data as iAuthResult
-            Util.token = resultData.refreshToken
-            rout.push("/dashboard")
-            
+            const resultData = result.data as iAuthResult;
+            Util.token = resultData.refreshToken;
+            rout.push("/dashboard");
         }
     })
 

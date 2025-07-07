@@ -35,10 +35,10 @@ public class BannerData
                     .Select(ba=>new BannerResponseDto
                     {
                         id = ba.id,
-                        create_at = ba.create_at,
-                        end_at = ba.end_at,
+                        createdAt = ba.createdAt,
+                        endAt = ba.endAt,
                         image = _config.getKey("url_file") + ba.image,
-                        store_id = ba.store_id
+                        storeId = ba.storeId
                     }) 
                 .FirstOrDefaultAsync();
         }
@@ -52,21 +52,21 @@ public class BannerData
     
     
     public async Task<BannerResponseDto?> getBanner(
-        Guid store_id,
+        Guid storeId,
         Guid banner_id)
     {
         try
         {
             return  await  _dbContext.Banner
                     .AsNoTracking()
-                    .Where(ba=>ba.id==banner_id && ba.store_id==store_id)
+                    .Where(ba=>ba.id==banner_id && ba.storeId==storeId)
                     .Select(ba=>new BannerResponseDto
                     {
                         id = ba.id,
-                        create_at = ba.create_at,
-                        end_at = ba.end_at,
+                        createdAt = ba.createdAt,
+                        endAt = ba.endAt,
                         image =  ba.image,
-                        store_id = ba.store_id
+                        storeId = ba.storeId
                     }) 
                 .FirstOrDefaultAsync();
         }
@@ -87,14 +87,14 @@ public class BannerData
         {
             return  await  _dbContext.Banner
                     .AsNoTracking()
-                    .Where(ba=>ba.store_id==id)
+                    .Where(ba=>ba.storeId==id)
                     .Select(ba=>new BannerResponseDto
                     {
                         id = ba.id,
-                        create_at = ba.create_at,
-                        end_at = ba.end_at,
+                        createdAt = ba.createdAt,
+                        endAt = ba.endAt,
                         image = _config.getKey("url_file") + ba.image,
-                        store_id = ba.store_id
+                        storeId = ba.storeId
                     })
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
@@ -112,9 +112,9 @@ public class BannerData
   
 
     public async Task<BannerResponseDto?> addNewBanner(
-        DateTime end_at,
-        string image_path,
-        Guid store_id)
+        DateTime endAt,
+        string image,
+        Guid storeId)
     {
         try
         {
@@ -122,10 +122,10 @@ public class BannerData
             Bannel categoryObj = new Bannel
             {
                 id = id,
-                end_at = end_at,
-                create_at = DateTime.Today,
-                image = image_path,
-                store_id = store_id
+                endAt = endAt,
+                createdAt = DateTime.Today,
+                image = image,
+                storeId = storeId
             };
             await _dbContext.Banner.AddAsync(categoryObj);
             await _dbContext.SaveChangesAsync();
@@ -134,7 +134,7 @@ public class BannerData
         catch (Exception ex)
         {
             Console.Write("error from  insert new banner " + ex.Message);
-            clsUtil.deleteFile(image_path, _host);
+            clsUtil.deleteFile(image, _host);
             return null;
         }
     }
@@ -169,7 +169,7 @@ public class BannerData
         {
             return await _dbContext.Banner
                 .AsNoTracking()
-                .Where(ban=>ban.end_at>DateTime.Now)
+                .Where(ban=>ban.endAt>DateTime.Now)
                 .CountAsync();
         }
         catch (Exception ex)
@@ -192,10 +192,10 @@ public class BannerData
                 .Select(ba=>new BannerResponseDto
                 {
                     id = ba.id,
-                    create_at = ba.create_at,
-                    end_at = ba.end_at,
+                    createdAt = ba.createdAt,
+                    endAt = ba.endAt,
                     image = _config.getKey("url_file") + ba.image,
-                    store_id = ba.store_id
+                    storeId = ba.storeId
                 })
                 .Take(pageSize)
                 .ToListAsync(); 

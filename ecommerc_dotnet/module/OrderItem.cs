@@ -9,14 +9,14 @@ public class OrderItem
     [Key]
     public Guid id { get; set; }
 
-    public Guid order_id { get; set; }
-    public Guid product_id { get; set; }
+    public Guid orderId { get; set; }
+    public Guid productId { get; set; }
     public decimal price { get; set; }
     public int quanity { get; set; }
-    public Guid store_id { get; set; }
+    public Guid storeId { get; set; }
 
     public Order  order { get; set; }
-    public Store Store { get; set; }
+    public Store store { get; set; }
     
     public ICollection<OrderProductsVarient>orderProductsVarients { get; set; }
     public enOrderItemStatus Status { get; set; }= enOrderItemStatus.InProgress;

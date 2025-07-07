@@ -133,7 +133,7 @@ public class UserController : ControllerBase
     }
 
 
-   [HttpGet("")]
+    [HttpGet("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -163,6 +163,7 @@ public class UserController : ControllerBase
 
         return StatusCode(200, user);
     }
+
 
     [HttpGet("{page:int}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -208,11 +209,12 @@ public class UserController : ControllerBase
         return StatusCode(200, users);
     }
 
-    [HttpDelete("{user_id:guid}")]
+
+    [HttpDelete("{userId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> deleteOrUndeletedUser(Guid user_id)
+    public async Task<IActionResult> deleteOrUndeletedUser(Guid userId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -240,7 +242,7 @@ public class UserController : ControllerBase
             return BadRequest("ليس لديك الصلاحية ");
 
 
-        bool result = await _userData.deleteUser(user_id);
+        bool result = await _userData.deleteUser(userId);
 
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء حذف المستخدم");
@@ -311,7 +313,7 @@ public class UserController : ControllerBase
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (idHolder != user.ID)
+        if (idHolder != user.id)
         {
             return BadRequest("فقط المستخدم يمكن تعديل بياناته");
         }
@@ -351,7 +353,7 @@ public class UserController : ControllerBase
     }
 
 
- 
+
     [HttpGet("address")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -383,7 +385,7 @@ public class UserController : ControllerBase
         }
 
 
-        List<AddressResponseDto>? locations = await _addressData.getUserAddressByUserId(user.ID);
+        List<AddressResponseDto>? locations = await _addressData.getUserAddressByUserId(user.id);
 
         if (locations == null)
             return NoContent();
@@ -477,7 +479,7 @@ public class UserController : ControllerBase
             return NotFound("العنوان غير موجود");
         }
 
-        if (addressResult.owner_id != idHolder.Value)
+        if (addressResult.ownerId != idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
@@ -533,7 +535,7 @@ public class UserController : ControllerBase
             return NotFound("العنوان غير موجود");
         }
 
-        if (addressResult.owner_id != idHolder.Value)
+        if (addressResult.ownerId != idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
@@ -586,11 +588,11 @@ public class UserController : ControllerBase
             return BadRequest("العنوان غير موجود");
         }
 
-        bool? result = await _addressData.changeCurrentAddress(address.id, user.ID);
+        bool? result = await _addressData.changeCurrentAddress(address.id, user.id);
 
         return StatusCode(200, result);
     }
-    
+
     [AllowAnonymous]
     [HttpPost("generateOtp")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -640,10 +642,10 @@ public class UserController : ControllerBase
         bool result = await _forgetPasswordData.isExist(verification.email, verification.otp);
         if (!result)
         {
-          return  NotFound("not found otp");
+            return NotFound("not found otp");
         }
 
-      result = await _forgetPasswordData.updateOtpStatus(verification.otp);
+        result = await _forgetPasswordData.updateOtpStatus(verification.otp);
 
         if (!result)
             return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
@@ -659,19 +661,19 @@ public class UserController : ControllerBase
     public async Task<IActionResult> reseatPassword([FromBody] ReseatePasswordRequestDto data)
     {
 
-        bool otpValidationResult = await _forgetPasswordData.isExist(data.email, data.otp,true);
-      
+        bool otpValidationResult = await _forgetPasswordData.isExist(data.email, data.otp, true);
+
         if (!otpValidationResult)
         {
-          return  NotFound("not found otp");
+            return NotFound("not found otp");
         }
 
-        bool isExist =await _userData.isExistByEmail(data.email);
+        bool isExist = await _userData.isExistByEmail(data.email);
         if (!isExist)
             return NotFound("المستخدم غير موجود");
         UserInfoResponseDto? result = await _userData.updateUserPassword(data.email,
             clsUtil.hashingText(data.password));
-        if (result==null)
+        if (result == null)
             return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
 
         string token = "", refreshToken = "";
@@ -690,4 +692,6 @@ public class UserController : ControllerBase
         return StatusCode(200
             , new { token = token, refreshToken = refreshToken });
     }
+
+
 }

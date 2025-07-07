@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -39,7 +40,6 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,8 +59,10 @@ fun LoginScreen(
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
     val erroMessage = remember { mutableStateOf("") }
 
-    val isSendingData = remember { mutableStateOf(false) }
+    val isSendingData = authKoin.isLoading.collectAsState()
+    val errorMessage = authKoin.errorMesssage.collectAsState()
     val coroutine = rememberCoroutineScope()
+
 
     val focusRequester = FocusRequester()
 
@@ -85,6 +87,14 @@ fun LoginScreen(
         return true
     }
 
+
+    LaunchedEffect(errorMessage.value) {
+        if (errorMessage.value != null)
+            coroutine.launch {
+                snackbarHostState.showSnackbar(errorMessage.value.toString())
+                authKoin.clearErrorMessage()
+            }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -196,7 +206,7 @@ fun LoginScreen(
                         color = CustomColor.neutralColor950,
                         fontSize = (16 / fontScall).sp,
                         modifier = Modifier.clickable {
-                          nav.navigate(Screens.ReseatPasswordGraph)
+                            nav.navigate(Screens.ReseatPasswordGraph)
                         }
                     )
                 }
@@ -209,34 +219,18 @@ fun LoginScreen(
                     operation = {
                         keyboardController?.hide()
 
-                        coroutine.launch {
-                            if(userNameOrEmail.value.text.isBlank()||password.value.text.isBlank())
-                            {
+                        if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
+                            coroutine.launch {
                                 snackbarHostState.showSnackbar("User name Or Password is Blanck")
                             }
-                            else{
-                                isSendingData.value = true
-                                val result = async {
-                                    authKoin.loginUser(
-                                        userNameOrEmail.value.text, password = password.value.text,
-                                    )
+                        } else {
 
+                            authKoin.loginUser(
+                                userNameOrEmail.value.text,
+                                password = password.value.text,
+                                nav = nav
+                            )
 
-                                }.await()
-
-                                isSendingData.value = false
-
-                                if (!result.isNullOrEmpty()) {
-                                    snackbarHostState.showSnackbar(result)
-                                } else {
-                                    nav.navigate(Screens.LocationGraph) {
-                                        popUpTo(nav.graph.id) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }
-
-                            }
 
                         }
 

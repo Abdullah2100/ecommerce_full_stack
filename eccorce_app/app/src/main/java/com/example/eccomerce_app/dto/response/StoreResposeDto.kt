@@ -10,11 +10,11 @@ data class StoreResposeDto(
     val id: UUID,
 
     @Serializable(with = UUIDKserialize::class)
-    val user_id: UUID,
+    val userId: UUID,
 
     val name: String,
-    val wallpaper_image: String,
-    val small_image: String,
+    val wallpaperImage: String,
+    val smallImage: String,
     val longitude: Double,
     val latitude: Double,
 )

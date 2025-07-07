@@ -182,17 +182,13 @@ fun CreateProductScreen(
         if (uris.isNotEmpty()) {
             uris.forEach { productImages ->
                 val file = productImages.toCustomFil(context)
-                if (images.value.isNotEmpty()) {
-                    imagesHolder.addAll(images.value)
 
-                }
                 if (file != null) {
                     imagesHolder.add(file.absolutePath)
                 }
-                if (imagesHolder.isNotEmpty()) {
-                    images.value = imagesHolder
-                }
-
+            }
+            if (imagesHolder.isNotEmpty()) {
+                images.value = imagesHolder
             }
         }
     }
@@ -777,18 +773,19 @@ fun CreateProductScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        CustomColor.neutralColor400,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
             ) {
 
                 Row(
                     modifier = Modifier
                         .height(65.dp)
                         .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            CustomColor.neutralColor400,
-                            RoundedCornerShape(8.dp)
-                        )
-                        .clip(RoundedCornerShape(8.dp))
+
                         .clickable {
                             isExpandedSubCategory.value = !isExpandedSubCategory.value
                         }
@@ -813,7 +810,6 @@ fun CreateProductScreen(
 
                 Column(
                     modifier = Modifier
-                        .padding(bottom = 19.dp)
                         .fillMaxWidth()
                         .height(animated.value)
                         .border(
@@ -860,7 +856,9 @@ fun CreateProductScreen(
                 Sizer(5)
             FlowRow {
                 productVarients.value.forEachIndexed { index, value ->
-                    ConstraintLayout {
+                    ConstraintLayout(
+                        modifier = Modifier.padding(end=5.dp, bottom = 10.dp)
+                    ) {
                         var (iconRef) = createRefs()
                         Column(
                             modifier = Modifier
@@ -869,7 +867,8 @@ fun CreateProductScreen(
                                     RoundedCornerShape(8.dp)
                                 )
                                 .padding(
-                                    horizontal = 5.dp
+                                    end = 25.dp,
+                                    start=5.dp
                                 )
                         ) {
                             Text(
@@ -933,18 +932,19 @@ fun CreateProductScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .border(
+                        1.dp,
+                        CustomColor.neutralColor400,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
             ) {
 
                 Row(
                     modifier = Modifier
                         .height(65.dp)
                         .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            CustomColor.neutralColor400,
-                            RoundedCornerShape(8.dp)
-                        )
-                        .clip(RoundedCornerShape(8.dp))
+
                         .clickable {
                             isExpandedVarient.value = !isExpandedVarient.value
                         }

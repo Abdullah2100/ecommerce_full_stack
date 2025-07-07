@@ -10,15 +10,16 @@ public class Product
     [Column(TypeName = "TEXT")]
     public string description { get; set; }
     public string  thmbnail { get; set; }
-    public Guid subcategory_id { get; set; }
-    public Guid store_id { get; set; }
+    public Guid subcategoryId { get; set; }
+    public Guid storeId { get; set; }
     public decimal price { get; set; }
+    public int? quanity { get; set; } = null;
     
     [Column(TypeName = "Timestamp")]
-    public DateTime create_at { get; set; }
+    public DateTime createdAt { get; set; }
 
     [Column(TypeName = "Timestamp")] 
-    public DateTime? update_at { get; set; } = null;
+    public DateTime? updatedAt { get; set; } = null;
     
     public ICollection<ProductVarient> productVarients { get; set; }
     public ICollection<ProductImage> productImages { get; set; }

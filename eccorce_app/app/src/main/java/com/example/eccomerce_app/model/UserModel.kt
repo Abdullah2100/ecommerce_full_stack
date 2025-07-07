@@ -9,5 +9,5 @@ data class UserModel(
     val email: String,
     val thumbnail: String,
     val address: List<Address>? = null,
-    val store_id: UUID
+    val store_id: UUID?=null
 )

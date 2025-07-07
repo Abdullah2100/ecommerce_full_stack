@@ -19,11 +19,11 @@ public class GeneralData
     }
 
    
-    public async Task<General?> getGeneralSettings(Guid id)
+    public async Task<GeneralSettings?> getGeneralSettings(Guid id)
     {
         try
         {
-            return await _dbContext.GeneralSetting
+            return await _dbContext.GeneralSettings
                 .AsNoTracking()
                 .FirstOrDefaultAsync(gs=>gs.id==id);
         }
@@ -39,7 +39,7 @@ public class GeneralData
     {
         try
         {
-            return await _dbContext.GeneralSetting
+            return await _dbContext.GeneralSettings
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -57,7 +57,7 @@ public class GeneralData
     {
         try
         {
-            var result = await _dbContext.GeneralSetting.FindAsync(id);
+            var result = await _dbContext.GeneralSettings.FindAsync(id);
             return result != null;
         }
         catch (Exception ex)
@@ -71,7 +71,7 @@ public class GeneralData
     {
         try
         {
-            var result = await _dbContext.GeneralSetting
+            var result = await _dbContext.GeneralSettings
                 .FirstOrDefaultAsync(gs => gs.id == id && gs.name == name);
             return result != null;
         }
@@ -86,7 +86,7 @@ public class GeneralData
     {
         try
         {
-            return await _dbContext.GeneralSetting.CountAsync();
+            return await _dbContext.GeneralSettings.CountAsync();
         }
         catch (Exception ex)
         {
@@ -96,7 +96,7 @@ public class GeneralData
     }
 
 
-    public async Task<General?> createGeneralSetting(
+    public async Task<GeneralSettings?> createGeneralSetting(
         string name,
         decimal value)
     {
@@ -104,10 +104,10 @@ public class GeneralData
         {
             Guid id = clsUtil.generateGuid();
             var result = await _dbContext
-                .GeneralSetting.AddAsync(
-                    new General 
+                .GeneralSettings.AddAsync(
+                    new GeneralSettings 
                     {
-                        created_at = DateTime.Now,
+                        createdAt = DateTime.Now,
                         id = id,
                         name = name,
                         value = value
@@ -123,7 +123,7 @@ public class GeneralData
         }
     }
 
-    public async Task<General?> updateGeneralSetting(
+    public async Task<GeneralSettings?> updateGeneralSetting(
         Guid id,
         string name,
         decimal value
@@ -131,11 +131,11 @@ public class GeneralData
     {
         try
         {
-            General? result = await _dbContext
-                .GeneralSetting.FindAsync(id);
+            GeneralSettings? result = await _dbContext
+                .GeneralSettings.FindAsync(id);
             if (result == null) return null;
 
-            result.updated_at = DateTime.Now;
+            result.updatedAt = DateTime.Now;
             result.name = name;
             result.value = value;
             
@@ -153,8 +153,8 @@ public class GeneralData
     {
         try
         {
-            General? result = await _dbContext
-                .GeneralSetting.FindAsync(id);
+            GeneralSettings? result = await _dbContext
+                .GeneralSettings.FindAsync(id);
             if (result == null) return null;
             _dbContext.Remove(result);
             await _dbContext.SaveChangesAsync();

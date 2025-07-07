@@ -424,6 +424,7 @@ fun AddressScreen(
                                                 }.await()
                                                 isLoading.value = false
                                                 var message = "update Current Address Seccessfuly"
+                                                homeViewModle.getMyInfo()
                                                 if (result != null) {
                                                     message = result
                                                 }

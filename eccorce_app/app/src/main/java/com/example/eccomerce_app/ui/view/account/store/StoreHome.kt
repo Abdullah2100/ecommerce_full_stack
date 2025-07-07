@@ -272,27 +272,6 @@ fun StoreScreen(
 
 
 
-    LaunchedEffect(reachedBottom.value) {
-        if (!products.value.isNullOrEmpty() && reachedBottom.value) {
-            when (selectedSubCategoryId.value == null) {
-                true -> {
-                    homeViewModel.getProducts(
-                        page, store_id = store_id!!, isLoadingMore
-                    )
-                }
-
-                else -> {
-                    homeViewModel.getProducts(
-                        page, store_id = store_id!!, selectedSubCategoryId.value!!, isLoadingMore
-                    )
-                }
-            }
-
-        }
-
-    }
-
-
 
     fun creationValidation(): Boolean {
         keyboardController?.hide()
@@ -313,8 +292,32 @@ fun StoreScreen(
 
 
     LaunchedEffect(Unit) {
-        if (store_id != null) homeViewModel.getStoreInfoByStoreId(store_id)
+        if (store_id != null)
+        {
+            homeViewModel.getStoreInfoByStoreId(store_id)
+        }
     }
+
+    LaunchedEffect(reachedBottom.value) {
+        if (!products.value.isNullOrEmpty() && reachedBottom.value) {
+            when (selectedSubCategoryId.value == null) {
+                true -> {
+                    homeViewModel.getProducts(
+                        page, store_id = store_id!!, isLoadingMore
+                    )
+                }
+
+                else -> {
+                    homeViewModel.getProducts(
+                        page, store_id = store_id!!, selectedSubCategoryId.value!!, isLoadingMore
+                    )
+                }
+            }
+
+        }
+
+    }
+
 
 
 
@@ -646,7 +649,7 @@ fun StoreScreen(
                     }
                 },
                 actions = {
-                    if (myStore_id == null && isFromHome == false) {
+                    if ((myStore_id == null) && isFromHome == false) {
                         TextButton(
                             enabled = isLoading.value == false, onClick = {
                                 if (creationValidation()) {
@@ -1187,6 +1190,7 @@ fun StoreScreen(
                     }
 
                 }
+                if(isFromHome==true||myStore_id!=null)
                 item {
                     if (isFromHome == false) {
                         Sizer(10)

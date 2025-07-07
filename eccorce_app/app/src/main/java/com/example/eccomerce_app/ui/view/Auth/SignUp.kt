@@ -19,6 +19,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +61,7 @@ fun SignUpPage(
     val keyboardController = LocalSoftwareKeyboardController.current
 
 
-    val isLoading = authKoin.isLoadin.collectAsState()
+    val isLoading = authKoin.isLoading.collectAsState()
     val fontScall = LocalDensity.current.fontScale
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -83,7 +84,8 @@ fun SignUpPage(
 
     val focusRequester = FocusRequester()
 
-    val isSendingData = remember { mutableStateOf(false) }
+    val isSendingData = authKoin.isLoading.collectAsState()
+    val errorMessage = authKoin.errorMesssage.collectAsState()
     val coroutine = rememberCoroutineScope()
 
 
@@ -159,7 +161,13 @@ fun SignUpPage(
         return true
     }
 
-
+    LaunchedEffect(errorMessage.value) {
+        if (errorMessage.value != null)
+            coroutine.launch {
+                snackbarHostState.showSnackbar(errorMessage.value.toString())
+                authKoin.clearErrorMessage()
+            }
+    }
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -289,39 +297,22 @@ fun SignUpPage(
                                 name = name.value.text,
                                 password = password.value.text,
                                 confirmPassword = confirm_password.value.text
-                            )
+                        )
                     },
                     buttonTitle = "Login",
                     operation = {
                         keyboardController?.hide()
-                        coroutine.launch {
-                                isSendingData.value = true
-                                val result = async {
-                                    authKoin.signUpUser(
-                                        phone = phone.value.text,
-                                        email = email.value.text,
-                                        password = password.value.text,
-                                        name = name.value.text,
-                                    )
 
-                                }.await()
-
-                                isSendingData.value = false
-
-                                if (!result.isNullOrEmpty()) {
-                                    snackbarHostState.showSnackbar(result)
-                                } else {
-                                    nav.navigate(Screens.LocationGraph) {
-                                        popUpTo(nav.graph.id) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }
+                        authKoin.signUpUser(
+                            phone = phone.value.text,
+                            email = email.value.text,
+                            password = password.value.text,
+                            name = name.value.text,
+                            nav = nav
+                        )
+                    })
 
 
-                        }
-                    }
-                )
 
             }
         }

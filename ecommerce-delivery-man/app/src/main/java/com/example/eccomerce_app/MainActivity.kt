@@ -1,12 +1,9 @@
 package com.example.e_commerc_delivery_man
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,10 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -44,9 +39,6 @@ import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
 import com.example.e_commerc_delivery_man.model.ButtonNavItem
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
@@ -74,15 +66,15 @@ class MainActivity : ComponentActivity() {
             val currentScreen = authViewModle.currentScreen.collectAsState()
             var buttonNavItemHolder = listOf<ButtonNavItem>(
                 ButtonNavItem(name ="Home", imageId = Icons.Outlined.Home,0 ),
-                ButtonNavItem(name ="Order", imageId = ImageVector.vectorResource(R.drawable.order),1 ),
-                ButtonNavItem(name ="Cart", imageId = Icons.Outlined.ShoppingCart,2 ),
+                ButtonNavItem(name ="Orders", imageId = ImageVector.vectorResource(R.drawable.order),1 ),
+                ButtonNavItem(name ="MyOrder", imageId = ImageVector.vectorResource(R.drawable.shopping),2 ),
                 ButtonNavItem(name ="Account", imageId = Icons.Outlined.Person ,3),
             )
 
             val pages = listOf(
                 Screens.Home,
-                Screens.Order,
-                Screens.Cart,
+                Screens.Orders,
+                Screens.MyOrder,
                 Screens.Account,
             )
 
@@ -98,8 +90,8 @@ class MainActivity : ComponentActivity() {
                         val navBackStackEntry = nav.currentBackStackEntryAsState()
                         if(
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true||
-                            navBackStackEntry.value?.destination?.hasRoute(Screens.Cart::class) == true||
-                            navBackStackEntry.value?.destination?.hasRoute(Screens.Order::class) == true||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Orders::class) == true||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Orders::class) == true||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Account::class) == true
                             )
                         {
