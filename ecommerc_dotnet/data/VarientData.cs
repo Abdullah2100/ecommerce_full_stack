@@ -22,8 +22,10 @@ public class VarientData
     {
         try
         {
-            Varient? result = await _dbContext.Varients.FindAsync(id);
-            if (result == null) return null;
+            Varient? result = await _dbContext
+                .Varients
+                .FindAsync(id);
+            if (result is null) return null;
             return new VarientResposeDto
             {
                 id = result.id,
@@ -65,7 +67,10 @@ public class VarientData
     {
         try
         {
-            var result=(await _dbContext.Varients.CountAsync());
+            var result=(await _dbContext
+                .Varients
+                .AsNoTracking()
+                .CountAsync());
             return (double) result / 25;
         }
         catch (Exception ex)
@@ -79,8 +84,11 @@ public class VarientData
     {
         try
         {
-            var result = await _dbContext.Varients.FirstOrDefaultAsync(va => va.name == name);
-            return result != null;
+            var result = await _dbContext
+                .Varients
+                .AsNoTracking()
+                .FirstOrDefaultAsync(va => va.name == name);
+            return result !=  null;
         }
         catch (Exception ex)
         {
@@ -93,9 +101,11 @@ public class VarientData
     {
         try
         {
-            var result = await _dbContext.Varients
+            var result = await _dbContext
+                .Varients
+                .AsNoTracking()
                 .FirstOrDefaultAsync(va => va.id == id);
-            return result != null;
+            return result !=  null;
         }
         catch (Exception ex)
         {
@@ -110,8 +120,11 @@ public class VarientData
         try
         {
             var id = clsUtil.generateGuid();
-            await _dbContext.Varients.AddAsync(new Varient { id = id, name = name });
-            await _dbContext.SaveChangesAsync();
+            await _dbContext
+                .Varients
+                .AddAsync(new Varient { id = id, name = name });
+            await _dbContext
+                .SaveChangesAsync();
             return await getVarient(id);
         }
         catch (Exception ex)
@@ -124,10 +137,11 @@ public class VarientData
     public async Task<VarientResposeDto?> updateVarient(string name, Guid id)
     {
         try
-        {
-            var result = await _dbContext.Varients.FindAsync(id);
-            if (result == null) return null;
-            result.name = name;
+        { 
+            await _dbContext
+                .Varients.Where(v=>v.id==id)
+                .ExecuteUpdateAsync(v=>v
+                    .SetProperty(value=>value.name,name));
 
             await _dbContext.SaveChangesAsync();
             return await getVarient(id);
@@ -140,18 +154,14 @@ public class VarientData
     }
 
     public async Task<bool> deleteVarient(
-        Guid varrient_id)
+        Guid varrientId)
     {
         try
         {
-            var result = await _dbContext.Varients.FindAsync(varrient_id);
-
-            if (result == null)
-            {
-                return false;
-            }
-
-            _dbContext.Remove(result);
+             await _dbContext
+                 .Varients
+                 .Where(v=>v.id==varrientId)
+                 .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;
         }

@@ -45,6 +45,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,6 +71,7 @@ import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,12 +80,13 @@ fun CartScreen(
     nav: NavHostController,
     homeViewModel: HomeViewModel
 ) {
+   val  coroutine = rememberCoroutineScope()
 
-    var cardData = homeViewModel.cartImes.collectAsState()
+    val cardData = homeViewModel.cartImes.collectAsState()
     var varient = homeViewModel.varients.collectAsState()
-    var context = LocalContext.current
-    var config = LocalConfiguration.current;
-    var screenWidth = config.screenWidthDp
+    val context = LocalContext.current
+    val config = LocalConfiguration.current;
+    val screenWidth = config.screenWidthDp
     val snackbarHostState = remember { SnackbarHostState() }
     Log.d("cartItemsLength", "${cardData.value.cartProducts.size}")
 
@@ -165,6 +168,9 @@ fun CartScreen(
                            CustomBotton(
                                buttonTitle = "Go to Checkout",
                                operation = {
+                                   coroutine.launch {
+                                       homeViewModel.calculateOrderDistanceToUser()
+                                   }
                                    nav.navigate(Screens.Checkout)
                                }
                            )

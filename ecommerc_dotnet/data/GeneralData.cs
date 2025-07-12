@@ -58,7 +58,7 @@ public class GeneralData
         try
         {
             var result = await _dbContext.GeneralSettings.FindAsync(id);
-            return result != null;
+            return result !=  null;
         }
         catch (Exception ex)
         {
@@ -72,8 +72,9 @@ public class GeneralData
         try
         {
             var result = await _dbContext.GeneralSettings
+                .AsNoTracking()
                 .FirstOrDefaultAsync(gs => gs.id == id && gs.name == name);
-            return result != null;
+            return result !=  null;
         }
         catch (Exception ex)
         {
@@ -86,7 +87,9 @@ public class GeneralData
     {
         try
         {
-            return await _dbContext.GeneralSettings.CountAsync();
+            return await _dbContext.GeneralSettings
+                .AsNoTracking()
+                .CountAsync();
         }
         catch (Exception ex)
         {
@@ -131,13 +134,13 @@ public class GeneralData
     {
         try
         {
-            GeneralSettings? result = await _dbContext
-                .GeneralSettings.FindAsync(id);
-            if (result == null) return null;
-
-            result.updatedAt = DateTime.Now;
-            result.name = name;
-            result.value = value;
+             await _dbContext
+                .GeneralSettings
+                .Where(gs=>gs.id==id)
+                .ExecuteUpdateAsync(gs=>gs
+                    .SetProperty(value=>value.name,name)
+                    .SetProperty(value=>value.updatedAt,DateTime.Now)
+                    .SetProperty(value=>value.value,value));
             
             await _dbContext.SaveChangesAsync();
             return await getGeneralSettings(id);
@@ -153,11 +156,12 @@ public class GeneralData
     {
         try
         {
-            GeneralSettings? result = await _dbContext
-                .GeneralSettings.FindAsync(id);
-            if (result == null) return null;
-            _dbContext.Remove(result);
-            await _dbContext.SaveChangesAsync();
+             await _dbContext
+                .GeneralSettings
+                .Where(gs=>gs.id==id)
+                .ExecuteDeleteAsync();
+            
+             await _dbContext.SaveChangesAsync();
             return true;
         }
         catch (Exception ex)

@@ -149,6 +149,13 @@ fun CheckoutScreen(
                                     message = result
                                 }
                                 snackbarHostState.showSnackbar(message)
+                                if(result.isNullOrEmpty()){
+                                    nav.navigate(Screens.HomeGraph) {
+                                        popUpTo(nav.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
                             }
                         },
                         buttonTitle = "Place Order",
@@ -217,6 +224,7 @@ fun CheckoutScreen(
                         }
 
                         Sizer(1)
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -409,6 +417,31 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+                        Sizer(15)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                "Distance To User In Kilo",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "${distancToUser.value}",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
 
                     }
 

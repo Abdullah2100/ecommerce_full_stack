@@ -51,22 +51,22 @@ public class StoreController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted
-        //|| (user.id != store.userId && store.userId != null && user.role == 1)
+        //|| (user.id !=  store.userId && store.userId !=  null && user.role == 1)
         )
             return BadRequest("ليس لديك الصلاحية لانشاء متجر جديد");
 
@@ -80,19 +80,19 @@ public class StoreController : ControllerBase
         smallImage = await clsUtil.saveFile(store.smallImage, clsUtil.enImageType.STORE, _host);
         wallperper = await clsUtil.saveFile(store.wallpaperImage, clsUtil.enImageType.STORE, _host);
 
-        if (smallImage == null || wallperper == null)
+        if (smallImage is null || wallperper is null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصور");
 
         StoreResponseDto? result = await _storeData.createStore(
             name: store.name,
             wallpaperImage: wallperper,
             smallImage: smallImage,
-            userId: idHolder.Value != store?.userId && store.userId != null ? (Guid)store.userId : user.id,
+            userId: idHolder.Value !=  store?.userId && store.userId !=  null ? (Guid)store.userId : user.id,
             latitude: store.latitude,
             longitude: store.longitude
         );
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء حفظ البيانات");
 
         return StatusCode(201, result);
@@ -113,41 +113,41 @@ public class StoreController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
 
-        if (user.store == null)
+        if (user.store is null)
             return NotFound("المتجر غير موجود");
 
-        if (user.store.name != store.name && await _storeData.isExist(store.name))
+        if (user.store.name !=  store.name && await _storeData.isExist(store.name))
         {
             return Conflict("اسم المتجر تم استخدامه اختر اسما اخر");
         }
 
-        if (store.wallpaperImage != null)
+        if (store.wallpaperImage !=  null)
             clsUtil.deleteFile(user.store.wallpaperImage, _host);
 
-        if (store.smallImage != null)
+        if (store.smallImage !=  null)
             clsUtil.deleteFile(user.store.smallImage, _host);
 
 
         string? wallperper = null, smallImage = null;
 
-        if (store.smallImage != null)
+        if (store.smallImage !=  null)
             smallImage = await clsUtil.saveFile(store.smallImage, clsUtil.enImageType.STORE, _host);
-        if (store.wallpaperImage != null)
+        if (store.wallpaperImage !=  null)
             wallperper = await clsUtil.saveFile(store.wallpaperImage, clsUtil.enImageType.STORE, _host);
 
 
@@ -160,7 +160,7 @@ public class StoreController : ControllerBase
             longitude: store.longitude
         );
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء حفظ البيانات");
 
         return StatusCode(200, result);
@@ -181,18 +181,18 @@ public class StoreController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.role == 1)
@@ -232,9 +232,9 @@ public class StoreController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid userId = Guid.Empty;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            userId = outID;
+            userId = outId;
         }
 
         if (userId == Guid.Empty)
@@ -244,7 +244,7 @@ public class StoreController : ControllerBase
 
         StoreResponseDto? result = await _storeData.getStoreByUser(userId);
 
-        if (result == null)
+        if (result is null)
             return NoContent();
         return Ok(result);
     }
@@ -257,7 +257,7 @@ public class StoreController : ControllerBase
     {
         StoreResponseDto? result = await _storeData.getStoreById(storeId);
 
-        if (result == null)
+        if (result is null)
             return NotFound("المتجر غير موجود");
         return Ok(result);
     }
@@ -274,19 +274,19 @@ public class StoreController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? userData = await _userData.getUserById(idHolder.Value);
 
-        if (userData == null || userData.role != 0)
+        if (userData is null || userData.role !=  0)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
 
         int pages = await _storeData.getStorePages();
@@ -300,7 +300,7 @@ public class StoreController : ControllerBase
     {
         List<StoreResponseDto>? result = await _storeData.getStore(page);
 
-        if (result == null)
+        if (result is null)
             return NoContent();
         return Ok(result);
     }

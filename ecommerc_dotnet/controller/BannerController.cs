@@ -52,30 +52,30 @@ public class BannerController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
      
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         UserInfoResponseDto? userHolder = await _userData.getUser(idHolder.Value);
-        if (userHolder == null)
+        if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.storeId == null)
+        if (userHolder.storeId is null)
         {
             return NotFound("لا بد من انشاء متجر قبل اضافة اي لوحة اعلانية");
         }
 
         string? imagePath = await clsUtil.saveFile(banner.image, clsUtil.enImageType.BANNER, _host);
 
-        if (imagePath == null)
+        if (imagePath is null)
         {
             return BadRequest("حدثت مشكلة اثناء حفظ الصورة");
         }
@@ -83,7 +83,7 @@ public class BannerController : ControllerBase
 
         BannerResponseDto? result = await _bannerData.addNewBanner(banner.endAt, imagePath, (Guid)userHolder.storeId!);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء حقظ الوحة الاعلانية");
 
         await _hubContext.Clients.All.SendAsync("createdBanner", result);
@@ -105,30 +105,30 @@ public class BannerController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         UserInfoResponseDto? userHolder = await _userData.getUser(idHolder.Value);
-        if (userHolder == null)
+        if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.storeId == null)
+        if (userHolder.storeId is null)
         {
             return NotFound("ليس لديك اي متجر");
         }
 
         BannerResponseDto? banner = await _bannerData.getBanner((Guid)userHolder.storeId!, banner_id);
 
-        if ((banner == null))
+        if ((banner is null))
         {
             return BadRequest("اللوحة الاعلانية غير موجودة");
         }
@@ -158,7 +158,7 @@ public class BannerController : ControllerBase
 
         List<BannerResponseDto>? result = await _bannerData.getBanner(storeId, pageNumber);
 
-        if (result == null)
+        if (result is null)
             return NoContent();
         return StatusCode(200, result);
     }
@@ -170,7 +170,7 @@ public class BannerController : ControllerBase
     public async Task<IActionResult> getBannerRandom()
     {
         var result = await _bannerData.getBanner(15);
-        if (result == null)
+        if (result is null)
             return NoContent();
         
         return StatusCode(200, result);

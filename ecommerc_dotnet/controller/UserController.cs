@@ -50,14 +50,14 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> signUp([FromBody] SignupDto data)
     {
-        if (data.role != 0 && data.role != 1)
+        if (data.role !=  0 && data.role !=  1)
         {
             return BadRequest("role must be 1 or 0");
         }
 
         string? validationResult = clsValidation.validateInput(data.email, data.password, data.phone);
 
-        if (validationResult != null)
+        if (validationResult !=  null)
         {
             return BadRequest(validationResult);
         }
@@ -81,7 +81,7 @@ public class UserController : ControllerBase
             role: data.role,
             deviceToken: data.deviceToken
         );
-        if (result == null)
+        if (result is null)
             return BadRequest("هناك مشكلة ما");
 
         string token = "", refreshToken = "";
@@ -110,7 +110,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> signIn([FromBody] LoginDto data)
     {
         UserInfoResponseDto? result = await _userData.getUser(data.username, clsUtil.hashingText(data.password));
-        if (result == null)
+        if (result is null)
             return BadRequest("المستخدم غير موجود");
 
         await _userData.updateUserDeviceToken(userId: result.Id, deviceToken: data.deviceToken);
@@ -143,19 +143,19 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         UserInfoResponseDto? user = await _userData.getUser(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return BadRequest("المستخدم غير موجود");
         }
@@ -176,24 +176,24 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (user.role == 1)
+        if (user.role is 1)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
 
         if (page < 0)
@@ -203,7 +203,7 @@ public class UserController : ControllerBase
 
         List<UserInfoResponseDto>? users = await _userData.getUsers(page);
 
-        if (users == null)
+        if (users is null)
             return NoContent();
 
         return StatusCode(200, users);
@@ -221,30 +221,30 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (user.role == 1)
+        if (user.role is 1)
             return BadRequest("ليس لديك الصلاحية ");
 
 
-        bool result = await _userData.deleteUser(userId);
+        bool? result = await _userData.deleteUser(userId);
 
-        if (result == false)
+        if (result is null or false)
             return BadRequest("حدثة مشكلة اثناء حذف المستخدم");
         return NoContent();
     }
@@ -261,19 +261,19 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is  null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? userData = await _userData.getUserById(idHolder.Value);
 
-        if (userData == null || userData.role != 0)
+        if (userData is null || userData.role !=  0)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
 
         int size = await _userData.getUsers();
@@ -296,44 +296,44 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (idHolder != user.id)
+        if (idHolder !=  user.id)
         {
             return BadRequest("فقط المستخدم يمكن تعديل بياناته");
         }
 
 
-        if (userData.password != null && userData.newPassword != null)
+        if (userData.password !=  null && userData.newPassword !=  null)
         {
-            if (user.password != clsUtil.hashingText(userData.password))
+            if (user.password !=  clsUtil.hashingText(userData.password))
             {
                 return BadRequest("كلمة المرور غير صحيحة");
             }
         }
 
-        if (user.thumbnail != null && userData.thumbnail != null)
+        if (user.thumbnail !=  null && userData.thumbnail !=  null)
         {
             clsUtil.deleteFile(user.thumbnail, _host);
         }
 
         string? profile = null;
-        if (userData.thumbnail != null)
+        if (userData.thumbnail !=  null)
         {
             profile = await clsUtil.saveFile(userData.thumbnail, clsUtil.enImageType.PROFILE, _host);
         }
@@ -341,11 +341,11 @@ public class UserController : ControllerBase
         UserInfoResponseDto? result = await _userData.updateUser(
             userId: idHolder.Value,
             phone: userData.phone,
-            password: userData.password == null ? null : clsUtil.hashingText(userData.password),
+            password: userData.password is null ? null : clsUtil.hashingText(userData.password),
             name: userData.name,
             profile);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("هناك مشكلة في تحديث البيانات");
 
 
@@ -367,19 +367,19 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null || user.isDeleted)
+        if (user is null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -387,7 +387,7 @@ public class UserController : ControllerBase
 
         List<AddressResponseDto>? locations = await _addressData.getUserAddressByUserId(user.id);
 
-        if (locations == null)
+        if (locations is null)
             return NoContent();
 
         return StatusCode(200, locations);
@@ -408,19 +408,19 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null || user.isDeleted)
+        if (user is null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -435,7 +435,7 @@ public class UserController : ControllerBase
             latitude: address.latitude,
             userId: idHolder.Value
         );
-        if (location == null)
+        if (location is null)
             return BadRequest("حدثة مشكلة اثناء حفظ المان");
 
         return StatusCode(201, location);
@@ -455,31 +455,31 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null || user.isDeleted)
+        if (user is null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
 
         Address? addressResult = await _addressData.getAddressData(address.id);
 
-        if (addressResult == null)
+        if (addressResult is null)
         {
             return NotFound("العنوان غير موجود");
         }
 
-        if (addressResult.ownerId != idHolder.Value)
+        if (addressResult.ownerId !=  idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
@@ -491,7 +491,7 @@ public class UserController : ControllerBase
             latitude: address.latitude
         );
 
-        if (location == null)
+        if (location is null)
             return BadRequest("حدثة مشكلة اثناء تعديل البيانات");
 
         return StatusCode(200, location);
@@ -511,31 +511,31 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null || user.isDeleted)
+        if (user is null || user.isDeleted)
         {
             return NotFound("المستخدم غير موجود");
         }
 
         Address? addressResult = await _addressData.getAddressData(addre_id);
 
-        if (addressResult == null)
+        if (addressResult is null)
         {
             return NotFound("العنوان غير موجود");
         }
 
-        if (addressResult.ownerId != idHolder.Value)
+        if (addressResult.ownerId !=  idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
@@ -564,26 +564,26 @@ public class UserController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null || user.isDeleted)
+        if (user is null || user.isDeleted)
         {
             return BadRequest("المستخدم غير موجود");
         }
 
         AddressResponseDto? address = await _addressData.getUserAddressByAddressId(addressID);
 
-        if (address == null)
+        if (address is null)
         {
             return BadRequest("العنوان غير موجود");
         }
@@ -601,7 +601,7 @@ public class UserController : ControllerBase
     {
         UserInfoResponseDto? user = await _userData.getUser(email.email);
 
-        if (user == null)
+        if (user is null)
         {
             NotFound("user not exist");
         }
@@ -673,7 +673,7 @@ public class UserController : ControllerBase
             return NotFound("المستخدم غير موجود");
         UserInfoResponseDto? result = await _userData.updateUserPassword(data.email,
             clsUtil.hashingText(data.password));
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
 
         string token = "", refreshToken = "";

@@ -13,7 +13,6 @@ public class UserData
 {
     private readonly IConfig _configuration;
     private readonly AppDbContext _dbContext;
-    // private readonly ILogger _logger;
 
     public UserData(AppDbContext appDbContext)
     {
@@ -22,13 +21,10 @@ public class UserData
 
     public UserData(AppDbContext dbContext,
         IConfig configuration
-
-        // , ILogger logger
     )
     {
         _dbContext = dbContext;
         _configuration = configuration;
-        // _logger = logger;
     }
 
 
@@ -50,10 +46,11 @@ public class UserData
                     storeId = u.store.id
                 })
                 .FirstOrDefaultAsync();
+            if (result is null) return null;
 
             List<AddressResponseDto>? address = await _dbContext.Address
-                .AsNoTracking()
                 .Where(ad => ad.ownerId == result.Id)
+                .AsNoTracking()
                 .OrderByDescending(ad => ad.createdAt)
                 .Select(ad => new AddressResponseDto()
                 {
@@ -61,9 +58,9 @@ public class UserData
                     latitude = ad.latitude,
                     longitude = ad.longitude,
                     title = ad.title
-                }).ToListAsync() ?? null;
+                }).ToListAsync();
 
-            result.address = address;
+            result.address = address ??[];
 
             return result;
         }
@@ -80,9 +77,10 @@ public class UserData
         try
         {
             UserInfoResponseDto? result = await _dbContext.Users
-                .AsNoTracking()
                 .Include(u => u.store)
+                .AsSplitQuery()
                 .Where(us => us.id == userID)
+                .AsNoTracking()
                 .Select(us => new UserInfoResponseDto
                 {
                     name = us.name,
@@ -97,12 +95,12 @@ public class UserData
                     storeId = us.store == null ? null : us!.store.id
                 }).FirstOrDefaultAsync();
 
-            if (result != null)
+            if (result !=  null)
             {
                 //result.address =await _dbContext.Address.Where(ad=>ad.ownerId==userID).ToListAsync()
                 result.address = await _dbContext.Address
-                    .AsNoTracking()
                     .Where(ad => ad.ownerId == userID)
+                    .AsNoTracking()
                     .Select(ad => new AddressResponseDto
                     {
                         id = ad.id,
@@ -128,9 +126,10 @@ public class UserData
         try
         {
             UserInfoResponseDto? result = await _dbContext.Users
-                .AsNoTracking()
                 .Include(u => u.store)
+                .AsSplitQuery()
                 .Where(us => us.email==email)
+                .AsNoTracking()
                 .Select(us => new UserInfoResponseDto
                 {
                     name = us.name,
@@ -160,8 +159,8 @@ public class UserData
         try
         {
             return await _dbContext.Users
-                .AsNoTracking()
                 .Include(u => u.store)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -171,7 +170,7 @@ public class UserData
                     phone = us.phone,
                     email = us.email,
                     Id = us.id,
-                    storeName =us.store!=null? us.store.name:"",
+                    storeName =us.store!= null? us.store.name:"",
                     isAdmin =us.role==0,
                     isActive = us.isDeleted,
                     thumbnail = us.thumbnail == null
@@ -196,7 +195,10 @@ public class UserData
     {
         try
         {
-            return await _dbContext.Users.AsNoTracking().CountAsync();
+            return await _dbContext
+                .Users
+                .AsNoTracking()
+                .CountAsync();
         }
         catch (Exception e)
         {
@@ -213,6 +215,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .Include(st => st.store)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.id == ID);
         }
@@ -230,8 +233,9 @@ public class UserData
         {
             return await _dbContext.Users
                 .Include(st => st.store)
+                .AsSplitQuery()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.store!=null&&u.store.id == storeId);
+                .FirstOrDefaultAsync(u => u.store!= null&&u.store.id == storeId);
         }
         catch (Exception e)
         {
@@ -246,7 +250,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.id == userid && u.isDeleted == false) != null;
+                .FirstOrDefaultAsync(u => u.id == userid && u.isDeleted == false) !=  null;
         }
         catch (Exception e)
         {
@@ -263,7 +267,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.email == email) != null;
+                .FirstOrDefaultAsync(u => u.email == email) !=  null;
         }
         catch (Exception e)
         {
@@ -280,7 +284,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.phone == phone && u.isDeleted == false) != null;
+                .FirstOrDefaultAsync(u => u.phone == phone && u.isDeleted == false) !=  null;
         }
         catch (Exception e)
         {
@@ -289,14 +293,15 @@ public class UserData
         }
     }
 
-    public async Task<bool> deleteUser(Guid userID)
+    public async Task<bool?> deleteUser(Guid userID)
     {
         try
         {
-            User? result = await _dbContext.Users
+          var result =   await _dbContext.Users
                 .FindAsync(userID);
 
-            result!.isDeleted = !result.isDeleted;
+          if (result is null) return null;
+            result.isDeleted = !result.isDeleted;
             await _dbContext.SaveChangesAsync();
             return result.isDeleted;
         }
@@ -323,7 +328,7 @@ public class UserData
             {
                 User? result = await _dbContext.Users
                     .FirstOrDefaultAsync(u => u.role == 1);
-                if (result != null)
+                if (result !=  null)
                 {
                     Console.WriteLine("can't create new admin while there is already an admin");
                     return null;
@@ -342,7 +347,8 @@ public class UserData
                 deviceToken = deviceToken ?? ""
             };
 
-            await _dbContext.Users.AddAsync(userData);
+            await _dbContext
+                .Users.AddAsync(userData);
             await _dbContext.SaveChangesAsync();
             return await getUser(userData.id);
         }
@@ -365,9 +371,9 @@ public class UserData
         try
         {
             User? userData = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.id == userId);
+                .FindAsync( userId);
 
-            if (userData == null)
+            if (userData is null)
                 return null;
 
             userData.name = name ?? userData.name;
@@ -397,7 +403,7 @@ public class UserData
             User? userData = await _dbContext.Users
                 .FindAsync( userId);
 
-            if (userData == null)
+            if (userData is null)
                 return null;
 
             userData.deviceToken = deviceToken ?? userData.deviceToken;
@@ -420,17 +426,14 @@ public class UserData
         {
             try
             {
-                User? userData = await _dbContext.Users
-                    .FirstOrDefaultAsync(u => u.email==email);
-    
-                if (userData == null)
-                    return null;
-    
-                userData.password = newPassword;
-    
+                 await _dbContext.Users
+                    .Where(u => u.email==email)
+                    .ExecuteUpdateAsync(
+                        us=>us
+                            .SetProperty(value=>value.password,newPassword));
     
                 await _dbContext.SaveChangesAsync();
-                return await getUser(userID: userData.id);
+                return await getUser(email: email);
             }
             catch (Exception e)
             {

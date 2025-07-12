@@ -18,7 +18,7 @@ namespace hotel_api.Services
                 enTokenMode enTokenMode=enTokenMode.AccessToken
         )
         {
-            if (userID == null) return "";
+            if (userID is null) return "";
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             string key = config.getKey("credentials:key");
             string issuer = config.getKey("credentials:Issuer");

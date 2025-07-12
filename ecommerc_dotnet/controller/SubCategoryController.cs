@@ -43,12 +43,12 @@ public class SubCategoryController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
@@ -61,7 +61,7 @@ public class SubCategoryController : ControllerBase
 
         UserInfoResponseDto?  user = await _userData.getUser(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -74,13 +74,13 @@ public class SubCategoryController : ControllerBase
 
         Guid? storeData = user.storeId;
 
-        if (storeData == null)
+        if (storeData is null)
         {
             return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
         int? store_subCateogry_size = await _subCategoryData.countByStoreId(user.storeId);
-        if (store_subCateogry_size == null)
+        if (store_subCateogry_size is null)
             return BadRequest("حدثة مشكلة اثناء التاكد من عدد الفئات الفرعية للمتجر");
         if(store_subCateogry_size>19)
         return BadRequest("لا يمكنك اضافة اكثر من 20 فئة في متجرك");
@@ -91,7 +91,7 @@ public class SubCategoryController : ControllerBase
                 storeId: (Guid)user.storeId!,
                 name: subCategory.name);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثة مشكلة اثناء الفئة");
         return StatusCode(201, result);
     }
@@ -108,19 +108,19 @@ public class SubCategoryController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         UserInfoResponseDto? user = await _userData.getUser(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -140,21 +140,21 @@ public class SubCategoryController : ControllerBase
 
         Guid? storeData = user.storeId;
 
-        if (storeData == null)
+        if (storeData is null)
         {
             return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
-        if (await _subCategoryData.isExist((Guid)user.storeId!, (Guid)subCategory.id!) == null)
+        if (await _subCategoryData.isExist((Guid)user.storeId!, (Guid)subCategory.id!) is null)
             return BadRequest("الفئة التي ادخلتها غير موجودة");
 
 
         SubCategoryResponseDto? result = await _subCategoryData
             .updateSubCategory(id: subCategory.id,
                 name: subCategory.name,
-                category_id: subCategory.cateogy_id);
+                categoryId: subCategory.cateogy_id);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثة مشكلة اثناء الفئة");
         return StatusCode(200, result);
     }
@@ -174,19 +174,19 @@ public class SubCategoryController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         UserInfoResponseDto? user = await _userData.getUser(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -200,18 +200,18 @@ public class SubCategoryController : ControllerBase
 
         Guid? storeData = user.storeId;
 
-        if (storeData == null)
+        if (storeData is null)
         {
             return NotFound("ليس لديك اي متجر يرجى فتح متجر لكي تكون قادرا على اضافة فئة");
         }
 
-        if (await _subCategoryData.isExist((Guid)user.storeId!, subCateogyId) == null)
+        if (await _subCategoryData.isExist((Guid)user.storeId!, subCateogyId) is null)
             return BadRequest("الفئة التي ادخلتها غير موجودة");
 
 
         bool? result = await _subCategoryData.deleteSubCategory(subCateogyId);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثة مشكلة اثناء حذف الفئة");
         return NoContent();
     }

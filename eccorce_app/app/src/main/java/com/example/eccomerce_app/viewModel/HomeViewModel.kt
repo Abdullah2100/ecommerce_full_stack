@@ -11,9 +11,11 @@ import com.example.e_commercompose.data.repository.HomeRepository
 import com.example.e_commercompose.data.Room.AuthDao
 import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
 import com.example.e_commercompose.dto.ModelToDto.toOrderRequestDto
+import com.example.e_commercompose.dto.ModelToDto.toOrderRequestItemDto
 import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
 import com.example.e_commercompose.dto.request.AddressRequestDto
 import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
+import com.example.e_commercompose.dto.request.CartRequestDto
 import com.example.e_commercompose.dto.request.SubCategoryRequestDto
 import com.example.e_commercompose.dto.response.AddressResponseDto
 import com.example.e_commercompose.dto.response.BannerResponseDto
@@ -64,6 +66,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 class HomeViewModel(
@@ -135,7 +140,7 @@ class HomeViewModel(
 
 
     fun addToCart(product: CardProductModel) {
-        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var cardProducts = mutableListOf<CardProductModel>()
 
             cardProducts.add(product)
@@ -155,13 +160,13 @@ class HomeViewModel(
                 )
                 _cartImes.emit(copyCardItme)
             }
-            calculateOrderDistanceToUser()
+
         }
     }
 
 
     fun increaseCardItem(productId: UUID) {
-        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var copyproduct: CardProductModel? = null;
             var productHolders = _cartImes.value.cartProducts.map { product ->
                 if (product.id == productId) {
@@ -190,7 +195,7 @@ class HomeViewModel(
 
 
     fun decreaseCardItem(productId: UUID) {
-        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var productList = _cartImes.value.cartProducts;
             var fristProduct = productList.first { it.id == productId }
             var varientPrice = fristProduct!!.price
@@ -228,7 +233,7 @@ class HomeViewModel(
     }
 
     fun removeItemFromCard(productId: UUID) {
-        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var productList = _cartImes.value.cartProducts;
             var fristProduct = productList.first { it.id == productId }
             var varientPrice = fristProduct!!.price
@@ -251,20 +256,27 @@ class HomeViewModel(
         }
     }
 
-  suspend   fun calculateOrderDistanceToUser(){
-             _cartImes.value.cartProducts.distinctBy { it.store_id }.forEach { product->
-                 val result = FloatArray(1)
-                 Location.distanceBetween(
-                     _stores.value?.firstOrNull { it.id==product.store_id }!!.latitude,
-                     _stores.value?.firstOrNull { it.id==product.store_id }!!.longitude,
-                     _myInfo.value?.address?.firstOrNull{it.isCurrnt==true}!!.latitude,
-                     _myInfo.value?.address?.firstOrNull{it.isCurrnt==true}!!.longitude,
-                     result
-                 )
+    suspend fun calculateOrderDistanceToUser() {
+        var copyDistance = 0.0;
+        _cartImes.value.cartProducts.distinctBy { it.store_id }.forEach { product ->
+            val yPower = (
+                    _stores.value?.firstOrNull { it.id == product.store_id }!!.latitude -
+                            _myInfo.value?.address?.firstOrNull { it.isCurrnt == true }!!.latitude
+                    ).pow(2)
 
-                 val copyDistance = _distance.value + (result[0]/1000)
-                 _distance.emit(Math.ceil(copyDistance))
-         }
+            val xPower = (
+                    _stores.value?.firstOrNull { it.id == product.store_id }!!.longitude -
+                            _myInfo.value?.address?.firstOrNull { it.isCurrnt == true }!!.longitude
+                    ).pow(2)
+
+
+            val result = sqrt(xPower + yPower)
+
+
+            copyDistance = copyDistance + (max(1.0, (result / 1000)).toInt())
+
+        }
+        _distance.emit(copyDistance)
     }
 
 
@@ -287,7 +299,7 @@ class HomeViewModel(
     }
 
     override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             if (_hub.value != null)
                 _hub.value!!.stop()
         }
@@ -297,7 +309,7 @@ class HomeViewModel(
     fun connection() {
 
         if (webSocket != null) {
-            viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+            viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
 
                 _hub.emit(webSocket)
                 _hub.value?.start()?.blockingAwait()
@@ -312,7 +324,7 @@ class HomeViewModel(
                             banners.add(result.toBanner())
                             banners.addAll(_banners.value!!)
                         }
-                        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+                        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
                             Log.d("bannerCreationData", banners.toString())
 
                             _banners.emit(banners)
@@ -325,7 +337,7 @@ class HomeViewModel(
                     "storeStatus",
                     { result ->
 
-                        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+                        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
                             if (result.status == true) {
                                 val productNotBelongToStore =
                                     _products.value?.filter { it.store_id != result.storeId }
@@ -352,7 +364,7 @@ class HomeViewModel(
                         if (_orderItemForMyStore.value != null) {
                             orderItemList.addAll(_orderItemForMyStore.value!!)
                         }
-                        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+                        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
                             _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }.toList())
                         }
                     },
@@ -489,7 +501,7 @@ class HomeViewModel(
     //category
     fun getCategories(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -524,7 +536,7 @@ class HomeViewModel(
     //general
     fun getGeneral(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             var result = homeRepository.getGeneral(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -557,7 +569,7 @@ class HomeViewModel(
     //order
     fun getVarients(pageNumber: Int = 1) {
         if (pageNumber == 1 && _varients.value != null) return;
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             var result = homeRepository.getVarient(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -663,11 +675,12 @@ class HomeViewModel(
                     }
                     var copyMyAddress = _myInfo.value?.copy(address = addresses);
                     _myInfo.emit(copyMyAddress)
-                    dao.savePassingLocation(IsPassSetLocationScreen(0,true))
+                    dao.savePassingLocation(IsPassSetLocationScreen(0, true))
 
                 }
                 return null
             }
+
             is NetworkCallHandler.Error -> {
                 var errorMessage = result.data
                 return errorMessage.toString()
@@ -750,7 +763,7 @@ class HomeViewModel(
 
     fun getMyInfo() {
         if (_myInfo.value != null) return;
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             var result = homeRepository.getMyInfo();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -766,15 +779,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Error -> {
                     if (_myInfo.value == null) {
                         _myInfo.emit(
-                            UserModel(
-                                id = UUID.randomUUID(),
-                                name = "",
-                                phone = "",
-                                email = "",
-                                thumbnail = "",
-                                address = emptyList(),
-                                store_id =null
-                            )
+                           null
                         )
                     }
                     var resultError = result.data as String
@@ -1543,14 +1548,23 @@ class HomeViewModel(
 
 
     fun logout() {
-        viewModelScope.launch(Dispatchers.IO+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             dao.nukeTable()
         }
     }
 
 
     suspend fun submitCartTitems(): String? {
-        var result = homeRepository.submitOrder(_cartImes.value.toOrderRequestDto())
+        var result = homeRepository.submitOrder(
+            CartRequestDto(
+                longitude = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.longitude
+                    ?: 0.0,
+                latitude = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.latitude
+                    ?: 0.0,
+                items = _cartImes.value.cartProducts.map { it.toOrderRequestItemDto() },
+                totalPrice = _cartImes.value.totalPrice
+            )
+        )
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as OrderResponseDto
@@ -1586,7 +1600,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
         if (isLoading != null) isLoading.value = true
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             if (isLoading != null)
                 delay(500)
             var result = homeRepository.getMyOrders(pageNumber.value)
@@ -1648,7 +1662,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
 
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
+        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             if (isLoading != null) {
                 isLoading.value = true
                 delay(500)

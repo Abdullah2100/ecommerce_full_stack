@@ -16,7 +16,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +34,7 @@ import com.example.e_commercompose.ui.component.AccountCustomBottom
 import com.example.e_commercompose.ui.component.LogoutBotton
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,6 +120,11 @@ fun AccountPage(
 
             if (myInfo.value?.store_id != null)
                 AccountCustomBottom("Order For My Store", R.drawable.order_belong_to_store, {
+                    homeViewModel.getMyOrderItemBelongToMyStore(
+                        store_id = storeId?: UUID.randomUUID(),
+                        pageNumber=mutableStateOf(1),
+                        isLoading= mutableStateOf(false)
+                        )
                     nav.navigate(Screens.OrderForMyStore)
                 })
             LogoutBotton("Logout", R.drawable.logout, {

@@ -140,7 +140,9 @@ object DtoToModel {
           id = this.id,
            latitude = this.latitude,
            longitude = this.longitude,
+           deliveryFee = this.deliveryFee,
            user_phone = this.userPhone,
+           totalPrice=this.totalPrice,
            order_items = this.orderItems.map { it.toOrderItem() },
            status = this.status
        )

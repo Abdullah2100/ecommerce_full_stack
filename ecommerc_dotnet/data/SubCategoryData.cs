@@ -17,14 +17,13 @@ public class SubCategoryData
         _dbContext = dbContext;
     }
 
-    public async Task<SubCategoryResponseDto?> getSubCategory(Guid id)
+    private async Task<SubCategoryResponseDto?> getSubCategory(Guid id)
     {
         try
         {
             return await _dbContext.SubCategories
                 .AsNoTracking()
                 .Where(sub => sub.id == id)
-
                 .Select(sub =>
                      new SubCategoryResponseDto
                      {
@@ -79,12 +78,12 @@ public class SubCategoryData
     {
         try
         {
-            IQueryable<bool> result = (from st in _dbContext.Stores
+         return   await (from st in _dbContext.Stores
                                        join sub in _dbContext.SubCategories on st.id equals sub.id
                                        where st.id == storeId
                                        select sub.id == subcategoryId
-                );
-            return await result.FirstOrDefaultAsync();
+                )
+                .FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -96,12 +95,11 @@ public class SubCategoryData
     {
         try
         {
-            var result = (from st in _dbContext.Stores
+            return await (from st in _dbContext.Stores
                           join sub in _dbContext.SubCategories on st.id equals sub.id
                           where st.id == storeId
                           select sub.name == name
-                );
-            return await result.FirstOrDefaultAsync();
+                ).FirstOrDefaultAsync();
         }
         catch (Exception ex)
         {
@@ -112,10 +110,14 @@ public class SubCategoryData
 
     public async Task<int?> countByStoreId(Guid? storeId)
     {
-        if (storeId == null) return null;
+        if (storeId is null) return null;
         try
         {
-            return await _dbContext.SubCategories.Where(sub => sub.storeId == storeId).CountAsync();
+            return await _dbContext
+                .SubCategories
+                .Where(sub => sub.storeId == storeId)
+                .AsNoTracking()
+                .CountAsync();
         }
         catch (Exception ex)
         {
@@ -181,18 +183,21 @@ public class SubCategoryData
         }
     }
 
-    public async Task<SubCategoryResponseDto?> updateSubCategory(Guid id,
-        string name, Guid category_id)
+    public async Task<SubCategoryResponseDto?> updateSubCategory(
+        Guid id,
+        string name,
+        Guid categoryId)
     {
         try
         {
-            SubCategory? result = await _dbContext
-                .SubCategories.FindAsync(id);
-            if (result == null) return null;
-
-            result.updatedAt = DateTime.Now;
-            result.name = name;
-            result.categoriId = category_id;
+             await _dbContext
+                .SubCategories.Where(sc=>sc.id==id)
+                .ExecuteUpdateAsync(sc=>
+                    sc.SetProperty(
+                    value=>value.updatedAt,DateTime.Now)
+                    .SetProperty(value=>value.name,name)
+                    .SetProperty(value=>value.categoriId,categoryId)
+                );
             await _dbContext.SaveChangesAsync();
             return await getSubCategory(id);
         }
@@ -207,10 +212,10 @@ public class SubCategoryData
     {
         try
         {
-            SubCategory? result = await _dbContext
-                .SubCategories.FindAsync(id);
-            if (result == null) return null;
-            _dbContext.Remove(result);
+            await _dbContext
+                .SubCategories.Where(sc=>sc.id==id)
+                .ExecuteDeleteAsync();
+            
             await _dbContext.SaveChangesAsync();
             return true;
         }

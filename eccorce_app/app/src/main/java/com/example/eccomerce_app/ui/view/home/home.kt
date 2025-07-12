@@ -253,57 +253,57 @@ fun HomePage(
                     }
 
 
-//                if (categories.value.isNullOrEmpty() == false)
-                    item {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 10.dp, bottom = 5.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                "Category",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                color = CustomColor.neutralColor950,
-                                textAlign = TextAlign.Center
+             if (categories.value.isNullOrEmpty() == false)
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp, bottom = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Category",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center
 
-                            )
-                            Text(
-                                "View All",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = 14.sp,
-                                color = CustomColor.neutralColor950,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.clickable {
-                                    nav.navigate(Screens.Category)
-                                }
-
-                            )
-                        }
-
-                        when (categories.value == null) {
-                            true -> {
-                                CategoryLoadingShape(20)
+                        )
+                        if(categories.value!!.size>4) Text(
+                            "View All",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 14.sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.clickable {
+                                nav.navigate(Screens.Category)
                             }
 
-                            else -> {
+                        )
+                    }
 
-                                when (categories.value!!.isEmpty()) {
-                                    true -> {}
-                                    else -> {
-                                        CategoryShape(
-                                            categories.value!!.take(4),
-                                            homeViewModel,
-                                            nav
-                                        )
-                                    }
+                    when (categories.value == null) {
+                        true -> {
+                            CategoryLoadingShape(20)
+                        }
+
+                        else -> {
+
+                            when (categories.value!!.isEmpty()) {
+                                true -> {}
+                                else -> {
+                                    CategoryShape(
+                                        categories.value!!.take(4),
+                                        homeViewModel,
+                                        nav
+                                    )
                                 }
                             }
                         }
                     }
+                }
 
                 if (bannel.value != null) {
                     item {

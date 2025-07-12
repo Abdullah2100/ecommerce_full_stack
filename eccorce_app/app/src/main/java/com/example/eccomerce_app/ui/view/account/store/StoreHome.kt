@@ -747,13 +747,16 @@ fun StoreScreen(
             )
         },
         floatingActionButton = {
-            if (isFromHome == false && storeData != null) FloatingActionButton(
+            if (isFromHome == false && storeData != null)
+                FloatingActionButton(
                 onClick = {
                     nav.navigate(Screens.CreateProduct(store_id.toString(), null))
-                }, containerColor = CustomColor.primaryColor50
+                },
+                    containerColor = CustomColor.primaryColor500
             ) {
                 Icon(
-                    Icons.Default.Add, "", tint = Color.Black
+                    Icons.Default.Add,
+                    "", tint = Color.White
                 )
             }
         }
@@ -1212,7 +1215,7 @@ fun StoreScreen(
                                     .height(40.dp)
                                     .width(70.dp)
                                     .background(
-                                        CustomColor.primaryColor200, RoundedCornerShape(8.dp)
+                                        CustomColor.primaryColor500, RoundedCornerShape(8.dp)
                                     )
                                     .clip(RoundedCornerShape(8.dp))
                                     .clickable {
@@ -1551,7 +1554,7 @@ fun StoreScreen(
                                             .height(40.dp)
                                             .width(70.dp)
                                             .background(
-                                                CustomColor.primaryColor200, RoundedCornerShape(8.dp)
+                                                CustomColor.primaryColor500, RoundedCornerShape(8.dp)
                                             )
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {

@@ -26,8 +26,8 @@ public class StoreData
         try
         {
             return await _dbContext.Stores
-                .AsNoTracking()
                 .Where(st => st.userId == userId)
+                .AsNoTracking()
                 .Select(st => new StoreResponseDto
                 {
                     id = st.id,
@@ -40,7 +40,7 @@ public class StoreData
                     longitude = _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
                         _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude,
                     latitude =_dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
-                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude, 
+                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.latitude, 
                 })
                 .FirstOrDefaultAsync();
         }
@@ -56,8 +56,8 @@ public class StoreData
         try
         {
             return await _dbContext.Stores
-                .AsNoTracking()
                 .Where(st => st.id == id)
+                .AsNoTracking()
                 .OrderByDescending(st => st.createdAt)
                 .Select(st => new StoreResponseDto
                 {
@@ -70,7 +70,7 @@ public class StoreData
                     longitude = _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
                         _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude,
                     latitude =_dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
-                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude, 
+                        _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.latitude, 
                 })
                 .FirstOrDefaultAsync();
         }
@@ -91,8 +91,8 @@ public class StoreData
         try
         {
             return await _dbContext.Address
-                .AsNoTracking()
                 .Where(ad => ad.ownerId == id)
+                .AsNoTracking()
                 .OrderByDescending(st => st.createdAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -154,6 +154,7 @@ public class StoreData
                 await _dbContext.Stores
                     .Include(st=>st.user)
                     .AsNoTracking()
+                    .AsSplitQuery()
                     .OrderByDescending(st => st.createdAt)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
@@ -170,7 +171,7 @@ public class StoreData
                         longitude = _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
                             _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude,
                         latitude =_dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)==null?null:
-                            _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.longitude, 
+                            _dbContext.Address.FirstOrDefault(ad=>ad.ownerId==st.id)!.latitude, 
                     })
                     .ToListAsync();
         }
@@ -200,8 +201,10 @@ public class StoreData
     {
         try
         {
-            return await _dbContext.Stores.AsNoTracking()
-                .FirstOrDefaultAsync(st => st.name == name) != null;
+            return await _dbContext
+                .Stores
+                .AsNoTracking()
+                .FirstOrDefaultAsync(st => st.name == name) !=  null;
         }
         catch (Exception ex)
         {
@@ -214,8 +217,10 @@ public class StoreData
     {
         try
         {
-            return await _dbContext.Stores.AsNoTracking()
-                .FirstOrDefaultAsync(st => st.id == storeId) != null;
+            return await _dbContext
+                .Stores
+                .AsNoTracking()
+                .FirstOrDefaultAsync(st => st.id == storeId) !=  null;
         }
         catch (Exception ex)
         {
@@ -231,7 +236,11 @@ public class StoreData
             return await _dbContext.Stores
                 .Include(st=>st.SubCategories)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(st => st.id == storeId&& st.SubCategories.FirstOrDefault(sbu=>sbu.id==subcategoryId)!=null) != null;
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(st => st.id == storeId&&
+                                           st.SubCategories!= null&& 
+                                           st.SubCategories
+                                               .FirstOrDefault(sbu=>sbu.id==subcategoryId)!= null) !=  null;
         }
         catch (Exception ex)
         {
@@ -294,7 +303,7 @@ public class StoreData
         try
         {
             Store? store = await _dbContext.Stores.FindAsync( storeId);
-            if (store == null) return false;
+            if (store is null) return false;
 
             store.isBlock = !store.isBlock;
 
@@ -322,14 +331,19 @@ public class StoreData
         {
             Store? store = await _dbContext.Stores.FirstOrDefaultAsync(st => st.userId == userId);
 
+            if (store is null)
+                return null;
             store.smallImage = smallImage ?? store.smallImage;
             store.wallpaperImage = wallpaperImage ?? store.wallpaperImage;
             store.name = name ?? store.name;
 
-            if (longitude != null && latitude != null)
+            if (longitude !=  null && latitude !=  null)
             {
-                IQueryable<Address>? address = _dbContext.Address.Where(ad => ad.ownerId == store.id);
-                _dbContext.Address.RemoveRange(address);
+                await _dbContext
+                    .Address
+                    .Where(ad => ad.ownerId == store.id)
+                    .ExecuteDeleteAsync();
+                
                 _dbContext.Address.Add(new Address
                 {
                     id = clsUtil.generateGuid(),

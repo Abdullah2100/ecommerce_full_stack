@@ -11,9 +11,7 @@ namespace ecommerc_dotnet.data;
 
 public class  DeliveryData
 {
-    private readonly IConfig _configuration;
     private readonly AppDbContext _dbContext;
-    // private readonly ILogger _logger;
 
     public DeliveryData(AppDbContext appDbContext)
     {
@@ -27,7 +25,7 @@ public class  DeliveryData
     {
         try
         {
-            return await _dbContext.Deliveries.FindAsync(id)!=null;
+            return await _dbContext.Deliveries.FindAsync(id)!= null;
         }
         catch (Exception e)
         {
@@ -36,13 +34,14 @@ public class  DeliveryData
         }
     }
 
-    public async Task<bool> isExistByUserId(Guid userID)
+    public async Task<bool> isExistByUserId(Guid userId)
     {
         try
         {
             return await _dbContext
                 .Deliveries
-                .FirstOrDefaultAsync(de=>de.userId==userID)!=null;
+                .AsNoTracking()
+                .FirstOrDefaultAsync(de=>de.userId==userId)!= null;
         }
         catch (Exception e)
         {

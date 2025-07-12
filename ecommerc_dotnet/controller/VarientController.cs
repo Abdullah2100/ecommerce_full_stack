@@ -41,23 +41,23 @@ public class VarientController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? userHolder = await _userData.getUserById(idHolder.Value);
-        if (userHolder == null)
+        if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.role != 0)
+        if (userHolder.role !=  0)
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }
@@ -71,7 +71,7 @@ public class VarientController : ControllerBase
 
         VarientResposeDto? result = await _varientData.createVarient(varient.name);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء حفظ الخيار");
 
         return StatusCode(201, result);
@@ -90,28 +90,28 @@ public class VarientController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         var userHolder = await _userData.getUserById(idHolder.Value);
-        if (userHolder == null)
+        if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.role != 0)
+        if (userHolder.role !=  0)
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }
 
-        if (varient.id == null)
+        if (varient.id is null)
             return NotFound("هذا الخيار غير موجود");
 
         var isExistByID = await _varientData.isExist((Guid)varient.id!);
@@ -127,7 +127,7 @@ public class VarientController : ControllerBase
 
         var result = await _varientData.updateVarient(varient.name, (Guid)varient.id!);
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء  تعديل  الخيار");
 
         return StatusCode(200, result);
@@ -145,23 +145,23 @@ public class VarientController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         var userHolder = await _userData.getUserById(idHolder.Value);
-        if (userHolder == null)
+        if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.role != 0)
+        if (userHolder.role !=  0)
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }

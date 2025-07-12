@@ -6,6 +6,7 @@ public class OrderResponseDto
     public decimal longitude { get; set; }
     public decimal latitude { get; set; }
     public decimal totalPrice { get; set; }
+    public decimal deliveryFee { get; set; }
     public String name { get; set; }
     public String userPhone { get; set; }
     public int status { get; set; }

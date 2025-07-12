@@ -11,7 +11,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
+using NetTopologySuite.Geometries;
 
 namespace ecommerc_dotnet.controller;
 
@@ -55,28 +57,30 @@ public class OrderController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var isTotalPriceValid = isValideTotalPrice(order.totalPrice, order.items);
+        bool isTotalPriceValid = isValideTotalPrice(order.totalPrice, order.items);
 
         if (isTotalPriceValid == false)
             return Conflict("اجمالي السعر غير صحيح");
+
+
 
         var result = await _orderData.createOrder(
             userId: idHolder.Value,
@@ -86,24 +90,37 @@ public class OrderController : ControllerBase
             items: order.items
         );
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء حفظ الطلب");
 
         await _hubContext.Clients.All.SendAsync("createdOrder", result);
-        var messagin = FirebaseMessaging.DefaultInstance;
-        await messagin.SendAsync(new
-            Message
 
-        {
-            Notification = new Notification
-            {
-                Title = "Your order has been created",
-                Body = "Your order has been created",
-            },
-            Token = user.deviceToken
-        });
-
+        sendingFireBaseMessage(user.deviceToken, "تم انشاء الطلب بنجاح");
         return StatusCode(201, result);
+    }
+
+    private async void sendingFireBaseMessage(string token, string message)
+    {
+        try
+        {
+            var messagin = FirebaseMessaging.DefaultInstance;
+
+            await messagin.SendAsync(new
+                                Message
+
+            {
+                Notification = new Notification
+                {
+                    Title = "Your order has been created",
+                    Body = "Your order has been created",
+                },
+                Token = token
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"this errror from sending firebase message {ex.Message}");
+        }
     }
 
     private bool isValideTotalPrice(decimal totalPrice, List<OrderRequestItemsDto> items)
@@ -118,11 +135,11 @@ public class OrderController : ControllerBase
                 var product = _productData.getProduct(item.productId);
                 decimal varientPrice = 1;
 
-                item.products_varientId.ForEach(pvi =>
+                item.productsVarientId.ForEach(pvi =>
                 {
                     var productVairntPrice = _dbContext.ProductVarients
                         .FirstOrDefault(pv => pv.productId == product.id && pv.id == pvi);
-                    if (productVairntPrice == null)
+                    if (productVairntPrice is null)
                     {
                         isAmbiguous = true;
                         return;
@@ -135,7 +152,7 @@ public class OrderController : ControllerBase
                     return;
                 }
 
-                if (product.price != item.price)
+                if (product.price !=  item.price)
                 {
                     isAmbiguous = true;
                     return;
@@ -156,6 +173,7 @@ public class OrderController : ControllerBase
         }
     }
 
+
     [HttpGet("all/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -166,7 +184,7 @@ public class OrderController : ControllerBase
         int pageNumber = 1
     )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -174,26 +192,26 @@ public class OrderController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         var result = await _orderData.getOrder(pageNumber, 25);
-        if (result == null || result.Count < 1)
+        if (result is null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
     }
@@ -209,7 +227,7 @@ public class OrderController : ControllerBase
         int pageNumber = 1
     )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -217,26 +235,26 @@ public class OrderController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var result = await _orderData.getOrder(idHolder.Value, pageNumber, 25);
-        if (result == null || result.Count < 1)
+        List<OrderResponseDto>? result = await _orderData.getOrder(idHolder.Value, pageNumber, 25);
+        if (result is null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
     }
@@ -250,39 +268,41 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> deleteOrders
         (Guid orderId)
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         var orderData = await _orderData.getOrder(orderId, idHolder.Value);
-        if (orderData == null)
+        if (orderData is null)
             return NotFound("الطلب غير موجود");
-        if (orderData.status != 1)
+        if (orderData.status !=  1)
             return BadRequest("لا يمكن الغاء هذا الطلب لانه تمت معالجته سابقا");
         var result = await _orderData.deleteOrder(idHolder.Value, orderId);
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء حذف البيانات");
         return NoContent();
     }
+
+
 
     [HttpGet("pages")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -291,24 +311,24 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getOrderPages()
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.role == 1)
@@ -330,24 +350,24 @@ public class OrderController : ControllerBase
         [FromBody] OrderStatusRequestDto orderStatus
     )
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.role == 1)
@@ -381,80 +401,71 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getOrderStatus()
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
 
-        List<string> orderStatusDefination = new List<string>
-        {
-            "Regected",
-            "Inprogress",
-            "Excpected",
-            "Inprogress",
-            "Inway",
-            "Received",
-            "Completed",
-        };
-        return Ok(orderStatusDefination);
+        
+        return Ok(OrderData.orderStatusDefination);
     }
 
-    
-     [HttpGet("orderItem/{storeId}/{pageNumber}")]
+
+    [HttpGet("orderItem/{storeId}/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getOrdersItemForStore
-    (
-        Guid storeId,
-        int pageNumber = 1
-    )
+   (
+       Guid storeId,
+       int pageNumber = 1
+   )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true )
+        if (user.isDeleted == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var result = await _orderData.getOrderItems(storeId, pageNumber, 25);
-        if (result == null || result.Count < 1)
+        List<OrderItemResponseDto>? result = await _orderData.getOrderItems(storeId, pageNumber, 25);
+        if (result is null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
     }
@@ -463,43 +474,43 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult>updateOrderItemStatus 
-    ([FromBody]OrderItemUpdateDto orderItemDto)
+    public async Task<IActionResult> updateOrderItemStatus
+    ([FromBody] OrderItemUpdateDto orderItemDto)
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true )
+        if (user.isDeleted == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        if (user.store == null)
+        if (user.store is null)
             return BadRequest("المستخدم لا يمتلك اي متجر");
-        
-        var orderItem = await _orderData.getOrderItem(orderItemDto.id,user.store.id);
-        if (orderItem == null)
+
+        var orderItem = await _orderData.getOrderItem(orderItemDto.id, user.store.id);
+        if (orderItem is null)
             return NotFound("الطلب غير موجود");
         var result = await _orderData.updateOrderItemStatus(orderItemDto.id, orderItemDto.status);
 
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء تغير حالة الطلب");
-        
+
         return NoContent();
     }
 
@@ -538,9 +549,9 @@ public class OrderController : ControllerBase
     }
 
 
-    
-    
-    
+
+
+
     //delivery
     [HttpGet("delivery/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -552,7 +563,7 @@ public class OrderController : ControllerBase
         int pageNumber = 1
     )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -560,30 +571,30 @@ public class OrderController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
         bool isDeliveryMan = await _deliveryData.isExistByUserId(user.id);
-        
+
         if (isDeliveryMan == false)
             return NotFound("الموصل غير موجو");
-        
+
         if (user.isDeleted == true || user.role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        var result = await _orderData.getOrderForDelivery( pageNumber, 25);
-        if (result == null || result.Count < 1)
+        var result = await _orderData.getOrderForDelivery(pageNumber, 25);
+        if (result is null || result.Count < 1)
             return NoContent();
         return StatusCode(200, result);
     }

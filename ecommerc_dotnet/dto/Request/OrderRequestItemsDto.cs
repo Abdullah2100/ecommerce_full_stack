@@ -6,5 +6,5 @@ public class OrderRequestItemsDto
     public decimal price { get; set; }
     public int quanity { get; set; } = 1;
     public Guid productId { get; set; }
-    public List<Guid>  products_varientId { get; set; }
+    public List<Guid>  productsVarientId { get; set; }
 }

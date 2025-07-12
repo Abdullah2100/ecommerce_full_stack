@@ -10,6 +10,8 @@ data class OrderResponseDto(
     val id: UUID,
     val longitude: Double,
     val latitude: Double,
+    val totalPrice: Double,
+    val deliveryFee: Double,
     val userPhone: String,
     val status:Int,
     val orderItems:List<OrderItemResponseDto>

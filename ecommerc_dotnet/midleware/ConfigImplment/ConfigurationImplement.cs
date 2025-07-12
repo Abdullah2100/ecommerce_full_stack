@@ -12,7 +12,7 @@ public class ConfigurationImplement : IConfig
         public string getKey(string key)
         {
             string result = "";
-            if (_configurationService != null)
+            if (_configurationService !=  null)
             {
                 result = _configurationService[key]!;
             }

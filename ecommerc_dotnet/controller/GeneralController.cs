@@ -43,19 +43,19 @@ public class GeneralController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user == null)
+        if (user is null)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -74,7 +74,7 @@ public class GeneralController : ControllerBase
                generalSetting.value
                 );
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثت مشكلة اثناء حقظ الوحة الاعلانية");
 
         return StatusCode(201, result);
@@ -95,18 +95,18 @@ public class GeneralController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
-        if (user == null)
+        if (user is null)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -119,7 +119,7 @@ public class GeneralController : ControllerBase
         GeneralSettings? banner = await _generalData
             .getGeneralSettings(genralSettingId);
 
-        if ((banner == null))
+        if ((banner is null))
         {
             return BadRequest("هذا الاعداد غير موجود");
         }
@@ -150,18 +150,18 @@ public class GeneralController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outID;
+            idHolder = outId;
         }
 
-        if (idHolder == null)
+        if (idHolder is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         User? user = await _userData.getUserById(idHolder.Value);
-        if (user == null)
+        if (user is null)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -174,7 +174,7 @@ public class GeneralController : ControllerBase
         GeneralSettings? generalSettings = await _generalData
             .getGeneralSettings(genralSettingId);
 
-        if ((generalSettings == null))
+        if ((generalSettings is null))
         {
             return BadRequest("هذا الاعداد غير موجود");
         }
@@ -208,7 +208,7 @@ public class GeneralController : ControllerBase
         List<GeneralSettingResponseDto>? result = await _generalData
             .getGeneralSettingList( pageNumber);
 
-        if (result == null)
+        if (result is null)
             return NoContent();
         return StatusCode(200, result);
     }

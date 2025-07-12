@@ -44,7 +44,7 @@ namespace hotel_api.util
 
         public static string hashingText(string? text)
         {
-            if (text == null) return "";
+            if (text is null) return "";
             using (SHA256 sha256 = SHA256.Create())
             {
                 // Compute the hash of the given string
@@ -118,7 +118,7 @@ namespace hotel_api.util
             foreach (var image in file)
             {
                 string? path = await saveFile(image, type, host);
-                if (path == null)
+                if (path is null)
                 {
                     deleteFile(images, host);
                     return null;

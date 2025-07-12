@@ -676,15 +676,15 @@ class HomeRepository(val client: HttpClient) {
                                 }
                             )
 
-                            append("subcategory_id", subcategory_id.toString())
-                            append("store_id", store_id.toString())
+                            append("subcategoryId", subcategory_id.toString())
+                            append("storeId", store_id.toString())
                             append("price", price)
                             if (productVarients.isNotEmpty())
                                 productVarients.forEachIndexed { it, value ->
                                     append("productVarients[${it}].name", value.name)
                                     append("productVarients[${it}].precentage", value.precentage!!)
                                     append(
-                                        "productVarients[${it}].varient_id",
+                                        "productVarients[${it}].varientId",
                                         value.varient_id.toString()
                                     )
                                 }
@@ -778,8 +778,8 @@ class HomeRepository(val client: HttpClient) {
                                     }
                                 )
                             if (subcategory_id != null)
-                                append("subcategory_id", subcategory_id.toString())
-                            append("store_id", store_id.toString())
+                                append("subcategoryId", subcategory_id.toString())
+                            append("storeId", store_id.toString())
 
                             if (price != null)
                                 append("price", price)
@@ -789,7 +789,7 @@ class HomeRepository(val client: HttpClient) {
                                     append("productVarients[${it}].name", value.name)
                                     append("productVarients[${it}].precentage", value.precentage!!)
                                     append(
-                                        "productVarients[${it}].varient_id",
+                                        "productVarients[${it}].varientId",
                                         value.varient_id.toString()
                                     )
                                 }
@@ -801,7 +801,7 @@ class HomeRepository(val client: HttpClient) {
                                         value.precentage!!
                                     )
                                     append(
-                                        "deletedProductVarients[${it}].varient_id",
+                                        "deletedProductVarients[${it}].varientId",
                                         value.varient_id.toString()
                                     )
 

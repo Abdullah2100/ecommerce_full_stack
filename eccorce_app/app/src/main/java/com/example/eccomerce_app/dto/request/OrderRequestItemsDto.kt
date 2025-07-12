@@ -8,11 +8,11 @@ import java.util.UUID
 @Serializable
 data class OrderRequestItemsDto(
     @Serializable(with = UUIDKserialize::class)
-    val store_id: UUID,
+    val storeId: UUID,
     val price: Double,
     val quanity: Int,
     @Serializable(with = UUIDKserialize::class)
-    val product_Id: UUID,
+    val productId: UUID,
     @Serializable(with = UUIDListKserialize::class)
-    val products_varient_id: List<UUID>,
+    val productsVarientId: List<UUID>,
 )

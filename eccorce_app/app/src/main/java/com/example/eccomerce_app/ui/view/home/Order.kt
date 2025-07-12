@@ -93,10 +93,10 @@ fun OrderScreen(
 
     val isRefresh = remember { mutableStateOf(false) }
 
-    Log.d("loadingState",isLoadingMore.value.toString())
+    Log.d("loadingState", isLoadingMore.value.toString())
     LaunchedEffect(reachedBottom.value) {
 
-        if(!orders.value.isNullOrEmpty() && reachedBottom.value){
+        if (!orders.value.isNullOrEmpty() && reachedBottom.value) {
             homeViewModel.getMyOrder(
                 page,
                 isLoadingMore
@@ -152,7 +152,7 @@ fun OrderScreen(
         it.calculateBottomPadding()
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = {homeViewModel.getMyOrder(mutableStateOf(1))}
+            onRefresh = { homeViewModel.getMyOrder(mutableStateOf(1)) }
         ) {
             LazyColumn(
                 state = lazyState,
@@ -274,12 +274,90 @@ fun OrderScreen(
 
                                             }
                                         }
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
 
+                                            Text(
+                                                "Status  :",
+                                                fontFamily = General.satoshiFamily,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = (16).sp,
+                                                color = CustomColor.neutralColor950,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            Sizer(width = 5)
+                                            Text(
+                                                text = value.orderItemStatus,
+                                                fontFamily = General.satoshiFamily,
+                                                fontWeight = FontWeight.Normal,
+                                                fontSize = (16).sp,
+                                                color = when (value.orderItemStatus) {
+                                                    "InProgress" -> CustomColor.alertColor_3_500
+                                                    "Excepted" -> CustomColor.alertColor_2_700
+                                                    else -> CustomColor.alertColor_2_700
+                                                },
+                                                textAlign = TextAlign.Center
+                                            )
+
+
+                                        }
                                     }
                                 }
-                            }
-                            if (order.status == 1) {
-                                Sizer(10)
+
+                                Sizer(5)
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "Total Price",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        "\$${order.totalPrice}",
+
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+
+                                Sizer(5)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        "DeliveryFee Price",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        "\$${order.deliveryFee}",
+
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+
+                                Sizer(5)
+
                                 CustomBotton(
 
                                     buttonTitle = "Cencle Order",
@@ -330,7 +408,7 @@ fun OrderScreen(
             }
 
         }
-        if(isSendingData.value)
+        if (isSendingData.value)
             Dialog(
                 onDismissRequest = {}
             ) {
@@ -338,9 +416,10 @@ fun OrderScreen(
                     modifier = Modifier
                         .height(90.dp)
                         .width(90.dp)
-                        .background(Color.White,
-                            RoundedCornerShape(15.dp))
-                    , contentAlignment = Alignment.Center
+                        .background(
+                            Color.White,
+                            RoundedCornerShape(15.dp)
+                        ), contentAlignment = Alignment.Center
                 )
                 {
                     CircularProgressIndicator(

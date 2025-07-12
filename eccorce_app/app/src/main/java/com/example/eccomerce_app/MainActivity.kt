@@ -56,9 +56,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
 
-
-
-        installSplashScreen().apply {
+    installSplashScreen().apply {
             setKeepOnScreenCondition {
                 keepSplash
             }

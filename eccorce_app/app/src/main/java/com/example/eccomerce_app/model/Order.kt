@@ -10,6 +10,8 @@ data class Order(
     val id: UUID,
     val longitude: Double,
     val latitude: Double,
+    val totalPrice: Double,
+    val deliveryFee: Double,
     val user_phone: String,
     val status:Int,
     val order_items:List<OrderItem>

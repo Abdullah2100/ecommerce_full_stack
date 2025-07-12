@@ -1,11 +1,9 @@
 package com.example.e_commercompose.dto
 
-import com.example.e_commercompose.dto.request.AddressRequestDto
 import com.example.e_commercompose.dto.request.CartRequestDto
 import com.example.e_commercompose.dto.request.OrderRequestItemsDto
 import com.example.e_commercompose.dto.request.ProductVarientRequestDto
 import com.example.e_commercompose.dto.request.SubCategoryUpdateDto
-import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.model.CardProductModel
 import com.example.e_commercompose.model.CartModel
 import com.example.e_commercompose.model.ProductVarient
@@ -47,11 +45,11 @@ object ModelToDto {
 
     fun CardProductModel.toOrderRequestItemDto(): OrderRequestItemsDto{
         return OrderRequestItemsDto(
-            store_id =  this.store_id,
-            product_Id = this.productId,
+            storeId =  this.store_id,
+            productId = this.productId,
             price = this.price,
             quanity = this.quantity,
-            products_varient_id =  this.productvarients.map { it.id }
+            productsVarientId =  this.productvarients.map { it.id }
         )
     }
 

@@ -7,8 +7,7 @@ public class UserInfoResponseDto
 {
 
     public Guid Id { get; set; }
-     public string name { get; set; }
-
+    public string name { get; set; } 
      public bool isAdmin { get; set; } = false;
      public string phone { get; set; }
      public string email { get; set; }

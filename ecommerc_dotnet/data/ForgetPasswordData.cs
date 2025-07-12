@@ -49,12 +49,12 @@ public class ForgetPasswordData
     {
         try
         {
-            ReseatePasswordOtp? result = _dbContext.ReseatPasswords.FirstOrDefault(u => u.otp == otp);
-            if (result == null)
-            {
-                return false;
-            }
-            result.isValidated = true;
+            await _dbContext
+                .ReseatPasswords
+                .Where(u => u.otp == otp)
+                .ExecuteUpdateAsync(otp=>otp
+                    .SetProperty(value=>value.isValidated,true));
+            
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -70,8 +70,9 @@ public class ForgetPasswordData
     {
         try
         {
-            IQueryable<ReseatePasswordOtp>? otpBelongList = _dbContext.ReseatPasswords.Where(otp => otp.email == email);
-            _dbContext.ReseatPasswords.RemoveRange(otpBelongList);
+          await _dbContext.ReseatPasswords
+              .Where(otp => otp.email == email)
+               .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -88,8 +89,10 @@ public class ForgetPasswordData
     {
         try
         {
-            return _dbContext.ReseatPasswords.FirstOrDefault(u =>
-                (u.otp == otp) && (u.createdAt.AddHours(1).Microsecond > DateTime.Now.Microsecond)) != null;
+            return _dbContext.ReseatPasswords
+                .AsNoTracking()
+                .FirstOrDefault(u =>
+                (u.otp == otp) && (u.createdAt.AddHours(1).Microsecond > DateTime.Now.Microsecond)) !=  null;
         }
         catch (Exception e)
         {
@@ -103,10 +106,13 @@ public class ForgetPasswordData
     {
         try
         {
-            ReseatePasswordOtp? result = await _dbContext.ReseatPasswords.Where(u =>
-            u.otp == otp&&u.isValidated==status).FirstOrDefaultAsync();
+            ReseatePasswordOtp? result = await _dbContext
+                .ReseatPasswords
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u =>
+            u.otp == otp&&u.isValidated==status);
 
-            if (result == null) return false;
+            if (result is null) return false;
             DateTime otpTime =result.createdAt.AddHours(1);
 
             return  result.email == email && (otpTime.Date == DateTime.Now.Date && otpTime.TimeOfDay > DateTime.Now.TimeOfDay);

@@ -64,7 +64,7 @@ public class ProductData
         catch (Exception ex)
         {
             Console.WriteLine("this error occured from getting product " + ex.Message);
-            throw ex;
+            return null;
         }
     }
 
@@ -75,12 +75,14 @@ public class ProductData
         try
         {
             return await _dbContext.Products
-                .AsNoTracking()
                 .Include(pro=>pro.subCategory)
- 
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
+                .AsSplitQuery()
+                .AsNoTracking()
                 .OrderByDescending(pr => pr.createdAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
@@ -106,8 +108,6 @@ public class ProductData
                         ).ToList(),
                     productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
                 })
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -123,12 +123,15 @@ public class ProductData
         try
         {
             return await _dbContext.Products
-                .AsNoTracking()
                 .Include(pro => pro.productImages)
                 .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productVarients)
                 .Include(pro => pro.store)
+                .AsNoTracking()
+                .AsSplitQuery()
                 .OrderByDescending(pr => pr.createdAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(pr => new ProductsResponseAdminDto() 
                 {
                     id = pr.id,
@@ -152,8 +155,6 @@ public class ProductData
                         ).ToList(),
                     productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
                 })
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -190,11 +191,14 @@ public class ProductData
         try
         {
             return await _dbContext.Products
-                .AsNoTracking()
                 .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
                 .Where(pr => pr.storeId == storeId && pr.subcategoryId == subcategoryId)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
@@ -220,8 +224,6 @@ public class ProductData
                         ).ToList(),
                     productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
                 })
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -237,7 +239,7 @@ public class ProductData
     {
         try
         {
-            return await _dbContext.Products.FindAsync(id) != null;
+            return await _dbContext.Products.FindAsync(id) !=  null;
         }
         catch (Exception ex)
         {
@@ -252,12 +254,11 @@ public class ProductData
     {
         try
         {
-            productVarients.ForEach((x) =>
+            productVarients.ForEach( (x) =>
             {
-                var result = _dbContext.ProductVarients.FirstOrDefault(pv =>
-                    pv.productId == productId && pv.varientId == x.varientId && pv.name == x.name);
-                if (result != null)
-                    _dbContext.ProductVarients.Remove(result);
+               _dbContext.ProductVarients.Where(pv =>
+                    pv.productId == productId && pv.varientId == x.varientId && pv.name == x.name)
+                     .ExecuteDelete();
             });
             await _dbContext.SaveChangesAsync();
             return true;
@@ -273,9 +274,9 @@ public class ProductData
     {
         try
         {
-            var result = _dbContext.ProductVarients
-                .Where(pv => pv.productId == productId);
-            _dbContext.ProductVarients.RemoveRange(result);
+           await _dbContext.ProductVarients
+                .Where(pv => pv.productId == productId)
+                .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -286,13 +287,15 @@ public class ProductData
         }
     }
 
-    public bool deleteProductImages(List<string> productImage)
+    public async Task<bool> deleteProductImages(List<string> productImage)
     {
         try
         {
-            var result = _dbContext.ProductImages.Where(x => productImage.Contains(
-                x.name));
-            _dbContext.ProductImages.RemoveRange(result);
+            await _dbContext
+                .ProductImages
+                .Where(x => productImage.Contains(
+                x.name))
+                .ExecuteDeleteAsync();
             clsUtil.deleteFile(productImage, _host);
             return true;
         }
@@ -307,7 +310,9 @@ public class ProductData
     {
         try
         {
-            var result = _dbContext.ProductImages.Where(pv => pv.productId == productId);
+            var result = _dbContext
+                .ProductImages
+                .Where(pv => pv.productId == productId);
             _dbContext.ProductImages.RemoveRange(result);
             clsUtil.deleteFile(result.Select(x => x.name).ToList(), _host);
             return true;
@@ -323,11 +328,11 @@ public class ProductData
     {
         try
         {
-            var product = await _dbContext.Products.FirstOrDefaultAsync(pro => pro.id == productId);
+             await _dbContext
+                 .Products
+                 .Where(pro => pro.id == productId)
+                 .ExecuteDeleteAsync();
 
-            if (product == null) return false;
-
-            _dbContext.Remove(product);
              deleteProductImages(productId);
             await deleteProductVarient(productId);
             return true;
@@ -348,10 +353,13 @@ public class ProductData
         try
         {
             return await _dbContext.Products
-                .AsNoTracking()
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
                 .Where(pr => pr.storeId == storeId)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
@@ -376,8 +384,6 @@ public class ProductData
                         ).ToList(),
                     productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
                 })
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -394,11 +400,14 @@ public class ProductData
         try
         {
             return await _dbContext.Products
-                .AsNoTracking()
                 .Include(pro=>pro.subCategory)
                 .Include(pro => pro.productImages)
                 .Include(pro => pro.productVarients)
                 .Where(pr => pr.subCategory.categoriId==category_Id)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Select(pr => new ProductResponseDto
                 {
                     id = pr.id,
@@ -423,8 +432,6 @@ public class ProductData
                         ).ToList(),
                     productImages = pr.productImages.Select(pi => _config.getKey("url_file") + pi.name).ToList()
                 })
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -463,7 +470,7 @@ public class ProductData
                 thmbnail = thumbnail
             });
 
-            if (productVarients != null)
+            if (productVarients !=  null)
                 productVarients.ForEach(x =>
                     _dbContext.ProductVarients.AddAsync(new ProductVarient
                     {
@@ -510,7 +517,7 @@ public class ProductData
         {
             var product = await _dbContext.Products.FindAsync(id);
 
-            if (product == null) return null;
+            if (product is null) return null;
 
             product.name = name ?? product.name;
             product.description = description ?? product.description;
@@ -519,7 +526,7 @@ public class ProductData
             product.thmbnail = thumbnail ?? product.thmbnail;
             product.updatedAt = DateTime.Now;
 
-            if (productVarients != null)
+            if (productVarients !=  null)
                 productVarients.ForEach(x =>
                     _dbContext.ProductVarients.AddAsync(new ProductVarient
                     {
@@ -530,7 +537,7 @@ public class ProductData
                         productId = id
                     })
                 );
-            if (images != null)
+            if (images !=  null)
                 images.ForEach(x =>
                     _dbContext.ProductImages.AddAsync(new ProductImage
                     {
@@ -542,12 +549,12 @@ public class ProductData
             await _dbContext.SaveChangesAsync();
             return getProduct(id);
         }
-        catch (Exception ex)
+        catch (Exception _)
         {
-            if (thumbnail != null)
+            if (thumbnail !=  null)
                 clsUtil.deleteFile(thumbnail, _host);
 
-            if (images != null)
+            if (images !=  null)
                 images.ForEach(x => clsUtil.deleteFile(x, _host));
 
             return null;

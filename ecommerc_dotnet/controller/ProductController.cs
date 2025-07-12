@@ -84,7 +84,7 @@ public class ProductController : ControllerBase
             category_id, pageNumber
         );
 
-        if (result == null)
+        if (result is null)
             return NoContent();
 
 
@@ -161,9 +161,9 @@ public class ProductController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid userId = Guid.Empty;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            userId = outID;
+            userId = outId;
         }
 
         if (userId == Guid.Empty)
@@ -172,7 +172,7 @@ public class ProductController : ControllerBase
         }
         
         User? user = await _userData.getUserById(userId);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية");
@@ -197,9 +197,9 @@ public class ProductController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid userId = Guid.Empty;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            userId = outID;
+            userId = outId;
         }
 
         if (userId == Guid.Empty)
@@ -208,7 +208,7 @@ public class ProductController : ControllerBase
         }
 
         User? user = await _userData.getUserById(userId);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
         if (user.role == 1)
             return BadRequest("ليس لديك الصلاحية");
@@ -235,9 +235,9 @@ public class ProductController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid userId = Guid.Empty;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            userId = outID;
+            userId = outId;
         }
 
         if (userId == Guid.Empty)
@@ -246,15 +246,15 @@ public class ProductController : ControllerBase
         }
 
         var user = await _userData.getUser(userId);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.storeId != product.storeId)
+        if (user.storeId !=  product.storeId)
             return BadRequest("فقط صاحب المتجر بأمكانه اضافة المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
 
-        if (userStore == null)
+        if (userStore is null)
             return NotFound("المتجر غير موجو");
 
         if (userStore.isBlocked)
@@ -266,7 +266,7 @@ public class ProductController : ControllerBase
 
         var savedThumbnail = await clsUtil.saveFile(product.thmbnail, clsUtil.enImageType.PRODUCT, _host);
         var savedImage = await clsUtil.saveFile(product.images, clsUtil.enImageType.PRODUCT, _host);
-        if (savedImage == null || savedThumbnail == null)
+        if (savedImage is null || savedThumbnail is null)
         {
             return BadRequest("حدثة مشكلة اثناء حفظ الصور");
         }
@@ -282,7 +282,7 @@ public class ProductController : ControllerBase
             productVarients: product.productVarients
         );
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثة مشكلة اثناء حفظ المنتج");
 
         return StatusCode(201, result);
@@ -305,9 +305,9 @@ public class ProductController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid userId = Guid.Empty;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            userId = outID;
+            userId = outId;
         }
 
         if (userId == Guid.Empty)
@@ -316,15 +316,15 @@ public class ProductController : ControllerBase
         }
 
         var user = await _userData.getUser(userId);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.storeId != product.storeId)
+        if (user.storeId !=  product.storeId)
             return Conflict("فقط صاحب المتجر بأمكانه  المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
 
-        if (userStore == null)
+        if (userStore is null)
             return NotFound("المتجر غير موجو");
 
         if (userStore.isBlocked)
@@ -335,10 +335,10 @@ public class ProductController : ControllerBase
         if (!isExistProduct)
             return NotFound("المنتج غير موجو");
 
-        if (product.images != null & product?.images?.Count > 15)
+        if (product.images !=  null & product?.images?.Count > 15)
             return BadRequest("اقصى عدد صور المنتجات هو 15 صورة");
 
-        if (product?.deletedProductVarients != null)
+        if (product?.deletedProductVarients !=  null)
             await _productData.deleteProductVarient(product.deletedProductVarients, product.id);
 
 
@@ -346,11 +346,11 @@ public class ProductController : ControllerBase
              _productData.deleteProductImages(product.deletedimages);
 
         string? savedThumbnail = null;
-        if (product?.thmbnail != null)
+        if (product?.thmbnail !=  null)
             savedThumbnail = await clsUtil.saveFile(product.thmbnail, clsUtil.enImageType.PRODUCT, _host);
 
         List<string>? savedImage = null;
-        if (product?.images != null)
+        if (product?.images !=  null)
             savedImage = await clsUtil.saveFile(product.images, clsUtil.enImageType.PRODUCT, _host);
 
 
@@ -365,7 +365,7 @@ public class ProductController : ControllerBase
             images: savedImage
         );
 
-        if (result == null)
+        if (result is null)
             return BadRequest("حدثة مشكلة اثناء حفظ المنتج");
 
         return StatusCode(200, result);
@@ -388,9 +388,9 @@ public class ProductController : ControllerBase
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
         Guid userId = Guid.Empty;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outID))
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            userId = outID;
+            userId = outId;
         }
 
         if (userId == Guid.Empty)
@@ -399,10 +399,10 @@ public class ProductController : ControllerBase
         }
 
         var user = await _userData.getUser(userId);
-        if (user == null)
+        if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.storeId != storeId)
+        if (user.storeId !=  storeId)
             return Conflict("فقط صاحب المتجر بأمكانه حذف المنتجات ");
 
         var isExistProduct = await _productData.isExist(productId);

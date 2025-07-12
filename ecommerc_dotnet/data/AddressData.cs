@@ -22,8 +22,8 @@ public class AddressData
         try
         {
             IQueryable<AddressResponseDto> result =  _dbContext.Address
-                .AsNoTracking()
                 .Where(ad => ad.id == addressId)
+                .AsNoTracking()
                 .Select(ad => new AddressResponseDto
                 {
                     id = ad!.id,
@@ -68,8 +68,8 @@ public class AddressData
         try
         {
              return await   _dbContext.Address
-                .AsNoTracking()
                 .Where(ad => ad.ownerId == userId)
+                .AsNoTracking()
                 .OrderByDescending(ad=>ad.createdAt )
                 .Select(ad =>
                     new AddressResponseDto
@@ -135,12 +135,12 @@ public class AddressData
         {
 
             await _dbContext.Address
-                .Where(ad => ad.ownerId == userId && ad.id != addressId)
+                .Where(ad => ad.ownerId == userId && ad.id !=  addressId)
                 .ExecuteUpdateAsync(ad => ad.SetProperty(va => va.isCurrent, false));
            
             Address? currentAddress =await  _dbContext.Address.FindAsync(addressId);
            
-           if(currentAddress!=null)
+           if(currentAddress!= null)
                currentAddress.isCurrent = true;
             
             await _dbContext.SaveChangesAsync();
@@ -170,7 +170,7 @@ public class AddressData
             
             Address? currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.id==addressId);
 
-            if (currentAddress == null) return null;
+            if (currentAddress is null) return null;
             currentAddress.title = titile??currentAddress.title;
             currentAddress.longitude = longitude??currentAddress.longitude;
             currentAddress.latitude = latitude ?? currentAddress.latitude;
@@ -220,7 +220,7 @@ public class AddressData
 
            return await  _dbContext.Address
                .AsNoTracking()
-               .CountAsync(u => u.ownerId == userId && u.id != userId);
+               .CountAsync(u => u.ownerId == userId && u.id !=  userId);
         }
         catch (Exception ex)
         {

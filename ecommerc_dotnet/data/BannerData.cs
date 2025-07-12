@@ -30,8 +30,8 @@ public class BannerData
         try
         {
             return  await  _dbContext.Banner
-                    .AsNoTracking()
                     .Where(ba=>ba.id==id)
+                    .AsNoTracking()
                     .Select(ba=>new BannerResponseDto
                     {
                         id = ba.id,
@@ -58,8 +58,8 @@ public class BannerData
         try
         {
             return  await  _dbContext.Banner
-                    .AsNoTracking()
                     .Where(ba=>ba.id==banner_id && ba.storeId==storeId)
+                    .AsNoTracking()
                     .Select(ba=>new BannerResponseDto
                     {
                         id = ba.id,
@@ -86,8 +86,8 @@ public class BannerData
         try
         {
             return  await  _dbContext.Banner
-                    .AsNoTracking()
                     .Where(ba=>ba.storeId==id)
+                    .AsNoTracking()
                     .Select(ba=>new BannerResponseDto
                     {
                         id = ba.id,
@@ -146,7 +146,7 @@ public class BannerData
         {
             Bannel? result = await _dbContext.Banner.FindAsync(banner_id);
 
-            if (result == null)
+            if (result is null)
             {
                 return false;
             }
@@ -168,8 +168,8 @@ public class BannerData
         try
         {
             return await _dbContext.Banner
-                .AsNoTracking()
                 .Where(ban=>ban.endAt>DateTime.Now)
+                .AsNoTracking()
                 .CountAsync();
         }
         catch (Exception ex)

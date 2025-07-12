@@ -27,8 +27,8 @@ public class CategoryData
         try
         {
             IQueryable<CategoryResponseDto> result = _dbContext.Categories
-                .AsNoTracking()
                 .Where(c => c.isBlocked == false)
+                .AsNoTracking()
                 .OrderBy(c => c.createdAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -126,9 +126,9 @@ public class CategoryData
     {
         try
         {
-            Category? category = await _dbContext.Categories.FindAsync(id);
-            if (category == null) return null;
-             _dbContext.Remove(category);
+            await _dbContext.Categories
+                .Where(ca => ca.id == id)
+                .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;
         }
@@ -147,7 +147,10 @@ public class CategoryData
     {
         try
         {
-            return await _dbContext.Categories.FirstOrDefaultAsync(c => c.name == name) != null;
+            return await _dbContext
+                .Categories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.name == name) !=  null;
         }
         catch (Exception ex)
         {
@@ -163,7 +166,10 @@ public class CategoryData
         {
             try
             {
-                return await _dbContext.Categories.FirstOrDefaultAsync(c => c.id == id) != null;
+                return await _dbContext
+                    .Categories
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.id == id) !=  null;
             }
             catch (Exception ex)
             {

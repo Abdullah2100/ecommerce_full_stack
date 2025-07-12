@@ -9,7 +9,7 @@ public sealed class StringNotNullOrEmptyValidation:ValidationAttribute
     public override bool IsValid(object? value)
     {
         string? result = value as string;
-        if (result == null || result.Trim().Length == 0)return false;
+        if (result is null || result.Trim().Length == 0)return false;
         return  true;
     }
 }

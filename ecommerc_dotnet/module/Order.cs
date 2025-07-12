@@ -13,6 +13,7 @@ public class Order
     public decimal totalPrice { get; set; }
     public int status { get; set; }
     public decimal distanceToUser { get; set; } = 0;
+    public decimal distanceFee { get; set; } = 0;
     public Guid? deleveryId { get; set; } = null;
 
     [Column(TypeName = "Timestamp")]
