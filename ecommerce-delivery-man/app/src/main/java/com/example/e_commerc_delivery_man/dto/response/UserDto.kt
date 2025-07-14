@@ -8,11 +8,10 @@ import java.util.UUID
 data class UserDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
-    val name:String,
-    val phone: String,
-    val email: String,
-    val thumbnail:String,
-    val address:List<AddressResponseDto>?=null,
     @Serializable(with = UUIDKserialize::class)
-    val store_id: UUID,
+    val userId: UUID,
+    val isAvaliable: Boolean = true,
+    val thumbnail: String? = null,
+    val address: AddressResponseDto,
+    val analys: DeliveryAnalysDto? = null
 )

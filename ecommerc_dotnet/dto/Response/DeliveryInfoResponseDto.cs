@@ -9,5 +9,6 @@ public class DeliveryInfoResponseDto
     public string? thumbnail { get; set; }
     public AddressResponseDto address { get; set; }
     public DeliveryAnalysDto? analys { get; set; } = null;
+    public UserDeliveryInfoResponseDto user;
 
 }

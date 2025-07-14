@@ -163,7 +163,14 @@ public class DeliveryData
                             title = address.title,
                         },
                         thumbnail = deliver.thumbnail != null ? _config.getKey("url_file") + deliver.thumbnail : null,
-                        isAvaliable = deliver.isAvaliable
+                        isAvaliable = deliver.isAvaliable,
+                        user= new UserDeliveryInfoResponseDto 
+                        {
+                            email = user.email,
+                            phone = user.phone,
+                            thumbnail = user.thumbnail != null ? _config.getKey("url_file") + user.thumbnail : null,
+                            name= user.name,
+                        }
                     }
                 ).AsNoTracking()
                 .FirstOrDefaultAsync();
