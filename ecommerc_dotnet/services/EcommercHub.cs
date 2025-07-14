@@ -40,4 +40,9 @@ public class EcommercHub : Hub
     {
         await Clients.All.SendAsync("orderExcptedByAdmin", order);
     }
+    public async Task sendingOrderItemStatusChange(OrderResponseDto order)
+    {
+        await Clients.All.SendAsync("orderItemsStatusChange", order);
+        
+    }
 }

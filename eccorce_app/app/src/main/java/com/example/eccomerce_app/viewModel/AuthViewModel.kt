@@ -197,6 +197,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
 
         }
     }
+  
     }
 
 

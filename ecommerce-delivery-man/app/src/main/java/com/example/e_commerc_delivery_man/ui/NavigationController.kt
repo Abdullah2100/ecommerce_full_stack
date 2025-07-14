@@ -24,7 +24,6 @@ import com.example.e_commerc_delivery_man.ui.view.home.HomePage
 import com.example.e_commerc_delivery_man.ui.view.home.OrdersScreen
 import com.example.e_commerc_delivery_man.ui.view.home.ProductCategoryScreen
 import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
-import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
 import com.example.eccomerce_app.ui.view.home.CategoryScreen
 
 
@@ -347,28 +346,10 @@ fun NavController(
 
             }
 
-            composable<Screens.OrderForMyStore>(
-
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
-            ) {
-                OrderForMyStoreScreen(
-                    nav = nav,
-                    homeViewModel = homeViewModle
-                )
-
-            }
 
 
         }
+
 
     }
 

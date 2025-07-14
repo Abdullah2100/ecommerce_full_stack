@@ -4,8 +4,6 @@ build/
 .gradle/
 obj/
 bin/
-appsettings.Development.json
-appsettings.json
 images/
 Migrations/
 firebase-adminsdk.json

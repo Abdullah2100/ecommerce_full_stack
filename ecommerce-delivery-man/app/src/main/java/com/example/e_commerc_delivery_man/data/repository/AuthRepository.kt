@@ -22,7 +22,7 @@ class AuthRepository(val client:HttpClient) {
 
     suspend fun login(loginData:LoginDto): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/login";
+            val full_url =Secrets.getBaseUrl()+"/Delivery/login";
             val result = client.post(full_url){
                 setBody(loginData)
                 contentType(ContentType.Application.Json)

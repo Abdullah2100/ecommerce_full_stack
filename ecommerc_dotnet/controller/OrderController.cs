@@ -39,7 +39,7 @@ public class OrderController : ControllerBase
         _orderData = new OrderData(dbContext, config);
         _userData = new UserData(dbContext, config);
         _productData = new ProductData(dbContext, config, host);
-        _deliveryData = new DeliveryData(dbContext);
+        _deliveryData = new DeliveryData(dbContext,config);
         _hubContext = hubContext;
     }
 
@@ -510,6 +510,13 @@ public class OrderController : ControllerBase
 
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء تغير حالة الطلب");
+        
+        await _hubContext.Clients.All.SendAsync("createdOrder", new OrderItemsStatus
+        {
+            orderId = orderItem.orderId,
+            orderItemId = orderItem.id,
+            status = orderItem.orderItemStatus
+        });
 
         return NoContent();
     }

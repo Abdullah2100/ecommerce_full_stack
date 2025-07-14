@@ -764,10 +764,7 @@ class HomeViewModel(
                     var data = result.data as UserDto
                     _myInfo.emit(data.toUser())
 
-                    if (_orderItemForMyStore.value == null) {
-                        getMyOrderItemBelongToMyStore(myInfo.value!!.store_id, mutableStateOf(1))
 
-                    }
                 }
 
                 is NetworkCallHandler.Error -> {
@@ -1649,49 +1646,6 @@ class HomeViewModel(
 
     }
 
-    fun getMyOrderItemBelongToMyStore(
-        store_id: UUID,
-        pageNumber: MutableState<Int>,
-        isLoading: MutableState<Boolean>? = null
-    ) {
-
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption) {
-            if (isLoading != null) {
-                isLoading.value = true
-                delay(500)
-            }
-            var result = homeRepository.getMyOrderItemForStoreId(store_id, pageNumber.value)
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<OrderItemResponseDto>
-                    var orderItemList = mutableListOf<OrderItem>()
-                    orderItemList.addAll(data.map { it.toOrderItem() })
-                    if (!_orderItemForMyStore.value.isNullOrEmpty()) {
-                        orderItemList.addAll(_orderItemForMyStore.value!!)
-                    }
-                    val distinctOrderItem = orderItemList.distinctBy { it.id }.toList()
-                    _orderItemForMyStore.emit(distinctOrderItem)
-                    if (isLoading != null) isLoading.value = false
-                    if (data.size == 25) pageNumber.value++
-
-                }
-
-                is NetworkCallHandler.Error -> {
-                    if (_orderItemForMyStore.value == null) {
-                        _orderItemForMyStore.emit(emptyList())
-                    }
-                    if (isLoading != null) isLoading.value = false
-
-                    var errorMessage = result.data as String
-                    Log.d("errorFromGettingOrder", errorMessage)
-                    if (_orderItemForMyStore.value == null) {
-                        _orderItemForMyStore.emit(emptyList())
-                    }
-                }
-            }
-
-        }
-    }
 
 
     suspend fun updateOrderItemStatusFromStore(id: UUID, status: Int): String? {

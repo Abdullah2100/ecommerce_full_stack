@@ -55,6 +55,7 @@ import com.example.e_commercompose.dto.response.StoreStatusResponseDto
 import com.example.e_commercompose.model.GeneralSetting
 import com.example.e_commercompose.model.Order
 import com.example.e_commercompose.model.OrderItem
+import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -370,6 +371,41 @@ class HomeViewModel(
                     },
                     OrderResponseDto::class.java
                 )
+                _hub.value?.on(
+                    "orderItemsStatusChange",
+                    { response ->
+                        val myStoreOrderItemHolder = _orderItemForMyStore.value?.map {
+                            if(it.id==response.orderId){
+                                it.copy(orderItemStatus = response.status)
+
+                            } else it
+                        }
+                        val orderHolder = _orders.value?.firstOrNull { it.id==response.orderId }
+                        if(orderHolder!=null){
+                            val orderItemsHolder = orderHolder.order_items.map {
+                                oi->
+                                if(oi.id==response.orderItemId){
+                                        oi.copy(orderItemStatus = response.status)
+                                    }
+                                    else oi
+                            }
+                            orderHolder.copy(order_items = orderItemsHolder)
+
+                        }
+                        val userOrderList = _orders.value?.map {
+                            if(it.id==response.orderId&&orderHolder!=null)
+                                it.copy(order_items = orderHolder.order_items)
+                            else it
+                        }
+
+                            viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
+                                _orderItemForMyStore.emit(myStoreOrderItemHolder)
+                                _orders.emit(userOrderList)
+                        }
+                    },
+                    OrderItemStatusChangeDto::class.java
+                )
+
             }
 
         }

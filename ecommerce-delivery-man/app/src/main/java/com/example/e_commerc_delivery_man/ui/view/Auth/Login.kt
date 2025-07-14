@@ -1,6 +1,7 @@
 package com.example.e_commerc_delivery_man.ui.view.Auth
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -22,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +34,6 @@ import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.component.TextInputWithTitle
 import com.example.e_commerc_delivery_man.ui.component.TextSecureInputWithTitle
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @Composable
@@ -52,10 +51,12 @@ fun LoginScreen(
 
     val isEmailError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
-    val erroMessage = remember { mutableStateOf<String>("") }
+    val erroMessage = remember { mutableStateOf("") }
 
-    val isSendingData = remember { mutableStateOf(false) }
+    val isSendingData = authViewModel.isLoading.collectAsState()
+    val errorMessage = authViewModel.errorMesssage.collectAsState()
     val coroutine = rememberCoroutineScope()
+
 
     val focusRequester = FocusRequester()
 
@@ -81,7 +82,13 @@ fun LoginScreen(
     }
 
 
-
+    LaunchedEffect(errorMessage.value) {
+        if (errorMessage.value != null)
+            coroutine.launch {
+                snackbarHostState.showSnackbar(errorMessage.value.toString())
+                authViewModel.clearErrorMessage()
+            }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -93,15 +100,13 @@ fun LoginScreen(
         it.calculateBottomPadding()
 
 
-
         Column(
             modifier = Modifier
-                .background(Color.White)
                 .fillMaxHeight(0.9f)
                 .fillMaxWidth()
-                .padding(top = 50.dp)
-                .padding(horizontal = 10.dp),
-            horizontalAlignment = Alignment.Start,
+                .padding(top = it.calculateTopPadding()+50.dp)
+                .padding(horizontal = 10.dp)
+            ,horizontalAlignment = Alignment.Start,
         ) {
 
             Text(
@@ -109,10 +114,10 @@ fun LoginScreen(
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Bold,
                 color = CustomColor.neutralColor950,
-                fontSize = (44 / fontScall).sp
+                fontSize = (34 / fontScall).sp
             )
 
-            Sizer(heigh = 30)
+            Sizer(heigh = 50)
             TextInputWithTitle(
                 userNameOrEmail,
                 title = "Email",
@@ -127,6 +132,21 @@ fun LoginScreen(
                 isPasswordError.value,
                 erroMessage.value
             )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    "Forget Password",
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = CustomColor.neutralColor950,
+                    fontSize = (16 / fontScall).sp,
+                    modifier = Modifier.clickable {
+                        nav.navigate(Screens.ReseatPasswordGraph)
+                    }
+                )
+            }
 
             Sizer(heigh = 30)
 
@@ -136,32 +156,18 @@ fun LoginScreen(
                 operation = {
                     keyboardController?.hide()
 
-                    coroutine.launch {
-                        if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
+                    if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
+                        coroutine.launch {
                             snackbarHostState.showSnackbar("User name Or Password is Blanck")
-                        } else {
-                            isSendingData.value = true
-                            val result = async {
-                                authViewModel.loginUser(
-                                    userNameOrEmail.value.text, password = password.value.text,
-                                )
-
-
-                            }.await()
-
-                            isSendingData.value = false
-
-                            if (!result.isNullOrEmpty()) {
-                                snackbarHostState.showSnackbar(result)
-                            } else {
-                                nav.navigate(Screens.HomeGraph) {
-                                    popUpTo(nav.graph.id) {
-                                        inclusive = true
-                                    }
-                                }
-                            }
-
                         }
+                    } else {
+
+                        authViewModel.loginUser(
+                            userNameOrEmail.value.text,
+                            password = password.value.text,
+                            nav = nav
+                        )
+
 
                     }
 
@@ -179,11 +185,9 @@ fun LoginScreen(
         }
 
 
+
     }
 
-
-//        }
-//    )
 
 
 }

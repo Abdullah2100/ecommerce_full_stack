@@ -174,6 +174,7 @@ public class OrderData
                 {
                     id = oi.id,
                     quanity = oi.quanity,
+                    orderId =oi.orderId,
                     product = _dbContext.Products.Where(ois => ois.id == oi.productId)
                         .Select(p => new OrderProductResponseDto
                         {
@@ -217,6 +218,7 @@ public class OrderData
                 {
                     id = oi.id,
                     quanity = oi.quanity,
+                    orderId = oi.orderId,
                     product = _dbContext.Products.Where(ois => ois.id == oi.productId)
                         .Select(p => new OrderProductResponseDto
                         {

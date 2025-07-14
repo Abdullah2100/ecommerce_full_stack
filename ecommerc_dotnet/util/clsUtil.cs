@@ -16,7 +16,8 @@ namespace hotel_api.util
             PRODUCT,
             CATEGORY,
             STORE,
-            BANNER
+            BANNER,
+            DELIVERY
         };
 
         private static string localPath = "images";

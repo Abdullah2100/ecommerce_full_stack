@@ -64,12 +64,56 @@ EXCEPTION
         RETURN FALSE;
 END;
 $$ LANGUAGE plpgsql;
- 
-select * from "Orders";
 
-select * from fun_calculate_distance_between_user_and_stores('513a8750-a21a-4309-8d40-f2285d9d04c6')
+CREATE OR REPLACE FUNCTION get_delivery_fee_info(
+ deleiveryId UUID)
+RETURNS TABLE (
+dayFee DECIMAL,
+weekFee DECIMAL,
+monthFee DECIMAL,
+dayOrder INT,
+weekOrder Int)
+AS $$
+DECLARE
+	dayFee DECIMAL:=0.0;
+	weekFee DECIMAL :=0.0;
+	monthFee DECIMAL :=0.0;
+	weekDate DATE := now()::DATE-7;
+	monthDate DATE := now()::DATE-3;
+	orders   RECORD;
+	dayOrder INT:=0;
+    weekOrder Int:=0;
+BEGIN
+
+   FOR orders IN
+	   (SELECT "Orders"."distanceFee" as fee,
+	           "Orders"."createdAt" as createdDate
+	   FROM "Orders" 
+       WHERE "Orders".id=deleiveryId
+	   AND "Orders".status>=5
+	   AND ("Orders"."createdAt"<=now()::DATE OR 
+	   "Orders"."createdAt"<=monthDate)
+	   )
+   LOOP 
+    IF orders.createdDate=now()::DATE THEN 
+	  dayFee:= dayFee + orders.fee;
+	  dayOrder:= dayOrder+1;
+	END IF;
+
+	IF orders.createdDate<=now()::DATE AND orders.createdDate>=weekDate THEN 
+	  weekFee := weekFee +  orders.fee;
+	  weekOrder:= weekOrder+1;
+	END IF ;
+     monthFee := monthFee + orders.fee;
+   END LOOP;
+
+   RETURN  QUERY SELECT dayFee,weekFee,monthFee,dayOrder,weekOrder;
+EXCEPTION
+   WHEN OTHERS THEN 
+   RAISE EXCEPTION 'Something went wrong: %',SQLERRM;
+   RETURN 	 QUERY SELECT NULL,NULL,NULL,NULL,NULL;
+END 
+$$ LANGUAGE plpgsql;
 
 
-
-
-
+SELECT * FROM get_delivery_fee_info('3b7406e2-7b35-4cd7-9c5a-d1788555b5b3')
