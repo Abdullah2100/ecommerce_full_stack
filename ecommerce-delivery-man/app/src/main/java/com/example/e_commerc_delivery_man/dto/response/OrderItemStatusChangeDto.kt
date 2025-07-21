@@ -4,14 +4,12 @@ import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
+
 @Serializable()
-data class ProductVarientReponseDto(
+data class OrderItemStatusChangeDto(
     @Serializable(with = UUIDKserialize::class)
-    val id: UUID,
-    val name:String,
-    val precentage: Double,
-
+    val orderId: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val varient_id: UUID,
-
-    )
+    val orderItemId: UUID,
+    val status: String
+)

@@ -10,9 +10,13 @@ data class OrderResponseDto(
     val id: UUID,
     val longitude: Double,
     val latitude: Double,
-    val user_phone: String,
+    val userPhone: String,
+    var name: String,
     val status:Int,
-    val order_items:List<OrderItemResponseDto>
+    val totalPrice: Double,
+    val realPrice: Double,
+    val deliveryFee: Double,
+    val orderItems:List<OrderItemResponseDto>
 
 
 )

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ecommerc_dotnet.module;
 
-public enum enOrderItemStatus {InProgress,Excepted,Cancelled }
+public enum enOrderItemStatus {InProgress,Excepted,RecivedByDelivery,Cancelled }
 
 public class OrderItem
 {

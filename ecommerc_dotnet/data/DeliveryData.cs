@@ -52,7 +52,7 @@ public class DeliveryData
     }
 
 
-    public async Task<bool?> updateDeliveryDeviceToken(
+    public async Task<bool?> updateDeviceToken(
         Guid id,
         string? deviceToken)
     {
@@ -72,6 +72,30 @@ public class DeliveryData
             return null;
         }
     }
+
+
+
+    public async Task<bool?> updateStatus(
+        Guid id,
+        bool isAviable)
+    {
+        try
+        {
+            await _dbContext.Deliveries
+                .Where(de => de.id == id)
+                .ExecuteUpdateAsync(de => de.SetProperty(value => value.isAvaliable, isAviable));
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            //_logger.LogError("error from create new User"+e.Message);
+            Console.Write("error from update User" + e.Message);
+            return null;
+        }
+    }
+
 
 
     public async Task<bool?> createDelivery(
@@ -156,11 +180,10 @@ public class DeliveryData
                         userId = user.id,
                         id = deliver.id,
                         createdAt = deliver.createdAt,
-                        address = new AddressResponseDto
+                        address = new AddressResponseDeliveryDto
                         {
                             longitude = address.longitude,
                             latitude = address.latitude,
-                            title = address.title,
                         },
                         thumbnail = deliver.thumbnail != null ? _config.getKey("url_file") + deliver.thumbnail : null,
                         isAvaliable = deliver.isAvaliable,

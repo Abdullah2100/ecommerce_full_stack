@@ -5,16 +5,14 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data class StoreResposeDto(
+data class DeliveryInfoDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
-
     @Serializable(with = UUIDKserialize::class)
-    val user_id: UUID,
-
-    val name: String,
-    val wallpaper_image: String,
-    val small_image: String,
-    val longitude: Double,
-    val latitude: Double,
+    val userId: UUID,
+    val isAvaliable: Boolean,
+    val thumbnail: String? = null,
+    val address: AddressResponseDto,
+    val analys: DeliveryAnalysDto,
+    val user: UserDto
 )

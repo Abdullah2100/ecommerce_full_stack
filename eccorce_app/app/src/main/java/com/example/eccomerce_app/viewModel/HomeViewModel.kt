@@ -537,7 +537,7 @@ class HomeViewModel(
     //category
     fun getCategories(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -572,7 +572,7 @@ class HomeViewModel(
     //general
     fun getGeneral(pageNumber: Int = 1) {
         if (pageNumber == 1 && _categories.value != null) return;
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var result = homeRepository.getGeneral(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -605,7 +605,7 @@ class HomeViewModel(
     //order
     fun getVarients(pageNumber: Int = 1) {
         if (pageNumber == 1 && _varients.value != null) return;
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var result = homeRepository.getVarient(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -799,7 +799,7 @@ class HomeViewModel(
 
     fun getMyInfo() {
         if (_myInfo.value != null) return;
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var result = homeRepository.getMyInfo();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -1080,7 +1080,7 @@ class HomeViewModel(
     }
 
     fun getStoreData(store_id: UUID) {
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var result = homeRepository.getStoreById(store_id);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -1112,7 +1112,7 @@ class HomeViewModel(
     }
 
     private fun getStoreBanner(store_id: UUID, pageNumber: Int = 1) {
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             var result = homeRepository.getBannerByStoreId(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
@@ -1233,7 +1233,7 @@ class HomeViewModel(
         pageNumber: MutableState<Int>,
         isLoading: MutableState<Boolean>? = null
     ) {
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             if (isLoading != null) isLoading.value = true;
             delay(500)
 
@@ -1636,7 +1636,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
         if (isLoading != null) isLoading.value = true
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             if (isLoading != null)
                 delay(500)
             var result = homeRepository.getMyOrders(pageNumber.value)
@@ -1698,7 +1698,7 @@ class HomeViewModel(
         isLoading: MutableState<Boolean>? = null
     ) {
 
-        viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             if (isLoading != null) {
                 isLoading.value = true
                 delay(500)

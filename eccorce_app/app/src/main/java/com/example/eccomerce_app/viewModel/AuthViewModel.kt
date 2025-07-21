@@ -97,7 +97,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         password: String,
         nav: NavHostController,
         ) {
-       viewModelScope.launch (Dispatchers.Default+_coroutinExption){
+       viewModelScope.launch (Dispatchers.IO+_coroutinExption){
            _isLoading.emit(true)
            val token = FirebaseMessaging.getInstance().token.await() ?: ""
            val result = authRepository.signup(
@@ -150,7 +150,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
          password: String,
          nav: NavHostController,
     ) {
-        viewModelScope.launch(Dispatchers.Default+_coroutinExption){
+        viewModelScope.launch(Dispatchers.IO+_coroutinExption){
             _isLoading.emit(true);
         val token = FirebaseMessaging.getInstance().token.await() ?: ""
 

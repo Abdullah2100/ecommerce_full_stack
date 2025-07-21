@@ -38,12 +38,7 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            version = "3.31.5"
-            path = file("src/main/jni/CMakeLists.txt")
-        }
-    }
+
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -149,6 +144,5 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose.runntime)
 
     //googleMap
-    implementation(libs.google.map)
-
+    implementation(libs.maps.compose)
 }

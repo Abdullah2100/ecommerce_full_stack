@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +43,7 @@ fun AccountPage(
 ) {
 
     var myInfo = homeViewModel.myInfo.collectAsState()
-    var storeId = myInfo.value?.store_id
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -72,7 +73,7 @@ fun AccountPage(
                         }
                     ) {
                         Icon(
-                            Icons.Default.KeyboardArrowLeft,
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             "",
                             modifier = Modifier.size(30.dp),
                             tint = CustomColor.neutralColor950
@@ -104,21 +105,9 @@ fun AccountPage(
 //           AccountCustomBottom("My Order", R.drawable.order, {})
             AccountCustomBottom("Payment Me", R.drawable.credit_card, {})
             AccountCustomBottom("Notifications", R.drawable.notification_accout, {})
-            AccountCustomBottom("My Store", R.drawable.store, {
-//                if (myInfo.value != null)
-//                    homeViewModel.kgetProducts(store_id = myInfo.value!!.store_id, pageNumber = 1)
-                nav.navigate(
-                    Screens.Store(
-                        if (storeId == null) null else storeId.toString(),
-                        false
-                    )
-                )
-            })
 
-            if (myInfo.value?.store_id != null)
-                AccountCustomBottom("Order For My Store", R.drawable.order_belong_to_store, {
-                    nav.navigate(Screens.OrderForMyStore)
-                })
+
+
             LogoutBotton("Logout", R.drawable.logout, {
                 homeViewModel.logout()
                 nav.navigate(Screens.Login)

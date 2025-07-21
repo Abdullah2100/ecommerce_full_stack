@@ -7,8 +7,8 @@ public class DeliveryInfoResponseDto
     public bool isAvaliable { get; set; } = true;
     public DateTime createdAt { get; set; } = DateTime.Now;
     public string? thumbnail { get; set; }
-    public AddressResponseDto address { get; set; }
+    public AddressResponseDeliveryDto address { get; set; }
     public DeliveryAnalysDto? analys { get; set; } = null;
-    public UserDeliveryInfoResponseDto user;
+    public UserDeliveryInfoResponseDto user { get; set; }
 
 }

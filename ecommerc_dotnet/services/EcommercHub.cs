@@ -30,6 +30,13 @@ public class EcommercHub : Hub
     }
 
 
+    public async Task orderGettingByCustomer(OrderUpdatedEvent orderUpdatedEvent)
+    {
+        await Clients.All.SendAsync("orderGettingByDelivery", orderUpdatedEvent);
+    }
+
+
+
     public async Task updatingStoreStatus(StoreStatusResponseDto status)
     {
         await Clients.All.SendAsync("storeStatus", status);
@@ -40,9 +47,9 @@ public class EcommercHub : Hub
     {
         await Clients.All.SendAsync("orderExcptedByAdmin", order);
     }
-    public async Task sendingOrderItemStatusChange(OrderResponseDto order)
+    public async Task sendingOrderItemStatusChange(OrderItemsStatus orderItemsStatus)
     {
-        await Clients.All.SendAsync("orderItemsStatusChange", order);
+        await Clients.All.SendAsync("orderItemsStatusChange", orderItemsStatus);
         
     }
 }

@@ -15,7 +15,7 @@ fun provideDataBase(application: Context): AuthDataBase {
         "table_post"
     )
         .openHelperFactory(General.encryptionFactory(Secrets.getBaseUrl()))
-        .fallbackToDestructiveMigration()
+        .fallbackToDestructiveMigration(false)
         .build()
 }
 

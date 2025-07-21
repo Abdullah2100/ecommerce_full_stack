@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -176,7 +177,7 @@ fun ProfileScreen(
                         }
                     ) {
                         Icon(
-                            Icons.Default.KeyboardArrowLeft,
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             "",
                             modifier = Modifier.size(30.dp),
                             tint = CustomColor.neutralColor950
@@ -185,59 +186,59 @@ fun ProfileScreen(
                 },
 
                 actions = {
-                    if(
-                        file.value!=null||
-                        (fullName.value.text.isNotEmpty()&&
-                                fullName.value.text!=myInfo.value?.name)||
-                        newPassword.value.text.isNotEmpty()||
-                        oldPassword.value.text.isNotEmpty()||
-                        phone.value.text.isNotEmpty()
-
-                        )
-
-                    TextButton(
-                        onClick = {
-                            keyboardController?.hide()
-                            var result = validateLoginInput()
-                            if((result)==true){
-                                var data = MyInfoUpdate(
-                                    name =if(fullName.value.text.isEmpty())null else fullName.value.text,
-                                    oldPassword =if(oldPassword.value.text.isEmpty())null else oldPassword.value.text,
-                                    newPassword =if(newPassword.value.text.isEmpty())null else newPassword.value.text,
-                                    phone =if(phone.value.text.isEmpty())null else phone.value.text,
-                                    thumbnail = file.value,
-                                )
-                                currotine.launch {
-                                    var result=async {
-                                        homeViewModel.updateMyInfo(data);
-                                    }.await()
-                                    if(result.isNullOrEmpty()){
-                                        phone.value= TextFieldValue("")
-                                        oldPassword.value= TextFieldValue("")
-                                        newPassword.value= TextFieldValue("")
-                                        fullName.value= TextFieldValue("")
-                                        file===null
-                                        currotine.launch {
-                                            snackbarHostState.showSnackbar("profile update seccessfuly");
-                                        }
-                                    }else{
-                                        currotine.launch {
-                                            snackbarHostState.showSnackbar(result);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ) {
-                        Text(
-                            "Save",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = (18).sp,
-                            color = CustomColor.primaryColor700,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+//                    if(
+//                        file.value!=null||
+//                        (fullName.value.text.isNotEmpty()&&
+//                                fullName.value.text!=myInfo.value?.name)||
+//                        newPassword.value.text.isNotEmpty()||
+//                        oldPassword.value.text.isNotEmpty()||
+//                        phone.value.text.isNotEmpty()
+//
+//                        )
+//
+//                    TextButton(
+//                        onClick = {
+//                            keyboardController?.hide()
+//                            var result = validateLoginInput()
+//                            if((result)==true){
+//                                var data = MyInfoUpdate(
+//                                    name =if(fullName.value.text.isEmpty())null else fullName.value.text,
+//                                    oldPassword =if(oldPassword.value.text.isEmpty())null else oldPassword.value.text,
+//                                    newPassword =if(newPassword.value.text.isEmpty())null else newPassword.value.text,
+//                                    phone =if(phone.value.text.isEmpty())null else phone.value.text,
+//                                    thumbnail = file.value,
+//                                )
+//                                currotine.launch {
+////                                    var result=async {
+////                                        homeViewModel.updateMyInfo(data);
+////                                    }.await()
+////                                    if(result.isNullOrEmpty()){
+////                                        phone.value= TextFieldValue("")
+////                                        oldPassword.value= TextFieldValue("")
+////                                        newPassword.value= TextFieldValue("")
+////                                        fullName.value= TextFieldValue("")
+////                                        file===null
+////                                        currotine.launch {
+////                                            snackbarHostState.showSnackbar("profile update seccessfuly");
+////                                        }
+////                                    }else{
+////                                        currotine.launch {
+////                                            snackbarHostState.showSnackbar(result);
+////                                        }
+////                                    }
+//                                }
+//                            }
+//                        }
+//                    ) {
+//                        Text(
+//                            "Save",
+//                            fontFamily = General.satoshiFamily,
+//                            fontWeight = FontWeight.Normal,
+//                            fontSize = (18).sp,
+//                            color = CustomColor.primaryColor700,
+//                            textAlign = TextAlign.Center
+//                        )
+//                    }
                 },
 //                scrollBehavior = scrollBehavior
             )
@@ -393,7 +394,7 @@ fun ProfileScreen(
             TextInputWithTitle(
                 value = fullName,
                 title = "Full Name",
-                placHolder = myInfo.value?.name ?: "",
+                placHolder = myInfo.value?.user?.name ?: "",
                 erroMessage = "",
                 focusRequester = focusRequester
             )
@@ -401,7 +402,7 @@ fun ProfileScreen(
             TextInputWithTitle(
                 value = email,
                 title = "Email",
-                placHolder = myInfo.value?.email ?: "",
+                placHolder = myInfo.value?.user?.email ?: "",
                 erroMessage = "",
                 isEnable = false,
                 focusRequester = focusRequester
@@ -410,7 +411,7 @@ fun ProfileScreen(
             TextNumberInputWithTitle(
                 value = phone,
                 title = "Phone",
-                placHolder = myInfo.value?.phone ?: "",
+                placHolder = myInfo.value?.user?.phone ?: "",
                 isHasError = false,
                 erroMessage = "",
             )

@@ -1,18 +1,20 @@
 package com.example.eccomerce_app.model
 
+import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
-@Serializable
 data class Order(
-    @Serializable(with = UUIDKserialize::class)
     val id: UUID,
     val longitude: Double,
     val latitude: Double,
     val user_phone: String,
     val status:Int,
-    val order_items:List<OrderItem>
-
-
+    val userPhone: String,
+    var name: String,
+    val totalPrice: Double,
+    val realPrice: Double,
+    val deliveryFee: Double,
+    val orderItems:List<OrderItem>
 )

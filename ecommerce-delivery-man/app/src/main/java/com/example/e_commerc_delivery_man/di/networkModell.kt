@@ -102,7 +102,7 @@ null;
 
 fun socketClient(): HubConnection? {
     try {
-        var connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
+        var connectionUrl="http://10.0.2.2:5077"+"/bannerHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
             .withTransport(com.microsoft.signalr.TransportEnum.LONG_POLLING)

@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
             val nav = rememberNavController();
             val authViewModle: AuthViewModel = koinViewModel();
             val currentScreen = authViewModle.currentScreen.collectAsState()
+
             var buttonNavItemHolder = listOf<ButtonNavItem>(
                 ButtonNavItem(name ="Home", imageId = Icons.Outlined.Home,0 ),
                 ButtonNavItem(name ="Orders", imageId = ImageVector.vectorResource(R.drawable.order),1 ),
@@ -91,7 +92,7 @@ class MainActivity : ComponentActivity() {
                         if(
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Orders::class) == true||
-                            navBackStackEntry.value?.destination?.hasRoute(Screens.Orders::class) == true||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.MyOrder::class) == true||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Account::class) == true
                             )
                         {
@@ -148,7 +149,7 @@ class MainActivity : ComponentActivity() {
             {
                     it.calculateTopPadding()
                     it.calculateBottomPadding()
-                    NavController(nav, currentScreen=currentScreen.value?:1)
+                    NavController(nav, currentScreen=currentScreen.value!!)
                 }
         }
     }

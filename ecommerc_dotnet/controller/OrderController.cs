@@ -511,12 +511,13 @@ public class OrderController : ControllerBase
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء تغير حالة الطلب");
         
-        await _hubContext.Clients.All.SendAsync("createdOrder", new OrderItemsStatus
+        OrderItemsStatus status =new OrderItemsStatus
         {
             orderId = orderItem.orderId,
             orderItemId = orderItem.id,
-            status = orderItem.orderItemStatus
-        });
+            status=enOrderItemStatus.Excepted.ToString()
+        };
+        await _hubContext.Clients.All.SendAsync("orderItemsStatusChange",status );
 
         return NoContent();
     }
@@ -559,52 +560,5 @@ public class OrderController : ControllerBase
 
 
 
-    //delivery
-    [HttpGet("delivery/{pageNumber}")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getOrderNotTakedByDelivery
-    (
-        int pageNumber = 1
-    )
-    {
-        if (pageNumber < 1)
-            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
-
-        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
-            authorizationHeader.ToString().Replace("Bearer ", ""));
-
-        Guid? idHolder = null;
-        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
-        {
-            idHolder = outId;
-        }
-
-        if (idHolder is null)
-        {
-            return Unauthorized("هناك مشكلة في التحقق");
-        }
-
-        User? user = await _userData.getUserById(idHolder.Value);
-
-        if (user is null)
-            return NotFound("المستخدم غير موجود");
-        bool isDeliveryMan = await _deliveryData.isExistByUserId(user.id);
-
-        if (isDeliveryMan == false)
-            return NotFound("الموصل غير موجو");
-
-        if (user.isDeleted == true || user.role == 1)
-            return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
-
-        var result = await _orderData.getOrderForDelivery(pageNumber, 25);
-        if (result is null || result.Count < 1)
-            return NoContent();
-        return StatusCode(200, result);
-    }
-
-
+  
 }

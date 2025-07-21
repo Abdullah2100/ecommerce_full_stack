@@ -12,7 +12,6 @@ import com.example.e_commerc_delivery_man.data.Room.AuthModleEntity
 import com.example.e_commerc_delivery_man.data.Room.IsPassOnBoardingScreen
 import com.example.e_commerc_delivery_man.dto.request.LoginDto
 import com.example.e_commerc_delivery_man.data.repository.AuthRepository
-import com.example.e_commerc_delivery_man.dto.request.SignupDto
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.google.firebase.messaging.FirebaseMessaging
@@ -55,12 +54,14 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     fun getStartedScreen() {
         viewModelScope.launch(Dispatchers.Default + _coroutinExption) {
             val authData = dao.getAuthData()
-            when (authData != null) {
-                false -> {
+
+            when (authData == null) {
+                true -> {
                     _cuurentScreen.emit(0)
                 }
 
                 else -> {
+                    General.authData.emit(authData)
                     _cuurentScreen.emit(1)
                 }
             }
