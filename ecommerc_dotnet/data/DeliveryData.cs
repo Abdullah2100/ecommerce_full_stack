@@ -42,7 +42,7 @@ public class DeliveryData
             return await _dbContext
                 .Deliveries
                 .AsNoTracking()
-                .FirstOrDefaultAsync(de => de.userId == userId) != null;
+                .FirstOrDefaultAsync(de => de.UserId == userId) != null;
         }
         catch (Exception e)
         {
@@ -59,7 +59,7 @@ public class DeliveryData
         try
         {
             await _dbContext.Deliveries
-                .Where(de => de.userId == id)
+                .Where(de => de.UserId == id)
                 .ExecuteUpdateAsync(de => de.SetProperty(value => value.deviceToken, deviceToken));
 
             await _dbContext.SaveChangesAsync();
@@ -82,7 +82,7 @@ public class DeliveryData
         try
         {
             await _dbContext.Deliveries
-                .Where(de => de.id == id)
+                .Where(de => de.Id == id)
                 .ExecuteUpdateAsync(de => de.SetProperty(value => value.isAvaliable, isAviable));
 
             await _dbContext.SaveChangesAsync();
@@ -112,20 +112,20 @@ public class DeliveryData
             var id = clsUtil.generateGuid();
             await _dbContext.Address.AddAsync(new Address
             {
-                id = addressId,
-                longitude = longitude,
-                latitude = latitude,
-                title = "my Place",
-                createdAt = DateTime.Now,
-                ownerId = id
+                Id = addressId,
+                Longitude = longitude,
+                Latitude = latitude,
+                Title = "my Place",
+                CreatedAt = DateTime.Now,
+                OwnerId = id
             });
 
             await _dbContext.Deliveries.AddAsync(new Delivery
             {
                 deviceToken = deviceToken,
-                id = id,
-                createdAt = DateTime.Now,
-                userId = userId,
+                Id = id,
+                CreatedAt = DateTime.Now,
+                UserId = userId,
             });
 
             await _dbContext.SaveChangesAsync();
@@ -145,13 +145,13 @@ public class DeliveryData
         {
             DeliveryInfoResponseDto? response = await (
                     from deliver in _dbContext.Deliveries
-                    join user in _dbContext.Users on deliver.userId equals user.id
-                    join address in _dbContext.Address on deliver.userId equals address.ownerId
-                    where deliver.userId == id
+                    join user in _dbContext.Users on deliver.UserId equals user.Id
+                    join address in _dbContext.Address on deliver.UserId equals address.OwnerId
+                    where deliver.UserId == id
                     select new DeliveryInfoResponseDto
                     {
-                        userId = user.id,
-                        id = deliver.id,
+                        userId = user.Id,
+                        id = deliver.Id,
                     }
                 ).AsNoTracking()
                 .FirstOrDefaultAsync();
@@ -172,27 +172,27 @@ public class DeliveryData
         {
             DeliveryInfoResponseDto? response = await (
                     from deliver in _dbContext.Deliveries
-                    join user in _dbContext.Users on deliver.userId equals user.id
-                    join address in _dbContext.Address on deliver.userId equals address.ownerId
-                    where deliver.id ==id
+                    join user in _dbContext.Users on deliver.UserId equals user.Id
+                    join address in _dbContext.Address on deliver.UserId equals address.OwnerId
+                    where deliver.Id ==id
                     select new DeliveryInfoResponseDto
                     {
-                        userId = user.id,
-                        id = deliver.id,
-                        createdAt = deliver.createdAt,
+                        userId = user.Id,
+                        id = deliver.Id,
+                        createdAt = deliver.CreatedAt,
                         address = new AddressResponseDeliveryDto
                         {
-                            longitude = address.longitude,
-                            latitude = address.latitude,
+                            longitude = address.Longitude,
+                            latitude = address.Latitude,
                         },
-                        thumbnail = deliver.thumbnail != null ? _config.getKey("url_file") + deliver.thumbnail : null,
+                        thumbnail = deliver.Thumbnail != null ? _config.getKey("url_file") + deliver.Thumbnail : null,
                         isAvaliable = deliver.isAvaliable,
                         user= new UserDeliveryInfoResponseDto 
                         {
-                            email = user.email,
-                            phone = user.phone,
-                            thumbnail = user.thumbnail != null ? _config.getKey("url_file") + user.thumbnail : null,
-                            name= user.name,
+                            email = user.Email,
+                            phone = user.Phone,
+                            thumbnail = user.Thumbnail != null ? _config.getKey("url_file") + user.Thumbnail : null,
+                            name= user.Name,
                         }
                     }
                 ).AsNoTracking()

@@ -1,6 +1,8 @@
 using System.Text;
 using ecommerc_dotnet.context;
+using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.UnitOfWork;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using hotel_api.Services;
@@ -19,6 +21,7 @@ builder.Services.AddOptions();
 // Other Services (Scoped)
 builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
 builder.Services.AddTransient<iEmailService, EmailService>();
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
 
 var fireBaseConfig = Path.Combine(
@@ -102,4 +105,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<EcommercHub>("/bannerHub");
+app.ConfigureExceptionHandler();
 app.Run();

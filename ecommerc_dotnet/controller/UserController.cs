@@ -88,12 +88,12 @@ public class UserController : ControllerBase
 
         token = AuthinticationServices.generateToken(
             userID: result.Id,
-            email: result.email,
+            email: result.Email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
             userID: result.Id,
-            email: result.email,
+            email: result.Email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
 
@@ -119,12 +119,12 @@ public class UserController : ControllerBase
 
         token = AuthinticationServices.generateToken(
             userID: result.Id,
-            email: result.email,
+            email: result.Email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
             userID: result.Id,
-            email: result.email,
+            email: result.Email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
 
@@ -193,7 +193,7 @@ public class UserController : ControllerBase
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (user.role is 1)
+        if (user.Role is 1)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
 
         if (page < 0)
@@ -238,7 +238,7 @@ public class UserController : ControllerBase
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (user.role is 1)
+        if (user.Role is 1)
             return BadRequest("ليس لديك الصلاحية ");
 
 
@@ -273,7 +273,7 @@ public class UserController : ControllerBase
 
         User? userData = await _userData.getUserById(idHolder.Value);
 
-        if (userData is null || userData.role !=  0)
+        if (userData is null || userData.Role !=  0)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
 
         int size = await _userData.getUsers();
@@ -313,7 +313,7 @@ public class UserController : ControllerBase
             return BadRequest("المستخدم غير موجود");
         }
 
-        if (idHolder !=  user.id)
+        if (idHolder !=  user.Id)
         {
             return BadRequest("فقط المستخدم يمكن تعديل بياناته");
         }
@@ -321,15 +321,15 @@ public class UserController : ControllerBase
 
         if (userData.password !=  null && userData.newPassword !=  null)
         {
-            if (user.password !=  clsUtil.hashingText(userData.password))
+            if (user.Password !=  clsUtil.hashingText(userData.password))
             {
                 return BadRequest("كلمة المرور غير صحيحة");
             }
         }
 
-        if (user.thumbnail !=  null && userData.thumbnail !=  null)
+        if (user.Thumbnail !=  null && userData.thumbnail !=  null)
         {
-            clsUtil.deleteFile(user.thumbnail, _host);
+            clsUtil.deleteFile(user.Thumbnail, _host);
         }
 
         string? profile = null;
@@ -379,13 +379,13 @@ public class UserController : ControllerBase
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user is null || user.isDeleted)
+        if (user is null || user.IsBlocked)
         {
             return NotFound("المستخدم غير موجود");
         }
 
 
-        List<AddressResponseDto>? locations = await _addressData.getUserAddressByUserId(user.id);
+        List<AddressResponseDto>? locations = await _addressData.getUserAddressByUserId(user.Id);
 
         if (locations is null)
             return NoContent();
@@ -420,7 +420,7 @@ public class UserController : ControllerBase
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user is null || user.isDeleted)
+        if (user is null || user.IsBlocked)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -467,7 +467,7 @@ public class UserController : ControllerBase
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user is null || user.isDeleted)
+        if (user is null || user.IsBlocked)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -479,13 +479,13 @@ public class UserController : ControllerBase
             return NotFound("العنوان غير موجود");
         }
 
-        if (addressResult.ownerId !=  idHolder.Value)
+        if (addressResult.OwnerId !=  idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
 
     AddressResponseDto? location = await _addressData.updateAddress(
-            addressId: addressResult.id,
+            addressId: addressResult.Id,
             titile: address.title,
             longitude: address.longitude,
             latitude: address.latitude
@@ -523,7 +523,7 @@ public class UserController : ControllerBase
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user is null || user.isDeleted)
+        if (user is null || user.IsBlocked)
         {
             return NotFound("المستخدم غير موجود");
         }
@@ -535,16 +535,16 @@ public class UserController : ControllerBase
             return NotFound("العنوان غير موجود");
         }
 
-        if (addressResult.ownerId !=  idHolder.Value)
+        if (addressResult.OwnerId !=  idHolder.Value)
         {
             return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
         }
 
-        if (addressResult.isCurrent)
+        if (addressResult.IsCurrent)
             return BadRequest("لا يمكن حذف العنوان الحالي");
 
         bool result = await _addressData.deleteDaddress(
-            addressId: addressResult.id);
+            addressId: addressResult.Id);
 
         if (result == false)
             return BadRequest("حدثة مشكلة اثناء حذف البيانات");
@@ -576,7 +576,7 @@ public class UserController : ControllerBase
 
         User? user = await _userData.getUserById(idHolder.Value);
 
-        if (user is null || user.isDeleted)
+        if (user is null || user.IsBlocked)
         {
             return BadRequest("المستخدم غير موجود");
         }
@@ -588,7 +588,7 @@ public class UserController : ControllerBase
             return BadRequest("العنوان غير موجود");
         }
 
-        bool? result = await _addressData.changeCurrentAddress(address.id, user.id);
+        bool? result = await _addressData.changeCurrentAddress(address.id, user.Id);
 
         return StatusCode(200, result);
     }
@@ -680,12 +680,12 @@ public class UserController : ControllerBase
 
         token = AuthinticationServices.generateToken(
             userID: result.Id,
-            email: result.email,
+            email: result.Email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
             userID: result.Id,
-            email: result.email,
+            email: result.Email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
 

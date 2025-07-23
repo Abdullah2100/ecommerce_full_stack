@@ -174,7 +174,7 @@ public class ProductController : ControllerBase
         User? user = await _userData.getUserById(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية");
         var result = await _productData.getProductsAdmin(pageNumber);
 
@@ -210,7 +210,7 @@ public class ProductController : ControllerBase
         User? user = await _userData.getUserById(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية");
         
         var result = await _productData.getProduct();

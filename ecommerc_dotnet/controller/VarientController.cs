@@ -57,7 +57,7 @@ public class VarientController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.role !=  0)
+        if (userHolder.Role !=  0)
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }
@@ -106,7 +106,7 @@ public class VarientController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.role !=  0)
+        if (userHolder.Role !=  0)
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }
@@ -161,7 +161,7 @@ public class VarientController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.role !=  0)
+        if (userHolder.Role !=  0)
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }

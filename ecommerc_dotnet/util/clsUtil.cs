@@ -8,24 +8,21 @@ using hotel_api.Services;
 
 namespace hotel_api.util
 {
-    sealed class clsUtil
+    public enum enImageType
     {
-        public enum enImageType
-        {
-            PROFILE,
-            PRODUCT,
-            CATEGORY,
-            STORE,
-            BANNER,
-            DELIVERY
-        };
+        PROFILE,
+        PRODUCT,
+        CATEGORY,
+        STORE,
+        BANNER,
+        DELIVERY
+    };
 
+    static class clsUtil
+    {
         private static string localPath = "images";
 
-        public static Guid generateGuid()
-        {
-            return Guid.NewGuid();
-        }
+        public static Guid generateGuid()=> Guid.NewGuid();
 
         public static DateTime generateDateTime(AuthinticationServices.enTokenMode mode)
         {
@@ -57,10 +54,8 @@ namespace hotel_api.util
         }
 
 
-        public static string getFileExtention(IFormFile filename)
-        {
-            return Path.GetExtension(filename.FileName);
-        }
+        public static string getFileExtention(IFormFile filename)=> Path.GetExtension(filename.FileName);
+        
 
         private static bool createDirectory(string dir)
         {
@@ -100,8 +95,8 @@ namespace hotel_api.util
 
                 switch (fileFullName.Contains("//"))
                 {
-                    case true: return fileFullName.Replace(host.ContentRootPath+"//images", "");
-                    default: return fileFullName.Replace(host.ContentRootPath+"/images", "");
+                    case true: return fileFullName.Replace(host.ContentRootPath + "//images", "");
+                    default: return fileFullName.Replace(host.ContentRootPath + "/images", "");
                 }
             }
             catch (Exception ex)
@@ -137,9 +132,9 @@ namespace hotel_api.util
             try
             {
                 string fileRealPath = Path.Combine(host.ContentRootPath, filePath);
-                if (File.Exists( fileRealPath))
+                if (File.Exists(fileRealPath))
                 {
-                    File.Delete( fileRealPath);
+                    File.Delete(fileRealPath);
                     return true;
                 }
 
@@ -152,9 +147,8 @@ namespace hotel_api.util
             }
         }
 
-        public static void deleteFile(List<string> filePath, IWebHostEnvironment host)
-        {
+        public static void deleteFile(List<string> filePath, IWebHostEnvironment host)=>  
             filePath.ForEach(image => { deleteFile(image, host); });
-        }
+        
     }
 }

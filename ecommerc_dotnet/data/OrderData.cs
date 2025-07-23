@@ -103,40 +103,40 @@ public class OrderData
         {
             var result = await (
                     from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.userId equals user.id
+                    join user in _dbContext.Users on order.UserId equals user.Id
                     select new OrderResponseDto
                     {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        userPhone = user.phone,
-                        status = order.status,
-                        deliveryFee = order.distanceFee,
+                        id = order.Id,
+                        longitude = order.Longitude,
+                        latitude = order.Latitude,
+                        userPhone = user.Phone,
+                        status = order.Status,
+                        deliveryFee = order.DistanceFee,
 
-                        name = user.name,
-                        totalPrice = order.totalPrice,
+                        name = user.Name,
+                        totalPrice = order.TotalPrice,
                         orderItems = _dbContext.OrderItems
                             .AsNoTracking()
-                            .Where(oi => oi.orderId == order.id)
+                            .Where(oi => oi.OrderId == order.Id)
                             .Select(orIt => new OrderItemResponseDto
                             {
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.productId).Select(pr =>
-                                    new OrderProductResponseDto
+                                price = orIt.Price,
+                                id = orIt.Id,
+                                quanity = orIt.Quanity,
+                                product = _dbContext.Products.Where(p => p.Id == orIt.ProductId).Select(pr =>
+                                    new OrderProductDto
                                     {
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                        Id = pr.Id,
+                                        Name = pr.Name,
+                                        Thmbnail = _config.getKey("url_file") + pr.Thmbnail,
                                     }).FirstOrDefault(),
                                 productVarient = _dbContext.OrdersProductsVarients
                                     .AsNoTracking()
-                                    .Where(opv => opv.orderItemId == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
+                                    .Where(opv => opv.OrderItemId == orIt.Id)
+                                    .Select(opv => new OrderVarientDto
                                     {
-                                        productVarientName = opv.productVarient.name,
-                                        varientName = opv.productVarient.varient.name,
+                                        ProductVarientName = opv.ProductVarient.Name,
+                                        VarientName = opv.ProductVarient.varient.Name,
                                     }).ToList(),
                             }).ToList()
                     }
@@ -164,31 +164,31 @@ public class OrderData
         try
         {
             var result = await _dbContext.OrderItems
-                .Include(oi => oi.orderProductsVarients)
-                .Include(oi => oi.order)
+                .Include(oi => oi.OrderProductsVarients)
+                .Include(oi => oi.Order)
                 .AsSplitQuery()
                 .AsNoTracking()
-                .OrderByDescending(oi => oi.id)
-                .Where(oi => oi.storeId == storeId && oi.order.status >= 2)
+                .OrderByDescending(oi => oi.Id)
+                .Where(oi => oi.StoreId == storeId && oi.Order.Status >= 2)
                 .Select(oi => new OrderItemResponseDto
                 {
-                    id = oi.id,
-                    quanity = oi.quanity,
-                    orderId = oi.orderId,
-                    product = _dbContext.Products.Where(ois => ois.id == oi.productId)
-                        .Select(p => new OrderProductResponseDto
+                    id = oi.Id,
+                    quanity = oi.Quanity,
+                    orderId = oi.OrderId,
+                    product = _dbContext.Products.Where(ois => ois.Id == oi.ProductId)
+                        .Select(p => new OrderProductDto
                         {
-                            id = p.id,
-                            name = p.name,
-                            thmbnail = _config.getKey("url_file") + p.thmbnail,
+                            Id = p.Id,
+                            Name = p.Name,
+                            Thmbnail = _config.getKey("url_file") + p.Thmbnail,
                         }).FirstOrDefault(),
                     productVarient = _dbContext.OrdersProductsVarients
                         .AsNoTracking()
-                        .Where(opv => opv.orderItemId == oi.id)
-                        .Select(opv => new OrderVarientResponseDto
+                        .Where(opv => opv.OrderItemId == oi.Id)
+                        .Select(opv => new OrderVarientDto
                         {
-                            productVarientName = opv.productVarient.name,
-                            varientName = opv.productVarient.varient.name,
+                            ProductVarientName = opv.ProductVarient.Name,
+                            VarientName = opv.ProductVarient.varient.Name,
                         }).ToList(),
                     orderItemStatus = oi.Status.ToString()
                 })
@@ -209,30 +209,30 @@ public class OrderData
         try
         {
             var result = await _dbContext.OrderItems
-                .Include(oi => oi.orderProductsVarients)
+                .Include(oi => oi.OrderProductsVarients)
                 .AsSplitQuery()
                 .AsNoTracking()
-                .OrderByDescending(oi => oi.id)
-                .Where(oi => oi.id == id && oi.storeId == storeId)
+                .OrderByDescending(oi => oi.Id)
+                .Where(oi => oi.Id == id && oi.StoreId == storeId)
                 .Select(oi => new OrderItemResponseDto
                 {
-                    id = oi.id,
-                    quanity = oi.quanity,
-                    orderId = oi.orderId,
-                    product = _dbContext.Products.Where(ois => ois.id == oi.productId)
-                        .Select(p => new OrderProductResponseDto
+                    id = oi.Id,
+                    quanity = oi.Quanity,
+                    orderId = oi.OrderId,
+                    product = _dbContext.Products.Where(ois => ois.Id == oi.ProductId)
+                        .Select(p => new OrderProductDto
                         {
-                            id = p.id,
-                            name = p.name,
-                            thmbnail = _config.getKey("url_file") + p.thmbnail,
+                            Id = p.Id,
+                            Name = p.Name,
+                            Thmbnail = _config.getKey("url_file") + p.Thmbnail,
                         }).FirstOrDefault(),
                     productVarient = _dbContext.OrdersProductsVarients
                         .AsNoTracking()
-                        .Where(opv => opv.orderItemId == oi.id)
-                        .Select(opv => new OrderVarientResponseDto
+                        .Where(opv => opv.OrderItemId == oi.Id)
+                        .Select(opv => new OrderVarientDto
                         {
-                            productVarientName = opv.productVarient.name,
-                            varientName = opv.productVarient.varient.name,
+                            ProductVarientName = opv.ProductVarient.Name,
+                            VarientName = opv.ProductVarient.varient.Name,
                         }).ToList(),
                     orderItemStatus = oi.Status.ToString()
                 })
@@ -257,40 +257,40 @@ public class OrderData
         {
             var result = await (
                     from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.userId equals user.id
-                    where user.id == userid
+                    join user in _dbContext.Users on order.UserId equals user.Id
+                    where user.Id == userid
                     select new OrderResponseDto
                     {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        userPhone = user.phone,
-                        status = order.status,
-                        deliveryFee = order.distanceFee,
-                        totalPrice = order.totalPrice,
+                        id = order.Id,
+                        longitude = order.Longitude,
+                        latitude = order.Latitude,
+                        userPhone = user.Phone,
+                        status = order.Status,
+                        deliveryFee = order.DistanceFee,
+                        totalPrice = order.TotalPrice,
                         orderItems = _dbContext.OrderItems
                             .AsNoTracking()
-                            .Where(oi => oi.orderId == order.id)
+                            .Where(oi => oi.OrderId == order.Id)
                             .Select(orIt => new OrderItemResponseDto
                             {
                                 orderItemStatus = orIt.Status.ToString(),
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.productId).Select(pr =>
-                                    new OrderProductResponseDto
+                                price = orIt.Price,
+                                id = orIt.Id,
+                                quanity = orIt.Quanity,
+                                product = _dbContext.Products.Where(p => p.Id == orIt.ProductId).Select(pr =>
+                                    new OrderProductDto
                                     {
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                        Id = pr.Id,
+                                        Name = pr.Name,
+                                        Thmbnail = _config.getKey("url_file") + pr.Thmbnail,
                                     }).FirstOrDefault(),
                                 productVarient = _dbContext.OrdersProductsVarients
                                     .AsNoTracking()
-                                    .Where(opv => opv.orderItemId == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
+                                    .Where(opv => opv.OrderItemId == orIt.Id)
+                                    .Select(opv => new OrderVarientDto
                                     {
-                                        productVarientName = opv.productVarient.name,
-                                        varientName = opv.productVarient.varient.name,
+                                        ProductVarientName = opv.ProductVarient.Name,
+                                        VarientName = opv.ProductVarient.varient.Name,
                                     }).ToList(),
                             }).ToList()
                     }
@@ -313,7 +313,7 @@ public class OrderData
         try
         {
             await _dbContext.OrderItems
-                .Where(oi => oi.id == id)
+                .Where(oi => oi.Id == id)
                 .ExecuteUpdateAsync(
                     oi => oi
                         .SetProperty(value => value.Status,
@@ -339,7 +339,7 @@ public class OrderData
         {
             await _dbContext
                 .Orders
-                .Where(or => or.userId == userid && or.id == orderId)
+                .Where(or => or.UserId == userid && or.Id == orderId)
                 .ExecuteDeleteAsync();
 
             await _dbContext.SaveChangesAsync();
@@ -390,41 +390,41 @@ public class OrderData
         {
             return await (
                     from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.userId equals user.id
-                    where order.id == id
+                    join user in _dbContext.Users on order.UserId equals user.Id
+                    where order.Id == id
                     select new OrderResponseDto
                     {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        userPhone = user.phone,
-                        status = order.status,
-                        name = user.name,
-                        deliveryFee = order.distanceFee,
+                        id = order.Id,
+                        longitude = order.Longitude,
+                        latitude = order.Latitude,
+                        userPhone = user.Phone,
+                        status = order.Status,
+                        name = user.Name,
+                        deliveryFee = order.DistanceFee,
                         orderItems = _dbContext.OrderItems
                             .AsNoTracking()
-                            .Where(oi => oi.orderId == order.id)
+                            .Where(oi => oi.OrderId == order.Id)
                             .Select(orIt => new OrderItemResponseDto
                             {
 
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.productId).Select(pr =>
-                                    new OrderProductResponseDto
+                                price = orIt.Price,
+                                id = orIt.Id,
+                                quanity = orIt.Quanity,
+                                product = _dbContext.Products.Where(p => p.Id == orIt.ProductId).Select(pr =>
+                                    new OrderProductDto
                                     {
-                                        storeId = pr.storeId,
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                        StoreId = pr.StoreId,
+                                        Id = pr.Id,
+                                        Name = pr.Name,
+                                        Thmbnail = _config.getKey("url_file") + pr.Thmbnail,
                                     }).FirstOrDefault(),
                                 productVarient = _dbContext.OrdersProductsVarients
                                     .AsNoTracking()
-                                    .Where(opv => opv.orderItemId == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
+                                    .Where(opv => opv.OrderItemId == orIt.Id)
+                                    .Select(opv => new OrderVarientDto
                                     {
-                                        productVarientName = opv.productVarient.name,
-                                        varientName = opv.productVarient.varient.name,
+                                        ProductVarientName = opv.ProductVarient.Name,
+                                        VarientName = opv.ProductVarient.varient.Name,
                                     }).ToList(),
                             }).ToList()
                     }
@@ -444,41 +444,41 @@ public class OrderData
         {
             return await (
                     from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.userId equals user.id
-                    where order.id == id && user.id == userid
+                    join user in _dbContext.Users on order.UserId equals user.Id
+                    where order.Id == id && user.Id == userid
                     select new OrderResponseDto
                     {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        userPhone = user.phone,
-                        status = order.status,
-                        deliveryFee = order.distanceFee,
+                        id = order.Id,
+                        longitude = order.Longitude,
+                        latitude = order.Latitude,
+                        userPhone = user.Phone,
+                        status = order.Status,
+                        deliveryFee = order.DistanceFee,
 
-                        name = user.name,
+                        name = user.Name,
                         orderItems = _dbContext.OrderItems
                             .AsNoTracking()
-                            .Where(oi => oi.orderId == order.id)
+                            .Where(oi => oi.OrderId == order.Id)
                             .Select(orIt => new OrderItemResponseDto
                             {
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.productId).Select(pr =>
-                                    new OrderProductResponseDto
+                                price = orIt.Price,
+                                id = orIt.Id,
+                                quanity = orIt.Quanity,
+                                product = _dbContext.Products.Where(p => p.Id == orIt.ProductId).Select(pr =>
+                                    new OrderProductDto
                                     {
-                                        storeId = pr.storeId,
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                        StoreId = pr.StoreId,
+                                        Id = pr.Id,
+                                        Name = pr.Name,
+                                        Thmbnail = _config.getKey("url_file") + pr.Thmbnail,
                                     }).FirstOrDefault(),
                                 productVarient = _dbContext.OrdersProductsVarients
                                     .AsNoTracking()
-                                    .Where(opv => opv.orderItemId == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
+                                    .Where(opv => opv.OrderItemId == orIt.Id)
+                                    .Select(opv => new OrderVarientDto
                                     {
-                                        productVarientName = opv.productVarient.name,
-                                        varientName = opv.productVarient.varient.name,
+                                        ProductVarientName = opv.ProductVarient.Name,
+                                        VarientName = opv.ProductVarient.varient.Name,
                                     }).ToList(),
                             }).ToList()
                     }
@@ -555,14 +555,14 @@ public class OrderData
             var id = clsUtil.generateGuid();
             await _dbContext.Orders.AddAsync(new Order
             {
-                id = id,
-                longitude = longitude,
-                latitude = latitude,
-                userId = userId,
-                totalPrice = totalPrice,
-                status = 1,
-                createdAt = DateTime.Now,
-                updatedAt = null,
+                Id = id,
+                Longitude = longitude,
+                Latitude = latitude,
+                UserId = userId,
+                TotalPrice = totalPrice,
+                Status = 1,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = null,
             });
 
             items.ForEach(item =>
@@ -570,21 +570,21 @@ public class OrderData
                 var orderItemId = clsUtil.generateGuid();
                 _dbContext.OrderItems.AddAsync(new OrderItem
                 {
-                    id = orderItemId,
-                    orderId = id,
-                    productId = item.productId,
-                    quanity = item.quanity,
-                    storeId = item.storeId,
-                    price = item.price,
+                    Id = orderItemId,
+                    OrderId = id,
+                    ProductId = item.productId,
+                    Quanity = item.quanity,
+                    StoreId = item.storeId,
+                    Price = item.price,
                 });
                 item.productsVarientId.ForEach(pv =>
                 {
                     _dbContext.OrdersProductsVarients.AddAsync(
                         new OrderProductsVarient
                         {
-                            id = clsUtil.generateGuid(),
-                            orderItemId = orderItemId,
-                            productVarientId = pv
+                            Id = clsUtil.generateGuid(),
+                            OrderItemId = orderItemId,
+                            ProductVarientId = pv
                         }
                     );
                 });
@@ -612,9 +612,9 @@ public class OrderData
         {
             await _dbContext
                 .Orders
-                .Where(o => o.id == orderId)
+                .Where(o => o.Id == orderId)
                 .ExecuteUpdateAsync(
-                    o => o.SetProperty(value => value.status, status)
+                    o => o.SetProperty(value => value.Status, status)
                 );
 
             await _dbContext.SaveChangesAsync();
@@ -638,51 +638,51 @@ public class OrderData
         {
             var result = await (
                     from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.userId equals user.id
-                    where order.deleveryId == null && order.status > 1
+                    join user in _dbContext.Users on order.UserId equals user.Id
+                    where order.DeleveryId == null && order.Status > 1
                     select new OrderResponseDeliveryDto
                     {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        userPhone = user.phone,
-                        status = order.status,
-                        deliveryFee = order.distanceFee,
+                        id = order.Id,
+                        longitude = order.Longitude,
+                        latitude = order.Latitude,
+                        userPhone = user.Phone,
+                        status = order.Status,
+                        deliveryFee = order.DistanceFee,
                         realPrice = _dbContext.OrderItems
-                            .Where(oi => oi.orderId == order.id && oi.Status == enOrderItemStatus.Excepted)
-                            .Sum(oi => oi.quanity),
-                        name = user.name,
-                        totalPrice = order.totalPrice,
+                            .Where(oi => oi.OrderId == order.Id && oi.Status == enOrderItemStatus.Excepted)
+                            .Sum(oi => oi.Quanity),
+                        name = user.Name,
+                        totalPrice = order.TotalPrice,
                         orderItems = _dbContext.OrderItems
                             .AsNoTracking()
-                            .Where(oi => oi.orderId == order.id)
+                            .Where(oi => oi.OrderId == order.Id)
                             .Select(orIt => new OrderItemResponseDeliveryDto
                             {
                                 address = _dbContext.Address
                                     .AsNoTracking()
-                                    .Where(st => st.id == orIt.storeId)
+                                    .Where(st => st.Id == orIt.StoreId)
                                     .Select(ad => new AddressResponseDeliveryDto
                                     {
-                                        longitude = ad.longitude,
-                                        latitude = ad.latitude,
+                                        longitude = ad.Longitude,
+                                        latitude = ad.Latitude,
                                     }).FirstOrDefault(),
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.productId).Select(pr =>
-                                    new OrderProductResponseDto
+                                price = orIt.Price,
+                                id = orIt.Id,
+                                quanity = orIt.Quanity,
+                                product = _dbContext.Products.Where(p => p.Id == orIt.ProductId).Select(pr =>
+                                    new OrderProductDto
                                     {
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                        Id = pr.Id,
+                                        Name = pr.Name,
+                                        Thmbnail = _config.getKey("url_file") + pr.Thmbnail,
                                     }).FirstOrDefault(),
                                 productVarient = _dbContext.OrdersProductsVarients
                                     .AsNoTracking()
-                                    .Where(opv => opv.orderItemId == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
+                                    .Where(opv => opv.OrderItemId == orIt.Id)
+                                    .Select(opv => new OrderVarientDto
                                     {
-                                        productVarientName = opv.productVarient.name,
-                                        varientName = opv.productVarient.varient.name,
+                                        ProductVarientName = opv.ProductVarient.Name,
+                                        VarientName = opv.ProductVarient.varient.Name,
                                     }).ToList(),
                             }).ToList()
                     }
@@ -706,51 +706,51 @@ public class OrderData
         {
             var result = await (
                     from order in _dbContext.Orders
-                    join user in _dbContext.Users on order.userId equals user.id
-                    where order.deleveryId == deliveryId && order.status > 1
+                    join user in _dbContext.Users on order.UserId equals user.Id
+                    where order.DeleveryId == deliveryId && order.Status > 1
                     select new OrderResponseDeliveryDto
                     {
-                        id = order.id,
-                        longitude = order.longitude,
-                        latitude = order.latitude,
-                        userPhone = user.phone,
-                        status = order.status,
-                        deliveryFee = order.distanceFee,
+                        id = order.Id,
+                        longitude = order.Longitude,
+                        latitude = order.Latitude,
+                        userPhone = user.Phone,
+                        status = order.Status,
+                        deliveryFee = order.DistanceFee,
                         realPrice = _dbContext.OrderItems
-                            .Where(oi => oi.orderId == order.id && oi.Status == enOrderItemStatus.Excepted)
-                            .Sum(oi => oi.quanity),
-                        name = user.name,
-                        totalPrice = order.totalPrice,
+                            .Where(oi => oi.OrderId == order.Id && oi.Status == enOrderItemStatus.Excepted)
+                            .Sum(oi => oi.Quanity),
+                        name = user.Name,
+                        totalPrice = order.TotalPrice,
                         orderItems = _dbContext.OrderItems
                             .AsNoTracking()
-                            .Where(oi => oi.orderId == order.id)
+                            .Where(oi => oi.OrderId == order.Id)
                             .Select(orIt => new OrderItemResponseDeliveryDto
                             {
                                 address = _dbContext.Address
                                     .AsNoTracking()
-                                    .Where(st => st.id == orIt.storeId)
+                                    .Where(st => st.Id == orIt.StoreId)
                                     .Select(ad => new AddressResponseDeliveryDto
                                     {
-                                        longitude = ad.longitude,
-                                        latitude = ad.latitude,
+                                        longitude = ad.Longitude,
+                                        latitude = ad.Latitude,
                                     }).FirstOrDefault(),
-                                price = orIt.price,
-                                id = orIt.id,
-                                quanity = orIt.quanity,
-                                product = _dbContext.Products.Where(p => p.id == orIt.productId).Select(pr =>
-                                    new OrderProductResponseDto
+                                price = orIt.Price,
+                                id = orIt.Id,
+                                quanity = orIt.Quanity,
+                                product = _dbContext.Products.Where(p => p.Id == orIt.ProductId).Select(pr =>
+                                    new OrderProductDto
                                     {
-                                        id = pr.id,
-                                        name = pr.name,
-                                        thmbnail = _config.getKey("url_file") + pr.thmbnail,
+                                        Id = pr.Id,
+                                        Name = pr.Name,
+                                        Thmbnail = _config.getKey("url_file") + pr.Thmbnail,
                                     }).FirstOrDefault(),
                                 productVarient = _dbContext.OrdersProductsVarients
                                     .AsNoTracking()
-                                    .Where(opv => opv.orderItemId == orIt.id)
-                                    .Select(opv => new OrderVarientResponseDto
+                                    .Where(opv => opv.OrderItemId == orIt.Id)
+                                    .Select(opv => new OrderVarientDto
                                     {
-                                        productVarientName = opv.productVarient.name,
-                                        varientName = opv.productVarient.varient.name,
+                                        ProductVarientName = opv.ProductVarient.Name,
+                                        VarientName = opv.ProductVarient.varient.Name,
                                     }).ToList(),
                                 orderItemStatus = orIt.Status.ToString()
                             }).ToList()
@@ -776,9 +776,9 @@ public class OrderData
         {
             await _dbContext
                 .Orders
-                .Where(order => order.id == orderId)
+                .Where(order => order.Id == orderId)
                 .ExecuteUpdateAsync(
-                    o => o.SetProperty(value => value.deleveryId, deliveryId)
+                    o => o.SetProperty(value => value.DeleveryId, deliveryId)
                 );
 
             await _dbContext.SaveChangesAsync();
@@ -798,7 +798,7 @@ public class OrderData
         {
 
             var result = await _dbContext.OrderItems
-            .Where(oi => oi.orderId == orderId && oi.Status == enOrderItemStatus.RecivedByDelivery)
+            .Where(oi => oi.OrderId == orderId && oi.Status == enOrderItemStatus.RecivedByDelivery)
             .CountAsync();
             return result > 0;
         }
@@ -819,7 +819,7 @@ public class OrderData
 
             if (result == null) return null;
 
-            result.deleveryId = null;
+            result.DeleveryId = null;
 
             await _dbContext.SaveChangesAsync();
             return true;

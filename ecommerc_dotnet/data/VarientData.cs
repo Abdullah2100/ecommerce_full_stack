@@ -28,8 +28,8 @@ public class VarientData
             if (result is null) return null;
             return new VarientResposeDto
             {
-                id = result.id,
-                name = result.name,
+                id = result.Id,
+                name = result.Name,
             };
         }
         catch (Exception ex)
@@ -50,8 +50,8 @@ public class VarientData
                 .Take(pageSize)
                 .Select(var => new VarientResposeDto
                     {
-                        id = var.id,
-                        name = var.name,
+                        id = var.Id,
+                        name = var.Name,
 
                     }
                 ).ToListAsync();
@@ -87,7 +87,7 @@ public class VarientData
             var result = await _dbContext
                 .Varients
                 .AsNoTracking()
-                .FirstOrDefaultAsync(va => va.name == name);
+                .FirstOrDefaultAsync(va => va.Name == name);
             return result !=  null;
         }
         catch (Exception ex)
@@ -104,7 +104,7 @@ public class VarientData
             var result = await _dbContext
                 .Varients
                 .AsNoTracking()
-                .FirstOrDefaultAsync(va => va.id == id);
+                .FirstOrDefaultAsync(va => va.Id == id);
             return result !=  null;
         }
         catch (Exception ex)
@@ -122,7 +122,7 @@ public class VarientData
             var id = clsUtil.generateGuid();
             await _dbContext
                 .Varients
-                .AddAsync(new Varient { id = id, name = name });
+                .AddAsync(new Varient { Id = id, Name = name });
             await _dbContext
                 .SaveChangesAsync();
             return await getVarient(id);
@@ -139,9 +139,9 @@ public class VarientData
         try
         { 
             await _dbContext
-                .Varients.Where(v=>v.id==id)
+                .Varients.Where(v=>v.Id==id)
                 .ExecuteUpdateAsync(v=>v
-                    .SetProperty(value=>value.name,name));
+                    .SetProperty(value=>value.Name,name));
 
             await _dbContext.SaveChangesAsync();
             return await getVarient(id);
@@ -160,7 +160,7 @@ public class VarientData
         {
              await _dbContext
                  .Varients
-                 .Where(v=>v.id==varrientId)
+                 .Where(v=>v.Id==varrientId)
                  .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;

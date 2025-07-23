@@ -72,12 +72,12 @@ public class DeliveryController : ControllerBase
 
         token = AuthinticationServices.generateToken(
             userID: delivery.id,
-            email: result.email,
+            email: result.Email,
             _configuration);
 
         refreshToken = AuthinticationServices.generateToken(
             userID: delivery.id,
-            email: result.email,
+            email: result.Email,
             _configuration,
             AuthinticationServices.enTokenMode.RefreshToken);
 
@@ -118,7 +118,7 @@ public class DeliveryController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return NotFound("ليس لديك الصلاحية لإكمال العملية");
 
         bool isExist = await _deliveryData.isExistById(delivery.userId);
@@ -344,7 +344,7 @@ public class DeliveryController : ControllerBase
             return NotFound("الطلب غير موجود");
         }
 
-        if (order.deleveryId is not null)
+        if (order.DeleveryId is not null)
         {
             return BadRequest("تم اخذ الطلب من قبل موصل اخر");
         }
@@ -364,7 +364,7 @@ public class DeliveryController : ControllerBase
         {
             OrderUpdatedEvent eventHolder = new OrderUpdatedEvent
             {
-                id = order.id,
+                id = order.Id,
                 deliveryId = idHolder.Value
             };
             await _hubContext.Clients.All.SendAsync("orderGettingByDelivery", eventHolder);

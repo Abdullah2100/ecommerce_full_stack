@@ -72,7 +72,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true)
+        if (user.IsBlocked == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         bool isTotalPriceValid = isValideTotalPrice(order.totalPrice, order.items);
@@ -138,14 +138,14 @@ public class OrderController : ControllerBase
                 item.productsVarientId.ForEach(pvi =>
                 {
                     var productVairntPrice = _dbContext.ProductVarients
-                        .FirstOrDefault(pv => pv.productId == product.id && pv.id == pvi);
+                        .FirstOrDefault(pv => pv.ProductId == product.id && pv.Id == pvi);
                     if (productVairntPrice is null)
                     {
                         isAmbiguous = true;
                         return;
                     }
 
-                    varientPrice = varientPrice * productVairntPrice.precentage;
+                    varientPrice = varientPrice * productVairntPrice.Precentage;
                 });
                 if (isAmbiguous == true)
                 {
@@ -207,7 +207,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true || user.role == 1)
+        if (user.IsBlocked == true || user.Role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         var result = await _orderData.getOrder(pageNumber, 25);
@@ -250,7 +250,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true || user.role == 1)
+        if (user.IsBlocked == true || user.Role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         List<OrderResponseDto>? result = await _orderData.getOrder(idHolder.Value, pageNumber, 25);
@@ -288,7 +288,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true || user.role == 1)
+        if (user.IsBlocked == true || user.Role == 1)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         var orderData = await _orderData.getOrder(orderId, idHolder.Value);
@@ -331,7 +331,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("فقط مدير النظام لديه الصلاحية");
 
         var pages = await _orderData.getOrdersSize();
@@ -370,7 +370,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("فقط مدير النظام لديه الصلاحية");
 
         if (orderStatus.status > 6 || orderStatus.status < 0)
@@ -461,7 +461,7 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true)
+        if (user.IsBlocked == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
         List<OrderItemResponseDto>? result = await _orderData.getOrderItems(storeId, pageNumber, 25);
@@ -497,13 +497,13 @@ public class OrderController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted == true)
+        if (user.IsBlocked == true)
             return BadRequest("تم حظر المستخدم من اجراء اي عمليات يرجى مراجعة مدير الانظام");
 
-        if (user.store is null)
+        if (user.Store is null)
             return BadRequest("المستخدم لا يمتلك اي متجر");
 
-        var orderItem = await _orderData.getOrderItem(orderItemDto.id, user.store.id);
+        var orderItem = await _orderData.getOrderItem(orderItemDto.id, user.Store.Id);
         if (orderItem is null)
             return NotFound("الطلب غير موجود");
         var result = await _orderData.updateOrderItemStatus(orderItemDto.id, orderItemDto.status);

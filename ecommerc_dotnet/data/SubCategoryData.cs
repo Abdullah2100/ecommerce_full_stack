@@ -23,14 +23,14 @@ public class SubCategoryData
         {
             return await _dbContext.SubCategories
                 .AsNoTracking()
-                .Where(sub => sub.id == id)
+                .Where(sub => sub.Id == id)
                 .Select(sub =>
                      new SubCategoryResponseDto
                      {
-                         id = sub.id,
-                         name = sub.name,
-                         categoryId = sub.categoriId,
-                         storeId = sub.storeId
+                         id = sub.Id,
+                         name = sub.Name,
+                         categoryId = sub.CategoryId,
+                         storeId = sub.StoreId
 
                      })
                 .FirstOrDefaultAsync();
@@ -52,16 +52,16 @@ public class SubCategoryData
         {
             return await _dbContext.SubCategories
                 .AsNoTracking()
-                .Where(sub => sub.storeId == id)
+                .Where(sub => sub.StoreId == id)
                 .Skip(((pageNumber - 1) * pageSize))
                 .Take(pageSize)
                 .Select(sub =>
                     new SubCategoryResponseDto
                     {
-                        id = sub.id,
-                        name = sub.name,
-                        categoryId = sub.categoriId,
-                        storeId = sub.storeId
+                        id = sub.Id,
+                        name = sub.Name,
+                        categoryId = sub.CategoryId,
+                        storeId = sub.StoreId
 
                     })
                 .ToListAsync();
@@ -79,9 +79,9 @@ public class SubCategoryData
         try
         {
          return   await (from st in _dbContext.Stores
-                                       join sub in _dbContext.SubCategories on st.id equals sub.id
-                                       where st.id == storeId
-                                       select sub.id == subcategoryId
+                                       join sub in _dbContext.SubCategories on st.Id equals sub.Id
+                                       where st.Id == storeId
+                                       select sub.Id == subcategoryId
                 )
                 .FirstOrDefaultAsync();
         }
@@ -96,9 +96,9 @@ public class SubCategoryData
         try
         {
             return await (from st in _dbContext.Stores
-                          join sub in _dbContext.SubCategories on st.id equals sub.id
-                          where st.id == storeId
-                          select sub.name == name
+                          join sub in _dbContext.SubCategories on st.Id equals sub.Id
+                          where st.Id == storeId
+                          select sub.Name == name
                 ).FirstOrDefaultAsync();
         }
         catch (Exception ex)
@@ -115,7 +115,7 @@ public class SubCategoryData
         {
             return await _dbContext
                 .SubCategories
-                .Where(sub => sub.storeId == storeId)
+                .Where(sub => sub.StoreId == storeId)
                 .AsNoTracking()
                 .CountAsync();
         }
@@ -165,12 +165,12 @@ public class SubCategoryData
                 .SubCategories.AddAsync(
                     new SubCategory
                     {
-                        id = id,
-                        categoriId = cateogy_id,
-                        storeId = storeId,
-                        name = name,
-                        updatedAt = null,
-                        createdAt = DateTime.Now,
+                        Id = id,
+                        CategoryId = cateogy_id,
+                        StoreId = storeId,
+                        Name = name,
+                        UpdatedAt = null,
+                        CreatedAt = DateTime.Now,
                     }
                 );
             await _dbContext.SaveChangesAsync();
@@ -191,12 +191,12 @@ public class SubCategoryData
         try
         {
              await _dbContext
-                .SubCategories.Where(sc=>sc.id==id)
+                .SubCategories.Where(sc=>sc.Id==id)
                 .ExecuteUpdateAsync(sc=>
                     sc.SetProperty(
-                    value=>value.updatedAt,DateTime.Now)
-                    .SetProperty(value=>value.name,name)
-                    .SetProperty(value=>value.categoriId,categoryId)
+                    value=>value.UpdatedAt,DateTime.Now)
+                    .SetProperty(value=>value.Name,name)
+                    .SetProperty(value=>value.CategoryId,categoryId)
                 );
             await _dbContext.SaveChangesAsync();
             return await getSubCategory(id);
@@ -213,7 +213,7 @@ public class SubCategoryData
         try
         {
             await _dbContext
-                .SubCategories.Where(sc=>sc.id==id)
+                .SubCategories.Where(sc=>sc.Id==id)
                 .ExecuteDeleteAsync();
             
             await _dbContext.SaveChangesAsync();

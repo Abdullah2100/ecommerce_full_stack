@@ -35,7 +35,7 @@ public class GeneralController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> createGeneralSetting(
-        [FromBody] GeneralSettingRequestDto generalSetting
+        [FromBody] GeneralSettingDto generalSetting
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -60,7 +60,7 @@ public class GeneralController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (user.role == 1)
+        if (user.Role == 1)
         {
             return NotFound("ليس لديك الصلاحية لاكمال العملية");
         }
@@ -70,8 +70,8 @@ public class GeneralController : ControllerBase
 
         GeneralSettings? result =
             await _generalData.createGeneralSetting(
-               generalSetting.name,
-               generalSetting.value
+               generalSetting.Name,
+               generalSetting.Value
                 );
 
         if (result is null)
@@ -111,7 +111,7 @@ public class GeneralController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (user.role == 1)
+        if (user.Role == 1)
         {
             return NotFound("ليس لديك الصلاحية لحذف البيانات");
         }
@@ -127,7 +127,7 @@ public class GeneralController : ControllerBase
 
 
 
-        bool? result = await _generalData.deleteGeneralSetting(banner.id);
+        bool? result = await _generalData.deleteGeneralSetting(banner.Id);
 
         if (result == false)
             return BadRequest("حدثت مشكلة اثناء حذف الاعداد العام");
@@ -142,7 +142,7 @@ public class GeneralController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updatePanner(
         Guid genralSettingId ,
-        [FromBody] GeneralSettingRequestDto generalSetting
+        [FromBody] GeneralSettingDto generalSetting
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -166,7 +166,7 @@ public class GeneralController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (user.role == 1)
+        if (user.Role == 1)
         {
             return NotFound("ليس لديك الصلاحية لحذف البيانات");
         }
@@ -184,8 +184,8 @@ public class GeneralController : ControllerBase
 
         GeneralSettings? result = await _generalData.updateGeneralSetting(
             genralSettingId,
-            generalSettings.name, 
-            generalSettings.value);
+            generalSettings.Name, 
+            generalSettings.Value);
 
         if (result ==null)
             return BadRequest("حدثت مشكلة اثناء حذف الاعداد العام");

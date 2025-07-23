@@ -47,56 +47,56 @@ public class AppDbContext : DbContext
             user =>
             {
 
-                user.HasIndex(u => new { u.email, u.phone }).IsUnique();
+                user.HasIndex(u => new { email = u.Email, phone = u.Phone }).IsUnique();
 
-                user.HasMany(ca => ca.categories)
-                    .WithOne(u => u.user)
-                    .HasForeignKey(c => c.ownerId)
-                    .HasPrincipalKey(u => u.id)
+                user.HasMany(ca => ca.Categories)
+                    .WithOne(u => u.User)
+                    .HasForeignKey(c => c.OwnerId)
+                    .HasPrincipalKey(u => u.Id)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                user.HasOne(u => u.store)
+                user.HasOne(u => u.Store)
                     .WithOne(st => st.user)
-                    .HasForeignKey<Store>(st => st.userId)
-                    .HasPrincipalKey<User>(u => u.id)
+                    .HasForeignKey<Store>(st => st.UserId)
+                    .HasPrincipalKey<User>(u => u.Id)
                     .OnDelete(DeleteBehavior.Restrict);
             }
         );
 
         modelBuilder.Entity<Delivery>(delev =>
         {
-            delev.HasOne(de => de.user)
-                .WithOne(u => u.delivery)
-                .HasForeignKey<Delivery>(de => de.userId)
-                .HasPrincipalKey<User>(u => u.id)
+            delev.HasOne(de => de.User)
+                .WithOne(u => u.Delivery)
+                .HasForeignKey<Delivery>(de => de.UserId)
+                .HasPrincipalKey<User>(u => u.Id)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Category>(ca =>
         {
-            ca.HasIndex(c => new { c.name }).IsUnique();
+            ca.HasIndex(c => new { name = c.Name }).IsUnique();
 
-            ca.HasMany(cat => cat.subCategories)
-                .WithOne(sub => sub.category)
-                .HasForeignKey(sub => sub.categoriId)
-                .HasPrincipalKey(cat => cat.id)
+            ca.HasMany(cat => cat.SubCategories)
+                .WithOne(sub => sub.Category)
+                .HasForeignKey(sub => sub.CategoryId)
+                .HasPrincipalKey(cat => cat.Id)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Store>(st =>
         {
-            st.HasIndex(s => s.name).IsUnique();
+            st.HasIndex(s => s.Name).IsUnique();
 
             st.HasMany(std => std.SubCategories)
                 .WithOne(sub => sub.Store)
-                .HasForeignKey(sub => sub.storeId)
-                .HasPrincipalKey(stc => stc.id)
+                .HasForeignKey(sub => sub.StoreId)
+                .HasPrincipalKey(stc => stc.Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            st.HasMany(sto => sto.banners)
-                .WithOne(bn => bn.store)
-                .HasForeignKey(ban => ban.storeId)
-                .HasPrincipalKey(sto => sto.id)
+            st.HasMany(sto => sto.Banners)
+                .WithOne(bn => bn.Store)
+                .HasForeignKey(ban => ban.StoreId)
+                .HasPrincipalKey(sto => sto.Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
         });
@@ -111,72 +111,72 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Product>(pr =>
         {
-            pr.HasMany<ProductVarient>(pro => pro.productVarients)
+            pr.HasMany<ProductVarient>(pro => pro.ProductVarients)
                 .WithOne(p => p.product)
-                .HasForeignKey(p => p.productId)
-                .HasPrincipalKey(pro => pro.id)
+                .HasForeignKey(p => p.ProductId)
+                .HasPrincipalKey(pro => pro.Id)
                 .OnDelete(DeleteBehavior.Restrict);
             pr.HasOne<SubCategory>(pro => pro.subCategory)
-                .WithMany(sub => sub.products)
-                .HasForeignKey(pro => pro.subcategoryId)
-                .HasPrincipalKey(sub => sub.id)
+                .WithMany(sub => sub.Products)
+                .HasForeignKey(pro => pro.SubcategoryId)
+                .HasPrincipalKey(sub => sub.Id)
                 .OnDelete(DeleteBehavior.Restrict);
             pr.HasOne(pro => pro.store)
-                .WithMany(st => st.products)
-                .HasForeignKey(pro => pro.storeId)
-                .HasPrincipalKey(str => str.id)
+                .WithMany(st => st.Products)
+                .HasForeignKey(pro => pro.StoreId)
+                .HasPrincipalKey(str => str.Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            pr.HasMany<ProductImage>(pro => pro.productImages)
-                .WithOne(pim => pim.product)
-                .HasForeignKey(pim => pim.productId)
-                .HasPrincipalKey(pro => pro.id)
+            pr.HasMany<ProductImage>(pro => pro.ProductImages)
+                .WithOne(pim => pim.Product)
+                .HasForeignKey(pim => pim.ProductId)
+                .HasPrincipalKey(pro => pro.Id)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Varient>(va =>
         {
-            va.HasIndex(var => var.name).IsUnique();
-            va.HasMany(var => var.productVarients)
+            va.HasIndex(var => var.Name).IsUnique();
+            va.HasMany(var => var.ProductVarients)
                 .WithOne(var => var.varient)
-                .HasForeignKey(var => var.varientId)
-                .HasPrincipalKey(var => var.id)
+                .HasForeignKey(var => var.VarientId)
+                .HasPrincipalKey(var => var.Id)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Order>(or =>
         {
-            or.HasOne<User>(ord => ord.user)
-                .WithMany(u => u.orders)
-                .HasForeignKey(ord => ord.userId)
-                .HasPrincipalKey(u => u.id);
+            or.HasOne<User>(ord => ord.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(ord => ord.UserId)
+                .HasPrincipalKey(u => u.Id);
 
-            or.HasMany(ord => ord.items)
-                .WithOne(orIt => orIt.order)
-                .HasForeignKey(ord => ord.orderId)
-                .HasPrincipalKey(orIt => orIt.id);
+            or.HasMany(ord => ord.Items)
+                .WithOne(orIt => orIt.Order)
+                .HasForeignKey(ord => ord.OrderId)
+                .HasPrincipalKey(orIt => orIt.Id);
         });
 
         modelBuilder.Entity<OrderItem>(oIt =>
         {
 
-            oIt.HasOne(orIt => orIt.store)
-                .WithMany(st => st.oddrderItems)
-                .HasForeignKey(orIt => orIt.storeId)
-                .HasPrincipalKey(st => st.id);
+            oIt.HasOne(orIt => orIt.Store)
+                .WithMany(st => st.OddrderItems)
+                .HasForeignKey(orIt => orIt.StoreId)
+                .HasPrincipalKey(st => st.Id);
 
-            oIt.HasMany(orIt => orIt.orderProductsVarients)
-                .WithOne(opv => opv.orderItem)
-                .HasForeignKey(orIt => orIt.orderItemId)
-                .HasPrincipalKey(orIt => orIt.id);
+            oIt.HasMany(orIt => orIt.OrderProductsVarients)
+                .WithOne(opv => opv.OrderItem)
+                .HasForeignKey(orIt => orIt.OrderItemId)
+                .HasPrincipalKey(orIt => orIt.Id);
         });
 
         modelBuilder.Entity<OrderProductsVarient>(opv =>
         {
-            opv.HasOne(OPV => OPV.productVarient)
+            opv.HasOne(OPV => OPV.ProductVarient)
                 .WithMany(or => or.orderProductsVarients)
-                .HasForeignKey(or => or.productVarientId)
-                .HasPrincipalKey(or => or.id);
+                .HasForeignKey(or => or.ProductVarientId)
+                .HasPrincipalKey(or => or.Id);
 
 
         });

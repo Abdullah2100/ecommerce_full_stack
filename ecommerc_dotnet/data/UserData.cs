@@ -34,14 +34,14 @@ public class UserData
         {
             UserInfoResponseDto? result = await _dbContext.Users
                 .AsNoTracking()
-                .Where(u => (u.email == userName) && u.password == password)
+                .Where(u => (u.Email == userName) && u.Password == password)
                 .Select(u => new UserInfoResponseDto
                 {
-                    Id = u.id,
-                    name = u.name,
-                    phone = u.phone,
-                    email = u.email,
-                    thumbnail = String.Empty,
+                    Id = u.Id,
+                    Name = u.Name,
+                    Phone = u.Phone,
+                    Email = u.Email,
+                    Thumbnail = String.Empty,
                 })
                 .FirstOrDefaultAsync();
             if (result is null) return null;
@@ -62,37 +62,37 @@ public class UserData
         try
         {
             UserInfoResponseDto? result = await _dbContext.Users
-                .Include(u => u.store)
+                .Include(u => u.Store)
                 .AsSplitQuery()
-                .Where(us => us.id == userID)
+                .Where(us => us.Id == userID)
                 .AsNoTracking()
                 .Select(us => new UserInfoResponseDto
                 {
-                    name = us.name,
-                    phone = us.phone,
-                    email = us.email,
-                    Id = us.id,
-                    thumbnail = us.thumbnail == null
+                    Name = us.Name,
+                    Phone = us.Phone,
+                    Email = us.Email,
+                    Id = us.Id,
+                    Thumbnail = us.Thumbnail == null
                         ? ""
-                        : _configuration.getKey("url_file") + us.thumbnail,
+                        : _configuration.getKey("url_file") + us.Thumbnail,
 
                     address = null,
-                    storeId = us.store == null ? null : us!.store.id
+                    storeId = us.Store == null ? null : us!.Store.Id
                 }).FirstOrDefaultAsync();
 
             if (result != null)
             {
                 //result.address =await _dbContext.Address.Where(ad=>ad.ownerId==userID).ToListAsync()
                 result.address = await _dbContext.Address
-                    .Where(ad => ad.ownerId == userID)
+                    .Where(ad => ad.OwnerId == userID)
                     .AsNoTracking()
                     .Select(ad => new AddressResponseDto
                     {
-                        id = ad.id,
-                        longitude = ad.longitude,
-                        latitude = ad.latitude,
-                        title = ad.title,
-                        isCurrent = ad.isCurrent,
+                        id = ad.Id,
+                        longitude = ad.Longitude,
+                        latitude = ad.Latitude,
+                        title = ad.Title,
+                        isCurrent = ad.IsCurrent,
                     }).ToListAsync();
             }
 
@@ -111,22 +111,22 @@ public class UserData
         try
         {
             UserInfoResponseDto? result = await _dbContext.Users
-                .Include(u => u.store)
+                .Include(u => u.Store)
                 .AsSplitQuery()
-                .Where(us => us.email == email)
+                .Where(us => us.Email == email)
                 .AsNoTracking()
                 .Select(us => new UserInfoResponseDto
                 {
-                    name = us.name,
-                    phone = us.phone,
-                    email = us.email,
-                    Id = us.id,
-                    thumbnail = us.thumbnail == null
+                    Name = us.Name,
+                    Phone = us.Phone,
+                    Email = us.Email,
+                    Id = us.Id,
+                    Thumbnail = us.Thumbnail == null
                         ? ""
-                        : _configuration.getKey("url_file") + us.thumbnail,
+                        : _configuration.getKey("url_file") + us.Thumbnail,
 
                     address = null,
-                    storeId = us.store == null ? null : us!.store.id
+                    storeId = us.Store == null ? null : us!.Store.Id
                 }).FirstOrDefaultAsync();
 
             return result;
@@ -144,26 +144,26 @@ public class UserData
         try
         {
             return await _dbContext.Users
-                .Include(u => u.store)
+                .Include(u => u.Store)
                 .AsSplitQuery()
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(us => new UserInfoResponseDto
                 {
-                    name = us.name,
-                    phone = us.phone,
-                    email = us.email,
-                    Id = us.id,
-                    storeName = us.store != null ? us.store.name : "",
-                    isAdmin = us.role == 0,
-                    isActive = us.isDeleted,
-                    thumbnail = us.thumbnail == null
+                    Name = us.Name,
+                    Phone = us.Phone,
+                    Email = us.Email,
+                    Id = us.Id,
+                    StoreName = us.Store != null ? us.Store.Name : "",
+                    IsAdmin = us.Role == 0,
+                    IsActive = us.IsBlocked,
+                    Thumbnail = us.Thumbnail == null
                         ? ""
-                        : _configuration.getKey("url_file") + us.thumbnail,
+                        : _configuration.getKey("url_file") + us.Thumbnail,
 
                     address = null,
-                    storeId = us.store == null ? null : us!.store.id
+                    storeId = us.Store == null ? null : us!.Store.Id
                 })
                 .ToListAsync();
         }
@@ -199,10 +199,10 @@ public class UserData
         try
         {
             return await _dbContext.Users
-                .Include(st => st.store)
+                .Include(st => st.Store)
                 .AsSplitQuery()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.id == ID);
+                .FirstOrDefaultAsync(u => u.Id == ID);
         }
         catch (Exception e)
         {
@@ -217,10 +217,10 @@ public class UserData
         try
         {
             return await _dbContext.Users
-                .Include(st => st.store)
+                .Include(st => st.Store)
                 .AsSplitQuery()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.store != null && u.store.id == storeId);
+                .FirstOrDefaultAsync(u => u.Store != null && u.Store.Id == storeId);
         }
         catch (Exception e)
         {
@@ -235,7 +235,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.id == userid && u.isDeleted == false) != null;
+                .FirstOrDefaultAsync(u => u.Id == userid && u.IsBlocked == false) != null;
         }
         catch (Exception e)
         {
@@ -252,7 +252,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.email == email) != null;
+                .FirstOrDefaultAsync(u => u.Email == email) != null;
         }
         catch (Exception e)
         {
@@ -269,7 +269,7 @@ public class UserData
         {
             return await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.phone == phone && u.isDeleted == false) != null;
+                .FirstOrDefaultAsync(u => u.Phone == phone && u.IsBlocked == false) != null;
         }
         catch (Exception e)
         {
@@ -286,9 +286,9 @@ public class UserData
                   .FindAsync(userID);
 
             if (result is null) return null;
-            result.isDeleted = !result.isDeleted;
+            result.IsBlocked = !result.IsBlocked;
             await _dbContext.SaveChangesAsync();
-            return result.isDeleted;
+            return result.IsBlocked;
         }
         catch (Exception e)
         {
@@ -312,7 +312,7 @@ public class UserData
             if (role == 0)
             {
                 User? result = await _dbContext.Users
-                    .FirstOrDefaultAsync(u => u.role == 1);
+                    .FirstOrDefaultAsync(u => u.Role == 1);
                 if (result != null)
                 {
                     Console.WriteLine("can't create new admin while there is already an admin");
@@ -322,20 +322,20 @@ public class UserData
 
             User userData = new User
             {
-                name = name,
-                email = email,
-                phone = phone,
-                password = password,
-                createdAt = DateTime.Now,
-                id = clsUtil.generateGuid(),
-                updatedAt = null,
+                Name = name,
+                Email = email,
+                Phone = phone,
+                Password = password,
+                CreatedAt = DateTime.Now,
+                Id = clsUtil.generateGuid(),
+                UpdatedAt = null,
                 deviceToken = deviceToken ?? ""
             };
 
             await _dbContext
                 .Users.AddAsync(userData);
             await _dbContext.SaveChangesAsync();
-            return await getUser(userData.id);
+            return await getUser(userData.Id);
         }
         catch (Exception e)
         {
@@ -361,15 +361,15 @@ public class UserData
             if (userData is null)
                 return null;
 
-            userData.name = name ?? userData.name;
-            userData.phone = phone ?? userData.phone;
-            userData.password = password ?? userData.password;
-            userData.updatedAt = DateTime.Now;
-            userData.thumbnail = imagePath ?? userData.thumbnail;
+            userData.Name = name ?? userData.Name;
+            userData.Phone = phone ?? userData.Phone;
+            userData.Password = password ?? userData.Password;
+            userData.UpdatedAt = DateTime.Now;
+            userData.Thumbnail = imagePath ?? userData.Thumbnail;
 
 
             await _dbContext.SaveChangesAsync();
-            return await getUser(userID: userData.id);
+            return await getUser(userID: userData.Id);
         }
         catch (Exception e)
         {
@@ -395,7 +395,7 @@ public class UserData
 
 
             await _dbContext.SaveChangesAsync();
-            return await getUser(userID: userData.id);
+            return await getUser(userID: userData.Id);
         }
         catch (Exception e)
         {
@@ -412,10 +412,10 @@ public class UserData
         try
         {
             await _dbContext.Users
-               .Where(u => u.email == email)
+               .Where(u => u.Email == email)
                .ExecuteUpdateAsync(
                    us => us
-                       .SetProperty(value => value.password, newPassword));
+                       .SetProperty(value => value.Password, newPassword));
 
             await _dbContext.SaveChangesAsync();
             return await getUser(email: email);

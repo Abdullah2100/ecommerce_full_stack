@@ -65,7 +65,7 @@ public class StoreController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.isDeleted
+        if (user.IsBlocked
         //|| (user.id !=  store.userId && store.userId !=  null && user.role == 1)
         )
             return BadRequest("ليس لديك الصلاحية لانشاء متجر جديد");
@@ -87,7 +87,7 @@ public class StoreController : ControllerBase
             name: store.name,
             wallpaperImage: wallperper,
             smallImage: smallImage,
-            userId: idHolder.Value !=  store?.userId && store.userId !=  null ? (Guid)store.userId : user.id,
+            userId: idHolder.Value !=  store?.userId && store.userId !=  null ? (Guid)store.userId : user.Id,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -128,19 +128,19 @@ public class StoreController : ControllerBase
             return NotFound("المستخدم غير موجود");
 
 
-        if (user.store is null)
+        if (user.Store is null)
             return NotFound("المتجر غير موجود");
 
-        if (user.store.name !=  store.name && await _storeData.isExist(store.name))
+        if (user.Store.Name !=  store.name && await _storeData.isExist(store.name))
         {
             return Conflict("اسم المتجر تم استخدامه اختر اسما اخر");
         }
 
         if (store.wallpaperImage !=  null)
-            clsUtil.deleteFile(user.store.wallpaperImage, _host);
+            clsUtil.deleteFile(user.Store.WallpaperImage, _host);
 
         if (store.smallImage !=  null)
-            clsUtil.deleteFile(user.store.smallImage, _host);
+            clsUtil.deleteFile(user.Store.SmallImage, _host);
 
 
         string? wallperper = null, smallImage = null;
@@ -155,7 +155,7 @@ public class StoreController : ControllerBase
             name: store.name,
             wallpaperImage: wallperper,
             smallImage: smallImage,
-            userId: user.id,
+            userId: user.Id,
             latitude: store.latitude,
             longitude: store.longitude
         );
@@ -195,7 +195,7 @@ public class StoreController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("المستخدم ليس لديه الصلاحية");
 
         bool isExist = await _storeData.isExist(storeId);
@@ -286,7 +286,7 @@ public class StoreController : ControllerBase
 
         User? userData = await _userData.getUserById(idHolder.Value);
 
-        if (userData is null || userData.role !=  0)
+        if (userData is null || userData.Role !=  0)
             return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
 
         int pages = await _storeData.getStorePages();

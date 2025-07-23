@@ -77,7 +77,7 @@ public class CategoryController : ControllerBase
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
         bool isExist = await _categoryData.isExist(category.name);
@@ -91,7 +91,7 @@ public class CategoryController : ControllerBase
         if (imagePath is null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصورة");
 
-        bool? result = await _categoryData.addNewCategory(category.name, imagePath, user.id);
+        bool? result = await _categoryData.addNewCategory(category.name, imagePath, user.Id);
 
         if (result is null)
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
@@ -131,7 +131,7 @@ public class CategoryController : ControllerBase
             return NotFound("المستخدم غير موجود");
         }
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
         Category? categoryHolder = await _categoryData.getCategory(category.id);
@@ -142,24 +142,24 @@ public class CategoryController : ControllerBase
 
         bool isExistName = false;
 
-        if (category?.name !=  null&&category.name!= categoryHolder.name)
+        if (category?.name !=  null&&category.name!= categoryHolder.Name)
             isExistName = await _categoryData.isExist(category.name);
 
-        if (isExistName && categoryHolder.id !=  category!.id)
+        if (isExistName && categoryHolder.Id !=  category!.id)
             return Conflict("هناك قسم بهذا الاسم");
 
         string? imagePath = null;
 
         if (category?.image is not  null)
         {
-            if (categoryHolder?.image is not  null)
-                clsUtil.deleteFile(categoryHolder.image, _host);
+            if (categoryHolder?.Image is not  null)
+                clsUtil.deleteFile(categoryHolder.Image, _host);
             imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
         }
 
         bool? result = await _categoryData.updateCategory(
             category!.id,
-            categoryHolder?.name !=  category.name ? category.name : null,
+            categoryHolder?.Name !=  category.name ? category.name : null,
             imagePath
         );
 
@@ -197,7 +197,7 @@ public class CategoryController : ControllerBase
         if (user is null)
             return NotFound("ليس لديك الصلاحية لانشاء قسم جديد");
 
-        if (user.role == 1)
+        if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
         Category? categoryHolder = await _categoryData.getCategory(categoryId);

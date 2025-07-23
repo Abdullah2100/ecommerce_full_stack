@@ -26,11 +26,11 @@ public class ForgetPasswordData
         {
             await deleteAllOtpBelongTo(email);
             ReseatePasswordOtp newOtp = new ReseatePasswordOtp();
-            newOtp.isValidated = false;
-            newOtp.otp = otp;
-            newOtp.email = email;
-            newOtp.createdAt = DateTime.Now;
-            newOtp.id = Guid.NewGuid();
+            newOtp.IsValidated = false;
+            newOtp.Otp = otp;
+            newOtp.Email = email;
+            newOtp.CreatedAt = DateTime.Now;
+            newOtp.Id = Guid.NewGuid();
             _dbContext.ReseatPasswords.Add(newOtp);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -51,9 +51,9 @@ public class ForgetPasswordData
         {
             await _dbContext
                 .ReseatPasswords
-                .Where(u => u.otp == otp)
+                .Where(u => u.Otp == otp)
                 .ExecuteUpdateAsync(otp=>otp
-                    .SetProperty(value=>value.isValidated,true));
+                    .SetProperty(value=>value.IsValidated,true));
             
             await _dbContext.SaveChangesAsync();
             return true;
@@ -71,7 +71,7 @@ public class ForgetPasswordData
         try
         {
           await _dbContext.ReseatPasswords
-              .Where(otp => otp.email == email)
+              .Where(otp => otp.Email == email)
                .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;
@@ -92,7 +92,7 @@ public class ForgetPasswordData
             return _dbContext.ReseatPasswords
                 .AsNoTracking()
                 .FirstOrDefault(u =>
-                (u.otp == otp) && (u.createdAt.AddHours(1).Microsecond > DateTime.Now.Microsecond)) !=  null;
+                (u.Otp == otp) && (u.CreatedAt.AddHours(1).Microsecond > DateTime.Now.Microsecond)) !=  null;
         }
         catch (Exception e)
         {
@@ -110,12 +110,12 @@ public class ForgetPasswordData
                 .ReseatPasswords
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u =>
-            u.otp == otp&&u.isValidated==status);
+            u.Otp == otp&&u.IsValidated==status);
 
             if (result is null) return false;
-            DateTime otpTime =result.createdAt.AddHours(1);
+            DateTime otpTime =result.CreatedAt.AddHours(1);
 
-            return  result.email == email && (otpTime.Date == DateTime.Now.Date && otpTime.TimeOfDay > DateTime.Now.TimeOfDay);
+            return  result.Email == email && (otpTime.Date == DateTime.Now.Date && otpTime.TimeOfDay > DateTime.Now.TimeOfDay);
         }
         catch (Exception e)
         {

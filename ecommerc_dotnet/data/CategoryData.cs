@@ -27,16 +27,16 @@ public class CategoryData
         try
         {
             IQueryable<CategoryResponseDto> result = _dbContext.Categories
-                .Where(c => c.isBlocked == false)
+                .Where(c => c.IsBlocked == false)
                 .AsNoTracking()
-                .OrderBy(c => c.createdAt)
+                .OrderBy(c => c.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(u => new CategoryResponseDto
                 {
-                    id = u.id,
-                    name = u.name,
-                    image = services.getKey("url_file") + u.image,
+                    id = u.Id,
+                    name = u.Name,
+                    image = services.getKey("url_file") + u.Image,
                 });
 
             return await result.ToListAsync();
@@ -77,11 +77,11 @@ public class CategoryData
         {
             Category categoryObj = new Category
             {
-                id = clsUtil.generateGuid(), 
-                name = name, 
-                image = filePath,
-                isBlocked = false,
-                ownerId = userId
+                Id = clsUtil.generateGuid(), 
+                Name = name, 
+                Image = filePath,
+                IsBlocked = false,
+                OwnerId = userId
             };
             await _dbContext.Categories.AddAsync(categoryObj);
             await _dbContext.SaveChangesAsync();
@@ -105,8 +105,8 @@ public class CategoryData
         try
         {
             Category? category = await _dbContext.Categories.FindAsync(id);
-            category!.name = name ?? category.name;
-            category.image = filePath ?? category.image;
+            category!.Name = name ?? category.Name;
+            category.Image = filePath ?? category.Image;
 
             await _dbContext.SaveChangesAsync();
             return true;
@@ -127,7 +127,7 @@ public class CategoryData
         try
         {
             await _dbContext.Categories
-                .Where(ca => ca.id == id)
+                .Where(ca => ca.Id == id)
                 .ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
             return true;
@@ -150,7 +150,7 @@ public class CategoryData
             return await _dbContext
                 .Categories
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.name == name) !=  null;
+                .FirstOrDefaultAsync(c => c.Name == name) !=  null;
         }
         catch (Exception ex)
         {
@@ -169,7 +169,7 @@ public class CategoryData
                 return await _dbContext
                     .Categories
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.id == id) !=  null;
+                    .FirstOrDefaultAsync(c => c.Id == id) !=  null;
             }
             catch (Exception ex)
             {

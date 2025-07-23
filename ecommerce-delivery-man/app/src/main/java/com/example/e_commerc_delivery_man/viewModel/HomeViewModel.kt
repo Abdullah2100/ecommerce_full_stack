@@ -36,11 +36,13 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.ContactsContract
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 class HomeViewModel(
     val homeRepository: HomeRepository,
@@ -483,10 +485,9 @@ class HomeViewModel(
 }
 
 
+typealias  d = String;
 fun main() {
-    var result = CoroutineScope(context = Dispatchers.Main ). {
-
-    }
+    val name:d = "ahmed"
 }
 
 

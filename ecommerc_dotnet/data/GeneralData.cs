@@ -25,7 +25,7 @@ public class GeneralData
         {
             return await _dbContext.GeneralSettings
                 .AsNoTracking()
-                .FirstOrDefaultAsync(gs=>gs.id==id);
+                .FirstOrDefaultAsync(gs=>gs.Id==id);
         }
         catch (Exception ex)
         {
@@ -43,7 +43,7 @@ public class GeneralData
                 .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(gs=> new GeneralSettingResponseDto{id=gs.id,name = gs.name,value = gs.value})
+                .Select(gs=> new GeneralSettingResponseDto{id=gs.Id,name = gs.Name,value = gs.Value})
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -73,7 +73,7 @@ public class GeneralData
         {
             var result = await _dbContext.GeneralSettings
                 .AsNoTracking()
-                .FirstOrDefaultAsync(gs => gs.id == id && gs.name == name);
+                .FirstOrDefaultAsync(gs => gs.Id == id && gs.Name == name);
             return result !=  null;
         }
         catch (Exception ex)
@@ -110,10 +110,10 @@ public class GeneralData
                 .GeneralSettings.AddAsync(
                     new GeneralSettings 
                     {
-                        createdAt = DateTime.Now,
-                        id = id,
-                        name = name,
-                        value = value
+                        CreatedAt = DateTime.Now,
+                        Id = id,
+                        Name = name,
+                        Value = value
                     }
                 );
             await _dbContext.SaveChangesAsync();
@@ -136,11 +136,11 @@ public class GeneralData
         {
              await _dbContext
                 .GeneralSettings
-                .Where(gs=>gs.id==id)
+                .Where(gs=>gs.Id==id)
                 .ExecuteUpdateAsync(gs=>gs
-                    .SetProperty(value=>value.name,name)
-                    .SetProperty(value=>value.updatedAt,DateTime.Now)
-                    .SetProperty(value=>value.value,value));
+                    .SetProperty(value=>value.Name,name)
+                    .SetProperty(value=>value.UpdatedAt,DateTime.Now)
+                    .SetProperty(value=>value.Value,value));
             
             await _dbContext.SaveChangesAsync();
             return await getGeneralSettings(id);
@@ -158,7 +158,7 @@ public class GeneralData
         {
              await _dbContext
                 .GeneralSettings
-                .Where(gs=>gs.id==id)
+                .Where(gs=>gs.Id==id)
                 .ExecuteDeleteAsync();
             
              await _dbContext.SaveChangesAsync();

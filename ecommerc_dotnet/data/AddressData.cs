@@ -22,15 +22,15 @@ public class AddressData
         try
         {
             IQueryable<AddressResponseDto> result =  _dbContext.Address
-                .Where(ad => ad.id == addressId)
+                .Where(ad => ad.Id == addressId)
                 .AsNoTracking()
                 .Select(ad => new AddressResponseDto
                 {
-                    id = ad!.id,
-                    longitude = ad.longitude,
-                    latitude = ad.latitude,
-                    title = ad.title,
-                    isCurrent = ad.isCurrent,
+                    id = ad!.Id,
+                    longitude = ad.Longitude,
+                    latitude = ad.Latitude,
+                    title = ad.Title,
+                    isCurrent = ad.IsCurrent,
                 });
             return await result.FirstOrDefaultAsync();
 
@@ -68,16 +68,16 @@ public class AddressData
         try
         {
              return await   _dbContext.Address
-                .Where(ad => ad.ownerId == userId)
+                .Where(ad => ad.OwnerId == userId)
                 .AsNoTracking()
-                .OrderByDescending(ad=>ad.createdAt )
+                .OrderByDescending(ad=>ad.CreatedAt )
                 .Select(ad =>
                     new AddressResponseDto
                     {
-                        id = ad.id,
-                        longitude = ad.longitude,
-                        latitude = ad.latitude,
-                        title = ad.title, isCurrent = ad.isCurrent,
+                        id = ad.Id,
+                        longitude = ad.Longitude,
+                        latitude = ad.Latitude,
+                        title = ad.Title, isCurrent = ad.IsCurrent,
                     })
                 .ToListAsync();
 
@@ -98,22 +98,22 @@ public class AddressData
     {
         try
         {
-            await _dbContext.Address.ExecuteUpdateAsync(ad=>ad.SetProperty(state=>state.isCurrent,false));
+            await _dbContext.Address.ExecuteUpdateAsync(ad=>ad.SetProperty(state=>state.IsCurrent,false));
 
             Address addressObj = new Address
             {
-                longitude = longitude,
-                latitude = latitude,
-                title = title,
-                isCurrent = true,
-                id = clsUtil.generateGuid(),
-                createdAt = DateTime.Now,
-                ownerId = userId
+                Longitude = longitude,
+                Latitude = latitude,
+                Title = title,
+                IsCurrent = true,
+                Id = clsUtil.generateGuid(),
+                CreatedAt = DateTime.Now,
+                OwnerId = userId
             };
             
             await _dbContext.Address.AddAsync(addressObj);
             await _dbContext.SaveChangesAsync();
-            return  await getUserAddressByAddressId(addressObj.id);
+            return  await getUserAddressByAddressId(addressObj.Id);
 
         }
         catch (Exception ex)
@@ -135,13 +135,13 @@ public class AddressData
         {
 
             await _dbContext.Address
-                .Where(ad => ad.ownerId == userId && ad.id !=  addressId)
-                .ExecuteUpdateAsync(ad => ad.SetProperty(va => va.isCurrent, false));
+                .Where(ad => ad.OwnerId == userId && ad.Id !=  addressId)
+                .ExecuteUpdateAsync(ad => ad.SetProperty(va => va.IsCurrent, false));
            
             Address? currentAddress =await  _dbContext.Address.FindAsync(addressId);
            
            if(currentAddress!= null)
-               currentAddress.isCurrent = true;
+               currentAddress.IsCurrent = true;
             
             await _dbContext.SaveChangesAsync();
             
@@ -168,12 +168,12 @@ public class AddressData
         {
 
             
-            Address? currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.id==addressId);
+            Address? currentAddress =await  _dbContext.Address.FirstOrDefaultAsync(ad=>ad.Id==addressId);
 
             if (currentAddress is null) return null;
-            currentAddress.title = titile??currentAddress.title;
-            currentAddress.longitude = longitude??currentAddress.longitude;
-            currentAddress.latitude = latitude ?? currentAddress.latitude;
+            currentAddress.Title = titile??currentAddress.Title;
+            currentAddress.Longitude = longitude??currentAddress.Longitude;
+            currentAddress.Latitude = latitude ?? currentAddress.Latitude;
             
             await _dbContext.SaveChangesAsync();
             
@@ -220,7 +220,7 @@ public class AddressData
 
            return await  _dbContext.Address
                .AsNoTracking()
-               .CountAsync(u => u.ownerId == userId && u.id !=  userId);
+               .CountAsync(u => u.OwnerId == userId && u.Id !=  userId);
         }
         catch (Exception ex)
         {
