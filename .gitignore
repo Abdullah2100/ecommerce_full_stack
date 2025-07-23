@@ -1,10 +1,105 @@
-build/
-.idea/
-.kotlin/
-.gradle/
+# Mapbox Access Token
+eccorce_app/app/src/main/res/values/mapbox_access_token.xml
+
+# .NET Core
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+*.dbmdl
+*.pfx
+*.publishsettings
+*.ncrunchsolution
+*.ncrunchproject
+Migrations/
+images/
 obj/
 bin/
-images/
-Migrations/
 firebase-adminsdk.json
-mapbox_access_token.xml
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio
+.vs/
+.vscode/
+*.sln.ide
+
+# Built application files
+*.apk
+*.aab
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+*.idea
+
+# Generated files
+gen/
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log Files
+*.log
+
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
+
+# IntelliJ
+# *.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild/
+
+# Google Services (e.g., Firebase)
+google-services.json
+
+# Fastlane specific
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+# Version control
+vcs.xml
+
+# Local configuration file (sdk path, etc)
+local.properties
