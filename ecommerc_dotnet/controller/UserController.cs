@@ -1,16 +1,14 @@
 using System.Security.Claims;
 using ecommerc_dotnet.context;
+using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.dto.Request;
-using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
-using hotel_api.Services.EmailService;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,156 +21,76 @@ namespace ecommerc_dotnet.controller;
 [Route("api/User")]
 public class UserController : ControllerBase
 {
-    public UserController(
-        AppDbContext dbContext,
-        IConfig configuration,
-        IWebHostEnvironment webHostEnvironment,
-        IEmail email,
-        IUnitOfWork unitOfWork
-    )
+    private readonly IUserServices _userServices;
+
+    public UserController(IUserServices userServices)
     {
-        _configuration = configuration;
-        _userService = new UserService(dbContext, configuration, unitOfWork);
-        _host = webHostEnvironment;
-        _addressData = new AddressData(unitOfWork, dbContext);
-        _forgetPasswordData = new ForgetPasswordData(dbContext, unitOfWork);
-        _email = email;
+        _userServices = userServices;
     }
-
-    private readonly IConfig _configuration;
-    private readonly IEmail _email;
-
-    private readonly UserService _userService;
-
-    private readonly ForgetPasswordData _forgetPasswordData;
-    private readonly AddressData _addressData;
-    private readonly IWebHostEnvironment _host;
 
     [AllowAnonymous]
     [HttpPost("signup")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> signUp([FromBody] SignupDto data)
     {
-        if (data.Role != 0 && data.Role != 1)
+        var result = await _userServices.signup(data);
+
+        return result.IsSeccessful switch
         {
-            return BadRequest("role must be 1 or 0");
-        }
-
-        string? validationResult = clsValidation.validateInput(data.Email, data.Password, data.Phone);
-
-        if (validationResult != null)
-        {
-            return BadRequest(validationResult);
-        }
-
-        if (await _userService.isExistByEmail(data.Email))
-        {
-            return BadRequest("email already exist");
-        }
-
-        if (await _userService.isExistByPhone(data.Phone))
-        {
-            return BadRequest("phone already exist");
-        }
-
-        UserInfoDto? result = await _userService.createNew(
-            name: data.Name,
-            email: data.Email,
-            phone: data.Phone,
-            password: clsUtil.hashingText(data.Password),
-            role: data.Role,
-            deviceToken: data.DeviceToken
-        );
-        if (result is null)
-            return BadRequest("هناك مشكلة ما");
-
-        string token = "", refreshToken = "";
-
-        token = AuthinticationServices.generateToken(
-            userId: result.Id,
-            email: result.Email,
-            _configuration);
-
-        refreshToken = AuthinticationServices.generateToken(
-            userId: result.Id,
-            email: result.Email,
-            _configuration,
-            EnTokenMode.RefreshToken);
-
-        return StatusCode(StatusCodes.Status201Created
-            , new { token = token, refreshToken = refreshToken });
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
-    
     [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> login([FromBody] LoginDto data)
     {
-        UserInfoDto? result = await _userService.getUser(data.Username, clsUtil.hashingText(data.Password));
-        if (result is null)
-            return BadRequest("المستخدم غير موجود");
+        var result = await _userServices.login(data);
 
-        await _userService.updateUserDeviceToken(id: result.Id, deviceToken: data.DeviceToken);
-
-        string token = "", refreshToken = "";
-
-        token = AuthinticationServices.generateToken(
-            userId: result.Id,
-            email: result.Email,
-            _configuration);
-
-        refreshToken = AuthinticationServices.generateToken(
-            userId: result.Id,
-            email: result.Email,
-            _configuration,
-            EnTokenMode.RefreshToken);
-
-        return StatusCode(200
-            , new { token = token, refreshToken = refreshToken });
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
     [HttpGet("")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUser()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.getMe(userId.Value);
 
-        if (user is null)
+        return result.IsSeccessful switch
         {
-            return BadRequest("المستخدم غير موجود");
-        }
-
-
-        return StatusCode(200, user);
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
     [HttpGet("{page:int}")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUsers(int page)
@@ -181,78 +99,56 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.getUsers(page, userId.Value);
 
-        if (user is null)
+        return result.IsSeccessful switch
         {
-            return BadRequest("المستخدم غير موجود");
-        }
-
-        if (user.Role is 1)
-            return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
-
-        if (page < 0)
-        {
-            return BadRequest("لا بد من ان تكون الصفحة اكبر من الصفر");
-        }
-
-        List<UserInfoDto>? users = await _userService.getUsers(page);
-
-        if (users is null)
-            return NoContent();
-
-        return StatusCode(200, users);
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
     [HttpDelete("{userId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> deleteOrUndeletedUser(Guid userId)
+    public async Task<IActionResult> blockOrUnBlockUser(Guid userId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.blockOrUnBlockUser(adminId.Value, userId);
 
-        if (user is null)
+        return result.IsSeccessful switch
         {
-            return BadRequest("المستخدم غير موجود");
-        }
-
-        if (user.Role is 1)
-            return BadRequest("ليس لديك الصلاحية ");
-
-
-        bool? result = await _userService.deleteUser(userId);
-
-        if (result is null or false)
-            return BadRequest("حدثة مشكلة اثناء حذف المستخدم");
-        return NoContent();
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
@@ -266,32 +162,34 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? userData = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.getUserCount(adminId.Value);
 
-        if (userData is null || userData.Role != 0)
-            return BadRequest("ليس لديك الصلاحية للوصول الى البيانات");
-
-        int size = await _userService.getUsersLenght();
-        int userPages = Convert.ToInt32(Math.Ceiling((double)size / 24));
-
-        return StatusCode(200, userPages);
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result
+                    .StatusCode,
+                Convert
+                    .ToInt32(Math.Ceiling((double)result.Data / 24))),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> updateUser(
         [FromForm] UpdateUserInfoDto userData
@@ -301,63 +199,25 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        if (userData.isEmpty()) return Ok(" ليس هناك اي شئ يحتاجل للتغيير ");
+        var result = await _userServices.updateUser(userData, userId.Value);
 
-        User? user = await _userService.getUser(idHolder.Value);
-
-        if (user is null)
+        return result.IsSeccessful switch
         {
-            return BadRequest("المستخدم غير موجود");
-        }
-
-        if (idHolder != user.Id)
-        {
-            return BadRequest("فقط المستخدم يمكن تعديل بياناته");
-        }
-
-
-        if (userData.Password != null && userData.NewPassword != null)
-        {
-            if (user.Password != clsUtil.hashingText(userData.Password))
-            {
-                return BadRequest("كلمة المرور غير صحيحة");
-            }
-        }
-
-        if (user.Thumbnail != null && userData.Thumbnail != null)
-        {
-            clsUtil.deleteFile(user.Thumbnail, _host);
-        }
-
-        string? profile = null;
-        if (userData.Thumbnail != null)
-        {
-            profile = await clsUtil.saveFile(userData.Thumbnail, EnImageType.PROFILE, _host);
-        }
-
-        UserInfoDto? result = await _userService.updateUser(
-            id: idHolder.Value,
-            phone: userData.Phone,
-            password: userData.Password is null ? null : clsUtil.hashingText(userData.Password),
-            name: userData.Name,
-            profile);
-
-        if (result is null)
-            return BadRequest("هناك مشكلة في تحديث البيانات");
-
-
-        return Ok(result);
+            true => StatusCode(result
+                .StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
@@ -366,7 +226,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> setUserLocation(
+    public async Task<IActionResult> addNewUserAddress(
         [FromBody] CreateAddressDto address
     )
     {
@@ -374,38 +234,26 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.addAddressToUser(address, userId.Value);
 
-        if (user is null || user.IsBlocked)
+        return result.IsSeccessful switch
         {
-            return NotFound("المستخدم غير موجود");
-        }
+            true => StatusCode(result
+                .StatusCode, result.Data),
 
-        int userLocationCount = await _addressData.getAddressCountForUser(idHolder.Value);
-        if (userLocationCount > 10)
-            return BadRequest("اقصى حد للاماكن التي يمكن للمستخدم ادخالها هي 10");
-
-        AddressDto? location = await _addressData.addUserAddress(
-            title: address.Title,
-            longitude: address.Longitude,
-            latitude: address.Latitude,
-            userId: idHolder.Value
-        );
-        if (location is null)
-            return BadRequest("حدثة مشكلة اثناء حفظ المان");
-
-        return StatusCode(201, location);
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
     [HttpPut("address")]
@@ -421,49 +269,27 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        if (address.isEmpty()) return Ok("ليس هناك اي شئ يحتاج للتغيير");
+        var result = await _userServices.updateUserAddress(address, userId.Value);
 
-        User? user = await _userService.getUser(idHolder.Value);
 
-        if (user is null || user.IsBlocked)
+        return result.IsSeccessful switch
         {
-            return NotFound("المستخدم غير موجود");
-        }
+            true => StatusCode(result
+                .StatusCode, result.Data),
 
-        Address? addressResult = await _addressData.getAddressById(address.Id);
-
-        if (addressResult is null)
-        {
-            return NotFound("العنوان غير موجود");
-        }
-
-        if (addressResult.OwnerId != idHolder.Value)
-        {
-            return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
-        }
-
-        AddressDto? location = await _addressData.updateAddress(
-            id: addressResult.Id,
-            titile: address.Title,
-            longitude: address.Longitude,
-            latitude: address.Latitude
-        );
-
-        if (location is null)
-            return BadRequest("حدثة مشكلة اثناء تعديل البيانات");
-
-        return StatusCode(200, location);
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
     [HttpDelete("address/{addressId}")]
@@ -479,127 +305,83 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.deleteUserAddress(addressId, adminId.Value);
 
-        if (user is null || user.IsBlocked)
+
+        return result.IsSeccessful switch
         {
-            return NotFound("المستخدم غير موجود");
-        }
+            true => StatusCode(result
+                .StatusCode, result.Data),
 
-        Address? addressResult = await _addressData.getAddressById(addressId);
-
-        if (addressResult is null)
-        {
-            return NotFound("العنوان غير موجود");
-        }
-
-        if (addressResult.OwnerId != idHolder.Value)
-        {
-            return BadRequest("فقط صاحب العنوان بامكانه تعديل البيانات");
-        }
-
-        if (addressResult.IsCurrent)
-            return BadRequest("لا يمكن حذف العنوان الحالي");
-
-        bool result = await _addressData.deleteAddress(
-            id: addressResult.Id);
-
-        if (result == false)
-            return BadRequest("حدثة مشكلة اثناء حذف البيانات");
-
-        return NoContent();
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
     [HttpPost("address/active{addressId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> updateUserCurrentLocation(Guid addressId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _userServices.updateUserCurrentAddress(addressId, userId.Value);
 
-        if (user is null || user.IsBlocked)
+
+        return result.IsSeccessful switch
         {
-            return BadRequest("المستخدم غير موجود");
-        }
+            true => StatusCode(result
+                .StatusCode, result.Data),
 
-        Address? address = await _addressData.getAddressById(addressId);
-
-        if (address is null)
-        {
-            return BadRequest("العنوان غير موجود");
-        }
-
-        bool? result = await _addressData.updateCurrentAddress(address.Id, user.Id);
-
-        return StatusCode(200, result);
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
+
 
     [AllowAnonymous]
     [HttpPost("generateOtp")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> generateOtp(
-        [FromBody] ForgetPasswordDto email
-        )
+        [FromBody] ForgetPasswordDto otp
+    )
     {
-        UserInfoDto? user = await _userService.getUser(email.Email);
+        var result = await _userServices.generateOtp(otp);
 
-        if (user is null)
+
+        return result.IsSeccessful switch
         {
-            NotFound("user not exist");
-        }
+            true => StatusCode(result.StatusCode, result.Data),
 
-        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-
-        bool isOtpExist = await _forgetPasswordData.isExist(otp);
-        bool isExist = isOtpExist;
-
-        if (isExist)
-        {
-            do
-            {
-                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                isOtpExist = await _forgetPasswordData.isExist(otp);
-            } while (isOtpExist);
-        }
-
-        bool result = await _forgetPasswordData.createNewOtp(otp, email.Email);
-        bool emailSendResult = await _email.sendingEmail(email.Email, otp);
-
-        if (emailSendResult == false || result == false)
-        {
-            BadRequest("user not exist");
-        }
-
-        return NoContent();
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
@@ -607,20 +389,20 @@ public class UserController : ControllerBase
     [HttpPost("otpVerification")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> verifingOtp([FromBody] CreateVerificationDto verification)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> verifingOtp(
+        [FromBody] CreateVerificationDto verification
+    )
     {
-        bool result = await _forgetPasswordData.isExist(verification.Email, verification.Otp);
-        if (!result)
+        var result = await _userServices.otpVerification(verification);
+
+
+        return result.IsSeccessful switch
         {
-            return NotFound("not found otp");
-        }
+            true => StatusCode(result.StatusCode, result.Data),
 
-        result = await _forgetPasswordData.updateOtpStatus(verification.Otp);
-
-        if (!result)
-            return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
-
-        return NoContent();
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
@@ -628,37 +410,17 @@ public class UserController : ControllerBase
     [HttpPost("reseatPassword")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> reseatPassword([FromBody] CreateReseatePasswordDto data)
     {
-        bool otpValidationResult = await _forgetPasswordData.isExist(data.Email, data.Otp, true);
+        var result = await _userServices.reseatePassword(data);
 
-        if (!otpValidationResult)
+
+        return result.IsSeccessful switch
         {
-            return NotFound("not found otp");
-        }
+            true => StatusCode(result.StatusCode, result.Data),
 
-        bool isExist = await _userService.isExistByEmail(data.Email);
-        if (!isExist)
-            return NotFound("المستخدم غير موجود");
-        UserInfoDto? result = await _userService.updateUserPassword(data.Email,
-            clsUtil.hashingText(data.Password));
-        if (result is null)
-            return BadRequest("حدثة مشكلة اثناء حفظ البيانات");
-
-        string token = "", refreshToken = "";
-
-        token = AuthinticationServices.generateToken(
-            userId: result.Id,
-            email: result.Email,
-            _configuration);
-
-        refreshToken = AuthinticationServices.generateToken(
-            userId: result.Id,
-            email: result.Email,
-            _configuration,
-            EnTokenMode.RefreshToken);
-
-        return StatusCode(200
-            , new { token = token, refreshToken = refreshToken });
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 }

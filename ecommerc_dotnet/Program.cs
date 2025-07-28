@@ -1,8 +1,13 @@
 using System.Text;
 using ecommerc_dotnet.context;
+using ecommerc_dotnet.core.interfaces.Repository;
+using ecommerc_dotnet.core.interfaces.services;
+using ecommerc_dotnet.data;
 using ecommerc_dotnet.di.email;
+using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
 using ecommerc_dotnet.services;
 using ecommerc_dotnet.UnitOfWork;
 using FirebaseAdmin;
@@ -20,10 +25,20 @@ var configuration = builder.Configuration;
 builder.Services.AddOptions();
 
 
-// Other Services (Scoped)
 builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
 builder.Services.AddTransient<IEmail, Email>();
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+//respoitory 
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IReseatePasswordRepository, ReseatePasswordRepository>();
+builder.Services.AddTransient<IAddressRepository, AddressRepository>();
+builder.Services.AddTransient<IStoreRepository, StoreRepository>();
+
+//services
+builder.Services.AddTransient<IUserServices, UserService>();
+builder.Services.AddTransient<IStoreServices, StoreServices>();
+
+
 
 
 var fireBaseConfig = Path.Combine(

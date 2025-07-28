@@ -34,6 +34,24 @@ public class UserRepository : IUserRepository
         return user;
     }
 
+    public async Task<User?> getUser(string email)
+    {
+        User? user = await _dbContext
+            .Users
+            .Include(u => u.Store)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Store != null && u.Email == email);
+        if (user == null) return null;
+
+        user.Addresses = await _dbContext
+            .Address
+            .AsNoTracking()
+            .Where(u => u.Id == user.Id)
+            .ToListAsync();
+
+        return user;
+    }
+
     public async Task<int> getUserCount()
     {
         return await _dbContext

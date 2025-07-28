@@ -7,6 +7,7 @@ public interface IAddressRepository:IRepository<Address>
 {
     Task<int> getAddressCount(Guid id);
     Task<Address?> getAddress(Guid id);
+    Task<Address?> getAddressByOwnerId(Guid id);
     Task<int> updateCurrentLocation(Guid id,Guid ownerId);
  
 }

@@ -1,17 +1,14 @@
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.core.Result;
+using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.dto.Request;
-using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
-using ecommerc_dotnet.UnitOfWork;
+using ecommerc_dotnet.shared.extentions;
 using hotel_api.Services;
 using hotel_api.util;
-using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.data;
 
@@ -20,18 +17,26 @@ public class UserService : IUserServices
     private readonly IConfig _config;
     private readonly IUserRepository _userRepository;
     private readonly IAddressRepository _addressRepository;
+    private readonly IReseatePasswordRepository _passwordRepository;
     private readonly IWebHostEnvironment _host;
+    private readonly IEmail _email;
 
 
     public UserService(
         IConfig config,
+        IWebHostEnvironment host,
+        IEmail email,
         IUserRepository userRepository,
-        IWebHostEnvironment host
+        IAddressRepository addressRepository,
+        IReseatePasswordRepository passwordRepository
     )
     {
         _config = config;
-        _userRepository = userRepository;
         _host = host;
+        _email = email;
+        _userRepository = userRepository;
+        _addressRepository = addressRepository;
+        _passwordRepository = passwordRepository;
     }
 
 
@@ -211,7 +216,9 @@ public class UserService : IUserServices
     }
 
 
-    public async Task<Result<List<UserInfoDto>?>> getUsers(int page, Guid id)
+    public async Task<Result<List<UserInfoDto>?>> getUsers(
+        int page,
+        Guid id)
     {
         User? user = await _userRepository
             .getUser(id);
@@ -254,11 +261,11 @@ public class UserService : IUserServices
         );
     }
 
-    public async Task<Result<bool>> blockOrUnBlockUser(Guid id)
+    public async Task<Result<bool>> blockOrUnBlockUser(Guid id, Guid userId)
     {
-        User? user = await _userRepository
+        User? admin = await _userRepository
             .getUser(id);
-        if (user is null)
+        if (admin is null)
         {
             return new Result<bool>
             (
@@ -269,7 +276,7 @@ public class UserService : IUserServices
             );
         }
 
-        if (user.Role == 1)
+        if (admin.Role == 1)
         {
             return new Result<bool>
             (
@@ -277,6 +284,19 @@ public class UserService : IUserServices
                 message: "you not have the permission",
                 isSeccessful: false,
                 statusCode: 400
+            );
+        }
+
+        User? user = await _userRepository.getUser(userId);
+
+        if (user is null)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "user thant want to blocked not found",
+                isSeccessful: false,
+                statusCode: 404
             );
         }
 
@@ -299,7 +319,7 @@ public class UserService : IUserServices
             data: true,
             message: "",
             isSeccessful: false,
-            statusCode: 200
+            statusCode: 204
         );
     }
 
@@ -342,7 +362,9 @@ public class UserService : IUserServices
         );
     }
 
-    public async Task<Result<UserInfoDto?>> updateUser(UpdateUserInfoDto userDto, Guid id)
+    public async Task<Result<UserInfoDto?>> updateUser(
+        UpdateUserInfoDto userDto,
+        Guid id)
     {
         if (userDto.isEmpty())
             return new Result<UserInfoDto?>
@@ -352,6 +374,8 @@ public class UserService : IUserServices
                 isSeccessful: false,
                 statusCode: 200
             );
+        
+      
 
         User? user = await _userRepository.getUser(id);
         if (user is null)
@@ -370,7 +394,7 @@ public class UserService : IUserServices
                 data: null,
                 message: "only own user data can change her data ",
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: 400
             );
         }
 
@@ -383,7 +407,7 @@ public class UserService : IUserServices
                 data: null,
                 message: "phone already exist",
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: 400
             );
         }
 
@@ -392,6 +416,7 @@ public class UserService : IUserServices
             || string.IsNullOrEmpty(userDto.NewPassword)
                 ? null
                 : clsUtil.hashingText(userDto.NewPassword);
+
         if (userDto.Password != null && userDto.NewPassword != null)
         {
             if (user.Password != clsUtil.hashingText(userDto.Password))
@@ -456,7 +481,7 @@ public class UserService : IUserServices
             );
         }
 
-        if (user.IsBlocked == true)
+        if (user.IsBlocked)
         {
             return new Result<AddressDto?>
             (
@@ -528,6 +553,15 @@ public class UserService : IUserServices
                 statusCode: 404
             );
         }
+
+        if (addressDto.isEmpty())
+            return new Result<AddressDto?>
+            (
+                data: null,
+                message: "nothing to be updated",
+                isSeccessful: true,
+                statusCode: 200
+            );
 
         Address? address = await _addressRepository.getAddress(addressDto.Id);
 
@@ -637,12 +671,12 @@ public class UserService : IUserServices
             data: true,
             message: "",
             isSeccessful: true,
-            statusCode: 200
+            statusCode:204 
         );
     }
 
-    
-    public async Task<Result<bool>> updateUserCurrentAddress(Guid addressId,Guid id)
+
+    public async Task<Result<bool>> updateUserCurrentAddress(Guid addressId, Guid id)
     {
         User? user = await _userRepository
             .getUser(id);
@@ -681,7 +715,7 @@ public class UserService : IUserServices
             );
         }
 
-        int result = await _addressRepository.updateCurrentLocation(addressId,user.Id);
+        int result = await _addressRepository.updateCurrentLocation(addressId, user.Id);
 
         if (result == 0)
         {
@@ -699,27 +733,208 @@ public class UserService : IUserServices
             data: true,
             message: "",
             isSeccessful: true,
-            statusCode: 200
+            statusCode: 204
         );
     }
 
-    
-    public Result<bool> generateOtp(ForgetPasswordDto forgetPasswordDto)
+
+    public async Task<Result<bool>> generateOtp(ForgetPasswordDto forgetPasswordDto)
     {
-        throw new NotImplementedException();
+        bool isExistUser = await _userRepository
+            .isExistByEmail(forgetPasswordDto.Email);
+        if (!isExistUser)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "user not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+        bool isOtpExist = await _passwordRepository.isExist(otp);
+        bool isExist = isOtpExist;
+
+        if (isExist)
+        {
+            do
+            {
+                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
+                isOtpExist = await _passwordRepository.isExist(otp);
+            } while (isOtpExist);
+        }
+
+        int result = await _passwordRepository.addAsync(
+            new ReseatePasswordOtp
+            {
+                Email = forgetPasswordDto.Email,
+                CreatedAt = DateTime.Now,
+                Id = clsUtil.generateGuid(),
+                Otp = otp
+            }
+        );
+        if (result == 0)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "error while generate otp",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+        bool emailSendResult = await _email.sendingEmail(forgetPasswordDto.Email, otp);
+
+        if (!emailSendResult)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "error while send  otp email",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+        return new Result<bool>
+        (
+            data: true,
+            message: "",
+            isSeccessful: false,
+            statusCode: 204
+        );
     }
 
-    public Result<bool> otpVerification(CreateVerificationDto createVerificationDto)
+    public async Task<Result<bool>> otpVerification(CreateVerificationDto otp)
     {
-        throw new NotImplementedException();
+        bool isExistUser = await _userRepository
+            .isExistByEmail(otp.Email);
+        if (!isExistUser)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "user not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        ReseatePasswordOtp? otpResult = await _passwordRepository.getOtp(otp.Otp, otp.Email);
+
+
+        if (otpResult is null)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "otp not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        otpResult.IsValidated = true;
+        int result = await _passwordRepository.updateAsync(otpResult);
+        if (result == 0)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "error while update otp",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+
+        return new Result<bool>
+        (
+            data: true,
+            message: "",
+            isSeccessful: true,
+            statusCode: 204
+        );
     }
 
-    public Result<AuthDto?> reseatePassword(CreateReseatePasswordDto createReseatePasswordDto)
+    public async Task<Result<AuthDto?>> reseatePassword(CreateReseatePasswordDto otp)
     {
-        throw new NotImplementedException();
-    }
+        bool isExistUser = await _userRepository
+            .isExistByEmail(otp.Email);
+        if (!isExistUser)
+        {
+            return new Result<AuthDto?>
+            (
+                data: null,
+                message: "user not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
 
-   
-    
-    
+        ReseatePasswordOtp? otpResult = await _passwordRepository.getOtp(otp.Otp, otp.Email);
+
+
+        if (otpResult is null)
+        {
+            return new Result<AuthDto?>
+            (
+                data: null,
+                message: "otp not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        User? user = await _userRepository.getUser(otp.Email);
+
+        if (user is null)
+        {
+            return new Result<AuthDto?>
+            (
+                data: null,
+                message: "user not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        user.Password = clsUtil.hashingText(otp.Password);
+
+        int result = await _userRepository.updateAsync(user);
+        if (result == 0)
+        {
+            return new Result<AuthDto?>
+            (
+                data: null,
+                message: "error while update user password",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+
+        string token = "", refreshToken = "";
+
+        token = AuthinticationServices.generateToken(
+            userId: user.Id,
+            email: user.Email,
+            _config);
+
+        refreshToken = AuthinticationServices.generateToken(
+            userId: user.Id,
+            email: user.Email,
+            _config,
+            EnTokenMode.RefreshToken);
+
+        return new Result<AuthDto?>(
+            isSeccessful: true,
+            data: new AuthDto { RefreshToken = refreshToken, Token = token },
+            message: "",
+            statusCode: 200
+        );
+    }
 }

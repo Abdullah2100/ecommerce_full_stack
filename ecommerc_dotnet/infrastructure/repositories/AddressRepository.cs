@@ -37,11 +37,10 @@ public class AddressRepository:IAddressRepository
 
     public async Task<int> deleteAsync(Guid id)
     {
-        Address? entity =await _dbContext
+        await _dbContext
             .Address
-            .FirstOrDefaultAsync(x => x.Id == id);
-        if(entity is null) return 0;
-        _dbContext.Address.Remove(entity);
+            .Where(x => x.Id == id)
+            .ExecuteDeleteAsync();
         return await _dbContext.SaveChangesAsync();
     }
 
@@ -56,6 +55,13 @@ public class AddressRepository:IAddressRepository
     public async Task<Address?> getAddress(Guid id)
     {
         return await _dbContext.Address.FindAsync(id);
+    }
+
+    public async Task<Address?> getAddressByOwnerId(Guid id)
+    {
+        return await _dbContext
+            .Address
+            .FirstOrDefaultAsync(x => x.OwnerId == id);
     }
 
     public async Task<int> updateCurrentLocation(Guid id, Guid ownerId)

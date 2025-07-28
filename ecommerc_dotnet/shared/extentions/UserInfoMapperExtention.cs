@@ -1,8 +1,8 @@
 using ecommerc_dotnet.dto;
+using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.module;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace ecommerc_dotnet.mapper;
+namespace ecommerc_dotnet.shared.extentions;
 
 public static class UserInfoMapperExtention 
 {

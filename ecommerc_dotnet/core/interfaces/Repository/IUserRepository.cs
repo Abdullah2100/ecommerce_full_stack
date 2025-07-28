@@ -6,6 +6,7 @@ namespace ecommerc_dotnet.core.interfaces.Repository;
 public interface IUserRepository:IRepository<User>
 {
       Task<User?> getUser(Guid id);
+      Task<User?> getUser(string email);
       Task<int> getUserCount();
       Task<User?> getUserByStoreId(Guid id);
       Task<User?> getUser(string username ,string password);

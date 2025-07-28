@@ -11,20 +11,20 @@ public interface IUserServices
 
     public Task<Result<UserInfoDto?>> getMe(Guid id);
 
-    public Task<Result<List<UserInfoDto>?>> getUsers(int page,Guid id);
+    public Task<Result<List<UserInfoDto>?>> getUsers(int page, Guid id);
 
-    public Task<Result<bool>> blockOrUnBlockUser(Guid id);
+    public Task<Result<bool>> blockOrUnBlockUser(Guid id,Guid userId);
 
     public Task<Result<int>> getUserCount(Guid id);
 
-    public Task<Result<UserInfoDto?>> updateUser(UpdateUserInfoDto userDto,Guid id);
+    public Task<Result<UserInfoDto?>> updateUser(UpdateUserInfoDto userDto, Guid id);
 
-    public Task<Result<AddressDto?>> addAddressToUser(CreateAddressDto addressDto,Guid id);
-    public Task<Result<AddressDto?>> updateUserAddress(UpdateAddressDto addressDto,Guid id);
-    public Task<Result<bool>> deleteUserAddress(Guid addressId,Guid id);
-    public Task<Result<bool>> updateUserCurrentAddress(Guid addressId,Guid id);
+    public Task<Result<AddressDto?>> addAddressToUser(CreateAddressDto addressDto, Guid id);
+    public Task<Result<AddressDto?>> updateUserAddress(UpdateAddressDto addressDto, Guid id);
+    public Task<Result<bool>> deleteUserAddress(Guid addressId, Guid id);
+    public Task<Result<bool>> updateUserCurrentAddress(Guid addressId, Guid id);
 
-    public Result<bool> generateOtp(ForgetPasswordDto forgetPasswordDto);
-    public Result<bool> otpVerification(CreateVerificationDto createVerificationDto);
-    public Result<AuthDto?> reseatePassword(CreateReseatePasswordDto createReseatePasswordDto);
+    public Task<Result<bool>> generateOtp(ForgetPasswordDto forgetPasswordDto);
+    public Task<Result<bool>> otpVerification(CreateVerificationDto createVerificationDto);
+    public Task<Result<AuthDto?>> reseatePassword(CreateReseatePasswordDto createReseatePasswordDto);
 }
