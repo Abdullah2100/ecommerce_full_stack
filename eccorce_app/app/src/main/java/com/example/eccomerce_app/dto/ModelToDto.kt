@@ -1,64 +1,58 @@
 package com.example.e_commercompose.dto
 
-import com.example.e_commercompose.dto.request.CartRequestDto
-import com.example.e_commercompose.dto.request.OrderRequestItemsDto
-import com.example.e_commercompose.dto.request.ProductVarientRequestDto
-import com.example.e_commercompose.dto.request.SubCategoryUpdateDto
 import com.example.e_commercompose.model.CardProductModel
 import com.example.e_commercompose.model.CartModel
 import com.example.e_commercompose.model.ProductVarient
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.model.SubCategoryUpdate
+import com.example.eccomerce_app.dto.CreateOrderDto
+import com.example.eccomerce_app.dto.CreateOrderItemDto
+import com.example.eccomerce_app.dto.CreateProductVarientDto
+import com.example.eccomerce_app.dto.UpdateSubCategoryDto
 
 object ModelToDto {
 
-//    fun Address.toLocationRequestDto(): AddressRequestDto {
-//        return AddressRequestDto(
-//            latitude=this.latitude,
-//            longitude = this.longitude,
-//            title = this.title?:"",
-//        )
-//    }
 
-    fun SubCategoryUpdate.toSubCategoryUpdateDto():SubCategoryUpdateDto{
-        return SubCategoryUpdateDto(
-            name=this.name,
-            id=this.id,
-            cateogy_id=this.cateogy_id
+
+    fun SubCategoryUpdate.toUpdateSubCategoryDto():UpdateSubCategoryDto{
+        return UpdateSubCategoryDto(
+            Name=this.name,
+            Id=this.id,
+            CateogyId=this.cateogy_id
         )
     }
 
-    fun ProductVarientSelection.toProdcutVarientRequestDto(): ProductVarientRequestDto{
-        return ProductVarientRequestDto(
-            name = this.name,
-            precentage = this.precentage,
-            varient_id =this.varient_id
+    fun ProductVarientSelection.toProdcutVarientRequestDto(): CreateProductVarientDto{
+        return CreateProductVarientDto(
+            Name = this.name,
+            Precentage = this.precentage,
+            VarientId =this.varientId
         )
     }
     fun List<List<ProductVarient>>.toListOfProductVarient(): List<ProductVarientSelection> {
         return   this.map{it->it.map {
                 data->
-            ProductVarientSelection(name = data.name, precentage = data.precentage, varient_id = data.varient_id)
+            ProductVarientSelection(name = data.name, precentage = data.precentage, varientId = data.varient_id)
 
         }}.flatten()
     }
 
-    fun CardProductModel.toOrderRequestItemDto(): OrderRequestItemsDto{
-        return OrderRequestItemsDto(
-            storeId =  this.store_id,
-            productId = this.productId,
-            price = this.price,
-            quanity = this.quantity,
-            productsVarientId =  this.productvarients.map { it.id }
+    fun CardProductModel.toOrderRequestItemDto(): CreateOrderItemDto{
+        return CreateOrderItemDto(
+            StoreId =  this.store_id,
+            ProductId = this.productId,
+            Price = this.price,
+            Quantity = this.quantity,
+            ProductsVarientId =  this.productvarients.map { it.id }
         )
     }
 
-    fun CartModel.toOrderRequestDto():CartRequestDto{
-        return CartRequestDto(
-            items = this.cartProducts.map { it.toOrderRequestItemDto() },
-            totalPrice = this.totalPrice ,
-            latitude = this.latitu,
-            longitude=this.longit
+    fun CartModel.toOrderRequestDto(): CreateOrderDto{
+        return CreateOrderDto(
+            Items = this.cartProducts.map { it.toOrderRequestItemDto() },
+            TotalPrice = this.totalPrice ,
+            Latitude = this.latitu,
+            Longitude=this.longit
         )
     }
 }

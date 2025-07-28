@@ -1,158 +1,158 @@
 package com.example.e_commercompose.model
 
-import com.example.e_commercompose.dto.response.AddressResponseDto
-import com.example.e_commercompose.dto.response.BannerResponseDto
-import com.example.e_commercompose.dto.response.CategoryReponseDto
-import com.example.e_commercompose.dto.response.ProductResponseDto
-import com.example.e_commercompose.dto.response.ProductVarientReponseDto
-import com.example.e_commercompose.dto.response.StoreResposeDto
-import com.example.e_commercompose.dto.response.SubCategoryResponseDto
-import com.example.e_commercompose.dto.response.UserDto
-import com.example.e_commercompose.dto.response.VarientResponseDto
-import com.example.e_commercompose.dto.response.GeneralSettingResponseDto
-import com.example.e_commercompose.dto.response.OrderItemResponseDto
-import com.example.e_commercompose.dto.response.OrderProductResponseDto
-import com.example.e_commercompose.dto.response.OrderResponseDto
-import com.example.e_commercompose.dto.response.OrderVarientResponseDto
+import com.example.eccomerce_app.dto.AddressDto
+import com.example.eccomerce_app.dto.BannerDto
+import com.example.eccomerce_app.dto.CategoryDto
+import com.example.eccomerce_app.dto.ProductDto
+import com.example.eccomerce_app.dto.ProductVarientDto
+import com.example.eccomerce_app.dto.StoreDto
+import com.example.eccomerce_app.dto.SubCategoryDto
+import com.example.eccomerce_app.dto.UserDto
+import com.example.eccomerce_app.dto.VarientDto
+import com.example.eccomerce_app.dto.GeneralSettingDto
+import com.example.eccomerce_app.dto.OrderItemDto
+import com.example.eccomerce_app.dto.OrderProductDto
+import com.example.eccomerce_app.dto.OrderDto
+import com.example.eccomerce_app.dto.OrderVarientDto
 import kotlin.text.replace
 
 object DtoToModel {
-    fun AddressResponseDto.toAddress(): Address {
+    fun AddressDto.toAddress(): Address {
         return Address(
-            id = this.id,
-            title =this.title,
-            latitude = this.latitude,
-            longitude = this.longitude,
-            isCurrnt = this.isCurrent?:false
+            id = this.Id,
+            title =this.Title,
+            latitude = this.Latitude,
+            longitude = this.Lngitude,
+            isCurrnt = this.IsCurrent?:false
         )
     }
 
-    fun CategoryReponseDto.toCategory(): Category{
+    fun CategoryDto.toCategory(): Category{
         return Category(
-            id= this.id,
-            name =this.name,
-            image=this.image.replace("localhost","10.0.2.2")
+            id= this.Id,
+            name =this.Name,
+            image=this.Image.replace("localhost","10.0.2.2")
         );
     }
-    fun SubCategoryResponseDto.toSubCategory(): SubCategory{
+    fun SubCategoryDto.toSubCategory(): SubCategory{
         return SubCategory(
-            id = this.id,
-            name=this.name,
-            category_id=this.categoryId,
-            store_id=this.storeId)
+            id = this.Id,
+            name=this.Name,
+            category_id=this.CategoryId,
+            store_id=this.StoreId)
     }
 
 
-    fun StoreResposeDto.toStore():StoreModel{
+    fun StoreDto.toStore():StoreModel{
         return StoreModel(
-            id = this.id,
-            name = this.name,
-            user_id = this.userId,
-            pig_image = this.wallpaperImage.replace("localhost", "10.0.2.2"),
-            small_image = this.smallImage.replace("localhost", "10.0.2.2"),
-            latitude = this.latitude,
-            longitude = this.longitude
+            id = this.Id,
+            name = this.Name,
+            user_id = this.UserId,
+            pig_image = this.WallpaperImage.replace("localhost", "10.0.2.2"),
+            small_image = this.SmallImage.replace("localhost", "10.0.2.2"),
+            latitude = this.Latitude,
+            longitude = this.Longitude
         )
     }
 
     fun UserDto.toUser(): UserModel{
         return UserModel(
-            id = this.id,
-            name = this.name,
-            phone = this.phone,
-            email = this.email,
-            thumbnail=if(this.thumbnail!=null)this.thumbnail.replace("localhost","10.0.2.2") else "",
-            address = this.address?.map { it.toAddress() }?.toList(),
-            store_id = this.storeId
+            id = this.Id,
+            name = this.Name,
+            phone = this.Phone,
+            email = this.Email,
+            thumbnail=if(!this.Thumbnail.isEmpty())this.Thumbnail.replace("localhost","10.0.2.2") else "",
+            address = this.Address?.map { it.toAddress() }?.toList(),
+            store_id = this.StoreId
         )
     }
 
 
-    fun BannerResponseDto.toBanner():BannerModel{
+    fun BannerDto.toBanner():BannerModel{
         return BannerModel(
-            id=this.id,
-            image=if(this.image.isNotEmpty())this.image.replace("localhost","10.0.2.2") else "",
-            store_id = this.storeId
+            id=this.Id,
+            image=if(this.Image.isNotEmpty())this.Image.replace("localhost","10.0.2.2") else "",
+            store_id = this.StoreId
         )
     }
 
-    fun VarientResponseDto.toVarient(): VarientModel{
+    fun VarientDto.toVarient(): VarientModel{
         return VarientModel(
-            id =  this.id,
-            name=this.name
+            id =  this.Id,
+            name=this.Name
         )
     }
 
-    fun ProductVarientReponseDto.toProductVarient(): ProductVarient {
+    fun ProductVarientDto.toProductVarient(): ProductVarient {
         return ProductVarient(
-            id = this.id,
-            name=this.name,
-            precentage = this.precentage,
-            varient_id =this.varientId
+            id = this.Id,
+            name=this.Name,
+            precentage = this.Precentage,
+            varient_id =this.VarientId
         )
     }
 
-    fun ProductResponseDto.toProdcut(): ProductModel {
+    fun ProductDto.toProdcut(): ProductModel {
         return ProductModel(
-            id = this.id,
-            name = this.name,
-            description = this.description,
-            thmbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("localhost","10.0.2.2") else "",
-            subcategory_id = this.subcategoryId,
-            store_id = this.storeId,
-            price = this.price,
-            category_id = this.categoryId,
-            productVarients = this.productVarients?.map {
+            id = this.Id,
+            name = this.Name,
+            description = this.Description,
+            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("localhost","10.0.2.2") else "",
+            subcategory_id = this.SubcategoryId,
+            store_id = this.StoreId,
+            price = this.Price,
+            category_id = this.CategoryId,
+            productVarients = this.ProductVarients?.map {
                 it.map { it.toProductVarient() }
             },
-            productImages = this.productImages.map { it->if(it.isNotEmpty())it.replace("localhost","10.0.2.2") else "" }
+            productImages = this.ProductImages.map { it->if(it.isNotEmpty())it.replace("localhost","10.0.2.2") else "" }
         )
     }
 
-    fun OrderVarientResponseDto.toOrderVarient(): OrderVarient{
+    fun OrderVarientDto.toOrderVarient(): OrderVarient{
         return OrderVarient(
-            varient_name=this.varientName,
-            product_varient_name=this.productVarientName
+            varient_name=this.VarientName,
+            product_varient_name=this.ProductVarientName
         )
     }
 
-    fun OrderProductResponseDto.toOrderProduct(): OrderProduct{
+    fun OrderProductDto.toOrderProduct(): OrderProduct{
         return OrderProduct(
-            id= this.id,
-            name = this.name,
-            thmbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("localhost","10.0.2.2") else ""
+            id= this.Id,
+            name = this.Name,
+            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("localhost","10.0.2.2") else ""
         )
     }
 
-    fun OrderItemResponseDto.toOrderItem(): OrderItem{
+    fun OrderItemDto.toOrderItem(): OrderItem{
         return OrderItem(
-            id=this.id,
-            quanity= this.quanity,
-            price = this.price,
-            product = this.product.toOrderProduct(),
-            productVarient = this.productVarient.map { it.toOrderVarient() },
-             orderItemStatus = this.orderItemStatus
+            id=this.Id,
+            quanity= this.Quanity,
+            price = this.Price,
+            product = this.Product.toOrderProduct(),
+            productVarient = this.ProductVarient.map { it.toOrderVarient() },
+             orderItemStatus = this.OrderItemStatus
         )
     }
 
-    fun OrderResponseDto.toOrderItem():Order{
+    fun OrderDto.toOrderItem():Order{
        return Order(
-          id = this.id,
-           latitude = this.latitude,
-           longitude = this.longitude,
-           deliveryFee = this.deliveryFee,
-           user_phone = this.userPhone,
-           totalPrice=this.totalPrice,
-           order_items = this.orderItems.map { it.toOrderItem() },
-           status = this.status
+          id = this.Id,
+           latitude = this.Latitude,
+           longitude = this.Longitude,
+           deliveryFee = this.DeliveryFee,
+           user_phone = this.UserPhone,
+           totalPrice=this.TotalPrice,
+           order_items = this.OrderItems.map { it.toOrderItem() },
+           status = this.Status
        )
     }
 
-    fun GeneralSettingResponseDto.toGeneralSetting(): GeneralSetting{
+    fun GeneralSettingDto.toGeneralSetting(): GeneralSetting{
         return GeneralSetting(
-            id = this.id,
-            name=this.name,
-            value =this.value
+            id = this.Id,
+            name=this.Name,
+            value =this.Value
         )
     }
 

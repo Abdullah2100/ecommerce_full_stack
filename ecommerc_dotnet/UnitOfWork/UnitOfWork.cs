@@ -1,5 +1,7 @@
 using ecommerc_dotnet.context;
-using ecommerc_dotnet.di.Repository;
+using ecommerc_dotnet.domain.interfaces;
+using ecommerc_dotnet.entity;
+using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.module;
 
 namespace ecommerc_dotnet.UnitOfWork;
@@ -10,10 +12,10 @@ public class UnitOfWork:IUnitOfWork
     {
         _context = context;
         AddressRepository = new Repository<Address>(context);
-        BannelRepository = new Repository<Bannel>(context);
+        BannelRepository = new Repository<Banner>(context);
         CategoryRepository = new Repository<Category>(context);
         DeliveryRepository = new Repository<Delivery>(context);
-        GeneralSettingsRepository = new Repository<GeneralSettings>(context);
+        GeneralSettingsRepository = new Repository<GeneralSetting>(context);
         OrderRepository = new Repository<Order>(context);
         OrderItemRepository = new Repository<OrderItem>(context);
         OrderProductsVarientRepository = new Repository<OrderProductsVarient>(context);
@@ -30,10 +32,10 @@ public class UnitOfWork:IUnitOfWork
     private readonly AppDbContext  _context;
     
     public IRepository<Address> AddressRepository { get; }
-    public IRepository<Bannel> BannelRepository { get; }
+    public IRepository<Banner> BannelRepository { get; }
     public IRepository<Category> CategoryRepository { get; }
     public IRepository<Delivery> DeliveryRepository { get; }
-    public IRepository<GeneralSettings> GeneralSettingsRepository { get; }
+    public IRepository<GeneralSetting> GeneralSettingsRepository { get; }
     public IRepository<Order> OrderRepository { get; }
     public IRepository<OrderItem> OrderItemRepository { get; }
     public IRepository<OrderProductsVarient> OrderProductsVarientRepository { get; }

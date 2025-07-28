@@ -1,15 +1,16 @@
 package com.example.e_commercompose.data.repository
 
-import com.example.e_commercompose.Dto.AuthResultDto
-import com.example.e_commercompose.dto.request.LoginDto
-import com.example.e_commercompose.dto.request.SignupDto
+import com.example.eccomerce_app.dto.LoginDto
 import com.example.e_commercompose.util.Secrets
-import com.example.e_commercompose.dto.request.ForgetPasswordDto
-import com.example.e_commercompose.dto.request.ReseatPasswordRequestDto
-import com.example.e_commercompose.dto.request.VerificationRequestDto
+import com.example.eccomerce_app.dto.AuthDto
+import com.example.eccomerce_app.dto.CreateVerificationDto
+import com.example.eccomerce_app.dto.ForgetPasswordDto
+import com.example.eccomerce_app.dto.CreateReseatPasswordDto
+import com.example.eccomerce_app.dto.SignupDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -22,14 +23,14 @@ class AuthRepository(val client:HttpClient) {
 
     suspend fun login(loginData:LoginDto): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/login";
-            val result = client.post(full_url){
+            val fullUrl =Secrets.getBaseUrl()+"/User/login";
+            val result = client.post(fullUrl){
                 setBody(loginData)
                 contentType(ContentType.Application.Json)
             }
 
             if(result.status== HttpStatusCode.OK){
-                NetworkCallHandler.Successful(result.body<AuthResultDto>())
+                NetworkCallHandler.Successful(result.body<AuthDto>())
             }else{
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -50,14 +51,14 @@ class AuthRepository(val client:HttpClient) {
 
     suspend fun signup(data: SignupDto): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/signup";
-            val result = client.post(full_url){
+            val fullUrl =Secrets.getBaseUrl()+"/User/signup";
+            val result = client.post(fullUrl){
                 setBody(data)
                 contentType(ContentType.Application.Json)
             }
 
             if(result.status== HttpStatusCode.Created){
-                NetworkCallHandler.Successful(result.body<AuthResultDto>())
+                NetworkCallHandler.Successful(result.body<AuthDto>())
             }else{
                 NetworkCallHandler.Error(result.body())
             }
@@ -78,8 +79,8 @@ class AuthRepository(val client:HttpClient) {
 
     suspend fun getOtp(email: String): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/generateOtp";
-            val result = client.post(full_url){
+            val fullUrl =Secrets.getBaseUrl()+"/User/generateOtp";
+            val result = client.post(fullUrl){
                 setBody(ForgetPasswordDto(email))
                 contentType(ContentType.Application.Json)
             }
@@ -106,11 +107,11 @@ class AuthRepository(val client:HttpClient) {
 
 
 
-    suspend fun verifingOtp(email: String,otp: String): NetworkCallHandler {
+    suspend fun verifyingOtp(email: String, otp: String): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/otpVerification";
-            val result = client.post(full_url){
-                setBody(VerificationRequestDto(email,otp))
+            val fullUrl =Secrets.getBaseUrl()+"/User/otpVerification";
+            val result = client.post(fullUrl){
+                setBody(CreateVerificationDto(email,otp))
                 contentType(ContentType.Application.Json)
             }
 
@@ -134,20 +135,20 @@ class AuthRepository(val client:HttpClient) {
         }
     }
 
-    suspend fun reasetPassword(email:String,otp: String,newPassword: String): NetworkCallHandler {
+    suspend fun resetPassword(email:String, otp: String, newPassword: String): NetworkCallHandler {
         return try {
-            val full_url =Secrets.getBaseUrl()+"/User/reseatPassword";
-            val result = client.post(full_url){
-                setBody(ReseatPasswordRequestDto(
-                    email = email,
-                    otp = otp,
-                    password =newPassword
+            val fullUrl =Secrets.getBaseUrl()+"/User/reseatPassword";
+            val result = client.post(fullUrl){
+                setBody(CreateReseatPasswordDto(
+                    Email = email,
+                    Otp = otp,
+                    Password =newPassword
                 ))
                 contentType(ContentType.Application.Json)
             }
 
             if(result.status== HttpStatusCode.OK){
-                NetworkCallHandler.Successful(result.body<AuthResultDto>())
+                NetworkCallHandler.Successful(result.body<Auth>())
             }else{
                 NetworkCallHandler.Error(result.body<String>())
             }

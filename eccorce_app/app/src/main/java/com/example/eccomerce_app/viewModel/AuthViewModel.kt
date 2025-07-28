@@ -9,7 +9,7 @@ import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.data.Room.AuthDao
 import com.example.e_commercompose.data.Room.AuthModleEntity
 import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
-import com.example.e_commercompose.dto.request.LoginDto
+import com.example.eccomerce_app.dto.LoginDto
 import com.example.e_commercompose.data.repository.AuthRepository
 import com.example.e_commercompose.dto.request.SignupDto
 import com.example.e_commercompose.ui.Screens
@@ -156,9 +156,9 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
 
         val result = authRepository.login(
             LoginDto(
-                username = username,
-                password = password,
-                deviceToken = token
+                Username = username,
+                Password = password,
+                DeviceToken = token
             )
         )
         when (result) {
@@ -230,7 +230,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     ): String? {
         _isLoading.emit(true);
 
-        val result = authRepository.verifingOtp(email,otp)
+        val result = authRepository.verifyingOtp(email,otp)
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 return null;
@@ -257,7 +257,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     ): String? {
         val token = FirebaseMessaging.getInstance().token.await() ?: ""
 
-        val result = authRepository.reasetPassword(email,otp,newPassword)
+        val result = authRepository.resetPassword(email,otp,newPassword)
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 val authData = result.data as AuthResultDto;

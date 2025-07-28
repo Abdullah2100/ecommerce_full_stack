@@ -1,9 +1,12 @@
 using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
+using ecommerc_dotnet.dto;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -18,13 +21,17 @@ namespace ecommerc_dotnet.controller;
 [Route("api/Varient")]
 public class VarientController : ControllerBase
 {
-    public VarientController(AppDbContext appDbContext)
+    public VarientController(
+        AppDbContext appDbContext,
+        IUnitOfWork unitOfWork,
+        IConfig config
+        )
     {
-        _userData = new UserData(appDbContext);
-        _varientData = new VarientData(appDbContext);
+        _userService = new UserService(appDbContext,config,unitOfWork);
+        _varientData = new VarientData(appDbContext,unitOfWork);
     }
 
-    private readonly UserData _userData;
+    private readonly UserService _userService;
     private readonly VarientData _varientData;
 
 
@@ -34,7 +41,7 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> createVarient([FromBody] VarientRequestDto varient)
+    public async Task<IActionResult> createVarient([FromBody] CreateVarientDto varient)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -51,7 +58,7 @@ public class VarientController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? userHolder = await _userData.getUserById(idHolder.Value);
+        User? userHolder = await _userService.getUser(idHolder.Value);
         if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
@@ -63,13 +70,13 @@ public class VarientController : ControllerBase
         }
 
 
-        var isExist = await _varientData.isExist(varient.name);
+        var isExist = await _varientData.isExist(varient.Name);
 
         if (isExist)
             return Conflict("هذا الخيار تم ادخاله سابقا");
 
 
-        VarientResposeDto? result = await _varientData.createVarient(varient.name);
+        VarientDto? result = await _varientData.createVarient(varient.Name);
 
         if (result is null)
             return BadRequest("حدثت مشكلة اثناء حفظ الخيار");
@@ -83,7 +90,7 @@ public class VarientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> updateVarient([FromBody] VarientRequestDto varient)
+    public async Task<IActionResult> updateVarient([FromBody] UpdateVarientDto varient)
     {
           StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -100,7 +107,8 @@ public class VarientController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userHolder = await _userData.getUserById(idHolder.Value);
+        if (varient.isEmpty()) return Ok("ليس هناك اي تعديل ");
+        var userHolder = await _userService.getUser(idHolder.Value);
         if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
@@ -110,22 +118,19 @@ public class VarientController : ControllerBase
         {
             return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
         }
+        
+        var isExistById = await _varientData.isExist((Guid)varient.Id!);
 
-        if (varient.id is null)
+        if (!isExistById)
             return NotFound("هذا الخيار غير موجود");
 
-        var isExistByID = await _varientData.isExist((Guid)varient.id!);
-
-        if (!isExistByID)
-            return NotFound("هذا الخيار غير موجود");
-
-        var isExistByName = await _varientData.isExist(varient.name);
+        var isExistByName = await _varientData.isExist(varient.Name??"");
 
         if (isExistByName)
             return Conflict("هذا الخيار تم ادخاله سابقا");
 
 
-        var result = await _varientData.updateVarient(varient.name, (Guid)varient.id!);
+        var result = await _varientData.updateVarient(varient.Name, (Guid)varient.Id!);
 
         if (result is null)
             return BadRequest("حدثت مشكلة اثناء  تعديل  الخيار");
@@ -155,7 +160,7 @@ public class VarientController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userHolder = await _userData.getUserById(idHolder.Value);
+        var userHolder = await _userService.getUser(idHolder.Value);
         if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");

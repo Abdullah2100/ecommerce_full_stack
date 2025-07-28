@@ -1,6 +1,5 @@
 package com.example.e_commercompose.viewModel
 
-import android.location.Location
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -10,21 +9,20 @@ import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.data.repository.HomeRepository
 import com.example.e_commercompose.data.Room.AuthDao
 import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
-import com.example.e_commercompose.dto.ModelToDto.toOrderRequestDto
 import com.example.e_commercompose.dto.ModelToDto.toOrderRequestItemDto
 import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
 import com.example.e_commercompose.dto.request.AddressRequestDto
 import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
 import com.example.e_commercompose.dto.request.CartRequestDto
 import com.example.e_commercompose.dto.request.SubCategoryRequestDto
-import com.example.e_commercompose.dto.response.AddressResponseDto
-import com.example.e_commercompose.dto.response.BannerResponseDto
-import com.example.e_commercompose.dto.response.CategoryReponseDto
-import com.example.e_commercompose.dto.response.ProductResponseDto
-import com.example.e_commercompose.dto.response.StoreResposeDto
-import com.example.e_commercompose.dto.response.SubCategoryResponseDto
-import com.example.e_commercompose.dto.response.UserDto
-import com.example.e_commercompose.dto.response.VarientResponseDto
+import com.example.eccomerce_app.dto.AddressDto
+import com.example.eccomerce_app.dto.BannerDto
+import com.example.eccomerce_app.dto.CategoryDto
+import com.example.eccomerce_app.dto.ProductDto
+import com.example.eccomerce_app.dto.StoreDto
+import com.example.eccomerce_app.dto.SubCategoryDto
+import com.example.eccomerce_app.dto.UserDto
+import com.example.eccomerce_app.dto.VarientDto
 import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.model.BannerModel
 import com.example.e_commercompose.model.CardProductModel
@@ -48,9 +46,9 @@ import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.UserModel
 import com.example.e_commercompose.model.VarientModel
-import com.example.e_commercompose.dto.response.GeneralSettingResponseDto
-import com.example.e_commercompose.dto.response.OrderItemResponseDto
-import com.example.e_commercompose.dto.response.OrderResponseDto
+import com.example.eccomerce_app.dto.GeneralSettingDto
+import com.example.eccomerce_app.dto.OrderItemDto
+import com.example.eccomerce_app.dto.OrderDto
 import com.example.e_commercompose.dto.response.StoreStatusResponseDto
 import com.example.e_commercompose.model.GeneralSetting
 import com.example.e_commercompose.model.Order
@@ -59,13 +57,16 @@ import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import java.nio.file.Files
 import java.util.UUID
 import kotlin.math.max
 import kotlin.math.pow
@@ -331,7 +332,7 @@ class HomeViewModel(
                             _banners.emit(banners)
                         }
                     },
-                    BannerResponseDto::class.java
+                    BannerDto::class.java
                 )
 
                 _hub.value?.on(
@@ -357,8 +358,8 @@ class HomeViewModel(
                     { response ->
                         val orderItemList = mutableListOf<OrderItem>();
 
-                        response.orderItems.forEach { value ->
-                            if (value.product.storeId == myInfo.value?.store_id) {
+                        response.OrderItems.forEach { value ->
+                            if (value.Product.StoreId == myInfo.value?.store_id) {
                                 orderItemList.add(value.toOrderItem())
                             }
                         }
@@ -369,7 +370,7 @@ class HomeViewModel(
                             _orderItemForMyStore.emit(orderItemList.distinctBy { it.id }.toList())
                         }
                     },
-                    OrderResponseDto::class.java
+                    OrderDto::class.java
                 )
                 _hub.value?.on(
                     "orderItemsStatusChange",
@@ -418,7 +419,7 @@ class HomeViewModel(
             var result = homeRepository.getRandomBanner();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<BannerResponseDto>
+                    var data = result.data as List<BannerDto>
 
                     var bannersHolder = mutableListOf<BannerModel>()
                     var bannersResponse = data.map { it.toBanner() }.toList()
@@ -466,7 +467,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as BannerResponseDto
+                var data = result.data as BannerDto
 
                 var bannersHolder = mutableListOf<BannerModel>()
                 var bannersResponse = data.toBanner()
@@ -541,7 +542,7 @@ class HomeViewModel(
             var result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var categoriesHolder = result.data as List<CategoryReponseDto>
+                    var categoriesHolder = result.data as List<CategoryDto>
 
                     var mutableCategories = mutableListOf<Category>()
 
@@ -576,7 +577,7 @@ class HomeViewModel(
             var result = homeRepository.getGeneral(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var generalSettings = result.data as List<GeneralSettingResponseDto>
+                    var generalSettings = result.data as List<GeneralSettingDto>
 
                     var mutableGeneralSetting = mutableListOf<GeneralSetting>()
 
@@ -609,7 +610,7 @@ class HomeViewModel(
             var result = homeRepository.getVarient(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var varientolder = result.data as List<VarientResponseDto>
+                    var varientolder = result.data as List<VarientDto>
 
                     var mutableVarient = mutableListOf<VarientModel>()
 
@@ -656,7 +657,7 @@ class HomeViewModel(
             )
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var address = result.data as AddressResponseDto?
+                var address = result.data as AddressDto?
                 if (address != null) {
                     var locationsCopy = mutableListOf<Address>()
 
@@ -743,7 +744,7 @@ class HomeViewModel(
         )
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var resultData = result.data as AddressResponseDto
+                var resultData = result.data as AddressDto
 
                 var address = _myInfo.value?.address?.map {
                     it
@@ -876,7 +877,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as StoreResposeDto
+                var data = result.data as StoreDto
                 var storesHolder = mutableListOf<StoreModel>()
                 if (_stores.value != null) {
                     storesHolder.add(data.toStore())
@@ -923,7 +924,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as StoreResposeDto
+                var data = result.data as StoreDto
 
                 var storesHolder = mutableListOf<StoreModel>()
                 if (_stores.value != null) {
@@ -968,7 +969,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as SubCategoryResponseDto
+                var data = result.data as SubCategoryDto
                 var listSubCategory = mutableListOf<SubCategory>()
 
                 listSubCategory.add(data.toSubCategory())
@@ -1007,11 +1008,11 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as SubCategoryResponseDto
+                var data = result.data as SubCategoryDto
                 var listSubCategory = mutableListOf<SubCategory>()
 
                 if (_SubCategories.value != null) {
-                    listSubCategory.addAll(_SubCategories.value!!.filter { it.id != data.id });
+                    listSubCategory.addAll(_SubCategories.value!!.filter { it.id != data.Id });
                 }
 
                 listSubCategory.add(data.toSubCategory())
@@ -1084,7 +1085,7 @@ class HomeViewModel(
             var result = homeRepository.getStoreById(store_id);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as StoreResposeDto
+                    var data = result.data as StoreDto
 
                     var storesHolder = mutableListOf<StoreModel>()
                     storesHolder.add(data.toStore())
@@ -1116,7 +1117,7 @@ class HomeViewModel(
             var result = homeRepository.getBannerByStoreId(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<BannerResponseDto>
+                    var data = result.data as List<BannerDto>
 
                     var bannersHolder = mutableListOf<BannerModel>()
                     var bannersResponse = data.map { it.toBanner() }.toList()
@@ -1156,7 +1157,7 @@ class HomeViewModel(
             var result = homeRepository.getStoreAddress(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<AddressResponseDto>
+                    var data = result.data as List<AddressDto>
 
                     var addressHolder = mutableListOf<Address>()
                     var addressResponse = data.map { it.toAddress() }.toList()
@@ -1195,7 +1196,7 @@ class HomeViewModel(
             var result = homeRepository.getStoreSubCategory(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<SubCategoryResponseDto>
+                    var data = result.data as List<SubCategoryDto>
 
                     var subCategoriesolder = mutableListOf<SubCategory>()
                     var addressResponse = data.map { it.toSubCategory() }.toList()
@@ -1240,7 +1241,7 @@ class HomeViewModel(
             var result = homeRepository.getProduct(pageNumber.value);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<ProductResponseDto>
+                    var data = result.data as List<ProductDto>
 
                     var holder = mutableListOf<ProductModel>()
                     var addressResponse = data.map { it.toProdcut() }.toList()
@@ -1292,7 +1293,7 @@ class HomeViewModel(
             var result = homeRepository.getProduct(store_id, pageNumber.value);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<ProductResponseDto>
+                    var data = result.data as List<ProductDto>
 
                     var holder = mutableListOf<ProductModel>()
                     var addressResponse = data.map { it.toProdcut() }.toList()
@@ -1344,7 +1345,7 @@ class HomeViewModel(
                 );
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<ProductResponseDto>
+                    var data = result.data as List<ProductDto>
 
                     var holder = mutableListOf<ProductModel>()
                     var addressResponse = data.map { it.toProdcut() }.toList()
@@ -1398,7 +1399,7 @@ class HomeViewModel(
             );
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<ProductResponseDto>
+                    var data = result.data as List<ProductDto>
 
                     var holder = mutableListOf<ProductModel>()
                     var productsesponse = data.map { it.toProdcut() }.toList()
@@ -1460,7 +1461,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as ProductResponseDto
+                var data = result.data as ProductDto
 
                 var holder = mutableListOf<ProductModel>()
                 var addressResponse = data.toProdcut()
@@ -1520,7 +1521,7 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as ProductResponseDto
+                var data = result.data as ProductDto
 
                 var holder = mutableListOf<ProductModel>()
                 var addressResponse = data.toProdcut()
@@ -1558,8 +1559,8 @@ class HomeViewModel(
 
         ): String? {
         var result = homeRepository.deleteProduct(
-            store_id = store_id,
-            product_id = product_id
+            storeId = store_id,
+            productId = product_id
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
@@ -1603,7 +1604,7 @@ class HomeViewModel(
         )
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as OrderResponseDto
+                var data = result.data as OrderDto
                 var orderList = mutableListOf<Order>()
                 orderList.add(data.toOrderItem())
                 if (!_orders.value.isNullOrEmpty()) {
@@ -1643,7 +1644,7 @@ class HomeViewModel(
             when (result) {
 
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<OrderResponseDto>
+                    var data = result.data as List<OrderDto>
                     var orderList = mutableListOf<Order>()
                     orderList.addAll(data.map { it.toOrderItem() })
                     if (!_orders.value.isNullOrEmpty()) {
@@ -1706,7 +1707,7 @@ class HomeViewModel(
             var result = homeRepository.getMyOrderItemForStoreId(store_id, pageNumber.value)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<OrderItemResponseDto>
+                    var data = result.data as List<OrderItemDto>
                     var orderItemList = mutableListOf<OrderItem>()
                     orderItemList.addAll(data.map { it.toOrderItem() })
                     if (!_orderItemForMyStore.value.isNullOrEmpty()) {
@@ -1768,5 +1769,19 @@ class HomeViewModel(
 
     }
 
+
+}
+
+fun main() {
+    var job = CoroutineScope(Dispatchers.IO).launch {
+
+        try {
+
+        }catch (e: Exception){
+            print("this exption ${e.message}")
+        }
+    }
+
+   job
 
 }

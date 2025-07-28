@@ -1,8 +1,12 @@
 using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
+using ecommerc_dotnet.dto;
 using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.module;
+using ecommerc_dotnet.services;
+using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -20,22 +24,31 @@ public class BannerController : ControllerBase
     public BannerController(
         IConfig configuration,
         IWebHostEnvironment host,
-        IHubContext<EcommercHub> hubContext,
-        AppDbContext appDbContext)
+        IHubContext<EcommerceHub> hubContext,
+        AppDbContext appDbContext,
+        IUnitOfWork unitOfWork
+        )
     {
-        _bannerData = new BannerData(appDbContext, configuration, host);
-        _userData = new UserData(appDbContext, configuration);
+        _bannerData = new BannerData(
+            appDbContext, 
+            configuration, 
+            host,
+            unitOfWork );
+        _userService = new UserService(
+            appDbContext, 
+            configuration,
+            unitOfWork);
         _configuration = configuration;
         _host = host;
         _hubContext = hubContext;
     }
 
     private readonly BannerData _bannerData;
-    private readonly UserData _userData;
+    private readonly UserService _userService;
     private readonly AppDbContext _dbContext;
     private readonly IConfig _configuration;
     private readonly IWebHostEnvironment _host;
-    private readonly IHubContext<EcommercHub> _hubContext;
+    private readonly IHubContext<EcommerceHub> _hubContext;
 
 
     [HttpPost("")]
@@ -44,7 +57,7 @@ public class BannerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> createBanner(
-        [FromForm] BannerRequestDto banner
+        [FromForm] CreateBannerDto banner
     )
     {
          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -62,18 +75,18 @@ public class BannerController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        UserInfoResponseDto? userHolder = await _userData.getUser(idHolder.Value);
+        User? userHolder = await _userService.getUser(idHolder.Value);
         if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.storeId is null)
+        if (userHolder.Store is null)
         {
             return NotFound("لا بد من انشاء متجر قبل اضافة اي لوحة اعلانية");
         }
 
-        string? imagePath = await clsUtil.saveFile(banner.image, clsUtil.enImageType.BANNER, _host);
+        string? imagePath = await clsUtil.saveFile(banner.Image, EnImageType.BANNER, _host);
 
         if (imagePath is null)
         {
@@ -81,23 +94,27 @@ public class BannerController : ControllerBase
         }
 
 
-        BannerResponseDto? result = await _bannerData.addNewBanner(banner.endAt, imagePath, (Guid)userHolder.storeId!);
+        BannerDto? result = await _bannerData
+            .addNewBanner(banner.EndAt, imagePath, (Guid)userHolder.Store.Id!);
 
         if (result is null)
+        {
+            clsUtil.deleteFile(imagePath, _host);
             return BadRequest("حدثت مشكلة اثناء حقظ الوحة الاعلانية");
+        }
 
         await _hubContext.Clients.All.SendAsync("createdBanner", result);
         return StatusCode(201, result);
     }
 
 
-    [HttpDelete("{banner_id:guid}")]
+    [HttpDelete("{bannerId:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> deleteBanner(
-        Guid banner_id
+        Guid bannerId
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
@@ -115,18 +132,18 @@ public class BannerController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        UserInfoResponseDto? userHolder = await _userData.getUser(idHolder.Value);
+        User? userHolder = await _userService.getUser(idHolder.Value);
         if (userHolder is null)
         {
             return NotFound("المستخدم غير موجود");
         }
 
-        if (userHolder.storeId is null)
+        if (userHolder.Store is null)
         {
             return NotFound("ليس لديك اي متجر");
         }
 
-        BannerResponseDto? banner = await _bannerData.getBanner((Guid)userHolder.storeId!, banner_id);
+        BannerDto? banner = await _bannerData.getBanner((Guid)userHolder.Store.Id!, bannerId);
 
         if ((banner is null))
         {
@@ -134,10 +151,10 @@ public class BannerController : ControllerBase
         }
 
 
-        clsUtil.deleteFile(banner.image, _host);
+        clsUtil.deleteFile(banner.Image, _host);
 
 
-        bool result = await _bannerData.deleteBanner(banner.id);
+        bool result = await _bannerData.deleteBanner(banner.Id);
 
         if (result == false)
             return BadRequest("حدثت مشكلة اثناء حذف الوحة الاعلانية");
@@ -156,7 +173,7 @@ public class BannerController : ControllerBase
         if(pageNumber<1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        List<BannerResponseDto>? result = await _bannerData.getBanner(storeId, pageNumber);
+        List<BannerDto>? result = await _bannerData.getBanners(storeId, pageNumber);
 
         if (result is null)
             return NoContent();
@@ -169,7 +186,7 @@ public class BannerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getBannerRandom()
     {
-        var result = await _bannerData.getBanner(15);
+        var result = await _bannerData.getRandomBanners(15);
         if (result is null)
             return NoContent();
         

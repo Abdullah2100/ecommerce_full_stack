@@ -1,7 +1,9 @@
 using System.Text;
 using ecommerc_dotnet.context;
+using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
+using ecommerc_dotnet.services;
 using ecommerc_dotnet.UnitOfWork;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -20,7 +22,7 @@ builder.Services.AddOptions();
 
 // Other Services (Scoped)
 builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
-builder.Services.AddTransient<iEmailService, EmailService>();
+builder.Services.AddTransient<IEmail, Email>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
 
@@ -104,6 +106,6 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<EcommercHub>("/bannerHub");
+app.MapHub<EcommerceHub>("/bannerHub");
 app.ConfigureExceptionHandler();
 app.Run();

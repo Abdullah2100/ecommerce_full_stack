@@ -3,8 +3,10 @@ using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto.Request;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.entity;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -19,14 +21,18 @@ namespace ecommerc_dotnet.controller;
 [Route("api/General")]
 public class GeneralController : ControllerBase
 {
-    public GeneralController(AppDbContext context)
+    public GeneralController(
+        AppDbContext context,
+        IUnitOfWork unitOfWork,
+        IConfig config
+        )
     {
-        _generalData = new GeneralData(context);
-        _userData = new UserData(context);
+        _generalData = new GeneralData(context,unitOfWork);
+        _userService = new UserService(context, config,unitOfWork);
     }
 
-    public GeneralData _generalData { get; set; }
-    public UserData _userData { get; set; }
+    private readonly GeneralData _generalData;
+    private readonly UserService _userService;
 
 
     [HttpPost("")]
@@ -53,7 +59,7 @@ public class GeneralController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userService.getUser(idHolder.Value);
 
         if (user is null)
         {
@@ -68,7 +74,7 @@ public class GeneralController : ControllerBase
 
 
 
-        GeneralSettings? result =
+        GeneralSetting? result =
             await _generalData.createGeneralSetting(
                generalSetting.Name,
                generalSetting.Value
@@ -86,7 +92,7 @@ public class GeneralController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> deleteBanner(
+    public async Task<IActionResult> deleteGeneralSetting(
         Guid genralSettingId 
     )
     {
@@ -105,7 +111,7 @@ public class GeneralController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userService.getUser(idHolder.Value);
         if (user is null)
         {
             return NotFound("المستخدم غير موجود");
@@ -116,7 +122,7 @@ public class GeneralController : ControllerBase
             return NotFound("ليس لديك الصلاحية لحذف البيانات");
         }
 
-        GeneralSettings? banner = await _generalData
+        GeneralSetting? banner = await _generalData
             .getGeneralSettings(genralSettingId);
 
         if ((banner is null))
@@ -140,7 +146,7 @@ public class GeneralController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> updatePanner(
+    public async Task<IActionResult> UpdateGeneralSetting(
         Guid genralSettingId ,
         [FromBody] GeneralSettingDto generalSetting
     )
@@ -160,7 +166,9 @@ public class GeneralController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(idHolder.Value);
+        
+        
+        User? user = await _userService.getUser(idHolder.Value);
         if (user is null)
         {
             return NotFound("المستخدم غير موجود");
@@ -171,7 +179,7 @@ public class GeneralController : ControllerBase
             return NotFound("ليس لديك الصلاحية لحذف البيانات");
         }
 
-        GeneralSettings? generalSettings = await _generalData
+        GeneralSetting? generalSettings = await _generalData
             .getGeneralSettings(genralSettingId);
 
         if ((generalSettings is null))
@@ -182,7 +190,7 @@ public class GeneralController : ControllerBase
 
 
 
-        GeneralSettings? result = await _generalData.updateGeneralSetting(
+        GeneralSetting? result = await _generalData.updateGeneralSetting(
             genralSettingId,
             generalSettings.Name, 
             generalSettings.Value);
@@ -198,14 +206,14 @@ public class GeneralController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getBanner(
+    public async Task<IActionResult> getGeneralSettings(
          int pageNumber
     )
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        List<GeneralSettingResponseDto>? result = await _generalData
+        List<GeneralSettingDto>? result = await _generalData
             .getGeneralSettingList( pageNumber);
 
         if (result is null)

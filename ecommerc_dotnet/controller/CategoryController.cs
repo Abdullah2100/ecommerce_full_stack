@@ -1,9 +1,12 @@
 using System.Security.Claims;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
+using ecommerc_dotnet.dto;
 using ecommerc_dotnet.dto.Response;
+using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -18,19 +21,20 @@ namespace ecommerc_dotnet.controller;
 public class CategoryController : ControllerBase
 {
     public CategoryController(AppDbContext dbContext
-        , IConfig configuration,
-        IWebHostEnvironment webHostEnvironment
+        , IConfig config,
+        IWebHostEnvironment webHostEnvironment,
+        IUnitOfWork unitOfWork
     )
     {
         _host = webHostEnvironment;
-        _categoryData = new CategoryData(dbContext);
-        _userData = new UserData(dbContext, configuration);
-        _configuration = configuration;
+        _categoryData = new CategoryData(dbContext,unitOfWork,config);
+        _userService = new UserService(dbContext, config,unitOfWork);
+        _config = config;
     }
 
     private readonly CategoryData _categoryData;
-    private readonly UserData _userData;
-    private readonly IConfig _configuration;
+    private readonly UserService _userService;
+    private readonly IConfig _config;
     private readonly IWebHostEnvironment _host;
 
 
@@ -43,8 +47,8 @@ public class CategoryController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        List<CategoryResponseDto>? categories = await _categoryData
-            .getCategories(_configuration, pageNumber);
+        List<CategoryDto>? categories = await _categoryData
+            .getCategories( pageNumber);
         if (categories is null)
             return NoContent();
 
@@ -57,7 +61,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> createCateogry([FromForm] CategoryRequestDto category)
+    public async Task<IActionResult> createCateogry([FromForm] CreateCategoryto category)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -73,28 +77,30 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userService.getUser(idHolder.Value);
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
         if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
-        bool isExist = await _categoryData.isExist(category.name);
+        bool isExist = await _categoryData.isExist(category.Name);
 
         if (isExist)
             return Conflict("هناك قسم بهذا الاسم");
 
-        string imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
-        // var imagePath = await MinIoServices.uploadFile(_configuration,category.image,MinIoServices.enBucketName.CATEGORY); ;
+        string? imagePath = await clsUtil.saveFile(category.Image, EnImageType.CATEGORY, _host);
 
         if (imagePath is null)
             return BadRequest("حدثة مشكلة اثناء حفظ الصورة");
 
-        bool? result = await _categoryData.addNewCategory(category.name, imagePath, user.Id);
+        bool result = await _categoryData.addNewCategory(category.Name, imagePath, user.Id);
 
-        if (result is null)
+        if (result == false)
+        {
+            clsUtil.deleteFile(imagePath ?? "", _host);
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
+        }
 
         return Created();
     }
@@ -108,7 +114,7 @@ public class CategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> updateCateogry(
-        [FromForm] CategoryRequestUpdatteDto category)
+        [FromForm] UpdateCategoryDto category)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
@@ -124,7 +130,10 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(idHolder.Value);
+        if (category.isEmpty()) return Ok("ليس هناك اي تحديث");
+        
+
+        User? user = await _userService.getUser(idHolder.Value);
 
         if (user is null)
         {
@@ -134,7 +143,7 @@ public class CategoryController : ControllerBase
         if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية لانشاء قسم جديد");
 
-        Category? categoryHolder = await _categoryData.getCategory(category.id);
+        Category? categoryHolder = await _categoryData.getCategory(category.Id);
 
         if (categoryHolder is null)
             return BadRequest("القسم غير موجود");
@@ -142,31 +151,37 @@ public class CategoryController : ControllerBase
 
         bool isExistName = false;
 
-        if (category?.name !=  null&&category.name!= categoryHolder.Name)
-            isExistName = await _categoryData.isExist(category.name);
+        if (category?.Name !=  null&&category.Name!= categoryHolder.Name)
+            isExistName = await _categoryData.isExist(category.Name);
 
-        if (isExistName && categoryHolder.Id !=  category!.id)
+        if (isExistName && categoryHolder.Id !=  category!.Id)
             return Conflict("هناك قسم بهذا الاسم");
 
         string? imagePath = null;
 
-        if (category?.image is not  null)
+        if (category?.Image is not  null)
         {
             if (categoryHolder?.Image is not  null)
                 clsUtil.deleteFile(categoryHolder.Image, _host);
-            imagePath = await clsUtil.saveFile(category.image, clsUtil.enImageType.CATEGORY, _host);
+            imagePath = await clsUtil.saveFile(category.Image, EnImageType.CATEGORY, _host);
         }
 
-        bool? result = await _categoryData.updateCategory(
-            category!.id,
-            categoryHolder?.Name !=  category.name ? category.name : null,
+        CategoryDto? result = await _categoryData.updateCategory(
+            category!.Id,
+            category.Name ,
             imagePath
         );
 
         if (result is null)
+        {
+            if (categoryHolder?.Image is not null)
+            {
+                clsUtil.deleteFile(imagePath??"", _host);
+            }
             return BadRequest("حدثت مشكلة اثناء حفظ القسم");
+        }
 
-        return NoContent();
+        return Ok(result);
     }
 
 
@@ -192,7 +207,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(idHolder.Value);
+        User? user = await _userService.getUser(idHolder.Value);
 
         if (user is null)
             return NotFound("ليس لديك الصلاحية لانشاء قسم جديد");

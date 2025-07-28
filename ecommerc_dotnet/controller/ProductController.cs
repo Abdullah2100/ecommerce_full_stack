@@ -2,9 +2,13 @@ using System.Security.Claims;
 using System.Xml.Linq;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.data;
+using ecommerc_dotnet.dto;
 using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.services;
+using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
@@ -22,16 +26,18 @@ public class ProductController : ControllerBase
     public ProductController(
         IConfig configuration,
         IWebHostEnvironment host,
-        IHubContext<EcommercHub> hubContext,
-        AppDbContext appDbContext)
+        IHubContext<EcommerceHub> hubContext,
+        AppDbContext appDbContext,
+        IUnitOfWork unitOfWork
+    )
     {
-        _userData = new UserData(appDbContext, configuration);
-        _productData = new ProductData(appDbContext, configuration, host);
-        _storeData = new StoreData(appDbContext, configuration);
+        _userService = new UserService(appDbContext, configuration, unitOfWork);
+        _productData = new ProductData(appDbContext, configuration, host, unitOfWork);
+        _storeData = new StoreData(appDbContext, configuration, unitOfWork);
         _host = host;
     }
 
-    private readonly UserData _userData;
+    private readonly UserService _userService;
     private readonly ProductData _productData;
     private readonly StoreData _storeData;
     private readonly IWebHostEnvironment _host;
@@ -46,7 +52,7 @@ public class ProductController : ControllerBase
         Guid storeId, int pageNumber
     )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         var isExist = await _storeData.isExist(storeId);
@@ -58,7 +64,7 @@ public class ProductController : ControllerBase
         var result = await _productData.getProducts(
             storeId, pageNumber
         );
-        
+
         if (result.Count < 1)
             return NoContent();
 
@@ -76,8 +82,7 @@ public class ProductController : ControllerBase
         Guid category_id, int pageNumber
     )
     {
-      
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         var result = await _productData.getProductsByCategory(
@@ -91,7 +96,7 @@ public class ProductController : ControllerBase
         return StatusCode(200, result);
     }
 
-    
+
     [HttpGet("{storeId:guid}/{subcategoryId:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -104,7 +109,7 @@ public class ProductController : ControllerBase
         int pageNumber
     )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         var isExist = await _storeData.isExist(storeId, subcategoryId);
@@ -135,14 +140,14 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> getProducts
         (int pageNumber)
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         var result = await _productData.getProducts(pageNumber);
 
         if (result.Count == 0)
             return NoContent();
-        
+
         return StatusCode(200, result);
     }
 
@@ -153,13 +158,13 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> getProductsAdmin
         (int pageNumber)
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
@@ -170,8 +175,8 @@ public class ProductController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        
-        User? user = await _userData.getUserById(userId);
+
+        User? user = await _userService.getUser(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
         if (user.Role == 1)
@@ -180,11 +185,11 @@ public class ProductController : ControllerBase
 
         if (result.Count == 0)
             return NoContent();
-        
+
         return StatusCode(200, result);
     }
-    
-    
+
+
     [HttpGet("pages")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -192,10 +197,10 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> getProductsPagess()
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
@@ -207,18 +212,18 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userData.getUserById(userId);
+        User? user = await _userService.getUser(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
         if (user.Role == 1)
             return BadRequest("ليس لديك الصلاحية");
-        
+
         var result = await _productData.getProduct();
 
-        
+
         return StatusCode(200, result);
     }
-    
+
 
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -227,13 +232,13 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateProduct
     (
-        [FromForm] ProductRequestDto product
+        [FromForm] CreateProductDto product
     )
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
@@ -245,11 +250,11 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUser(userId);
+        var user = await _userService.getUser(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.storeId !=  product.storeId)
+        if (user.Store is not null &&user.Store.Id != product.StoreId)
             return BadRequest("فقط صاحب المتجر بأمكانه اضافة المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
@@ -257,38 +262,45 @@ public class ProductController : ControllerBase
         if (userStore is null)
             return NotFound("المتجر غير موجو");
 
-        if (userStore.isBlocked)
+        if (userStore.IsBlocked)
             return BadRequest("لا يمكن اضافة اي منتج الى المتجر لان المتجر محضور تواصل مع مدير النظام");
 
-        if (product.images.Count > 15)
+        if (product.Images.Count > 15)
             return BadRequest("اقصى عدد صور المنتجات هو 15 صورة");
 
 
-        var savedThumbnail = await clsUtil.saveFile(product.thmbnail, clsUtil.enImageType.PRODUCT, _host);
-        var savedImage = await clsUtil.saveFile(product.images, clsUtil.enImageType.PRODUCT, _host);
+        var savedThumbnail = await clsUtil.saveFile(product.Thmbnail, EnImageType.PRODUCT, _host);
+        var savedImage = await clsUtil.saveFile(product.Images, EnImageType.PRODUCT, _host);
         if (savedImage is null || savedThumbnail is null)
         {
             return BadRequest("حدثة مشكلة اثناء حفظ الصور");
         }
 
         var result = await _productData.createProduct(
-            name: product.name,
-            description: product.description,
+            name: product.Name,
+            description: product.Description,
             thumbnail: (string)savedThumbnail!,
-            subcategoryId: product.subcategoryId,
-            storeId: product.storeId,
-            price: product.price,
+            subcategoryId: product.SubcategoryId,
+            storeId: product.StoreId,
+            price: product.Price,
             images: savedImage,
-            productVarients: product.productVarients
+            productVarients: product.ProductVarients
         );
 
         if (result is null)
+        {
+            if (product?.Thmbnail is null)
+                clsUtil.deleteFile(savedThumbnail ?? "", _host);
+            if (product?.Images.Count > 0)
+                clsUtil.deleteFile(savedImage, _host);
             return BadRequest("حدثة مشكلة اثناء حفظ المنتج");
+        }
 
         return StatusCode(201, result);
     }
 
-    
+
+
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -297,13 +309,13 @@ public class ProductController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> updateProduct
     (
-        [FromForm] ProductRequestUpdateDto product
+        [FromForm] UpdateProductDto product
     )
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
@@ -315,11 +327,13 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUser(userId);
+        if (product.isEmpty()) return Ok("ليس هناك اي شئ يحتاج التحديث");
+        
+        var user = await _userService.getUser(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.storeId !=  product.storeId)
+        if (user.Store is not null&& user.Store.Id != product.StoreId)
             return Conflict("فقط صاحب المتجر بأمكانه  المنتجات الى متجره");
 
         var userStore = await _storeData.getStoreByUser((Guid)user.Id);
@@ -327,46 +341,52 @@ public class ProductController : ControllerBase
         if (userStore is null)
             return NotFound("المتجر غير موجو");
 
-        if (userStore.isBlocked)
+        if (userStore.IsBlocked)
             return BadRequest("لا يمكن اضافة اي منتج الى المتجر لان المتجر محضور تواصل مع مدير النظام");
 
-        var isExistProduct = await _productData.isExist(product.id);
+        var isExistProduct = await _productData.isExist(product.Id);
 
         if (!isExistProduct)
             return NotFound("المنتج غير موجو");
 
-        if (product.images !=  null & product?.images?.Count > 15)
+        if (product.Images != null & product?.Images?.Count > 15)
             return BadRequest("اقصى عدد صور المنتجات هو 15 صورة");
 
-        if (product?.deletedProductVarients !=  null)
-            await _productData.deleteProductVarient(product.deletedProductVarients, product.id);
+        if (product?.DeletedProductVarients != null)
+            await _productData.deleteProductVarient(product.DeletedProductVarients, product.Id);
 
 
-        if (product?.deletedimages?.Count > 0)
-             _productData.deleteProductImages(product.deletedimages);
+        if (product?.Deletedimages?.Count > 0)
+            _productData.deleteProductImages(product.Deletedimages);
 
         string? savedThumbnail = null;
-        if (product?.thmbnail !=  null)
-            savedThumbnail = await clsUtil.saveFile(product.thmbnail, clsUtil.enImageType.PRODUCT, _host);
+        if (product?.Thmbnail != null)
+            savedThumbnail = await clsUtil.saveFile(product.Thmbnail, EnImageType.PRODUCT, _host);
 
         List<string>? savedImage = null;
-        if (product?.images !=  null)
-            savedImage = await clsUtil.saveFile(product.images, clsUtil.enImageType.PRODUCT, _host);
+        if (product?.Images != null)
+            savedImage = await clsUtil.saveFile(product.Images, EnImageType.PRODUCT, _host);
 
 
         var result = await _productData.updateProduct(
-            id: product.id,
-            name: product.name,
-            description: product.description,
+            id: product.Id,
+            name: product.Name,
+            description: product.Description,
             thumbnail: (string)savedThumbnail!,
-            subcategoryId: product.subcategoryId,
-            price: product.price,
-            productVarients: product.productVarients,
+            subcategoryId: product.SubcategoryId,
+            price: product.Price,
+            productVarients: product.ProductVarients,
             images: savedImage
         );
 
         if (result is null)
+        {
+            if (product?.Thmbnail is null)
+                clsUtil.deleteFile(savedThumbnail ?? "", _host);
+            if (product?.Images.Count > 0)
+                clsUtil.deleteFile(savedImage, _host);
             return BadRequest("حدثة مشكلة اثناء حفظ المنتج");
+        }
 
         return StatusCode(200, result);
     }
@@ -383,10 +403,10 @@ public class ProductController : ControllerBase
         Guid productId
     )
     {
-          StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationServices.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-    
+
         Guid userId = Guid.Empty;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
@@ -398,11 +418,11 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var user = await _userData.getUser(userId);
+        var user = await _userService.getUser(userId);
         if (user is null)
             return NotFound("المستخدم غير موجود");
 
-        if (user.storeId !=  storeId)
+        if (user.Store is not null &&user.Store.Id != storeId)
             return Conflict("فقط صاحب المتجر بأمكانه حذف المنتجات ");
 
         var isExistProduct = await _productData.isExist(productId);

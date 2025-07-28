@@ -1,27 +1,26 @@
 package com.example.e_commercompose.data.repository
 
 import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.dto.request.AddressRequestDto
-import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
-import com.example.e_commercompose.dto.request.CartRequestDto
-import com.example.e_commercompose.dto.request.OrderRequestItemsDto
-import com.example.e_commercompose.dto.request.SubCategoryRequestDto
-import com.example.e_commercompose.dto.request.SubCategoryUpdateDto
-import com.example.e_commercompose.dto.response.AddressResponseDto
-import com.example.e_commercompose.dto.response.BannerResponseDto
-import com.example.e_commercompose.dto.response.CategoryReponseDto
-import com.example.e_commercompose.dto.response.ProductResponseDto
-import com.example.e_commercompose.dto.response.StoreResposeDto
-import com.example.e_commercompose.dto.response.SubCategoryResponseDto
-import com.example.e_commercompose.dto.response.UserDto
-import com.example.e_commercompose.dto.response.VarientResponseDto
+import com.example.eccomerce_app.dto.AddressDto
+import com.example.eccomerce_app.dto.BannerDto
+import com.example.eccomerce_app.dto.CategoryDto
+import com.example.eccomerce_app.dto.ProductDto
+import com.example.eccomerce_app.dto.StoreDto
+import com.example.eccomerce_app.dto.SubCategoryDto
+import com.example.eccomerce_app.dto.UserDto
+import com.example.eccomerce_app.dto.VarientDto
 import com.example.e_commercompose.model.MyInfoUpdate
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.util.Secrets
-import com.example.e_commercompose.dto.request.OrderItemUpdateStatusDto
-import com.example.e_commercompose.dto.response.GeneralSettingResponseDto
-import com.example.e_commercompose.dto.response.OrderItemResponseDto
-import com.example.e_commercompose.dto.response.OrderResponseDto
+import com.example.eccomerce_app.dto.GeneralSettingDto
+import com.example.eccomerce_app.dto.OrderItemDto
+import com.example.eccomerce_app.dto.OrderDto
+import com.example.eccomerce_app.dto.CreateAddressDto
+import com.example.eccomerce_app.dto.CreateOrderDto
+import com.example.eccomerce_app.dto.CreateSubCategoryDto
+import com.example.eccomerce_app.dto.UpdateAddressDto
+import com.example.eccomerce_app.dto.UpdateOrderItemStatusDto
+import com.example.eccomerce_app.dto.UpdateSubCategoryDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -45,48 +44,11 @@ import java.util.UUID
 
 class HomeRepository(val client: HttpClient) {
 
-    /*
-    suspend fun getUserAddress(): NetworkCallHandler {
+   //Banner
+    suspend fun getBannerByStoreId(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            var result = client.get(
-                Secrets.getBaseUrl() + "/User/address"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
-            }
-
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<AddressResponseDto>>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
-            }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
-*/
-
-    //Banner
-    suspend fun getBannerByStoreId(store_id: UUID, pageNumber: Int): NetworkCallHandler {
-        return try {
-            val full_url = Secrets.getBaseUrl() + "/Banner/${store_id}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Banner/${storeId}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -97,7 +59,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<BannerDto>>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -118,8 +80,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getRandomBanner(): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Banner";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Banner";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -130,7 +92,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<BannerResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<BannerDto>>())
             } else if(result.status== HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -152,7 +114,7 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun createBanner(endDate: String, image: File, ): NetworkCallHandler {
+    suspend fun createBanner(endDate: String, image: File ): NetworkCallHandler {
         return try {
             var result = client.post(
                 Secrets.getBaseUrl() + "/Banner"
@@ -187,7 +149,7 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
             if (result.status == HttpStatusCode.Created) {
-                return NetworkCallHandler.Successful(result.body<BannerResponseDto>())
+                return NetworkCallHandler.Successful(result.body<BannerDto>())
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -205,10 +167,10 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteBanner(banner_id: UUID): NetworkCallHandler {
+    suspend fun deleteBanner(bannerId: UUID): NetworkCallHandler {
         return try {
             var result = client.delete(
-                Secrets.getBaseUrl() + "/Banner/${banner_id}"
+                Secrets.getBaseUrl() + "/Banner/${bannerId}"
             ) {
                 headers {
                     append(
@@ -253,7 +215,7 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<CategoryReponseDto>>())
+                return NetworkCallHandler.Successful(result.body<List<CategoryDto>>())
             } else if (result.status == HttpStatusCode.NoContent) {
                 return NetworkCallHandler.Error("No Data Found")
 
@@ -289,7 +251,7 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<GeneralSettingResponseDto>>())
+                return NetworkCallHandler.Successful(result.body<List<GeneralSettingDto>>())
             } else if (result.status == HttpStatusCode.NoContent) {
                 return NetworkCallHandler.Error("No Data Found")
 
@@ -313,10 +275,10 @@ class HomeRepository(val client: HttpClient) {
 
 
     //order
-    suspend fun submitOrder(cartData: CartRequestDto): NetworkCallHandler {
+    suspend fun submitOrder(cartData: CreateOrderDto): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order";
-            val result = client.post(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Order";
+            val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -330,7 +292,7 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.Created) {
 
-                NetworkCallHandler.Successful(result.body<OrderResponseDto>())
+                NetworkCallHandler.Successful(result.body<OrderDto>())
 
             } else {
 
@@ -354,8 +316,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getMyOrders(pageNumber:Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -367,7 +329,7 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
 
-                NetworkCallHandler.Successful(result.body<List<OrderResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<OrderDto>>())
 
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
@@ -391,10 +353,10 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteOrder(order_Id: UUID): NetworkCallHandler {
+    suspend fun deleteOrder(orderId: UUID): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/${order_Id}";
-            val result = client.delete(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Order/${orderId}";
+            val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -428,10 +390,10 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getMyOrderItemForStoreId(store_id: UUID,pageNumber:Int): NetworkCallHandler {
+    suspend fun getMyOrderItemForStoreId(storeId: UUID, pageNumber:Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/${store_id}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Order/orderItem/${storeId}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -443,7 +405,7 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
 
-                NetworkCallHandler.Successful(result.body<List<OrderItemResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<OrderItemDto>>())
 
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
@@ -469,8 +431,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun updateOrderItemStatus(id: UUID, status: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Order/orderItem/statsu";
-            val result = client.put(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Order/orderItem/statsu";
+            val result = client.put(fullUrl) {
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -478,7 +440,7 @@ class HomeRepository(val client: HttpClient) {
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
-                setBody(OrderItemUpdateStatusDto(id,status))
+                setBody(UpdateOrderItemStatusDto(id,status))
             }
 
             if (result.status == HttpStatusCode.NoContent) {
@@ -506,8 +468,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product/all/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Product/all/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -517,7 +479,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -538,10 +500,10 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProductByCategoryId(category_id: UUID, pageNumber: Int): NetworkCallHandler {
+    suspend fun getProductByCategoryId(categoryId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product/category/${category_id}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Product/category/${categoryId}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -551,7 +513,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -572,10 +534,10 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProduct(store_id: UUID, pageNumber: Int): NetworkCallHandler {
+    suspend fun getProduct(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product/${store_id}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -585,7 +547,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -606,11 +568,11 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProduct(store_id: UUID, subCatgory: UUID, pageNumber: Int): NetworkCallHandler {
+    suspend fun getProduct(storeId: UUID, subCategory: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url =
-                Secrets.getBaseUrl() + "/Product/${store_id}/${subCatgory}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl =
+                Secrets.getBaseUrl() + "/Product/${storeId}/${subCategory}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -620,7 +582,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
             }else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -645,16 +607,16 @@ class HomeRepository(val client: HttpClient) {
     suspend fun createProduct(
         name: String,
         description: String,
-        thmbnail: File,
-        subcategory_id: UUID,
-        store_id: UUID,
+        thumbnail: File,
+        subcategoryId: UUID,
+        storeId: UUID,
         price: Double,
         productVarients: List<ProductVarientSelection>,
         images: List<File>
     ): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product";
-            val result = client.post(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Product";
+            val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -668,21 +630,21 @@ class HomeRepository(val client: HttpClient) {
                             append("description", description)
                             append(
                                 key = "thmbnail", // Must match backend expectation
-                                value = thmbnail.readBytes(),
+                                value = thumbnail.readBytes(),
                                 headers = Headers.build {
                                     append(
                                         HttpHeaders.ContentType,
-                                        "image/${thmbnail.extension}"
+                                        "image/${thumbnail.extension}"
                                     )
                                     append(
                                         HttpHeaders.ContentDisposition,
-                                        "filename=${thmbnail.name}"
+                                        "filename=${thumbnail.name}"
                                     )
                                 }
                             )
 
-                            append("subcategoryId", subcategory_id.toString())
-                            append("storeId", store_id.toString())
+                            append("subcategoryId", subcategoryId.toString())
+                            append("storeId", storeId.toString())
                             append("price", price)
                             if (productVarients.isNotEmpty())
                                 productVarients.forEachIndexed { it, value ->
@@ -690,7 +652,7 @@ class HomeRepository(val client: HttpClient) {
                                     append("productVarients[${it}].precentage", value.precentage!!)
                                     append(
                                         "productVarients[${it}].varientId",
-                                        value.varient_id.toString()
+                                        value.varientId.toString()
                                     )
                                 }
                             images.forEachIndexed { it, value ->
@@ -717,7 +679,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<ProductResponseDto>())
+                NetworkCallHandler.Successful(result.body<ProductDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -740,20 +702,18 @@ class HomeRepository(val client: HttpClient) {
         id: UUID,
         name: String?,
         description: String?,
-        thmbnail: File?,
-        subcategory_id: UUID?,
-        store_id: UUID,
+        thumbnail: File?,
+        subcategoryId: UUID?,
+        storeId: UUID,
         price: Double?,
         productVarients: List<ProductVarientSelection>?,
         images: List<File>?,
         deletedProductVarients: List<ProductVarientSelection>?,
-        deletedimages: List<String>?
-
-
+        deleteImages: List<String>?
     ): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product";
-            val result = client.put(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Product";
+            val result = client.put(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -768,24 +728,24 @@ class HomeRepository(val client: HttpClient) {
                                 append("name", name)
                             if (description != null)
                                 append("description", description)
-                            if (thmbnail != null)
+                            if (thumbnail != null)
                                 append(
                                     key = "thmbnail", // Must match backend expectation
-                                    value = thmbnail.readBytes(),
+                                    value = thumbnail.readBytes(),
                                     headers = Headers.build {
                                         append(
                                             HttpHeaders.ContentType,
-                                            "image/${thmbnail.extension}"
+                                            "image/${thumbnail.extension}"
                                         )
                                         append(
                                             HttpHeaders.ContentDisposition,
-                                            "filename=${thmbnail.name}"
+                                            "filename=${thumbnail.name}"
                                         )
                                     }
                                 )
-                            if (subcategory_id != null)
-                                append("subcategoryId", subcategory_id.toString())
-                            append("storeId", store_id.toString())
+                            if (subcategoryId != null)
+                                append("subcategoryId", subcategoryId.toString())
+                            append("storeId", storeId.toString())
 
                             if (price != null)
                                 append("price", price)
@@ -796,7 +756,7 @@ class HomeRepository(val client: HttpClient) {
                                     append("productVarients[${it}].precentage", value.precentage!!)
                                     append(
                                         "productVarients[${it}].varientId",
-                                        value.varient_id.toString()
+                                        value.varientId.toString()
                                     )
                                 }
                             if (!deletedProductVarients.isNullOrEmpty())
@@ -808,13 +768,13 @@ class HomeRepository(val client: HttpClient) {
                                     )
                                     append(
                                         "deletedProductVarients[${it}].varientId",
-                                        value.varient_id.toString()
+                                        value.varientId.toString()
                                     )
 
                                 }
 
-                            if (!deletedimages.isNullOrEmpty())
-                                deletedimages.forEachIndexed { it, value ->
+                            if (!deleteImages.isNullOrEmpty())
+                                deleteImages.forEachIndexed { it, value ->
                                     val startIndex = "staticFiles"
                                     val indexAt = value.indexOf("staticFiles")
                                     append(
@@ -851,7 +811,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<ProductResponseDto>())
+                NetworkCallHandler.Successful(result.body<ProductDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -870,10 +830,10 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteProduct(store_id: UUID, product_id: UUID): NetworkCallHandler {
+    suspend fun deleteProduct(storeId: UUID, productId: UUID): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Product/${store_id}/${product_id}";
-            val result = client.delete(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${productId}";
+            val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -907,8 +867,8 @@ class HomeRepository(val client: HttpClient) {
     //store
     suspend fun createStore(
         name: String,
-        wallpaper_image: File,
-        small_image: File,
+        wallpaperImage: File,
+        smallImage: File,
         longitude: Double,
         latitude: Double
     ): NetworkCallHandler {
@@ -930,29 +890,29 @@ class HomeRepository(val client: HttpClient) {
                             append("latitude", longitude)
                             append(
                                 key = "wallpaperImage", // Must match backend expectation
-                                value = wallpaper_image.readBytes(),
+                                value = wallpaperImage.readBytes(),
                                 headers = Headers.build {
                                     append(
                                         HttpHeaders.ContentType,
-                                        "image/${wallpaper_image.extension}"
+                                        "image/${wallpaperImage.extension}"
                                     )
                                     append(
                                         HttpHeaders.ContentDisposition,
-                                        "filename=${wallpaper_image.name}"
+                                        "filename=${wallpaperImage.name}"
                                     )
                                 }
                             )
                             append(
                                 key = "smallImage", // Must match backend expectation
-                                value = small_image.readBytes(),
+                                value = smallImage.readBytes(),
                                 headers = Headers.build {
                                     append(
                                         HttpHeaders.ContentType,
-                                        "image/${small_image.extension}"
+                                        "image/${smallImage.extension}"
                                     )
                                     append(
                                         HttpHeaders.ContentDisposition,
-                                        "filename=${small_image.name}"
+                                        "filename=${smallImage.name}"
                                     )
                                 }
                             )
@@ -962,7 +922,7 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
             if (result.status == HttpStatusCode.Created) {
-                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+                return NetworkCallHandler.Successful(result.body<StoreDto>())
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -982,8 +942,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun updateStore(
         name: String,
-        wallpaper_image: File?,
-        small_image: File?,
+        wallpaperImage: File?,
+        smallImage: File?,
         longitude: Double,
         latitude: Double
     ): NetworkCallHandler {
@@ -1006,33 +966,33 @@ class HomeRepository(val client: HttpClient) {
                                 append("longitude", latitude)
                             if (longitude != 0.0)
                                 append("latitude", longitude)
-                            if (wallpaper_image != null)
+                            if (wallpaperImage != null)
                                 append(
                                     key = "wallpaper_image", // Must match backend expectation
-                                    value = wallpaper_image.readBytes(),
+                                    value = wallpaperImage.readBytes(),
                                     headers = Headers.build {
                                         append(
                                             HttpHeaders.ContentType,
-                                            "image/${wallpaper_image.extension}"
+                                            "image/${wallpaperImage.extension}"
                                         )
                                         append(
                                             HttpHeaders.ContentDisposition,
-                                            "filename=${wallpaper_image.name}"
+                                            "filename=${wallpaperImage.name}"
                                         )
                                     }
                                 )
-                            if (small_image != null)
+                            if (smallImage != null)
                                 append(
                                     key = "small_image", // Must match backend expectation
-                                    value = small_image.readBytes(),
+                                    value = smallImage.readBytes(),
                                     headers = Headers.build {
                                         append(
                                             HttpHeaders.ContentType,
-                                            "image/${small_image.extension}"
+                                            "image/${smallImage.extension}"
                                         )
                                         append(
                                             HttpHeaders.ContentDisposition,
-                                            "filename=${small_image.name}"
+                                            "filename=${smallImage.name}"
                                         )
                                     }
                                 )
@@ -1042,7 +1002,7 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+                return NetworkCallHandler.Successful(result.body<StoreDto>())
             } else {
                 return NetworkCallHandler.Error(result.body())
             }
@@ -1062,8 +1022,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getStoreById(id: UUID): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Store/${id}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Store/${id}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -1073,7 +1033,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<StoreResposeDto>())
+                NetworkCallHandler.Successful(result.body<StoreDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1094,8 +1054,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -1105,7 +1065,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<AddressResponseDto>())
+                NetworkCallHandler.Successful(result.body<AddressDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1125,15 +1085,12 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
-
-
     //subCategory
 
     suspend fun getStoreSubCategory(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory/${id}/${pageNumber}";
-            val result = client.get(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/SubCategory/${id}/${pageNumber}";
+            val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -1143,7 +1100,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<SubCategoryResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<SubCategoryDto>>())
             } else if(result.status == HttpStatusCode.NoContent){
                 NetworkCallHandler.Error("No Data Found")
             } else {
@@ -1165,10 +1122,10 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun createSubCategory(data: SubCategoryRequestDto): NetworkCallHandler {
+    suspend fun createSubCategory(data: CreateSubCategoryDto): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory/new";
-            val result = client.post(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/SubCategory/new";
+            val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -1181,7 +1138,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
+                NetworkCallHandler.Successful(result.body<SubCategoryDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1201,10 +1158,10 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun updateSubCategory(data: SubCategoryUpdateDto): NetworkCallHandler {
+    suspend fun updateSubCategory(data: UpdateSubCategoryDto): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory";
-            val result = client.put(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/SubCategory";
+            val result = client.put(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -1217,7 +1174,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<SubCategoryResponseDto>())
+                NetworkCallHandler.Successful(result.body<SubCategoryDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }
@@ -1239,8 +1196,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun deleteSubCategory(subCategoryID: UUID): NetworkCallHandler {
         return try {
-            val full_url = Secrets.getBaseUrl() + "/SubCategory/${subCategoryID}";
-            val result = client.delete(full_url) {
+            val fullUrl = Secrets.getBaseUrl() + "/SubCategory/${subCategoryID}";
+            val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
@@ -1272,7 +1229,7 @@ class HomeRepository(val client: HttpClient) {
 
 
     //user
-    suspend fun userAddNewAddress(locationData: AddressRequestDto): NetworkCallHandler {
+    suspend fun userAddNewAddress(locationData: CreateAddressDto): NetworkCallHandler {
         return try {
             var result = client.post(
                 Secrets.getBaseUrl() + "/User/address"
@@ -1291,7 +1248,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
+                NetworkCallHandler.Successful(result.body<AddressDto?>())
             } else {
                 NetworkCallHandler.Error(
                     result.body<String>()
@@ -1312,7 +1269,7 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun userUpdateAddress(locationData: AddressRequestUpdateDto): NetworkCallHandler {
+    suspend fun userUpdateAddress(locationData: UpdateAddressDto): NetworkCallHandler {
         return try {
             var result = client.put(
                 Secrets.getBaseUrl() + "/User/address"
@@ -1331,7 +1288,7 @@ class HomeRepository(val client: HttpClient) {
             }
 
             if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<AddressResponseDto?>())
+                NetworkCallHandler.Successful(result.body<AddressDto?>())
             } else {
                 NetworkCallHandler.Error(
                     result.body<String>()
@@ -1535,7 +1492,7 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<VarientResponseDto>>())
+                return NetworkCallHandler.Successful(result.body<List<VarientDto>>())
             } else if (result.status == HttpStatusCode.NoContent){
                 return NetworkCallHandler.Error("No Data Found")
             } else {

@@ -44,7 +44,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -872,7 +871,7 @@ fun CreateProductScreen(
                                 )
                         ) {
                             Text(
-                                varients.value?.firstOrNull { it.id == value.varient_id }?.name
+                                varients.value?.firstOrNull { it.id == value.varientId }?.name
                                     ?: "",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
@@ -1073,7 +1072,7 @@ fun CreateProductScreen(
                     val selectedVarient = ProductVarientSelection(
                         name = prodcutVarientName.value.text,
                         precentage = if (prodcutVarientPrecentage.value.text.isEmpty()) 1.0 else prodcutVarientPrecentage.value.text.toDouble(),
-                        varient_id = selectedVarientId.value!!
+                        varientId = selectedVarientId.value!!
                     )
 
                     var productVarientHolder = mutableListOf<ProductVarientSelection>()

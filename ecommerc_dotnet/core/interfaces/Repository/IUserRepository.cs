@@ -1,0 +1,20 @@
+using ecommerc_dotnet.domain.interfaces;
+using ecommerc_dotnet.module;
+
+namespace ecommerc_dotnet.core.interfaces.Repository;
+
+public interface IUserRepository:IRepository<User>
+{
+      Task<User?> getUser(Guid id);
+      Task<int> getUserCount();
+      Task<User?> getUserByStoreId(Guid id);
+      Task<User?> getUser(string username ,string password);
+      
+      Task<bool> isExist(Guid id);
+      
+      Task<bool> isExist(int role);
+      Task<bool> isExistByPhone(string phone);
+      Task<bool> isExistByEmail(string email);
+      
+      
+}

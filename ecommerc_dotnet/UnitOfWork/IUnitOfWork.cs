@@ -1,4 +1,5 @@
-using ecommerc_dotnet.di.Repository;
+using ecommerc_dotnet.domain.interfaces;
+using ecommerc_dotnet.entity;
 using ecommerc_dotnet.module;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
@@ -7,10 +8,10 @@ namespace ecommerc_dotnet.UnitOfWork;
 public interface IUnitOfWork :IDisposable
 {
     IRepository<Address> AddressRepository { get; }
-    IRepository<Bannel>  BannelRepository { get; }
+    IRepository<Banner>  BannelRepository { get; }
     IRepository<Category> CategoryRepository { get; }
     IRepository<Delivery> DeliveryRepository { get; }
-    IRepository<GeneralSettings> GeneralSettingsRepository { get; }
+    IRepository<GeneralSetting> GeneralSettingsRepository { get; }
     IRepository<Order> OrderRepository { get; }
     IRepository<OrderItem> OrderItemRepository { get; }
     IRepository<OrderProductsVarient> OrderProductsVarientRepository { get; }

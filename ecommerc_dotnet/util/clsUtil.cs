@@ -8,7 +8,7 @@ using hotel_api.Services;
 
 namespace hotel_api.util
 {
-    public enum enImageType
+    public enum EnImageType
     {
         PROFILE,
         PRODUCT,
@@ -24,11 +24,11 @@ namespace hotel_api.util
 
         public static Guid generateGuid()=> Guid.NewGuid();
 
-        public static DateTime generateDateTime(AuthinticationServices.enTokenMode mode)
+        public static DateTime generateDateTime(EnTokenMode mode)
         {
             switch (mode)
             {
-                case AuthinticationServices.enTokenMode.AccessToken:
+                case EnTokenMode.AccessToken:
                 {
                     return DateTime.Now.AddSeconds(40);
                 }
@@ -71,7 +71,7 @@ namespace hotel_api.util
             }
         }
 
-        public static async Task<string?> saveFile(IFormFile file, enImageType type, IWebHostEnvironment host)
+        public static async Task<string?> saveFile(IFormFile file, EnImageType type, IWebHostEnvironment host)
         {
             // string filePath = localPath + type.ToString()+"/";
             string filePath = Path.Combine(host.ContentRootPath, localPath, type.ToString());
@@ -107,7 +107,7 @@ namespace hotel_api.util
         }
 
 
-        public static async Task<List<string>?> saveFile(List<IFormFile> file, enImageType type,
+        public static async Task<List<string>?> saveFile(List<IFormFile> file, EnImageType type,
             IWebHostEnvironment host)
         {
             List<string> images = new List<string>();
