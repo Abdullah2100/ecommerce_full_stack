@@ -9,7 +9,7 @@ namespace ecommerc_dotnet.dto
         public string Image { get; set; }
     }
 
-    public class CreateCategoryto
+    public class CreateCategoryDto
     {
         [StringLength(maximumLength: 50, MinimumLength = 10, ErrorMessage = "Name must not be empty")]
         [Required]

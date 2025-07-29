@@ -13,7 +13,7 @@ namespace hotel_api.Services
         RefreshToken
     }
     
-    public static class AuthinticationServices
+    public static class AuthinticationUtil
     {
         public static string generateToken(
             Guid? userId, string email,

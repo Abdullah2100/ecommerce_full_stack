@@ -7,7 +7,7 @@ using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using hotel_api.util;
 
-namespace ecommerc_dotnet.data;
+namespace ecommerc_dotnet.infrastructure.services;
 
 public class StoreServices : IStoreServices
 {

@@ -162,7 +162,7 @@ public class ProductController : ControllerBase
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -198,7 +198,7 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> getProductsPagess()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -236,7 +236,7 @@ public class ProductController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -313,7 +313,7 @@ public class ProductController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -404,7 +404,7 @@ public class ProductController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;

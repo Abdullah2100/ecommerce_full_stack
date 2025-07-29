@@ -45,7 +45,7 @@ public class GeneralController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
@@ -97,7 +97,7 @@ public class GeneralController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
@@ -152,7 +152,7 @@ public class GeneralController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;

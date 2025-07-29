@@ -134,12 +134,12 @@ public class UserService : IUserServices
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationServices.generateToken(
+        token = AuthinticationUtil.generateToken(
             userId: userId,
             email: signupDto.Email,
             _config);
 
-        refreshToken = AuthinticationServices.generateToken(
+        refreshToken = AuthinticationUtil.generateToken(
             userId: userId,
             email: signupDto.Email,
             _config,
@@ -172,12 +172,12 @@ public class UserService : IUserServices
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationServices.generateToken(
+        token = AuthinticationUtil.generateToken(
             userId: user.Id,
             email: user.Email,
             _config);
 
-        refreshToken = AuthinticationServices.generateToken(
+        refreshToken = AuthinticationUtil.generateToken(
             userId: user.Id,
             email: user.Email,
             _config,
@@ -919,12 +919,12 @@ public class UserService : IUserServices
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationServices.generateToken(
+        token = AuthinticationUtil.generateToken(
             userId: user.Id,
             email: user.Email,
             _config);
 
-        refreshToken = AuthinticationServices.generateToken(
+        refreshToken = AuthinticationUtil.generateToken(
             userId: user.Id,
             email: user.Email,
             _config,

@@ -5,14 +5,12 @@ using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.infrastructure.repositories;
+using ecommerc_dotnet.infrastructure.services;
 using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.module;
 using ecommerc_dotnet.services;
-using ecommerc_dotnet.UnitOfWork;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
-using hotel_api.Services;
 using hotel_api.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -33,10 +31,19 @@ builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IReseatePasswordRepository, ReseatePasswordRepository>();
 builder.Services.AddTransient<IAddressRepository, AddressRepository>();
 builder.Services.AddTransient<IStoreRepository, StoreRepository>();
+builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+builder.Services.AddTransient<ISubCategoryRepository, SubCategoryRepository>();
+builder.Services.AddTransient<IVarientRepository, IVarientRepository>();
+builder.Services.AddTransient<IBannerRepository, BannerRepository>();
 
 //services
 builder.Services.AddTransient<IUserServices, UserService>();
 builder.Services.AddTransient<IStoreServices, StoreServices>();
+builder.Services.AddTransient<ICategoryServices, CategoryServices>();
+builder.Services.AddTransient<ISubCategoryServices, SubCategoryServices>();
+builder.Services.AddTransient<IVarientServices, VarientServices>();
+builder.Services.AddTransient<IBannerSerivces, BannerSerivces>();
+
 
 
 

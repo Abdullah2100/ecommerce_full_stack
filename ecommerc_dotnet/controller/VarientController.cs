@@ -1,87 +1,55 @@
 using System.Security.Claims;
-using ecommerc_dotnet.context;
-using ecommerc_dotnet.data;
+using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.dto.Request;
-using ecommerc_dotnet.mapper;
-using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.module;
-using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
-using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
 
 [Authorize]
 [ApiController]
-[Route("api/Varient")]
+[Route("api/Varients")]
 public class VarientController : ControllerBase
 {
-    public VarientController(
-        AppDbContext appDbContext,
-        IUnitOfWork unitOfWork,
-        IConfig config
-        )
+    public VarientController(IVarientServices varientServices)
     {
-        _userService = new UserService(appDbContext,config,unitOfWork);
-        _varientData = new VarientData(appDbContext,unitOfWork);
+        _varientServices = varientServices;
     }
 
-    private readonly UserService _userService;
-    private readonly VarientData _varientData;
+    private readonly IVarientServices _varientServices;
 
 
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> createVarient([FromBody] CreateVarientDto varient)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? userHolder = await _userService.getUser(idHolder.Value);
-        if (userHolder is null)
+        var result = await _varientServices.createVarient(varient,adminId.Value);
+
+        return result.IsSeccessful switch
         {
-            return NotFound("المستخدم غير موجود");
-        }
-
-        if (userHolder.Role !=  0)
-        {
-            return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
-        }
-
-
-        var isExist = await _varientData.isExist(varient.Name);
-
-        if (isExist)
-            return Conflict("هذا الخيار تم ادخاله سابقا");
-
-
-        VarientDto? result = await _varientData.createVarient(varient.Name);
-
-        if (result is null)
-            return BadRequest("حدثت مشكلة اثناء حفظ الخيار");
-
-        return StatusCode(201, result);
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
     [HttpPut("")]
@@ -93,51 +61,29 @@ public class VarientController : ControllerBase
     public async Task<IActionResult> updateVarient([FromBody] UpdateVarientDto varient)
     {
           StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        if (varient.isEmpty()) return Ok("ليس هناك اي تعديل ");
-        var userHolder = await _userService.getUser(idHolder.Value);
-        if (userHolder is null)
+        var result = await _varientServices.updateVarient(varient,adminId.Value);
+
+        return result.IsSeccessful switch
         {
-            return NotFound("المستخدم غير موجود");
-        }
-
-        if (userHolder.Role !=  0)
-        {
-            return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
-        }
-        
-        var isExistById = await _varientData.isExist((Guid)varient.Id!);
-
-        if (!isExistById)
-            return NotFound("هذا الخيار غير موجود");
-
-        var isExistByName = await _varientData.isExist(varient.Name??"");
-
-        if (isExistByName)
-            return Conflict("هذا الخيار تم ادخاله سابقا");
-
-
-        var result = await _varientData.updateVarient(varient.Name, (Guid)varient.Id!);
-
-        if (result is null)
-            return BadRequest("حدثت مشكلة اثناء  تعديل  الخيار");
-
-        return StatusCode(200, result);
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
-
+    
     [HttpDelete("{varientId:guid}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -146,44 +92,28 @@ public class VarientController : ControllerBase
     public async Task<IActionResult> deleteVarient(Guid varientId)
     {
           StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
     
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var userHolder = await _userService.getUser(idHolder.Value);
-        if (userHolder is null)
+   
+        var result = await _varientServices.deleteVarient(varientId,adminId.Value);
+
+        return result.IsSeccessful switch
         {
-            return NotFound("المستخدم غير موجود");
-        }
-
-        if (userHolder.Role !=  0)
-        {
-            return BadRequest("ليس لديك الصلاحية لانشاء خيار جديد");
-        }
-
-
-        var isExistByID = await _varientData.isExist(varientId);
-
-        if (!isExistByID)
-            return NotFound("هذا الخيار غير موجود");
-
-
-        var result = await _varientData.deleteVarient(varientId);
-
-        if (result == false)
-            return BadRequest("يحتوي هذا الخيار على علاقات مرتبطة به يجب اولا حذف العناصر المرتبطة به اولا قبل حذفه");
-
-        return NoContent();
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        }; 
     }
 
 
@@ -195,20 +125,14 @@ public class VarientController : ControllerBase
     {
         if(pageNumber<1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
-        
-        var result = await _varientData.getVarients(pageNumber);
-        if (result.Count < 1)
-            return NoContent();
-        return Ok(result);
-    }
-   
-    [HttpGet("pages")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getVarients()
-    {
-        var result = await _varientData.getVarients();
-        return Ok(result);
-    }
+        var result = await _varientServices.getVarients(pageNumber,25);
 
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        }; 
+    }
+    
     
 }

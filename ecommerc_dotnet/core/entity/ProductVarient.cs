@@ -1,3 +1,5 @@
+using ecommerc_dotnet.core.entity;
+
 namespace ecommerc_dotnet.module;
 
 public class ProductVarient

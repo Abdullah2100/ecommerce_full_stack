@@ -1,17 +1,8 @@
 using System.Security.Claims;
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.services;
-using ecommerc_dotnet.data;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.dto.Request;
-using ecommerc_dotnet.dto.Response;
-using ecommerc_dotnet.mapper;
-using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.module;
 using ecommerc_dotnet.services;
-using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
-using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -46,7 +37,7 @@ public class StoreController : ControllerBase
         [FromForm] CreateStoreDto store)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? userId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -79,7 +70,7 @@ public class StoreController : ControllerBase
         [FromForm] UpdateStoreDto store)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -114,7 +105,7 @@ public class StoreController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -153,7 +144,7 @@ public class StoreController : ControllerBase
     public async Task<IActionResult> getStore()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -199,7 +190,7 @@ public class StoreController : ControllerBase
     public async Task<IActionResult> getStorePages()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -229,7 +220,7 @@ public class StoreController : ControllerBase
     public async Task<IActionResult> getStores(int page = 1)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;

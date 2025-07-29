@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ecommerc_dotnet.core.entity;
 
 namespace ecommerc_dotnet.module;
 

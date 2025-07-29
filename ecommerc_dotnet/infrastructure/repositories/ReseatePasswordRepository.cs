@@ -66,7 +66,8 @@ public class ReseatePasswordRepository:IReseatePasswordRepository
         }
         return await _context.ReseatPasswords
             .AsNoTracking()
-            .AnyAsync(f => f.Otp == otp);
+            .AnyAsync(u =>
+                (u.Otp == otp) && (u.CreatedAt.AddHours(1).Microsecond > DateTime.Now.Microsecond));
 
     }
     

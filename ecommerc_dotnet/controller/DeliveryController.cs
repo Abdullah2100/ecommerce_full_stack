@@ -69,12 +69,12 @@ public class DeliveryController : ControllerBase
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationServices.generateToken(
+        token = AuthinticationUtil.generateToken(
             userId: delivery.Id,
             email: result.Email,
             _config);
 
-        refreshToken = AuthinticationServices.generateToken(
+        refreshToken = AuthinticationUtil.generateToken(
             userId: delivery.Id,
             email: result.Email,
             _config,
@@ -96,7 +96,7 @@ public class DeliveryController : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
@@ -159,7 +159,7 @@ public class DeliveryController : ControllerBase
     public async Task<IActionResult> getDeivery()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -191,7 +191,7 @@ public class DeliveryController : ControllerBase
     public async Task<IActionResult> updateDeliveryStatus(bool status)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -241,7 +241,7 @@ public class DeliveryController : ControllerBase
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
@@ -282,7 +282,7 @@ public class DeliveryController : ControllerBase
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
@@ -317,7 +317,7 @@ public class DeliveryController : ControllerBase
     public async Task<IActionResult> updateOrderDeliveryId(Guid orderId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -379,7 +379,7 @@ public class DeliveryController : ControllerBase
     public async Task<IActionResult> cencleOrderBelongToDelivery(Guid orderId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationServices.GetPayloadFromToken("id",
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? idHolder = null;
         if (Guid.TryParse(id?.Value, out Guid outId))

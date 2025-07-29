@@ -1,13 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.module;
+namespace ecommerc_dotnet.core.entity;
 
 public class Category
 {
     [Key]
     public Guid Id { get; set; }
-    public string Name { get; set; }
+
+    public string Name { get; set; } 
     public Guid  OwnerId { get; set; }
     public bool IsBlocked { get; set; }=false;
     

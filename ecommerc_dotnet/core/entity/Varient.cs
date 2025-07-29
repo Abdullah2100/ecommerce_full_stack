@@ -1,4 +1,6 @@
-namespace ecommerc_dotnet.module;
+using ecommerc_dotnet.module;
+
+namespace ecommerc_dotnet.core.entity;
 
 public class Varient
 {
