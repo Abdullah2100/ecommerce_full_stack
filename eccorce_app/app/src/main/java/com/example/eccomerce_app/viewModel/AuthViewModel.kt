@@ -4,15 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.Dto.AuthResultDto
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.data.Room.AuthDao
 import com.example.e_commercompose.data.Room.AuthModleEntity
 import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
 import com.example.eccomerce_app.dto.LoginDto
 import com.example.e_commercompose.data.repository.AuthRepository
-import com.example.e_commercompose.dto.request.SignupDto
 import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.dto.SignupDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineExceptionHandler

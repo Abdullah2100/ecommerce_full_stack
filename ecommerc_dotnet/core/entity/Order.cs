@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.module;
+namespace ecommerc_dotnet.core.entity;
 
 public class Order
 {

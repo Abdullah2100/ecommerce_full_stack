@@ -1,8 +1,7 @@
+using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.dto.Request;
-using ecommerc_dotnet.entity;
-using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.mapper;
+namespace ecommerc_dotnet.shared.extentions;
 
 public static class GeneralSettingMapperExtention
 {
@@ -13,5 +12,11 @@ public static class GeneralSettingMapperExtention
             Name = generalSetting.Name,
             Value = generalSetting.Value,
         };
+    }
+    
+    public static bool isEmpty(this UpdateGeneralSettingDto generalSetting)
+    {
+        return string.IsNullOrEmpty(generalSetting.Name?.Trim()) &&
+               generalSetting.Value != null;
     }
 }

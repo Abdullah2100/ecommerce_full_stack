@@ -7,6 +7,12 @@ namespace ecommerc_dotnet.dto.Request
         public string Name { get; set; }
         public decimal Value { get; set; }
     }
+    public class UpdateGeneralSettingDto
+    {
+        public string? Name { get; set; } = null;
+        public decimal? Value { get; set; } = null;
+    }
+
 
     public class CreateGeneralSettingDto
     {

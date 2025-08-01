@@ -1,16 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.context;
-using ecommerc_dotnet.data;
+using ecommerc_dotnet.core.entity;
+using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
-using ecommerc_dotnet.services;
-using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
-using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Primitives;
 
 namespace ecommerc_dotnet.controller;
@@ -20,29 +15,17 @@ namespace ecommerc_dotnet.controller;
 [Route("api/Delivery")]
 public class DeliveryController : ControllerBase
 {
-    public DeliveryController(AppDbContext context,
-        IWebHostEnvironment host,
-        IConfig config,
-        IHubContext<EcommerceHub> hubContext,
-        IUnitOfWork unitOfWork
-    )
+    public DeliveryController(
+        IDeliveryServices deliveryServices,
+        IOrderServices orderServices
+        )
     {
-        _userService = new UserService(context, config, unitOfWork);
-        _orderData = new OrderData(context, config, unitOfWork);
-
-        _deliveryData = new DeliveryData(context, config, unitOfWork);
-        _host = host;
-        _config = config;
-        _hubContext = hubContext;
+        _deliveryServices = deliveryServices;
+        _orderServices = orderServices;
     }
 
-    private readonly IHubContext<EcommerceHub> _hubContext;
-
-    private readonly UserService _userService;
-    private readonly OrderData _orderData;
-    private readonly DeliveryData _deliveryData;
-    private readonly IWebHostEnvironment _host;
-    private readonly IConfig _config;
+    private readonly IDeliveryServices _deliveryServices;
+    private readonly IOrderServices _orderServices;
 
 
     [AllowAnonymous]
@@ -50,38 +33,15 @@ public class DeliveryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> signIn([FromBody] LoginDto data)
+    public async Task<IActionResult> login([FromBody] LoginDto data)
     {
-        UserInfoDto? result = await _userService.getUser(data.Username, clsUtil.hashingText(data.Password));
+        var result = await _deliveryServices.login(data);
 
-        if (result is null)
-            return BadRequest("المستخدم غير موجود");
-
-        DeliveryDto? delivery = await _deliveryData.getInfoByUserId(result.Id);
-        if (delivery is null)
-            return BadRequest("الموصل غير موجود");
-
-
-        var updateDeviceTokenResult = await _deliveryData.updateDeviceToken(result.Id, data.DeviceToken);
-
-        if (updateDeviceTokenResult == false)
-            return BadRequest("لا بد من تسجيل الدخول باستخدام هاتف");
-
-        string token = "", refreshToken = "";
-
-        token = AuthinticationUtil.generateToken(
-            userId: delivery.Id,
-            email: result.Email,
-            _config);
-
-        refreshToken = AuthinticationUtil.generateToken(
-            userId: delivery.Id,
-            email: result.Email,
-            _config,
-            EnTokenMode.RefreshToken);
-
-        return StatusCode(200
-            , new { token = token, refreshToken = refreshToken });
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
@@ -99,56 +59,26 @@ public class DeliveryController : ControllerBase
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            adminId = outId;
         }
 
-        if (idHolder is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        User? user = await _userService.getUser(idHolder.Value);
+        var result = await _deliveryServices.createDelivery(
+            adminId.Value,
+            delivery);
 
-        if (user is null)
-            return NotFound("المستخدم غير موجود");
-
-        if (user.Role == 1)
-            return NotFound("ليس لديك الصلاحية لإكمال العملية");
-
-        bool isExist = await _deliveryData.isExistById(delivery.UserId);
-
-        if (isExist)
-            return BadRequest("المستخدم بالفعل مرتبط بموصل");
-
-        string? deliveryThumnail = null;
-        if (delivery.Thumbnail is not null)
+        return result.IsSeccessful switch
         {
-            deliveryThumnail = await clsUtil.saveFile(delivery.Thumbnail, EnImageType.DELIVERY, _host);
-        }
-
-        bool? result = await _deliveryData.createDelivery(
-            userId: delivery.UserId,
-            deviceToken: delivery.DeviceToken,
-            thumbnail: deliveryThumnail,
-            longitude: delivery.Longitude,
-            latitude: delivery.Latitude
-        );
-
-
-        if (result is null)
-        {
-            if (delivery.Thumbnail is not null)
-            {
-                clsUtil.deleteFile(deliveryThumnail ?? "", _host);
-            }
-
-            return BadRequest("حدثة مشكلة اثناء اضافة الموصل");
-        }
-
-        return Created();
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
     }
 
 
@@ -161,26 +91,54 @@ public class DeliveryController : ControllerBase
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
+        var result = await _deliveryServices.getDelivery(userId.Value);
 
-        DeliveryDto? delivery = await _deliveryData.getInfoById(idHolder.Value);
-
-        if (delivery is null)
+        return result.IsSeccessful switch
         {
-            return BadRequest("الموصل غير موجود");
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
+        
+    }
+
+
+    [HttpGet("all/{pageNumber:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getDeivery(int pageNumber)
+    {
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? adminId = null;
+        if (Guid.TryParse(id?.Value, out Guid outId))
+        {
+            adminId = outId;
         }
 
+        if (adminId is null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+        var result = await _deliveryServices.getDeliveries(adminId.Value,pageNumber,25);
 
-        return StatusCode(200, delivery);
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
+        
     }
 
 
@@ -193,37 +151,25 @@ public class DeliveryController : ControllerBase
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            userId = outId;
         }
 
-        if (idHolder is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
 
-        DeliveryDto? delivery = await _deliveryData.getInfoById(idHolder.Value);
+        var result = await _deliveryServices.updateDeliveryStatus(userId.Value,status);
 
-        if (delivery is null)
+        return result.IsSeccessful switch
         {
-            return BadRequest("الموصل غير موجود");
-        }
-
-        bool isUpdated = await _deliveryData.updateStatus(
-            id: delivery.Id,
-            isAviable: status
-        );
-
-        if (isUpdated == false)
-        {
-            return BadRequest("حدثة مشكلة اثناء تحديث حالة الموصل");
-        }
-
-
-        return NoContent();
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        }; 
     }
 
 
@@ -244,27 +190,25 @@ public class DeliveryController : ControllerBase
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outId;
+            deliveryId = outId;
         }
 
-        if (idHolder is null)
+        if (deliveryId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        bool isDeliveryMan = await _deliveryData.isExistById(idHolder.Value);
+        var result = await _orderServices
+            .getOrdersNotBelongToDeliveries(deliveryId.Value,pageNumber,25);
 
-        if (isDeliveryMan == false)
-            return NotFound("الموصل غير موجو");
-
-
-        var result = await _orderData.getOrdersNotBelongToDeliveries(pageNumber, 25);
-        if (result is null || result.Count < 1)
-            return NoContent();
-        return StatusCode(200, result);
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };   
     }
 
 
@@ -285,27 +229,25 @@ public class DeliveryController : ControllerBase
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? idHolder = null;
+        Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
-            idHolder = outId;
+            deliveryId = outId;
         }
 
-        if (idHolder is null)
+        if (deliveryId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        bool isDeliveryMan = await _deliveryData.isExistById(idHolder.Value);
+        var result = await _orderServices.getOrdersbyDeliveryId(
+            deliveryId.Value,pageNumber,25);
 
-        if (isDeliveryMan == false)
-            return NotFound("الموصل غير موجو");
-
-
-        var result = await _orderData.getOrdersBelongToDeliveries(idHolder.Value, pageNumber, 25);
-        if (result is null || result.Count < 1)
-            return NoContent();
-        return StatusCode(200, result);
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };   
     }
 
 
@@ -319,55 +261,24 @@ public class DeliveryController : ControllerBase
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
+        Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            deliveryId = outId;
         }
 
-        if (idHolder is null)
+        if (deliveryId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        DeliveryDto? delivery = await _deliveryData.getInfoById(idHolder.Value);
+        var result = await _orderServices.submitOrderToDelivery(orderId,deliveryId.Value);
 
-        if (delivery is null)
+        return result.IsSeccessful switch
         {
-            return NotFound("الموصل غير موجود");
-        }
-
-        Order? order = await _orderData.getOrderById(orderId);
-
-        if (order is null)
-        {
-            return NotFound("الطلب غير موجود");
-        }
-
-        if (order.DeleveryId is not null)
-        {
-            return BadRequest("تم اخذ الطلب من قبل موصل اخر");
-        }
-
-        bool? isUpdated = await _orderData.submitOrderToDeliveryId(
-            orderId: orderId,
-            deliveryId: idHolder.Value
-        );
-
-        if (isUpdated is null)
-        {
-            return BadRequest("حدثة مشكلة اثناء اضافة التطلب الى الموصل");
-        }
-
-        OrderTakedByEvent eventHolder = new OrderTakedByEvent
-        {
-            Id = order.Id,
-            DeliveryId = idHolder.Value
-        };
-        await _hubContext.Clients.All.SendAsync("orderGettingByDelivery", eventHolder);
-
-
-        return NoContent();
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };  
     }
 
 
@@ -381,55 +292,22 @@ public class DeliveryController : ControllerBase
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? idHolder = null;
+        Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            idHolder = outId;
+            deliveryId = outId;
         }
 
-        if (idHolder is null)
+        if (deliveryId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
+        var result = await _orderServices.cancelOrderFromDelivery(orderId,deliveryId.Value);
 
-        DeliveryDto? delivery = await _deliveryData.getInfoById(idHolder.Value);
-
-        if (delivery is null)
+        return result.IsSeccessful switch
         {
-            return NotFound("الموصل غير موجود");
-        }
-
-        bool? isExistOrder = await _orderData.isExist(orderId);
-        if (isExistOrder is null)
-        {
-            return NotFound("الطلب غير موجود");
-        }
-
-        bool? isOrderCanCelcle = await _orderData.isOrderCanCencled(orderId);
-
-        if (isOrderCanCelcle is null || isOrderCanCelcle == true)
-        {
-            return BadRequest("لا يمكن  الغاء هذا الطلب بسبب ان  عنصر تم استلامه بالفعل من الموصل");
-        }
-
-        bool? isUpdated = await _orderData.removeDeliveryFromCurrentOrder(
-            orderId: orderId);
-
-        if (isUpdated is null)
-        {
-            // return BadRequest("حدثة مشكلة اثناء تحديث حالة الموصل");
-            return BadRequest("حدثة مشكلة اثناء ازالة  التطلب من الموصل");
-        }
-
-        OrderDto? order = await _orderData.getOrder(orderId);
-
-        if (order is null)
-        {
-            return BadRequest("الطلب غير موجود");
-        }
-
-        await _hubContext.Clients.All.SendAsync("createdOrder", order);
-
-        return NoContent();
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        }; 
     }
 }

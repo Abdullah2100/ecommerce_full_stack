@@ -81,14 +81,16 @@ public class CategoryServices : ICategoryServices
                 statusCode: 400
             );
         Guid categoryId = clsUtil.generateGuid();
-        int result = await _categoryRepository.addAsync(new Category
+
+        Category category = new Category
         {
             Id = categoryId,
             Name = categoryDto.Name,
             Image = imagePath,
             IsBlocked = false,
             OwnerId = user.Id
-        });
+        };
+        int result = await _categoryRepository.addAsync(category);
 
         if (result == 0)
         {
@@ -101,11 +103,10 @@ public class CategoryServices : ICategoryServices
             );
         }
 
-        Category? category = await _categoryRepository.getCategory(categoryId);
         return new Result<CategoryDto?>
         (
             data: category?.toDto(_config.getKey("url_file")),
-            message: "error while adding category",
+            message: "",
             isSeccessful: true,
             statusCode: 201
         );
@@ -203,7 +204,7 @@ public class CategoryServices : ICategoryServices
         return new Result<CategoryDto?>
         (
             data: category.toDto(_config.getKey("url_file")),
-            message: "error while update category",
+            message: "",
             isSeccessful: true,
             statusCode: 200
         );
@@ -275,7 +276,7 @@ public class CategoryServices : ICategoryServices
         return new Result<List<CategoryDto>>
         (
             data: categories,
-            message: "error while update category",
+            message: "",
             isSeccessful: true,
             statusCode: 200
         );

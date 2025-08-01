@@ -58,6 +58,7 @@ import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.CustomTitleBotton
 import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.dto.CreateAddressDto
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -85,7 +86,7 @@ fun LocationHomeScreen(
     val locationTitle = remember { mutableStateOf(TextFieldValue()) }
 
 
-    val locationHolder = remember { mutableStateOf<AddressRequestDto?>(null) }
+    val locationHolder = remember { mutableStateOf<CreateAddressDto?>(null) }
 
     val isPressAddNewAddress = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -107,10 +108,10 @@ fun LocationHomeScreen(
                             data?.let {
                                     location->
 
-                               locationHolder.value = AddressRequestDto(
-                                   longitude = location.longitude,
-                                   latitude = location.latitude,
-                                   title = "home")
+                               locationHolder.value = CreateAddressDto(
+                                   Longitude = location.longitude,
+                                   Latitude = location.latitude,
+                                   Title = "home")
                             }
                         homeViewModle.initialFun()
 
@@ -156,8 +157,8 @@ fun LocationHomeScreen(
                                        isPressAddNewAddress.value=false
                                        var result = async {
                                            homeViewModle.addUserAddress(
-                                               longit = locationHolder.value?.longitude,
-                                               latit = locationHolder.value?.latitude,
+                                               longit = locationHolder.value?.Longitude,
+                                               latit = locationHolder.value?.Latitude,
                                                title = "home")
                                        }.await()
 

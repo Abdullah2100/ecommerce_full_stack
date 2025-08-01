@@ -1,5 +1,4 @@
 using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.entity;
 using ecommerc_dotnet.module;
 using Microsoft.EntityFrameworkCore;
 

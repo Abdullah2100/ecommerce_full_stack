@@ -35,6 +35,8 @@ builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddTransient<IVarientRepository, IVarientRepository>();
 builder.Services.AddTransient<IBannerRepository, BannerRepository>();
+builder.Services.AddTransient<IGeneralSettingRepository,GeneralSettingRepository>();
+builder.Services.AddTransient<IDeliveryRepository,DeliveryRepository>();
 
 //services
 builder.Services.AddTransient<IUserServices, UserService>();
@@ -43,6 +45,8 @@ builder.Services.AddTransient<ICategoryServices, CategoryServices>();
 builder.Services.AddTransient<ISubCategoryServices, SubCategoryServices>();
 builder.Services.AddTransient<IVarientServices, VarientServices>();
 builder.Services.AddTransient<IBannerSerivces, BannerSerivces>();
+builder.Services.AddTransient<IGeneralSettingServices, GeneralSettingServices>();
+builder.Services.AddTransient<IDeliveryServices, DeliveryServices>();
 
 
 

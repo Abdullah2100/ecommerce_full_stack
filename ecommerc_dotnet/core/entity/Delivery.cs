@@ -1,13 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.module;
+namespace ecommerc_dotnet.core.entity;
 
 public class Delivery
 {
     [Key] public Guid Id { get; set; }
     public Guid UserId { get; set; }
-    public string deviceToken { get; set; }
+    public string DeviceToken { get; set; }
 
     public bool IsAvaliable { get; set; } = true;
 

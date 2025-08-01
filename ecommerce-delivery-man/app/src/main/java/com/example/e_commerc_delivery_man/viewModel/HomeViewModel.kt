@@ -23,7 +23,6 @@ import com.example.eccomerce_app.model.Order
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -36,13 +35,11 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.provider.ContactsContract
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 class HomeViewModel(
     val homeRepository: HomeRepository,

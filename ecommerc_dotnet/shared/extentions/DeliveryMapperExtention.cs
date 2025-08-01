@@ -1,3 +1,4 @@
+using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.module;
 using ecommerc_dotnet.shared.extentions;

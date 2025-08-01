@@ -1772,16 +1772,3 @@ class HomeViewModel(
 
 }
 
-fun main() {
-    var job = CoroutineScope(Dispatchers.IO).launch {
-
-        try {
-
-        }catch (e: Exception){
-            print("this exption ${e.message}")
-        }
-    }
-
-   job
-
-}

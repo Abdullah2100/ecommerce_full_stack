@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ecommerc_dotnet.entity;
+namespace ecommerc_dotnet.core.entity;
 
 public class GeneralSetting
 {
