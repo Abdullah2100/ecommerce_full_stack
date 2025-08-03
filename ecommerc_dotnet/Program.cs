@@ -37,6 +37,8 @@ builder.Services.AddTransient<IVarientRepository, IVarientRepository>();
 builder.Services.AddTransient<IBannerRepository, BannerRepository>();
 builder.Services.AddTransient<IGeneralSettingRepository,GeneralSettingRepository>();
 builder.Services.AddTransient<IDeliveryRepository,DeliveryRepository>();
+builder.Services.AddTransient<IProductRepository,ProductRepository>();
+builder.Services.AddTransient<IOrderRepository,OrderRepository>();
 
 //services
 builder.Services.AddTransient<IUserServices, UserService>();
@@ -47,6 +49,8 @@ builder.Services.AddTransient<IVarientServices, VarientServices>();
 builder.Services.AddTransient<IBannerSerivces, BannerSerivces>();
 builder.Services.AddTransient<IGeneralSettingServices, GeneralSettingServices>();
 builder.Services.AddTransient<IDeliveryServices, DeliveryServices>();
+builder.Services.AddTransient<IProductServices,ProductServices>();
+builder.Services.AddTransient<IOrderServices,OrderServices>();
 
 
 
