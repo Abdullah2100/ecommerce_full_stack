@@ -14,20 +14,19 @@ namespace ecommerc_dotnet.dto
 
     public class CreateAddressDto
     {
-        [MinLength(2,ErrorMessage= "Longitude must not be empty")]
-        [Required] 
-        public decimal Longitude { get; set; }
-        
-        [MinLength(2,ErrorMessage= "Latitude must not be empty")]
-        [Required] public decimal Latitude { get; set; }
+        [Required]
+        public decimal Longitude { get; set; } = 0;
 
-        [StringLength(maximumLength: 100, MinimumLength = 5, ErrorMessage = "address title must not be empty")]
-        public string Title { get; set; }
+        [Required]
+        public decimal Latitude { get; set; } = 0;
+
+        [StringLength(maximumLength: 100, MinimumLength = 3, ErrorMessage = "address title must not be empty")]
+        public string Title { get; set; } = string.Empty;
     }
 
     public class UpdateAddressDto
     {
-        [Required] public Guid Id { get; set; }
+        [Required] public Guid Id { get; set; } = Guid.Empty;
         public decimal? Longitude { get; set; } = null;
         public decimal? Latitude { get; set; } = null;
         

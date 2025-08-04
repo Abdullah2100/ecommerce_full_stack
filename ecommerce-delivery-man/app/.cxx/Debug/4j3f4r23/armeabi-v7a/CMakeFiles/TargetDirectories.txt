@@ -1,3 +1,0 @@
-/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/4j3f4r23/armeabi-v7a/CMakeFiles/keys.dir
-/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/4j3f4r23/armeabi-v7a/CMakeFiles/edit_cache.dir
-/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/4j3f4r23/armeabi-v7a/CMakeFiles/rebuild_cache.dir

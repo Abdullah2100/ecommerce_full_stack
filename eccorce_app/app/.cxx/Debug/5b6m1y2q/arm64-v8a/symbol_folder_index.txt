@@ -1,1 +1,0 @@
-/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/build/intermediates/cxx/Debug/5b6m1y2q/obj/arm64-v8a

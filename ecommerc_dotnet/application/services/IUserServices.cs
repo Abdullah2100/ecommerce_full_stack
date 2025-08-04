@@ -14,9 +14,7 @@ public interface IUserServices
     public Task<Result<List<UserInfoDto>?>> getUsers(int page, Guid id);
 
     public Task<Result<bool>> blockOrUnBlockUser(Guid id,Guid userId);
-
-    public Task<Result<int>> getUserCount(Guid id);
-
+    
     public Task<Result<UserInfoDto?>> updateUser(UpdateUserInfoDto userDto, Guid id);
 
     public Task<Result<AddressDto?>> addAddressToUser(CreateAddressDto addressDto, Guid id);

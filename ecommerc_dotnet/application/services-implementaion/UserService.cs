@@ -1,3 +1,4 @@
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.core.Result;
@@ -39,6 +40,54 @@ public class UserService : IUserServices
         _passwordRepository = passwordRepository;
     }
 
+
+    private static Result<AuthDto?>? isValideFunc(User? user, bool isAdmin = true)
+    {
+        if (user is null)
+        {
+            return new Result<AuthDto?>
+            (
+                data: null,
+                message: "user not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        switch (!isAdmin)
+        {
+            case true:
+            {
+                if (user.IsBlocked)
+                {
+                    return new Result<AuthDto?>
+                    (
+                        data: null,
+                        message: "user is blocked",
+                        isSeccessful: false,
+                        statusCode: 404
+                    );
+                }
+
+                return null;
+            }
+            default:
+            {
+                if (user.Role == 1)
+                {
+                    return new Result<AuthDto?>
+                    (
+                        data: null,
+                        message: "user not havs the permission",
+                        isSeccessful: false,
+                        statusCode: 400
+                    );
+                }
+
+                return null;
+            }
+        }
+    }
 
     public async Task<Result<AuthDto?>> signup(SignupDto signupDto)
     {
@@ -159,16 +208,18 @@ public class UserService : IUserServices
             .getUser(loginDto.Username,
                 clsUtil.hashingText(loginDto.Password)
             );
-        if (user is null)
+
+        var isValide = isValideFunc(user, false);
+        if (isValide is not null)
         {
-            return new Result<AuthDto?>
-            (
-                data: null,
-                message: "user not found",
+            return new Result<AuthDto?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
+
 
         string token = "", refreshToken = "";
 
@@ -196,20 +247,22 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        if (user is null)
+
+        var isValide = isValideFunc(user, false);
+
+        if (isValide is not null)
         {
-            return new Result<UserInfoDto?>
-            (
-                data: null,
-                message: "user not found",
+            return new Result<UserInfoDto?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
         return new Result<UserInfoDto?>(
             isSeccessful: true,
-            data: user.toUserInfoDto(_config.getKey("url_file")),
+            data: user!.toUserInfoDto(_config.getKey("url_file")),
             message: "",
             statusCode: 200
         );
@@ -222,42 +275,30 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        if (user is null)
+
+        var isValide = isValideFunc(user);
+
+        if (isValide is not null)
         {
-            return new Result<List<UserInfoDto>?>
-            (
-                data: null,
-                message: "user not found",
+            return new Result<List<UserInfoDto>?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
-        if (user.Role == 1)
-        {
-            return new Result<List<UserInfoDto>?>
-            (
-                data: null,
-                message: "you not have the permission",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
-
-        var users = await _userRepository
-            .getAllAsync(page, 25);
-
-        List<UserInfoDto>? usersInfo = users?
+        List<UserInfoDto> users = (await _userRepository
+                .getAllAsync(page, 25))
             .Select(u => u.toUserInfoDto(_config.getKey("url_file")))
             .ToList();
 
         return new Result<List<UserInfoDto>?>
         (
-            data: usersInfo ?? new List<UserInfoDto>(),
-            message: "you not have the permission",
-            isSeccessful: false,
-            statusCode: 400
+            data: users,
+            message: "",
+            isSeccessful: true,
+            statusCode: 200
         );
     }
 
@@ -265,42 +306,35 @@ public class UserService : IUserServices
     {
         User? admin = await _userRepository
             .getUser(id);
-        if (admin is null)
-        {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
 
-        if (admin.Role == 1)
+        var isValideAdmin = isValideFunc(admin);
+
+        if (isValideAdmin is not null)
         {
-            return new Result<bool>
-            (
-                data: false,
-                message: "you not have the permission",
+            return new Result<bool>(
                 isSeccessful: false,
-                statusCode: 400
+                data: false,
+                message: isValideAdmin.Message,
+                statusCode: isValideAdmin.StatusCode
             );
         }
 
         User? user = await _userRepository.getUser(userId);
 
-        if (user is null)
+        isValideAdmin = isValideFunc(user);
+
+        //this to handle if user that admin want to block is not admin
+        if (isValideAdmin?.StatusCode == 404 || isValideAdmin == null)
         {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user thant want to blocked not found",
+            return new Result<bool>(
                 isSeccessful: false,
-                statusCode: 404
+                data: false,
+                message: $"unable to {(user?.IsBlocked == true ? "block" : "unblock")}  user",
+                statusCode: isValideAdmin?.StatusCode ?? 400
             );
         }
 
-        user.IsBlocked = !user.IsBlocked;
+        user!.IsBlocked = !user.IsBlocked;
         int result = await _userRepository.updateAsync(user);
 
         if (result == 0)
@@ -323,44 +357,6 @@ public class UserService : IUserServices
         );
     }
 
-    public async Task<Result<int>> getUserCount(Guid id)
-    {
-        User? user = await _userRepository
-            .getUser(id);
-        if (user is null)
-        {
-            return new Result<int>
-            (
-                data: 0,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        if (user.Role == 1)
-        {
-            return new Result<int>
-            (
-                data: 0,
-                message: "you not have the permission",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
-        user.IsBlocked = !user.IsBlocked;
-        int result = await _userRepository.getUserCount();
-
-
-        return new Result<int>
-        (
-            data: result,
-            message: "",
-            isSeccessful: true,
-            statusCode: 200
-        );
-    }
 
     public async Task<Result<UserInfoDto?>> updateUser(
         UpdateUserInfoDto userDto,
@@ -374,41 +370,37 @@ public class UserService : IUserServices
                 isSeccessful: false,
                 statusCode: 200
             );
-        
-      
+
 
         User? user = await _userRepository.getUser(id);
-        if (user is null)
-            return new Result<UserInfoDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
 
-        if (id != user.Id)
+        var isValide = isValideFunc(user, false);
+
+        if (isValide is not null)
         {
-            return new Result<UserInfoDto?>
-            (
-                data: null,
-                message: "only own user data can change her data ",
+            return new Result<UserInfoDto?>(
                 isSeccessful: false,
-                statusCode: 400
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
-        bool isExistPhone = await _userRepository.isExistByPhone(userDto.Phone ?? "");
 
-        if (isExistPhone)
+        if (userDto.Phone is not null && user?.Phone != userDto.Phone)
         {
-            return new Result<UserInfoDto?>
-            (
-                data: null,
-                message: "phone already exist",
-                isSeccessful: false,
-                statusCode: 400
-            );
+            bool isExistPhone = await _userRepository.isExistByPhone(userDto.Phone ?? "");
+
+            if (isExistPhone)
+            {
+                return new Result<UserInfoDto?>
+                (
+                    data: null,
+                    message: "phone already exist",
+                    isSeccessful: false,
+                    statusCode: 400
+                );
+            }
         }
 
         string? hashedPassword =
@@ -470,25 +462,15 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        if (user is null)
-        {
-            return new Result<AddressDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+        var isValide = isValideFunc(user, false);
 
-        if (user.IsBlocked)
+        if (isValide is not null)
         {
-            return new Result<AddressDto?>
-            (
-                data: null,
-                message: "user is blocked",
+            return new Result<AddressDto?>(
                 isSeccessful: false,
-                statusCode: 400
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
@@ -511,8 +493,13 @@ public class UserService : IUserServices
             Longitude = addressDto.Longitude,
             Latitude = addressDto.Latitude,
             Title = addressDto.Title,
-            OwnerId = user.Id
+            OwnerId = user!.Id,
         };
+
+        if (addressCount == 0)
+        {
+            address.IsCurrent =  true;
+        }
 
         int result = await _addressRepository.addAsync(address);
 
@@ -541,19 +528,6 @@ public class UserService : IUserServices
         UpdateAddressDto addressDto,
         Guid id)
     {
-        User? user = await _userRepository
-            .getUser(id);
-        if (user is null)
-        {
-            return new Result<AddressDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
         if (addressDto.isEmpty())
             return new Result<AddressDto?>
             (
@@ -562,6 +536,34 @@ public class UserService : IUserServices
                 isSeccessful: true,
                 statusCode: 200
             );
+
+        User? user = await _userRepository
+            .getUser(id);
+        var isValide = isValideFunc(user, false);
+
+        if (isValide is not null)
+        {
+            return new Result<AddressDto?>(
+                isSeccessful: false,
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
+            );
+        }
+
+        if (
+            (addressDto.Longitude is null && addressDto.Latitude is not null) ||
+            (addressDto.Longitude is not null && addressDto.Latitude is null)
+        )
+        {
+            return new Result<AddressDto?>(
+                isSeccessful: false,
+                data: null,
+                message: "when update address you must change both longitude and latitude not one of them only ",
+                statusCode: 400
+            );
+        }
+
 
         Address? address = await _addressRepository.getAddress(addressDto.Id);
 
@@ -618,16 +620,17 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        if (user is null)
+        var isValide = isValideFunc(user, false);
+
+        if (isValide is not null)
         {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user not found",
+            return new Result<bool>(
                 isSeccessful: false,
-                statusCode: 404
+                data: false,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        }
+        } 
 
         Address? address = await _addressRepository.getAddress(addressId);
 
@@ -648,6 +651,17 @@ public class UserService : IUserServices
             (
                 data: false,
                 message: "address not owned",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+        
+        if (address.IsCurrent)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "could not delete current address",
                 isSeccessful: false,
                 statusCode: 400
             );
@@ -671,7 +685,7 @@ public class UserService : IUserServices
             data: true,
             message: "",
             isSeccessful: true,
-            statusCode:204 
+            statusCode: 204
         );
     }
 
@@ -680,16 +694,17 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        if (user is null)
+        var isValide = isValideFunc(user, false);
+
+        if (isValide is not null)
         {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user not found",
+            return new Result<bool>(
                 isSeccessful: false,
-                statusCode: 404
+                data: false,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        }
+        }  
 
         Address? address = await _addressRepository.getAddress(addressId);
 
@@ -714,8 +729,19 @@ public class UserService : IUserServices
                 statusCode: 400
             );
         }
+        
+        if (address.IsCurrent)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "address is already current address",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
 
-        int result = await _addressRepository.updateCurrentLocation(addressId, user.Id);
+        int result = await _addressRepository.updateCurrentLocation(addressId, user!.Id);
 
         if (result == 0)
         {

@@ -1,3 +1,0 @@
-/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/keys.dir
-/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/edit_cache.dir
-/home/abdullah/Desktop/ecommerce_full_stack/ecommerce-delivery-man/app/.cxx/Debug/5b6m1y2q/x86_64/CMakeFiles/rebuild_cache.dir

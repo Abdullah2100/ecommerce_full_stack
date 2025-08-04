@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/.cxx/Debug/5b6m1y2q/x86_64",
-  "command": "/home/abdullah/Android/Sdk/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=x86_64-none-linux-android24 --sysroot=/home/abdullah/Android/Sdk/ndk/28.0.13004108/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Dkeys_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -o CMakeFiles/keys.dir/keys.cpp.o -c /home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/src/main/jni/keys.cpp",
-  "file": "/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/src/main/jni/keys.cpp",
-  "output": "CMakeFiles/keys.dir/keys.cpp.o"
-}
-]

@@ -10,19 +10,17 @@ namespace ecommerc_dotnet.dto
 
     public class SignupDto
     {
-        [StringLength(maximumLength: 50, MinimumLength = 10, ErrorMessage = "Name must not be empty")]
+        [StringLength(maximumLength: 50, ErrorMessage = "Name must not be empty")]
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [StringLength(maximumLength: 13, MinimumLength = 9, ErrorMessage = "phone must between  9 and 13 characters")]
         [Required]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = string.Empty;
 
-        [Required]
-        public string Email { get; set; }
+        [Required] public string Email { get; set; } = string.Empty;
 
-        [Required]
-        public string Password { get; set; }
+        [Required] public string Password { get; set; } = string.Empty;
 
         public string? DeviceToken { get; set; } = null;
         public int? Role { get; set; } = 1;
@@ -31,14 +29,13 @@ namespace ecommerc_dotnet.dto
 
     public class LoginDto
     {
-        [StringLength(maximumLength:50, MinimumLength = 10, ErrorMessage = "username must not be empty")]
+        [StringLength(maximumLength: 50,  ErrorMessage = "username must not be empty")]
         [Required]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
-        [Required]
-        public string Password { get; set; }
+        [Required] public string Password { get; set; } = string.Empty;
 
-        public string DeviceToken { get; set; }
+        public string? DeviceToken { get; set; } = null;
     }
 
     public class ForgetPasswordDto
@@ -52,17 +49,12 @@ namespace ecommerc_dotnet.dto
         public string Email { get; set; }
         public string Otp { get; set; }
     }
-    
-    
-    public class CreateReseatePasswordDto 
+
+
+    public class CreateReseatePasswordDto
     {
-        [Required]
-        public string Email { get; set; }
-        [Required]
-        public string Otp { get; set; }
-        [Required]
-        public string Password { get; set; }
+        [Required] public string Email { get; set; }
+        [Required] public string Otp { get; set; }
+        [Required] public string Password { get; set; }
     }
-   
-    
 }

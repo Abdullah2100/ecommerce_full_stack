@@ -16,7 +16,7 @@ public class EcommerceHub : Hub
         await Clients.All.SendAsync("createdOrder", order);
     }
     
-    public async Task sendingNewOrder(Guid bannerId)
+    public async Task sendDeletedBannerEvent(Guid bannerId)
     {
         await Clients.All.SendAsync("deletedOrder", bannerId);
     }

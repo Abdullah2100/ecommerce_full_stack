@@ -1,3 +1,4 @@
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.mapper;
@@ -22,13 +23,13 @@ public class UserRepository : IUserRepository
             .Users
             .Include(u => u.Store)
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Store != null && u.Store.Id == id);
+            .FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return null;
 
         user.Addresses = await _dbContext
             .Address
             .AsNoTracking()
-            .Where(u => u.Id == id)
+            .Where(u => u.OwnerId == id)
             .ToListAsync();
 
         return user;
@@ -46,7 +47,7 @@ public class UserRepository : IUserRepository
         user.Addresses = await _dbContext
             .Address
             .AsNoTracking()
-            .Where(u => u.Id == user.Id)
+            .Where(u => u.OwnerId == user.Id)
             .ToListAsync();
 
         return user;
@@ -82,7 +83,7 @@ public class UserRepository : IUserRepository
         user.Addresses = await _dbContext
             .Address
             .AsNoTracking()
-            .Where(u => u.Id == id)
+            .Where(u => u.OwnerId == id)
             .ToListAsync();
 
         return user;
@@ -94,13 +95,14 @@ public class UserRepository : IUserRepository
             .Users
             .Include(u => u.Store)
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Name == username && u.Password == password);
+            .FirstOrDefaultAsync(u => (u.Name == username||u.Email==username) && u.Password == password);
+       
         if (user == null) return null;
 
         user.Addresses = await _dbContext
             .Address
             .AsNoTracking()
-            .Where(u => u.Id == user.Id)
+            .Where(u => u.OwnerId == user.Id)
             .ToListAsync();
 
         return user;
@@ -152,7 +154,7 @@ public class UserRepository : IUserRepository
             user.Addresses = await _dbContext
                 .Address
                 .AsNoTracking()
-                .Where(u => u.Id == user.Id)
+                .Where(u => u.OwnerId == user.Id)
                 .ToListAsync();
         }
 
@@ -167,7 +169,7 @@ public class UserRepository : IUserRepository
 
     public async Task<int> updateAsync(User entity)
     {
-        await _dbContext.Users.AddAsync(entity);
+         _dbContext.Users.Update(entity);
         return await _dbContext.SaveChangesAsync();
     }
 

@@ -1,7 +1,7 @@
 using ecommerc_dotnet.domain.interfaces;
 using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.core.interfaces.Repository;
+namespace ecommerc_dotnet.application.Repository;
 
 public interface IUserRepository:IRepository<User>
 {

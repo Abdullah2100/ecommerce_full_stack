@@ -1,4 +1,5 @@
 using System.Text;
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
@@ -33,7 +34,7 @@ builder.Services.AddTransient<IAddressRepository, AddressRepository>();
 builder.Services.AddTransient<IStoreRepository, StoreRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<ISubCategoryRepository, SubCategoryRepository>();
-builder.Services.AddTransient<IVarientRepository, IVarientRepository>();
+builder.Services.AddTransient<IVarientRepository, VarientRepository>();
 builder.Services.AddTransient<IBannerRepository, BannerRepository>();
 builder.Services.AddTransient<IGeneralSettingRepository,GeneralSettingRepository>();
 builder.Services.AddTransient<IDeliveryRepository,DeliveryRepository>();
@@ -49,7 +50,7 @@ builder.Services.AddTransient<IVarientServices, VarientServices>();
 builder.Services.AddTransient<IBannerSerivces, BannerSerivces>();
 builder.Services.AddTransient<IGeneralSettingServices, GeneralSettingServices>();
 builder.Services.AddTransient<IDeliveryServices, DeliveryServices>();
-builder.Services.AddTransient<IProductServices,ProductServices>();
+builder.Services.AddTransient<IProductSerivces,ProductServices>();
 builder.Services.AddTransient<IOrderServices,OrderServices>();
 
 

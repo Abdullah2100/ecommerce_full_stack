@@ -1,1 +1,0 @@
-/home/abdullah/Desktop/ecommerce_full_stack/eccorce_app/app/src/main/jni/CMakeLists.txt

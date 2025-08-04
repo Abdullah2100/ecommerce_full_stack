@@ -1,15 +1,7 @@
 using System.Security.Claims;
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.services;
-using ecommerc_dotnet.data;
-using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.mapper;
-using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.module;
-using ecommerc_dotnet.UnitOfWork;
 using hotel_api.Services;
-using hotel_api.util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -60,8 +52,9 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpGet("")]
+    [HttpGet("me")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getUser()
     {
@@ -99,18 +92,18 @@ public class UserController : ControllerBase
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? userId = null;
+        Guid? adminId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            userId = outId;
+            adminId = outId;
         }
 
-        if (userId is null)
+        if (adminId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.getUsers(page, userId.Value);
+        var result = await _userServices.getUsers(page, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -152,40 +145,7 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpGet("pages")]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getUsersPagesSize()
-    {
-        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
-            authorizationHeader.ToString().Replace("Bearer ", ""));
-
-        Guid? adminId = null;
-        if (Guid.TryParse(id?.Value, out Guid outId))
-        {
-            adminId = outId;
-        }
-
-        if (adminId is null)
-        {
-            return Unauthorized("هناك مشكلة في التحقق");
-        }
-
-        var result = await _userServices.getUserCount(adminId.Value);
-
-        return result.IsSeccessful switch
-        {
-            true => StatusCode(result
-                    .StatusCode,
-                Convert
-                    .ToInt32(Math.Ceiling((double)result.Data / 24))),
-            _ => StatusCode(result.StatusCode, result.Message)
-        };
-    }
-
-
+ 
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -329,7 +289,7 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpPost("address/active{addressId:guid}")]
+    [HttpPatch("address/active/{addressId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -364,6 +324,8 @@ public class UserController : ControllerBase
     }
 
 
+    
+    
     [AllowAnonymous]
     [HttpPost("generateOtp")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

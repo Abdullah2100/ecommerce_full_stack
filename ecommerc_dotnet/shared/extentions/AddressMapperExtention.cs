@@ -12,7 +12,8 @@ public static class AddressMapperExtention
             Id = address.Id,
             Latitude = address.Latitude,
             Longitude = address.Longitude,
-            Title = address.Title
+            Title = address.Title,
+            IsCurrent = address.IsCurrent
         };
     }
     
