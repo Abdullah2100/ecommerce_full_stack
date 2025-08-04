@@ -7,6 +7,7 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.shared.extentions;
 using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
@@ -35,26 +36,17 @@ public class CategoryServices : ICategoryServices
     {
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
-        {
-            return new Result<CategoryDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
 
-        if (user.Role != 0)
+        var isValid = user.isValideFunc(true);
+        if (isValid is not null)
         {
-            return new Result<CategoryDto?>
-            (
-                data: null,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
+                return new Result<CategoryDto?>
+                (
+                    data: null,
+                    message: isValid.Message,
+                    isSeccessful: false,
+                    statusCode: isValid.StatusCode 
+                );
         }
 
         if (await _categoryRepository.isExist(categoryDto.Name))
@@ -89,7 +81,7 @@ public class CategoryServices : ICategoryServices
             Name = categoryDto.Name,
             Image = imagePath,
             IsBlocked = false,
-            OwnerId = user.Id
+            OwnerId = user!.Id
         };
         int result = await _categoryRepository.addAsync(category);
 
@@ -127,30 +119,19 @@ public class CategoryServices : ICategoryServices
         User? user = await _userRepository
             .getUser(adminId);
         
-        if (user is null)
+        var isValid = user.isValideFunc(true);
+        if (isValid is not null)
         {
             return new Result<CategoryDto?>
             (
                 data: null,
-                message: "user not found",
+                message: isValid.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: isValid.StatusCode 
             );
-        }
-
-        if (user.Role != 0)
-        {
-            return new Result<CategoryDto?>
-            (
-                data: null,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
+        } 
         if (categoryDto.Name is not null)
-            if (await _categoryRepository.isExist(categoryDto.Name))
+            if (await _categoryRepository.isExist(categoryDto.Name,categoryDto.Id))
             {
                 return new Result<CategoryDto?>
                 (
@@ -186,7 +167,7 @@ public class CategoryServices : ICategoryServices
                     _host);
         }
 
-        category.Name = categoryDto.Name ?? category.Name;
+        category.Name = categoryDto?.Name ?? category.Name;
         category.Image = image ?? category.Image;
         category.UpdatedAt = DateTime.Now;
         int result = await _categoryRepository.updateAsync(category);
@@ -215,28 +196,17 @@ public class CategoryServices : ICategoryServices
     {
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
+        var isValid = user.isValideFunc(true);
+        if (isValid is not null)
         {
             return new Result<bool>
             (
                 data: false,
-                message: "user not found",
+                message: isValid.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: isValid.StatusCode 
             );
-        }
-
-        if (user.Role != 0)
-        {
-            return new Result<bool>
-            (
-                data: false,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
+        }  
         if (!(await _categoryRepository.isExist(categoryId)))
         {
             return new Result<bool>

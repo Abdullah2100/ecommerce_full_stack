@@ -19,8 +19,8 @@ public class CategoryController : ControllerBase
     }
 
     private readonly ICategoryServices _categoryServices;
-  
-  [HttpPost("")]
+
+    [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -41,7 +41,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _categoryServices.createCategory(category,adminId.Value);
+        var result = await _categoryServices.createCategory(category, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -50,7 +50,7 @@ public class CategoryController : ControllerBase
         };
     }
 
- 
+
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -72,7 +72,8 @@ public class CategoryController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _categoryServices.updateCategory(category,adminId.Value);
+
+        var result = await _categoryServices.updateCategory(category, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -103,7 +104,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _categoryServices.deleteCategory(categoryId,adminId.Value);
+        var result = await _categoryServices.deleteCategory(categoryId, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -122,17 +123,12 @@ public class CategoryController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        var result = await _categoryServices.getCategories(pageNumber,25);
+        var result = await _categoryServices.getCategories(pageNumber, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
-    } 
-
-
- 
-
- 
+        };
+    }
 }

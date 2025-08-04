@@ -41,54 +41,7 @@ public class UserService : IUserServices
     }
 
 
-    private static Result<AuthDto?>? isValideFunc(User? user, bool isAdmin = true)
-    {
-        if (user is null)
-        {
-            return new Result<AuthDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        switch (!isAdmin)
-        {
-            case true:
-            {
-                if (user.IsBlocked)
-                {
-                    return new Result<AuthDto?>
-                    (
-                        data: null,
-                        message: "user is blocked",
-                        isSeccessful: false,
-                        statusCode: 404
-                    );
-                }
-
-                return null;
-            }
-            default:
-            {
-                if (user.Role == 1)
-                {
-                    return new Result<AuthDto?>
-                    (
-                        data: null,
-                        message: "user not havs the permission",
-                        isSeccessful: false,
-                        statusCode: 400
-                    );
-                }
-
-                return null;
-            }
-        }
-    }
-
+  
     public async Task<Result<AuthDto?>> signup(SignupDto signupDto)
     {
         if (signupDto.Role != 0 && signupDto.Role != 1)
@@ -209,7 +162,7 @@ public class UserService : IUserServices
                 clsUtil.hashingText(loginDto.Password)
             );
 
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
         if (isValide is not null)
         {
             return new Result<AuthDto?>(
@@ -247,9 +200,8 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-
-        var isValide = isValideFunc(user, false);
-
+        
+        var isValide = user.isValideFunc(false);
         if (isValide is not null)
         {
             return new Result<UserInfoDto?>(
@@ -276,8 +228,7 @@ public class UserService : IUserServices
         User? user = await _userRepository
             .getUser(id);
 
-        var isValide = isValideFunc(user);
-
+        var isValide = user.isValideFunc(false);
         if (isValide is not null)
         {
             return new Result<List<UserInfoDto>?>(
@@ -307,8 +258,7 @@ public class UserService : IUserServices
         User? admin = await _userRepository
             .getUser(id);
 
-        var isValideAdmin = isValideFunc(admin);
-
+        var isValideAdmin = admin.isValideFunc();
         if (isValideAdmin is not null)
         {
             return new Result<bool>(
@@ -321,7 +271,7 @@ public class UserService : IUserServices
 
         User? user = await _userRepository.getUser(userId);
 
-        isValideAdmin = isValideFunc(user);
+        isValideAdmin = user.isValideFunc();
 
         //this to handle if user that admin want to block is not admin
         if (isValideAdmin?.StatusCode == 404 || isValideAdmin == null)
@@ -374,7 +324,7 @@ public class UserService : IUserServices
 
         User? user = await _userRepository.getUser(id);
 
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
 
         if (isValide is not null)
         {
@@ -462,7 +412,7 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
 
         if (isValide is not null)
         {
@@ -539,7 +489,7 @@ public class UserService : IUserServices
 
         User? user = await _userRepository
             .getUser(id);
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
 
         if (isValide is not null)
         {
@@ -620,7 +570,7 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
 
         if (isValide is not null)
         {
@@ -694,7 +644,7 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
 
         if (isValide is not null)
         {
@@ -769,7 +719,7 @@ public class UserService : IUserServices
         User? user = await _userRepository
             .getUser(forgetPasswordDto.Email);
         
-        var isValide = isValideFunc(user, false);
+        var isValide = user.isValideFunc(false);
 
         if (isValide is not null)
         {
@@ -919,7 +869,7 @@ public class UserService : IUserServices
 
         User? user = await _userRepository.getUser(otp.Email);
         
-        var isValide = isValideFunc(user);
+        var isValide = user.isValideFunc();
         if (isValide is not null)
         {
             return new Result<AuthDto?>(

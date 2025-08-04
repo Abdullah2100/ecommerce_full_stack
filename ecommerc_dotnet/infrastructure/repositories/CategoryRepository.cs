@@ -1,3 +1,4 @@
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
@@ -40,7 +41,7 @@ public class CategoryRepository:ICategoryRepository
     public async Task<int> deleteAsync(Guid id)
     {
         await _context.Categories.Where(ca => ca.Id == id).ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        return 1;
     }
 
     public async Task<Category?> getCategory(Guid id)
@@ -62,5 +63,13 @@ public class CategoryRepository:ICategoryRepository
             .Categories
             .AsNoTracking()
             .AnyAsync(e => e.Name == name);
+    }
+
+    public async Task<bool> isExist(string name,Guid id)
+    {
+        return await _context
+            .Categories
+            .AsNoTracking()
+            .AnyAsync(e => e.Name == name && e.Id != id);
     }
 }

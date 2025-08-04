@@ -1,10 +1,11 @@
+using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.module;
 
 namespace ecommerc_dotnet.shared.extentions;
 
-public static class UserInfoMapperExtention 
+public static class UserMapperExtention 
 {
     public static UserInfoDto toUserInfoDto(this User user,string url)
     {
@@ -45,4 +46,53 @@ public static class UserInfoMapperExtention
                string.IsNullOrWhiteSpace(dto.NewPassword)
             ;
     }
+    
+    public static Result<AuthDto?>? isValideFunc(this User? user, bool isAdmin = true)
+    {
+        if (user is null)
+        {
+            return new Result<AuthDto?>
+            (
+                data: null,
+                message: "user not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        switch (!isAdmin)
+        {
+            case true:
+            {
+                if (user.IsBlocked)
+                {
+                    return new Result<AuthDto?>
+                    (
+                        data: null,
+                        message: "user is blocked",
+                        isSeccessful: false,
+                        statusCode: 404
+                    );
+                }
+
+                return null;
+            }
+            default:
+            {
+                if (user.Role == 1)
+                {
+                    return new Result<AuthDto?>
+                    (
+                        data: null,
+                        message: "user not havs the permission",
+                        isSeccessful: false,
+                        statusCode: 400
+                    );
+                }
+
+                return null;
+            }
+        }
+    }
+
 }

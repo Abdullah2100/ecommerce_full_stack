@@ -40,21 +40,24 @@ namespace ecommerc_dotnet.dto
 
     public class ForgetPasswordDto
     {
-        public string Email { get; set; }
+        [Required]
+        public string Email { get; set; }=string.Empty;
     }
 
 
     public class CreateVerificationDto
     {
-        public string Email { get; set; }
-        public string Otp { get; set; }
+        [Required]
+        public string Email { get; set; }=String.Empty;
+        [Required]
+        public string Otp { get; set; }=String.Empty;
     }
 
 
     public class CreateReseatePasswordDto
     {
-        [Required] public string Email { get; set; }
-        [Required] public string Otp { get; set; }
-        [Required] public string Password { get; set; }
+        [Required] public string Email { get; set; }=string.Empty;
+        [Required] public string Otp { get; set; } = string.Empty;
+        [Required] public string Password { get; set; }=string.Empty;
     }
 }
