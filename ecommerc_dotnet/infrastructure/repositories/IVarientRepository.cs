@@ -11,4 +11,5 @@ public interface IVarientRepository:IRepository<Varient>
 
  Task<bool> isExist(Guid id);
  Task<bool> isExist(string name);
+ Task<bool> isExist(string name,Guid id);
 }

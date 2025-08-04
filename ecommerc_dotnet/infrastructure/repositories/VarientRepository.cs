@@ -41,7 +41,7 @@ public class VarientRepository : IVarientRepository
             .Varients
             .Where(i => i.Id == id)
             .ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        return 1;
     }
 
     public async Task<Varient?> getVarient(Guid id)
@@ -73,5 +73,13 @@ public class VarientRepository : IVarientRepository
             .Varients
             .AsNoTracking()
             .AnyAsync(i => i.Name == name); 
+    }
+
+    public async Task<bool> isExist(string name, Guid id)
+    {
+        return await _context
+            .Varients
+            .AsNoTracking()
+            .AnyAsync(i => i.Name == name && i.Id != id); 
     }
 }

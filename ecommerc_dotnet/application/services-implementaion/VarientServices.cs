@@ -7,6 +7,7 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.shared.extentions;
 using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
@@ -32,28 +33,18 @@ public class VarientServices : IVarientServices
     {
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
+        
+        var isValid = user.isValideFunc(true);
+        if (isValid is not null)
         {
             return new Result<VarientDto?>
             (
                 data: null,
-                message: "user not found",
+                message: isValid.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: isValid.StatusCode 
             );
-        }
-
-        if (user.Role != 0)
-        {
-            return new Result<VarientDto?>
-            (
-                data: null,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
+        }   
         if (await _varientRepository.isExist(varientDto.Name))
         {
             return new Result<VarientDto?>
@@ -67,14 +58,13 @@ public class VarientServices : IVarientServices
 
         Guid id = clsUtil.generateGuid();
 
-        int result = await _varientRepository
-            .addAsync(
-                new Varient
-                {
-                    Id = id,
-                    Name = varientDto.Name
-                }
-            );
+        Varient? varient = new Varient
+        {
+            Id = id,
+            Name = varientDto.Name
+        };
+        
+        int result = await _varientRepository.addAsync(varient);
 
         if (result == 0)
         {
@@ -87,7 +77,6 @@ public class VarientServices : IVarientServices
             );
         }
 
-        Varient? varient = await _varientRepository.getVarient(id);
         return new Result<VarientDto?>
         (
             data: varient?.toDto(),
@@ -108,35 +97,25 @@ public class VarientServices : IVarientServices
                 data: null,
                 message: "",
                 isSeccessful: true,
-                statusCode: 201
+                statusCode: 200
             );
 
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
+        var isValid = user.isValideFunc(true);
+        if (isValid is not null)
         {
             return new Result<VarientDto?>
             (
                 data: null,
-                message: "user not found",
+                message: isValid.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: isValid.StatusCode 
             );
-        }
-
-        if (user.Role != 0)
-        {
-            return new Result<VarientDto?>
-            (
-                data: null,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
+        }    
 
         if (varientDto.Name is not null)
-            if (await _varientRepository.isExist(varientDto.Name))
+            if (await _varientRepository.isExist(varientDto.Name,varientDto.Id))
             {
                 return new Result<VarientDto?>
                 (
@@ -191,27 +170,17 @@ public class VarientServices : IVarientServices
 
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
+        var isValid = user.isValideFunc(true);
+        if (isValid is not null)
         {
             return new Result<bool>
             (
                 data: false,
-                message: "user not found",
+                message: isValid.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: isValid.StatusCode 
             );
-        }
-
-        if (user.Role != 0)
-        {
-            return new Result<bool>
-            (
-                data: false,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
+        }     
 
         
 
