@@ -41,7 +41,7 @@ public class UserRepository : IUserRepository
             .Users
             .Include(u => u.Store)
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Store != null && u.Email == email);
+            .FirstOrDefaultAsync(u =>  u.Email == email);
         if (user == null) return null;
 
         user.Addresses = await _dbContext

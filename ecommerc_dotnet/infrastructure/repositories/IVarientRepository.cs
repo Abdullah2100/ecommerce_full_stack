@@ -1,5 +1,5 @@
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.interfaces;
 using ecommerc_dotnet.module;
 
 namespace ecommerc_dotnet.infrastructure.repositories;

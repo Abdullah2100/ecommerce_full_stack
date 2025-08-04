@@ -1,4 +1,3 @@
-using ecommerc_dotnet.domain.interfaces;
 using ecommerc_dotnet.module;
 
 namespace ecommerc_dotnet.application.Repository;

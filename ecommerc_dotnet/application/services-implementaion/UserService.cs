@@ -766,21 +766,23 @@ public class UserService : IUserServices
 
     public async Task<Result<bool>> generateOtp(ForgetPasswordDto forgetPasswordDto)
     {
-        bool isExistUser = await _userRepository
-            .isExistByEmail(forgetPasswordDto.Email);
-        if (!isExistUser)
+        User? user = await _userRepository
+            .getUser(forgetPasswordDto.Email);
+        
+        var isValide = isValideFunc(user, false);
+
+        if (isValide is not null)
         {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user not found",
+            return new Result<bool>(
                 isSeccessful: false,
-                statusCode: 404
+                data: false,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        }
+        }   
 
         string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-        bool isOtpExist = await _passwordRepository.isExist(otp);
+        bool isOtpExist = await _passwordRepository.isExist(otp,user!.Email);
         bool isExist = isOtpExist;
 
         if (isExist)
@@ -788,7 +790,7 @@ public class UserService : IUserServices
             do
             {
                 otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                isOtpExist = await _passwordRepository.isExist(otp);
+                isOtpExist = await _passwordRepository.isExist(otp,user!.Email);
             } while (isOtpExist);
         }
 
@@ -796,7 +798,7 @@ public class UserService : IUserServices
             new ReseatePasswordOtp
             {
                 Email = forgetPasswordDto.Email,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.Now.AddHours(1),
                 Id = clsUtil.generateGuid(),
                 Otp = otp
             }
@@ -901,7 +903,7 @@ public class UserService : IUserServices
             );
         }
 
-        ReseatePasswordOtp? otpResult = await _passwordRepository.getOtp(otp.Otp, otp.Email);
+        ReseatePasswordOtp? otpResult = await _passwordRepository.getOtp(otp.Otp, otp.Email,true);
 
 
         if (otpResult is null)
@@ -916,17 +918,17 @@ public class UserService : IUserServices
         }
 
         User? user = await _userRepository.getUser(otp.Email);
-
-        if (user is null)
+        
+        var isValide = isValideFunc(user);
+        if (isValide is not null)
         {
-            return new Result<AuthDto?>
-            (
-                data: null,
-                message: "user not found",
+            return new Result<AuthDto?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        }
+        }   
 
         user.Password = clsUtil.hashingText(otp.Password);
 
