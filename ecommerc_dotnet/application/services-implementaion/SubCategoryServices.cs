@@ -17,16 +17,19 @@ public class SubCategoryServices:ISubCategoryServices
     private readonly IUserRepository  _userRepository;
     private readonly IStoreRepository _storeRepository;
     private readonly ISubCategoryRepository _subCategoryRepository;
+    private readonly ICategoryRepository _categoryRepository;
 
     public SubCategoryServices(
         IUserRepository userRepository,
         IStoreRepository storeRepository,
-        ISubCategoryRepository subCategoryRepository
+        ISubCategoryRepository subCategoryRepository,
+        ICategoryRepository categoryRepository
     )
     {
         _userRepository = userRepository;
         _storeRepository = storeRepository;
         _subCategoryRepository = subCategoryRepository;
+        _categoryRepository = categoryRepository;
     }
     public async Task<Result<SubCategoryDto?>> createSubCategory(
         Guid userId,
@@ -112,54 +115,23 @@ public class SubCategoryServices:ISubCategoryServices
         
         User? user = await _userRepository
             .getUser(userId);
-        if (user is null)
-        {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        if (user.IsBlocked)
-        {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "user is blocked",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
         
-        if (user.Store is null)
-        {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "user not has store",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+        var isValide = user.isValidateFunc(isStore:true);
 
-        if (user.Store.IsBlock)
+        if (isValide is not null)
         {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "contact admin to remove the block from you account ",
+            return new Result<SubCategoryDto?>(
                 isSeccessful: false,
-                statusCode: 400
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        } 
+        }    
         
         SubCategory? subCategory = await _subCategoryRepository
-            .getSubCategory(subCategoryDto.id);
+            .getSubCategory(subCategoryDto.Id);
         
-        if (subCategory is null || subCategory.StoreId != user.Store.Id)
+        if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
         {
             return new Result<SubCategoryDto?>
             (
@@ -168,9 +140,23 @@ public class SubCategoryServices:ISubCategoryServices
                 isSeccessful: false,
                 statusCode: 404
             );
-        } 
+        }
+
+        if (subCategoryDto.CategoryId is not null &&
+            !(await _categoryRepository.isExist((Guid)subCategoryDto!.CategoryId))
+           )
+        {
+            return new Result<SubCategoryDto?>
+            (
+                data: null,
+                message: "invalide category",
+                isSeccessful: false,
+                statusCode: 404
+            ); 
+        }
         
         subCategory.Name = subCategoryDto.Name??subCategory.Name;
+        subCategory.CategoryId = subCategoryDto.CategoryId??subCategory.CategoryId;
         subCategory.UpdatedAt = DateTime.Now;
         int result =  await _subCategoryRepository.updateAsync(subCategory);
         if (result == 0)
@@ -199,54 +185,23 @@ public class SubCategoryServices:ISubCategoryServices
         
         User? user = await _userRepository
             .getUser(userId);
-        if (user is null)
-        {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        if (user.IsBlocked)
-        {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user is blocked",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
         
-        if (user.Store is null)
-        {
-            return new Result<bool>
-            (
-                data: false,
-                message: "user not has store",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+        var isValide = user.isValidateFunc(isStore:true);
 
-        if (user.Store.IsBlock)
+        if (isValide is not null)
         {
-            return new Result<bool>
-            (
-                data: false,
-                message: "contact admin to remove the block from you account ",
+            return new Result<bool>(
                 isSeccessful: false,
-                statusCode: 400
+                data: false,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        } 
+        }     
         
         SubCategory? subCategory = await _subCategoryRepository
             .getSubCategory(id);
         
-        if (subCategory is null || subCategory.StoreId != user.Store.Id)
+        if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
         {
             return new Result<bool>
             (
@@ -299,28 +254,19 @@ public class SubCategoryServices:ISubCategoryServices
     {
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
-        {
-            return new Result<List<SubCategoryDto>>
-            (
-                data: new List<SubCategoryDto>(),
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+       var isValide = user.isValidateFunc(isAdmin:true);
 
-        if (user.Role!=0 )
+        if (isValide is not null)
         {
-         
-            return new Result<List<SubCategoryDto>>
-            (
-                data: new List<SubCategoryDto>(),
-                message: "not authorized to get banners",
+            return new Result<List<SubCategoryDto>>(
                 isSeccessful: false,
-                statusCode: 400
+                data: new List<SubCategoryDto>(),
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        }
+        }     
+        
+        
         List<SubCategoryDto> subcategories = (await _subCategoryRepository
                 .getAllAsync(page:page, length:length))
             .Select(ba => ba.toDto())

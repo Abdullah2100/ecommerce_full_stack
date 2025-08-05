@@ -24,7 +24,7 @@ public class SubCategoryController : ControllerBase
 
     private readonly ISubCategoryServices _subCategoryServices;
 
-    [HttpPost()]
+    [HttpPost]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -126,7 +126,7 @@ public class SubCategoryController : ControllerBase
     }
 
     
-    [HttpGet("all/{storeId}/{page:int}")]
+    [HttpGet("all/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getSubCategory(int page)

@@ -93,6 +93,6 @@ public class SubCategoryRepository: ISubCategoryRepository
     {
         await _context.SubCategories.Where(su => su.Id == id)
             .ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        return 1;
     }
 }

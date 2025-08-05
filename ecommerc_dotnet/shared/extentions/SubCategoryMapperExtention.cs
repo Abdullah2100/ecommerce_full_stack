@@ -27,6 +27,6 @@ public static class SubCategoryMapperExtensions
             throw new ArgumentNullException(nameof(dto));
 
         return string.IsNullOrWhiteSpace(dto.Name) &&
-               dto.CateogyId == null;
+               dto.CategoryId == null;
     }
 }

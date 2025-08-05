@@ -23,11 +23,11 @@ public class CreateSubCategoryDto
 
 public class UpdateSubCategoryDto
 {
-    [Required]   public Guid id { get; set; }
+    [Required]   public Guid Id { get; set; }
     
     [StringLength(maximumLength:50,ErrorMessage= "name must not  be empty")]
     public string? Name { get; set; } = null;
-    public Guid? CateogyId { get; set; } = null;
+    public Guid? CategoryId { get; set; } = null;
    
 }
 
