@@ -37,7 +37,7 @@ public class CategoryServices : ICategoryServices
         User? user = await _userRepository
             .getUser(adminId);
 
-        var isValid = user.isValideFunc(true);
+        var isValid = user.isValidateFunc(true);
         if (isValid is not null)
         {
                 return new Result<CategoryDto?>
@@ -119,7 +119,7 @@ public class CategoryServices : ICategoryServices
         User? user = await _userRepository
             .getUser(adminId);
         
-        var isValid = user.isValideFunc(true);
+        var isValid = user.isValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<CategoryDto?>
@@ -196,7 +196,7 @@ public class CategoryServices : ICategoryServices
     {
         User? user = await _userRepository
             .getUser(adminId);
-        var isValid = user.isValideFunc(true);
+        var isValid = user.isValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<bool>

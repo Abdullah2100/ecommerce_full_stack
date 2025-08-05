@@ -1,4 +1,5 @@
 using ecommerc_dotnet.application.Repository;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
@@ -34,49 +35,19 @@ public class SubCategoryServices:ISubCategoryServices
     {
         User? user = await _userRepository
             .getUser(userId);
-        if (user is null)
-        {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        if (user.IsBlocked)
-        {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "user is blocked",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
         
-        if (user.Store is null)
-        {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "user not has store",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+        var isValide = user.isValidateFunc(isStore:true);
 
-        if (user.Store.IsBlock)
+        if (isValide is not null)
         {
-            return new Result<SubCategoryDto?>
-            (
-                data: null,
-                message: "contact admin to remove the block from you account ",
+            return new Result<SubCategoryDto?>(
                 isSeccessful: false,
-                statusCode: 400
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
-        }
+        }   
+ 
 
         int count = await _subCategoryRepository.getSubCategoriesCount(user.Store.Id);
         
@@ -95,7 +66,7 @@ public class SubCategoryServices:ISubCategoryServices
         SubCategory subCategory = new SubCategory
         {
             Id = id,
-            CategoryId = id,
+            CategoryId = subCategoryDto.CategoryId,
             StoreId = user.Store.Id,
             Name = subCategoryDto.Name,
             UpdatedAt = null,
@@ -304,7 +275,7 @@ public class SubCategoryServices:ISubCategoryServices
         );
     }
 
-    public  async Task<Result<List<SubCategoryDto>>> getSubCategory(Guid id, int page, int length)
+    public  async Task<Result<List<SubCategoryDto>>> getSubCategories(Guid id, int page, int length)
     {
         List<SubCategoryDto> subCategories = (await _subCategoryRepository
                 .getSubCategories(id, page, length))

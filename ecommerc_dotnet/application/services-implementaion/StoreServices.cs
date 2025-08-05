@@ -1,4 +1,5 @@
 using ecommerc_dotnet.application.Repository;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.core.Result;
@@ -6,6 +7,7 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.shared.extentions;
 using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
@@ -17,6 +19,7 @@ public class StoreServices : IStoreServices
     private readonly IAddressRepository _addressRepository;
     private readonly IWebHostEnvironment _host;
     private readonly IConfig _config;
+
 
     public StoreServices(
         IWebHostEnvironment host,
@@ -33,37 +36,35 @@ public class StoreServices : IStoreServices
         _addressRepository = addressRepository;
     }
 
+    private void deleteStoreImage(string? wallperper, string? smallImage)
+    {
+        if (wallperper is not null)
+            clsUtil.deleteFile(wallperper, _host);
+        if (smallImage is not null)
+            clsUtil.deleteFile(smallImage, _host);
+    }
+
     public async Task<Result<StoreDto?>> createStore(
         CreateStoreDto store,
         Guid userId)
     {
         User? user = await _userRepository
             .getUser(userId);
-        if (user is null)
+
+        var isValide = user.isValidateFunc();
+
+        if (isValide is not null)
         {
-            return new Result<StoreDto?>
-            (
-                data: null,
-                message: "user not found",
+            return new Result<StoreDto?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
-        if (user.IsBlocked)
-        {
-            return new Result<StoreDto?>
-            (
-                data: null,
-                message: "user not allowed to create store",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
 
-        bool isExist = await _storeRepository.isExist(store.Name);
-
-        if (isExist)
+        if (await _storeRepository.isExist(store.Name))
         {
             return new Result<StoreDto?>
             (
@@ -87,6 +88,8 @@ public class StoreServices : IStoreServices
 
 
         if (smallImage is null || wallperper is null)
+        {
+            deleteStoreImage(wallperper, smallImage);
             return new Result<StoreDto?>
             (
                 data: null,
@@ -94,6 +97,8 @@ public class StoreServices : IStoreServices
                 isSeccessful: false,
                 statusCode: 400
             );
+        }
+
         Guid id = clsUtil.generateGuid();
         Store storeData = new Store
         {
@@ -118,10 +123,11 @@ public class StoreServices : IStoreServices
             OwnerId = id
         };
 
-        int result = 0;
-        result = await _storeRepository.addAsync(storeData);
+        int result = await _storeRepository.addAsync(storeData);
 
         if (result == 0)
+        {
+            deleteStoreImage(wallperper, smallImage);
             return new Result<StoreDto?>
             (
                 data: null,
@@ -129,9 +135,12 @@ public class StoreServices : IStoreServices
                 isSeccessful: false,
                 statusCode: 400
             );
+        }
+
         result = await _addressRepository.addAsync(address);
         if (result == 0)
         {
+            deleteStoreImage(wallperper, smallImage);
             await _addressRepository.deleteAsync(id);
             return new Result<StoreDto?>
             (
@@ -142,11 +151,13 @@ public class StoreServices : IStoreServices
             );
         }
 
-        Store? savedStore = await _storeRepository.getStore(id);
+        storeData.user = user!;
+        storeData.Addresses = new List<Address> { address };
+
 
         return new Result<StoreDto?>
         (
-            data: savedStore?.toDto(_config.getKey("url_file")),
+            data: storeData?.toDto(_config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -154,11 +165,11 @@ public class StoreServices : IStoreServices
     }
 
     public async Task<Result<StoreDto?>> updateStore(
-        UpdateStoreDto store,
+        UpdateStoreDto storeDto,
         Guid userId
     )
     {
-        if (store.isEmpty())
+        if (storeDto.isEmpty())
         {
             return new Result<StoreDto?>
             (
@@ -171,31 +182,22 @@ public class StoreServices : IStoreServices
 
         User? user = await _userRepository
             .getUser(userId);
-        if (user is null)
+
+        var isValide = user.isValidateFunc(isStore: true);
+
+        if (isValide is not null)
         {
-            return new Result<StoreDto?>
-            (
-                data: null,
-                message: "user not found",
+            return new Result<StoreDto?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
-        if (user.IsBlocked)
+        if (storeDto.Name is not null)
         {
-            return new Result<StoreDto?>
-            (
-                data: null,
-                message: "user not allowed to create store",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
-        if (store.Name is not null)
-        {
-            bool isExist = await _storeRepository.isExist(store.Name);
+            bool isExist = await _storeRepository.isExist(storeDto.Name, user!.Store!.Id);
 
             if (isExist)
             {
@@ -209,36 +211,34 @@ public class StoreServices : IStoreServices
             }
         }
 
-        Store? storeData = await _storeRepository.getStoreByUserId(userId);
-
-        if (storeData is null)
-            return new Result<StoreDto?>
-            (
-                data: null,
-                message: "user not has store",
-                isSeccessful: false,
-                statusCode: 404
-            );
 
         string? wallperper = null, smallImage = null;
 
-        if (store.WallpaperImage is not null)
+        if (storeDto.WallpaperImage is not null)
+        {
             wallperper = await clsUtil.saveFile(
-                store.WallpaperImage,
+                storeDto.WallpaperImage,
                 EnImageType.STORE,
                 _host);
-        if (store.SmallImage is not null)
-            smallImage = await clsUtil.saveFile(
-                store.SmallImage,
-                EnImageType.STORE,
-                _host);
-        storeData.SmallImage = smallImage ?? storeData.SmallImage;
-        storeData.WallpaperImage = wallperper ?? storeData.WallpaperImage;
-        storeData.Name = store.Name ?? storeData.Name;
-        storeData.UpdatedAt = DateTime.Now;
 
-        int result = 0;
-        result = await _storeRepository.updateAsync(storeData);
+            deleteStoreImage(user!.Store!.WallpaperImage, null);
+        }
+
+        if (storeDto.SmallImage is not null)
+        {
+            smallImage = await clsUtil.saveFile(
+                storeDto.SmallImage,
+                EnImageType.STORE,
+                _host);
+            deleteStoreImage(null, user!.Store?.SmallImage);
+        }
+
+        user!.Store!.SmallImage = smallImage ?? user!.Store!.SmallImage;
+        user!.Store!.WallpaperImage = wallperper ?? user!.Store!.WallpaperImage;
+        user!.Store!.Name = storeDto.Name ?? user!.Store!.Name;
+        user!.Store!.UpdatedAt = DateTime.Now;
+
+        int result = await _storeRepository.updateAsync(user!.Store!);
 
         if (result == 0)
             return new Result<StoreDto?>
@@ -249,10 +249,23 @@ public class StoreServices : IStoreServices
                 statusCode: 400
             );
 
-        if (store?.Longitude is not null && store?.Latitude is not null)
+        if (
+            (storeDto.Longitude is null && storeDto.Latitude is not null) ||
+            (storeDto.Longitude is not null && storeDto.Latitude is null)
+        )
+        {
+            return new Result<StoreDto?>(
+                isSeccessful: false,
+                data: null,
+                message: "when update address you must change both longitude and latitude not one of them only ",
+                statusCode: 400
+            );
+        }
+
+        if (storeDto?.Longitude is not null && storeDto?.Latitude is not null)
         {
             Address? address = await _addressRepository
-                .getAddressByOwnerId(storeData.Id);
+                .getAddressByOwnerId(user!.Store!.Id);
 
             if (address is null)
                 return new Result<StoreDto?>
@@ -262,10 +275,10 @@ public class StoreServices : IStoreServices
                     isSeccessful: false,
                     statusCode: 404
                 );
-            address.Title = store?.Name ?? address.Title;
+            address.Title = storeDto?.Name ?? address.Title;
             address.UpdatedAt = DateTime.Now;
-            address.Longitude = (decimal)store?.Longitude!;
-            address.Latitude = (decimal)store!.Latitude;
+            address.Longitude = (decimal)storeDto?.Longitude!;
+            address.Latitude = (decimal)storeDto!.Latitude;
             result = await _addressRepository.updateAsync(address);
 
             if (result == 0)
@@ -278,12 +291,11 @@ public class StoreServices : IStoreServices
                 );
         }
 
-        Store? updatedStore = await _storeRepository.getStoreByUserId(userId);
-
+        Store? store = await _storeRepository.getStore(user.Store.Id);
 
         return new Result<StoreDto?>
         (
-            data: updatedStore?.toDto(_config.getKey("url_file")),
+            data: store?.toDto(_config.getKey("url_file")),
             message: "error while update store Data",
             isSeccessful: true,
             statusCode: 200
@@ -340,25 +352,16 @@ public class StoreServices : IStoreServices
     {
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
-        {
-            return new Result<List<StoreDto>?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
 
-        if (user.Role != 0)
+        var isValide = user.isValidateFunc(true);
+
+        if (isValide is not null)
         {
-            return new Result<List<StoreDto>?>
-            (
-                data: null,
-                message: "not authorized user",
+            return new Result<List<StoreDto>?>(
                 isSeccessful: false,
-                statusCode: 400
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
@@ -376,66 +379,20 @@ public class StoreServices : IStoreServices
         );
     }
 
-    public async Task<Result<int>> getStoresCount(Guid adminId)
-    {
-        User? user = await _userRepository
-            .getUser(adminId);
-        if (user is null)
-        {
-            return new Result<int>
-            (
-                data: 0,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        if (user.Role != 0)
-        {
-            return new Result<int>
-            (
-                data: 0,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        int storesCount = await _storeRepository.getStoresCount();
-
-        return new Result<int>
-        (
-            data: storesCount,
-            message: "",
-            isSeccessful: true,
-            statusCode: 200
-        );
-    }
-
     public async Task<Result<bool?>> updateStoreStatus(Guid adminId, Guid storeId)
     {
         User? user = await _userRepository
             .getUser(adminId);
-        if (user is null)
-        {
-            return new Result<bool?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
 
-        if (user.Role != 0)
+        var isValide = user.isValidateFunc(true);
+
+        if (isValide is not null)
         {
-            return new Result<bool?>
-            (
-                data: null,
-                message: "not authorized user",
+            return new Result<bool?>(
                 isSeccessful: false,
-                statusCode: 404
+                data: null,
+                message: isValide.Message,
+                statusCode: isValide.StatusCode
             );
         }
 
@@ -449,6 +406,20 @@ public class StoreServices : IStoreServices
                 isSeccessful: false,
                 statusCode: 404
             );
+        
+        isValide = store.user.isValidateFunc(true);
+
+        if (isValide is null && store.UserId != user!.Id)
+        {
+            return new Result<bool?>(
+                isSeccessful: false,
+                data: null,
+                message: "only Admin can update his store Status",
+                statusCode: 404
+            );
+        }
+
+
         store.IsBlock = !store.IsBlock;
         int result = await _storeRepository.updateAsync(store);
         if (result == 0)
@@ -464,7 +435,7 @@ public class StoreServices : IStoreServices
             data: true,
             message: "",
             isSeccessful: true,
-            statusCode: 204 
+            statusCode: 204
         );
     }
 }

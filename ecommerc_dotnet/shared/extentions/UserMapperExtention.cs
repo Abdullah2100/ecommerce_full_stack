@@ -2,12 +2,13 @@ using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.module;
+using Mono.TextTemplating;
 
 namespace ecommerc_dotnet.shared.extentions;
 
-public static class UserMapperExtention 
+public static class UserMapperExtention
 {
-    public static UserInfoDto toUserInfoDto(this User user,string url)
+    public static UserInfoDto toUserInfoDto(this User user, string url)
     {
         return new UserInfoDto
         {
@@ -22,32 +23,68 @@ public static class UserMapperExtention
             StoreId = user?.Store?.Id
         };
     }
-    
-    
 
-    public static UserDeliveryInfoDto toDeliveryInfoDto(this User user,string url)
+
+    public static UserDeliveryInfoDto toDeliveryInfoDto(this User user, string url)
     {
-        return new UserDeliveryInfoDto 
+        return new UserDeliveryInfoDto
         {
             Email = user.Email,
             Name = user.Name,
             Phone = user.Phone,
             Thumbnail = string.IsNullOrEmpty(user.Thumbnail) ? "" : url + user.Thumbnail,
-            
         };
     }
-  
+
     public static bool isEmpty(this UpdateUserInfoDto dto)
     {
         return string.IsNullOrWhiteSpace(dto.Name) &&
                string.IsNullOrWhiteSpace(dto.Phone) &&
-               dto.Thumbnail == null&&
-               string.IsNullOrWhiteSpace(dto.Password) && 
+               dto.Thumbnail == null &&
+               string.IsNullOrWhiteSpace(dto.Password) &&
                string.IsNullOrWhiteSpace(dto.NewPassword)
             ;
     }
-    
-    public static Result<AuthDto?>? isValideFunc(this User? user, bool isAdmin = true)
+
+    public static Result<AuthDto?>? isHasStore(User user)
+    {
+        switch (user.Store is not null)
+        {
+            case true:
+            {
+                if (user.Store.IsBlock)
+                {
+                    return new Result<AuthDto?>
+                    (
+                        data: null,
+                        message: "contact admin to remove the block from you account ",
+                        isSeccessful: false,
+                        statusCode: 400
+                    );
+                }
+
+                return null;
+            }
+
+            default:
+            {
+                if (user.Store is null)
+                {
+                    return new Result<AuthDto?>
+                    (
+                        data: null,
+                        message: "you must has store before done this operation",
+                        isSeccessful: false,
+                        statusCode: 404
+                    );
+                }
+
+                return null;
+            }
+        }
+    }
+
+    public static Result<AuthDto?>? isValidateFunc(this User? user, bool isAdmin = true, bool isStore = false)
     {
         if (user is null)
         {
@@ -60,6 +97,7 @@ public static class UserMapperExtention
             );
         }
 
+        //validate user if it is admin or user according to isAdmin feild 
         switch (!isAdmin)
         {
             case true:
@@ -75,7 +113,8 @@ public static class UserMapperExtention
                     );
                 }
 
-                return null;
+                //check if user has store
+                return isStore ? isHasStore(user) : null;
             }
             default:
             {
@@ -89,10 +128,9 @@ public static class UserMapperExtention
                         statusCode: 400
                     );
                 }
-
-                return null;
+                //check if admin has store
+                return isStore ? isHasStore(user) : null;
             }
         }
     }
-
 }

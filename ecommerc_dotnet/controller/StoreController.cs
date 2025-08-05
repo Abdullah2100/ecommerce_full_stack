@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.services;
@@ -95,7 +96,7 @@ public class StoreController : ControllerBase
     }
 
 
-    [HttpPut("status/{storeId:guid}")]
+    [HttpPatch("status/{storeId:guid}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -183,37 +184,8 @@ public class StoreController : ControllerBase
     }
 
 
-    [HttpGet("pages")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> getStorePages()
-    {
-        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
-            authorizationHeader.ToString().Replace("Bearer ", ""));
-
-        Guid? adminId = null;
-        if (Guid.TryParse(id?.Value, out Guid outId))
-        {
-            adminId = outId;
-        }
-
-        if (adminId is null)
-        {
-            return Unauthorized("هناك مشكلة في التحقق");
-        }
-
-        var result = await _storeServices.getStoresCount(adminId.Value);
-
-        return result.IsSeccessful switch
-        {
-            true => StatusCode(result.StatusCode, result.Data),
-            _ => StatusCode(result.StatusCode, result.Message)
-        };  
-    }
-
-    [HttpGet("{page:int}")]
+ 
+    [HttpGet("all/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.dto;
 using hotel_api.Services;
@@ -23,7 +24,7 @@ public class SubCategoryController : ControllerBase
 
     private readonly ISubCategoryServices _subCategoryServices;
 
-    [HttpPost("new")]
+    [HttpPost()]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,6 +87,8 @@ public class SubCategoryController : ControllerBase
         };
     }
 
+    
+    
     [HttpDelete("{subCateogyId}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -122,6 +125,7 @@ public class SubCategoryController : ControllerBase
         };
     }
 
+    
     [HttpGet("all/{storeId}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -154,9 +158,9 @@ public class SubCategoryController : ControllerBase
     [HttpGet("{storeId}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getSubCategory(Guid storeId, int page)
+    public async Task<IActionResult> getSubCategories(Guid storeId, int page)
     {
-        var result = await _subCategoryServices.getSubCategory(
+        var result = await _subCategoryServices.getSubCategories(
             storeId, page, 25);
 
         return result.IsSeccessful switch

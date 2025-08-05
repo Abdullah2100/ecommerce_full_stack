@@ -34,7 +34,7 @@ public class VarientServices : IVarientServices
         User? user = await _userRepository
             .getUser(adminId);
         
-        var isValid = user.isValideFunc(true);
+        var isValid = user.isValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<VarientDto?>
@@ -102,7 +102,7 @@ public class VarientServices : IVarientServices
 
         User? user = await _userRepository
             .getUser(adminId);
-        var isValid = user.isValideFunc(true);
+        var isValid = user.isValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<VarientDto?>
@@ -170,7 +170,7 @@ public class VarientServices : IVarientServices
 
         User? user = await _userRepository
             .getUser(adminId);
-        var isValid = user.isValideFunc(true);
+        var isValid = user.isValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<bool>

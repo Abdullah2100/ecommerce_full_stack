@@ -1,7 +1,7 @@
 using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.dto;
 
-namespace ecommerc_dotnet.core.interfaces.services;
+namespace ecommerc_dotnet.application.services;
 
 public interface ISubCategoryServices
 {
@@ -10,6 +10,6 @@ public interface ISubCategoryServices
     
     Task<Result<bool>> deleteSubCategory(Guid id,Guid userId);
     
-    Task<Result<List<SubCategoryDto>>> getSubCategory(Guid id, int page, int length);
+    Task<Result<List<SubCategoryDto>>> getSubCategories(Guid id, int page, int length);
     Task<Result<List<SubCategoryDto>>> getSubCategoryAll(Guid adminId, int page, int length);
 }

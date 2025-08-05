@@ -1,3 +1,4 @@
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.module;
@@ -40,16 +41,19 @@ public class StoreRepository : IStoreRepository
 
         return stores;
     }
+
     public async Task<int> addAsync(Store entity)
     {
         await _context.Stores.AddAsync(entity);
         return await _context.SaveChangesAsync();
     }
+
     public async Task<int> updateAsync(Store entity)
     {
         _context.Stores.Update(entity);
         return await _context.SaveChangesAsync();
     }
+
     public async Task<int> deleteAsync(Guid id)
     {
         Store? store = await _context.Stores.FindAsync(id);
@@ -112,6 +116,14 @@ public class StoreRepository : IStoreRepository
             .Stores
             .AsNoTracking()
             .AnyAsync(st => st.Name == name);
+    }
+
+    public async Task<bool> isExist(string name, Guid id)
+    {
+        return await _context
+            .Stores
+            .AsNoTracking()
+            .AnyAsync(st => st.Name == name&& st.Id != id);
     }
 
     public async Task<bool> isExist(Guid id)

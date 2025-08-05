@@ -1,5 +1,6 @@
 using System.Text;
 using ecommerc_dotnet.application.Repository;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;

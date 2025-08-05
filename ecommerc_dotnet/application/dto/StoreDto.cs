@@ -20,17 +20,14 @@ namespace ecommerc_dotnet.dto
     {
         [StringLength(maximumLength: 100, MinimumLength = 5, ErrorMessage = "Name must not be empty")]
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
-        [Required] public IFormFile WallpaperImage { get; set; }
+        [Required] public  IFormFile WallpaperImage { get; set; }
         [Required] public IFormFile SmallImage { get; set; }
-        public Guid? UserId { get; set; } = null;
 
-        [MinLength(2, ErrorMessage = "Longitude must not be empty")]
         [Required]
         public decimal Longitude { get; set; }
-
-        [MinLength(2, ErrorMessage = "Latitude must not be empty")]
+        
         [Required]
         public decimal Latitude { get; set; }
     }
