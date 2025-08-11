@@ -99,7 +99,7 @@ fun CreateProductScreen(
     val context = LocalContext.current
 
     val subCategory = homeViewModel.subCategories.collectAsState()
-    val storeSubCategory = subCategory.value?.filter { it.store_id == store_id }
+    val storeSubCategory = subCategory.value?.filter { it.storeId == store_id }
 
     val snackbarHostState = remember { SnackbarHostState() }
 

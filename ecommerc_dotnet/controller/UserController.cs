@@ -145,7 +145,7 @@ public class UserController : ControllerBase
     }
 
 
- 
+
     [HttpPut("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -324,8 +324,8 @@ public class UserController : ControllerBase
     }
 
 
-    
-    
+
+
     [AllowAnonymous]
     [HttpPost("generateOtp")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

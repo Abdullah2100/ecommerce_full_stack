@@ -11,10 +11,6 @@ import com.example.e_commercompose.data.Room.AuthDao
 import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
 import com.example.e_commercompose.dto.ModelToDto.toOrderRequestItemDto
 import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
-import com.example.e_commercompose.dto.request.AddressRequestDto
-import com.example.e_commercompose.dto.request.AddressRequestUpdateDto
-import com.example.e_commercompose.dto.request.CartRequestDto
-import com.example.e_commercompose.dto.request.SubCategoryRequestDto
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.BannerDto
 import com.example.eccomerce_app.dto.CategoryDto
@@ -49,24 +45,25 @@ import com.example.e_commercompose.model.VarientModel
 import com.example.eccomerce_app.dto.GeneralSettingDto
 import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderDto
-import com.example.e_commercompose.dto.response.StoreStatusResponseDto
 import com.example.e_commercompose.model.GeneralSetting
 import com.example.e_commercompose.model.Order
 import com.example.e_commercompose.model.OrderItem
-import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
+import com.example.eccomerce_app.dto.CreateAddressDto
+import com.example.eccomerce_app.dto.CreateOrderDto
+import com.example.eccomerce_app.dto.CreateSubCategoryDto
+import com.example.eccomerce_app.dto.OrderItemsStatusEvent
+import com.example.eccomerce_app.dto.StoreStatusDto
+import com.example.eccomerce_app.dto.UpdateAddressDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
-import java.nio.file.Files
 import java.util.UUID
 import kotlin.math.max
 import kotlin.math.pow
@@ -140,6 +137,10 @@ class HomeViewModel(
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
+
+   suspend fun userPassLocation(){
+       dao.savePassingLocation(IsPassSetLocationScreen(0,true))
+    }
 
     fun addToCart(product: CardProductModel) {
         viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
@@ -340,17 +341,17 @@ class HomeViewModel(
                     { result ->
 
                         viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
-                            if (result.status == true) {
+                            if (result.Status == true) {
                                 val productNotBelongToStore =
-                                    _products.value?.filter { it.store_id != result.storeId }
+                                    _products.value?.filter { it.store_id != result.StoreId }
                                 val storeWithoutCurrentId =
-                                    _stores.value?.filter { it.id != result.storeId }
+                                    _stores.value?.filter { it.id != result.StoreId }
                                 _products.emit(productNotBelongToStore)
                                 _stores.emit(storeWithoutCurrentId)
                             }
                         }
                     },
-                    StoreStatusResponseDto::class.java
+                    StoreStatusDto::class.java
                 )
 
                 _hub.value?.on(
@@ -376,35 +377,33 @@ class HomeViewModel(
                     "orderItemsStatusChange",
                     { response ->
                         val myStoreOrderItemHolder = _orderItemForMyStore.value?.map {
-                            if(it.id==response.orderId){
-                                it.copy(orderItemStatus = response.status)
+                            if (it.id == response.OrderId) {
+                                it.copy(orderItemStatus = response.Status)
 
                             } else it
                         }
-                        val orderHolder = _orders.value?.firstOrNull { it.id==response.orderId }
-                        if(orderHolder!=null){
-                            val orderItemsHolder = orderHolder.order_items.map {
-                                oi->
-                                if(oi.id==response.orderItemId){
-                                        oi.copy(orderItemStatus = response.status)
-                                    }
-                                    else oi
+                        val orderHolder = _orders.value?.firstOrNull { it.id == response.OrderId }
+                        if (orderHolder != null) {
+                            val orderItemsHolder = orderHolder.order_items.map { oi ->
+                                if (oi.id == response.OrderItemId) {
+                                    oi.copy(orderItemStatus = response.Status)
+                                } else oi
                             }
                             orderHolder.copy(order_items = orderItemsHolder)
 
                         }
                         val userOrderList = _orders.value?.map {
-                            if(it.id==response.orderId&&orderHolder!=null)
+                            if (it.id == response.OrderId && orderHolder != null)
                                 it.copy(order_items = orderHolder.order_items)
                             else it
                         }
 
-                            viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
-                                _orderItemForMyStore.emit(myStoreOrderItemHolder)
-                                _orders.emit(userOrderList)
+                        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
+                            _orderItemForMyStore.emit(myStoreOrderItemHolder)
+                            _orders.emit(userOrderList)
                         }
                     },
-                    OrderItemStatusChangeDto::class.java
+                    OrderItemsStatusEvent::class.java
                 )
 
             }
@@ -643,16 +642,14 @@ class HomeViewModel(
         latit: Double? = null,
         title: String? = null,
     ): String? {
-
-
         _isLoading.emit(true)
         delay(100)
         var result = homeRepository
             .userAddNewAddress(
-                AddressRequestDto(
-                    longitude = longit ?: 5.5,
-                    latitude = latit ?: 5.5,
-                    title = title ?: "home"
+                CreateAddressDto(
+                    Longitude = longit ?: 5.5,
+                    Latitude = latit ?: 5.5,
+                    Title = title ?: "home"
                 )
             )
         when (result) {
@@ -735,11 +732,11 @@ class HomeViewModel(
     ): String? {
         _isLoading.emit(true)
         var result = homeRepository.userUpdateAddress(
-            AddressRequestUpdateDto(
-                id = addressId,
-                title = addressTitle,
-                latitude = latit,
-                longitude = longit
+            UpdateAddressDto(
+                Id = addressId,
+                Title = addressTitle,
+                Latitude = latit,
+                Longitude = longit
             )
         )
         when (result) {
@@ -801,7 +798,7 @@ class HomeViewModel(
     fun getMyInfo() {
         if (_myInfo.value != null) return;
         viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
-            var result = homeRepository.getMyInfo();
+            val result = homeRepository.getMyInfo();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     var data = result.data as UserDto
@@ -816,7 +813,7 @@ class HomeViewModel(
                 is NetworkCallHandler.Error -> {
                     if (_myInfo.value == null) {
                         _myInfo.emit(
-                           null
+                            null
                         )
                     }
                     var resultError = result.data as String
@@ -962,9 +959,9 @@ class HomeViewModel(
         _isLoading.emit(true)
 
         var result = homeRepository.createSubCategory(
-            SubCategoryRequestDto(
-                name = name,
-                cateogy_id = categoryId
+            CreateSubCategoryDto(
+                Name = name,
+                CateogyId = categoryId
             )
         );
         when (result) {
@@ -1593,13 +1590,13 @@ class HomeViewModel(
 
     suspend fun submitCartTitems(): String? {
         var result = homeRepository.submitOrder(
-            CartRequestDto(
-                longitude = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.longitude
+            CreateOrderDto(
+                Longitude = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.longitude
                     ?: 0.0,
-                latitude = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.latitude
+                Latitude = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.latitude
                     ?: 0.0,
-                items = _cartImes.value.cartProducts.map { it.toOrderRequestItemDto() },
-                totalPrice = _cartImes.value.totalPrice
+                Items = _cartImes.value.cartProducts.map { it.toOrderRequestItemDto() },
+                TotalPrice = _cartImes.value.totalPrice
             )
         )
         when (result) {

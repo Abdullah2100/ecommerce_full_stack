@@ -14,16 +14,17 @@ import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderProductDto
 import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderVarientDto
+import java.util.UUID
 import kotlin.text.replace
 
 object DtoToModel {
     fun AddressDto.toAddress(): Address {
         return Address(
-            id = this.Id,
-            title =this.Title,
-            latitude = this.Latitude,
-            longitude = this.Lngitude,
-            isCurrnt = this.IsCurrent?:false
+            id = this.id,
+            title =this.title,
+            latitude = this.latitude,
+            longitude = this.longitude,
+            isCurrnt = this.isCurrent?:false
         )
     }
 
@@ -39,7 +40,8 @@ object DtoToModel {
             id = this.Id,
             name=this.Name,
             category_id=this.CategoryId,
-            store_id=this.StoreId)
+            storeId= UUID.randomUUID()
+        )
     }
 
 
@@ -57,13 +59,13 @@ object DtoToModel {
 
     fun UserDto.toUser(): UserModel{
         return UserModel(
-            id = this.Id,
-            name = this.Name,
-            phone = this.Phone,
-            email = this.Email,
-            thumbnail=if(!this.Thumbnail.isEmpty())this.Thumbnail.replace("localhost","10.0.2.2") else "",
-            address = this.Address?.map { it.toAddress() }?.toList(),
-            store_id = this.StoreId
+            id = this.id,
+            name = this.name,
+            phone = this.phone,
+            email = this.email,
+            thumbnail=if(!this.thumbnail.isEmpty())this.thumbnail.replace("localhost","10.0.2.2") else "",
+            address = this.address?.map { it.toAddress() }?.toList(),
+            store_id = this.storeId
         )
     }
 

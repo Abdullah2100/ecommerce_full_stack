@@ -11,7 +11,7 @@ import com.example.eccomerce_app.dto.UserDto
 import com.example.eccomerce_app.dto.VarientDto
 import com.example.e_commercompose.model.MyInfoUpdate
 import com.example.e_commercompose.model.ProductVarientSelection
-import com.example.e_commercompose.util.Secrets
+import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.dto.GeneralSettingDto
 import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderDto
@@ -20,7 +20,6 @@ import com.example.eccomerce_app.dto.CreateOrderDto
 import com.example.eccomerce_app.dto.CreateSubCategoryDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
 import com.example.eccomerce_app.dto.UpdateOrderItemStatusDto
-import com.example.eccomerce_app.dto.UpdateSubCategoryDto
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -44,7 +43,7 @@ import java.util.UUID
 
 class HomeRepository(val client: HttpClient) {
 
-   //Banner
+    //Banner
     suspend fun getBannerByStoreId(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Banner/${storeId}/${pageNumber}";
@@ -52,7 +51,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -85,7 +84,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -93,7 +92,7 @@ class HomeRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<BannerDto>>())
-            } else if(result.status== HttpStatusCode.NoContent) {
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -114,15 +113,15 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun createBanner(endDate: String, image: File ): NetworkCallHandler {
+    suspend fun createBanner(endDate: String, image: File): NetworkCallHandler {
         return try {
-            var result = client.post(
+            val result = client.post(
                 Secrets.getBaseUrl() + "/Banner"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -169,13 +168,13 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun deleteBanner(bannerId: UUID): NetworkCallHandler {
         return try {
-            var result = client.delete(
+            val result = client.delete(
                 Secrets.getBaseUrl() + "/Banner/${bannerId}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -200,17 +199,16 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
     //category
     suspend fun getCategory(pageNumber: Int = 1): NetworkCallHandler {
         return try {
-            var result = client.get(
+            val result = client.get(
                 Secrets.getBaseUrl() + "/Category/all/${pageNumber}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -240,13 +238,13 @@ class HomeRepository(val client: HttpClient) {
     //general
     suspend fun getGeneral(pageNumber: Int = 1): NetworkCallHandler {
         return try {
-            var result = client.get(
+            val result = client.get(
                 Secrets.getBaseUrl() + "/General/all/${pageNumber}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -282,7 +280,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 contentType(ContentType.Application.Json)
@@ -314,14 +312,14 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getMyOrders(pageNumber:Int): NetworkCallHandler {
+    suspend fun getMyOrders(pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Order/me/${pageNumber}";
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -331,7 +329,7 @@ class HomeRepository(val client: HttpClient) {
 
                 NetworkCallHandler.Successful(result.body<List<OrderDto>>())
 
-            } else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
 
@@ -360,7 +358,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -390,14 +388,14 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getMyOrderItemForStoreId(storeId: UUID, pageNumber:Int): NetworkCallHandler {
+    suspend fun getMyOrderItemForStoreId(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Order/orderItem/${storeId}/${pageNumber}";
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -407,7 +405,7 @@ class HomeRepository(val client: HttpClient) {
 
                 NetworkCallHandler.Successful(result.body<List<OrderItemDto>>())
 
-            } else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
 
@@ -437,10 +435,10 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
-                setBody(UpdateOrderItemStatusDto(id,status))
+                setBody(UpdateOrderItemStatusDto(id, status))
             }
 
             if (result.status == HttpStatusCode.NoContent) {
@@ -473,14 +471,14 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -507,14 +505,14 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -541,14 +539,14 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -576,14 +574,14 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            }else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -620,7 +618,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -717,7 +715,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -837,7 +835,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -863,7 +861,6 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
     //store
     suspend fun createStore(
         name: String,
@@ -873,13 +870,13 @@ class HomeRepository(val client: HttpClient) {
         latitude: Double
     ): NetworkCallHandler {
         return try {
-            var result = client.post(
+            val result = client.post(
                 Secrets.getBaseUrl() + "/Store/new"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -948,13 +945,13 @@ class HomeRepository(val client: HttpClient) {
         latitude: Double
     ): NetworkCallHandler {
         return try {
-            var result = client.put(
+            val result = client.put(
                 Secrets.getBaseUrl() + "/Store"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -1027,7 +1024,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -1059,7 +1056,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -1094,14 +1091,14 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
 
             if (result.status == HttpStatusCode.OK) {
                 NetworkCallHandler.Successful(result.body<List<SubCategoryDto>>())
-            } else if(result.status == HttpStatusCode.NoContent){
+            } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -1129,7 +1126,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(data)
@@ -1158,14 +1155,14 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-    suspend fun updateSubCategory(data: UpdateSubCategoryDto): NetworkCallHandler {
+    suspend fun updateSubCategory(data: SubCategoryDto): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/SubCategory";
             val result = client.put(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(data)
@@ -1201,7 +1198,7 @@ class HomeRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -1227,17 +1224,16 @@ class HomeRepository(val client: HttpClient) {
     }
 
 
-
     //user
     suspend fun userAddNewAddress(locationData: CreateAddressDto): NetworkCallHandler {
         return try {
-            var result = client.post(
+            val result = client.post(
                 Secrets.getBaseUrl() + "/User/address"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -1271,13 +1267,13 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun userUpdateAddress(locationData: UpdateAddressDto): NetworkCallHandler {
         return try {
-            var result = client.put(
+            val result = client.put(
                 Secrets.getBaseUrl() + "/User/address"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -1311,13 +1307,13 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
         return try {
-            var result = client.delete(
+            val result = client.delete(
                 Secrets.getBaseUrl() + "/User/address/${addressID}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
 
@@ -1347,13 +1343,13 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun setAddressAsCurrent(addressId: UUID): NetworkCallHandler {
         return try {
-            var result = client.post(
+            val result = client.post(
                 Secrets.getBaseUrl() + "/User/address/active${addressId}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
@@ -1380,23 +1376,23 @@ class HomeRepository(val client: HttpClient) {
         }
     }
 
+
     suspend fun getMyInfo(): NetworkCallHandler {
         return try {
-            var result = client.get(
-                Secrets.getBaseUrl() + "/User"
+            val result = client.get(
+                Secrets.getBaseUrl() + "/User/me"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<UserDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
+                NetworkCallHandler.Successful(result.body<UserDto>())
+            } else NetworkCallHandler.Error(result.body())
+
         } catch (e: UnknownHostException) {
 
             return NetworkCallHandler.Error(e.message)
@@ -1413,13 +1409,13 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun UpdateMyInfo(data: MyInfoUpdate): NetworkCallHandler {
         return try {
-            var result = client.put(
+            val result = client.put(
                 Secrets.getBaseUrl() + "/User"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
                 setBody(
@@ -1460,10 +1456,9 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<UserDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
-            }
+                NetworkCallHandler.Successful(result.body<UserDto>())
+            } else NetworkCallHandler.Error(result.body())
+
         } catch (e: UnknownHostException) {
 
             return NetworkCallHandler.Error(e.message)
@@ -1481,22 +1476,22 @@ class HomeRepository(val client: HttpClient) {
     //varient
     suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
         return try {
-            var result = client.get(
+            val result = client.get(
                 Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
             ) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
+                        "Bearer ${General.authData.value?.RefreshToken}"
                     )
                 }
             }
             if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<VarientDto>>())
-            } else if (result.status == HttpStatusCode.NoContent){
-                return NetworkCallHandler.Error("No Data Found")
+                NetworkCallHandler.Successful(result.body<List<VarientDto>>())
+            } else if (result.status == HttpStatusCode.NoContent) {
+                NetworkCallHandler.Error("No Data Found")
             } else {
-                return NetworkCallHandler.Error(result.body())
+                NetworkCallHandler.Error(result.body())
             }
 
         } catch (e: UnknownHostException) {
@@ -1512,8 +1507,6 @@ class HomeRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
-
 
 
 }

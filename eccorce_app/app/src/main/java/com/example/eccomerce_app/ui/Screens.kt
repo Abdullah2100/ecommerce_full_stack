@@ -21,13 +21,13 @@ object Screens {
     object ReseatPasswordGraph
 
     @Serializable
-    object  GenerateOtp
+    object GenerateOtp
 
     @Serializable
-    data class  OtpVerification(val email: String)
+    data class OtpVerification(val email: String)
 
     @Serializable
-    data class  ReseatPassword(val email: String,val otp:String)
+    data class ReseatPassword(val email: String, val otp: String)
 
     @Serializable
     object LocationGraph
@@ -68,13 +68,23 @@ object Screens {
     @Serializable
     data class CreateProduct(
         var store_id: String,
-        var product_id: String?=null
+        var product_id: String? = null
     )
 
     @Serializable
     data class ProductDetails(
         var product_Id: String,
         var isFromHome: Boolean
+    )
+
+
+    @Serializable
+    data class MapScreen(
+        var title:String?=null,
+        val id:String?=null,
+        val lognit: Double?,
+        val latitt: Double?,
+        val isFromLogin: Boolean
     )
 
     @Serializable

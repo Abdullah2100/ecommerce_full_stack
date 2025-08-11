@@ -1,9 +1,7 @@
-package com.example.e_commercompose.util
+package com.example.eccomerce_app.util
 
 object Secrets {
-    init {
-        System.loadLibrary("keys") // Load the library once
-    }
+     fun getBaseUrl(): String="http://192.168.1.45:5077/api"
+//     fun getBaseUrl(): String="http://10.0.2.2:5077/api"
 
-    external fun getBaseUrl(): String
 }

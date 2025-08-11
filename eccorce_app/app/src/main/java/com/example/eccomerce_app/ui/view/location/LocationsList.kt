@@ -77,9 +77,8 @@ fun LocationsList(
     val fontScall = LocalDensity.current.fontScale
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val locationss = homeViewModle.myInfo.collectAsState()
-    val isLoading = homeViewModle.isLoading.collectAsState()
+    val isLoading = remember { mutableStateOf(false) }
     val currentLocationId = remember { mutableStateOf<UUID?>(null) }
-    val isPressLocation = remember { mutableStateOf<Boolean>(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val coroutine = rememberCoroutineScope()
@@ -118,8 +117,8 @@ fun LocationsList(
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
-                , colors =TopAppBarDefaults.centerAlignedTopAppBarColors(
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
                 )
             )
@@ -174,8 +173,32 @@ fun LocationsList(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable {
-                                    isPressLocation.value = true
-                                    currentLocationId.value = locationss.value!!.address!![index].id
+                                    coroutine.launch {
+                                        isLoading.value = true
+                                        val currentLocation = locationss.value!!.address!![index]
+                                        val result = async {
+
+                                            homeViewModle.updateUserAddress(
+                                                currentLocation.id ?: UUID.randomUUID(),
+                                                currentLocation.title,
+                                                currentLocation.longitude,
+                                                currentLocation.latitude
+                                            )
+                                        }.await()
+
+                                        isLoading.value = false
+                                        if (!result.isNullOrEmpty()) {
+                                            snackbarHostState.showSnackbar(result)
+                                            return@launch
+                                        }
+                                        nav.navigate(Screens.HomeGraph) {
+                                            popUpTo(nav.graph.id) {
+                                                inclusive = true
+                                            }
+                                        }
+
+                                    }
+
                                 }
                         ) {
                             Row(
@@ -193,7 +216,7 @@ fun LocationsList(
                                 )
                                 Sizer(width = 20)
                                 Text(
-                                    locationss.value!!.address!![index].title?:"",
+                                    locationss.value!!.address!![index].title ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = (16 / fontScall).sp,
@@ -213,84 +236,8 @@ fun LocationsList(
                     }
                 }
 
-                if (isPressLocation.value) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            //Logic when dismiss happens
-//                            isPressLocation.value=false
-                        },
-
-                        text = {
-
-                            Text(
-                                "Make this location as active Location",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (16 / fontScall).sp,
-                                color = CustomColor.neutralColor950,
-                                textAlign = TextAlign.End
-
-                            )
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    isPressLocation.value = false
-                                    coroutine.launch {
-                                        delay(50)
-                                        var result = async {
-                                            homeViewModle.setCurrentActiveUserAddress(
-                                                currentLocationId.value!!,
-                                            )
-                                        }.await()
-
-                                        var message = "update Current Address Seccessfuly"
-                                        if (result != null) {
-                                            message = result
-                                        }
-                                        snackbarHostState.showSnackbar(message)
-                                        if (result == null) {
-                                            homeViewModle.initialFun()
-                                            nav.navigate(Screens.HomeGraph) {
-                                                popUpTo(nav.graph.id) {
-                                                    inclusive = true
-                                                }
-                                            }
-                                        }
-                                    }
-                                }) {
-                                Text(
-                                    "okay",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = (16 / fontScall).sp,
-                                    color = CustomColor.primaryColor700,
-                                    textAlign = TextAlign.Center
-
-                                )
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = {
-                                isPressLocation.value = false
-                            }) {
-
-                                Text(
-                                    "Deny",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = (16 / fontScall).sp,
-                                    color = CustomColor.neutralColor700,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        })
-                }
-
                 if (isLoading.value)
-                    Dialog(
-                        onDismissRequest = {}
-                    ) {
+                    Dialog(onDismissRequest = {}) {
                         Box(
                             modifier = Modifier
                                 .height(90.dp)

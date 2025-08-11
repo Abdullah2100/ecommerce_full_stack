@@ -1,6 +1,6 @@
 package com.example.e_commercompose.di
 
-import com.example.e_commercompose.data.repository.AuthRepository
+import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.e_commercompose.data.repository.HomeRepository
 import org.koin.dsl.module
 

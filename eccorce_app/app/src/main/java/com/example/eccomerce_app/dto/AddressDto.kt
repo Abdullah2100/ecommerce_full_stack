@@ -7,11 +7,11 @@ import java.util.UUID
 @Serializable
 data class AddressDto(
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
-    val Lngitude: Double,
-    val Latitude: Double,
-    val Title: String?,
-    val IsCurrent: Boolean?=false
+    val id: UUID,
+    val longitude: Double,
+    val latitude: Double,
+    val title: String?,
+    val isCurrent: Boolean?=false
 )
 
 

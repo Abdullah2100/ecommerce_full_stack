@@ -1,13 +1,8 @@
 package com.example.e_commercompose.di
 
 import android.util.Log
-import androidx.room.Room
 import com.example.e_commercompose.data.Room.AuthDao
-import com.example.e_commercompose.data.Room.AuthDataBase
-import com.example.e_commercompose.data.repository.AuthRepository
-import com.example.e_commercompose.util.Secrets
-import com.example.e_commercompose.viewModel.AuthViewModel
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.Secrets
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import io.ktor.client.HttpClient
@@ -43,27 +38,26 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
 //                loadTokens {
 //                    BearerTokens(
 //                        General.authData.value?.token?:"",
-//                        General.authData.value?.refreshToken ?:""
+//                        General.authData.value?.RefreshToken ?:""
 //                    )
 //                }
 
-                refreshTokens {
 //                    try {
-//                        val refreshToken = client.
-//                        post("${General.BASED_URL}/refreshToken/refresh") {
+//                        val RefreshToken = client.
+//                        post("${General.BASED_URL}/RefreshToken/refresh") {
 //                            url {
-//                                parameters.append("tokenHolder", General.authData.value?.refreshToken ?: "")
+//                                parameters.append("tokenHolder", General.authData.value?.RefreshToken ?: "")
 //                            }
 //                            markAsRefreshTokenRequest()
 //                        }
-//                        if(refreshToken.status== HttpStatusCode.OK){
-//                            var result = refreshToken.body<AuthResultDto>()
+//                        if(RefreshToken.status== HttpStatusCode.OK){
+//                            var result = RefreshToken.body<AuthDto>()
 //                            General.updateSavedToken(authDao, result)
 //                            BearerTokens(
-//                                accessToken = result.accessToken,
-//                                refreshToken = result.refreshToken
+//                                Token = result.Token,
+//                                RefreshToken = result.RefreshToken
 //                            )
-//                        }else if(refreshToken.status== HttpStatusCode.Unauthorized) {
+//                        }else if(RefreshToken.status== HttpStatusCode.Unauthorized) {
 //                            authDao.nukeTable()
 //                            null;
 //                        }else {
@@ -75,7 +69,7 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
 null;
 
                     // Update saved tokens
-                }
+//                }
             }
         }
 

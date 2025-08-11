@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.example.e_commercompose.viewModel.HomeViewModel
-import com.example.e_commercompose.ui.OnBoarding.OnBoardingScreen
+import com.example.eccomerce_app.ui.view.OnBoarding.OnBoardingScreen
 import com.example.e_commercompose.ui.view.Auth.LoginScreen
 import com.example.e_commercompose.View.Pages.SignUpPage
 import com.example.e_commercompose.ui.view.Address.AddressScreen
@@ -34,6 +34,7 @@ import com.example.e_commercompose.ui.view.ReseatPassword.OtpVerificationScreen
 import com.example.e_commercompose.ui.view.ReseatPassword.ReseatPasswordScreen
 import com.example.e_commercompose.ui.view.account.OrderForMyStoreScreen
 import com.example.e_commercompose.ui.view.home.CategoryScreen
+import com.example.e_commercompose.ui.view.location.MapHomeScreen
 
 
 @Composable
@@ -54,6 +55,41 @@ fun NavController(
         navController = nav
     ) {
 
+        composable<Screens.MapScreen>(
+            enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            },
+
+            popEnterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            },
+            exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }
+        )
+        { result ->
+            val data = result.toRoute<Screens.MapScreen>()
+
+            MapHomeScreen(
+                nav = nav,
+                homeViewModle = homeViewModle,
+                title = data.title,
+                id=data.id,
+                data.lognit,
+                data.latitt,
+                isFomLogin = data.isFromLogin
+            )
+
+        }
+
+
+
         composable<Screens.OnBoarding>(
             enterTransition = {
                 return@composable fadeIn(tween(2000))
@@ -68,9 +104,12 @@ fun NavController(
             OnBoardingScreen(nav, authViewModle)
         }
 
+
+
         navigation<Screens.LocationGraph>(
             startDestination = Screens.LocationHome
-        ) {
+        )
+        {
 
             composable<Screens.LocationHome>(
                 enterTransition = {
@@ -127,7 +166,8 @@ fun NavController(
 
         navigation<Screens.ReseatPasswordGraph>(
             startDestination = Screens.GenerateOtp
-        ) {
+        )
+        {
 
             composable<Screens.GenerateOtp>(
                 enterTransition = {
@@ -157,7 +197,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {result->
+            ) { result ->
                 val data = result.toRoute<Screens.OtpVerification>()
                 OtpVerificationScreen(
                     nav = nav,
@@ -177,7 +217,7 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {result->
+            ) { result ->
                 val data = result.toRoute<Screens.ReseatPassword>()
                 ReseatPasswordScreen(
                     nav = nav,
@@ -191,7 +231,8 @@ fun NavController(
 
         navigation<Screens.AuthGraph>(
             startDestination = Screens.Login
-        ) {
+        )
+        {
 
             composable<Screens.Login>(
                 enterTransition = {
@@ -239,7 +280,8 @@ fun NavController(
 
         navigation<Screens.HomeGraph>(
             startDestination = Screens.Home
-        ) {
+        )
+        {
 
             composable<Screens.Home>(
                 enterTransition = {
@@ -288,8 +330,8 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {result->
-                val data =result.toRoute<Screens.ProductCategory>()
+            ) { result ->
+                val data = result.toRoute<Screens.ProductCategory>()
                 ProductCategoryScreen(
                     nav = nav,
                     homeViewModel = homeViewModle,

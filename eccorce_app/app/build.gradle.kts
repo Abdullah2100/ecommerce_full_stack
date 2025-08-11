@@ -38,12 +38,7 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            version = "3.31.5"
-            path = file("src/main/jni/CMakeLists.txt")
-        }
-    }
+
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -139,15 +134,16 @@ dependencies {
 
     //firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.messaging.ktx)
+//    implementation(libs.firebase.messaging.ktx)
     implementation(libs.firebase.messaging.directboot)
-
 
 
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.compose.runntime)
 
-   //mapbox
-    implementation(libs.android)
+    //mapbox
+    implementation ("com.mapbox.extension:maps-compose:0.1.0")
+    implementation ("com.mapbox.maps:android:11.14.1")
+
 }

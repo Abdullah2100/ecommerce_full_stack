@@ -108,12 +108,12 @@ fun LoginScreen(
 
         ConstraintLayout(
             modifier = Modifier
+                .background(Color.White)
                 .padding(horizontal = 10.dp)
                 .padding(
                     top = it.calculateTopPadding(),
                     bottom = it.calculateBottomPadding()
                 )
-                .background(Color.White)
                 .fillMaxSize()
         ) {
             val (bottonRef, inputRef) = createRefs();
@@ -237,6 +237,7 @@ fun LoginScreen(
                     },
                     buttonTitle = "Login",
                     validationFun = {
+                        true
                         validateLoginInput(
                             username = userNameOrEmail.value.text,
                             password = password.value.text

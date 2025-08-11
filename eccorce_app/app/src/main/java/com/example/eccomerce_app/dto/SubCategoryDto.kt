@@ -11,8 +11,6 @@ data class SubCategoryDto(
     val Id: UUID,
     @Serializable(with = UUIDKserialize::class)
     val CategoryId: UUID,
-    @Serializable(with = UUIDKserialize::class)
-    val StoreId: UUID
 )
 
 

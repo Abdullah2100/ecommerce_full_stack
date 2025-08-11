@@ -1,6 +1,9 @@
 package com.example.e_commercompose.Util
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.compose.foundation.lazy.LazyListState
@@ -13,7 +16,7 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
 import com.example.e_commercompose.data.Room.AuthModleEntity
-import com.example.e_commercompose.util.Secrets
+import com.example.eccomerce_app.util.Secrets
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
@@ -102,6 +105,9 @@ object General {
             return null;
         }
     }
+
+
+
     fun LazyListState.reachedBottom(): Boolean {
         val visibleItemsInfo = layoutInfo.visibleItemsInfo // Get the visible items
         return if (layoutInfo.totalItemsCount == 0) {

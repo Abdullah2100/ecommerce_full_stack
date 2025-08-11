@@ -6,6 +6,6 @@ data class SubCategory(
     val id: UUID,
     val name: String,
     val category_id: UUID,
-    val store_id: UUID
+    val storeId: UUID
 
 )

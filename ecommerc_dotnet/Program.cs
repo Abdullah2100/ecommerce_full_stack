@@ -74,7 +74,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAllOrigins", policy =>
     {
         policy
-.WithOrigins("http://localhost:3000")
+.WithOrigins("http://0.0.0.0:3000")
             .AllowAnyMethod()    // Allows any HTTP methods (GET, POST, etc.)
             .AllowAnyHeader();
     });
@@ -134,7 +134,6 @@ app.UseStaticFiles(new StaticFileOptions
         Path.Combine(builder.Environment.ContentRootPath, "images")),
     RequestPath = "/StaticFiles"
 });
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

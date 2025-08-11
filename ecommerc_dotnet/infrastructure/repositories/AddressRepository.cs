@@ -64,6 +64,7 @@ public class AddressRepository:IAddressRepository
             .FirstOrDefaultAsync(x => x.OwnerId == id);
     }
 
+    
     public async Task<int> updateCurrentLocation(Guid id, Guid ownerId)
     {
       await  _context.Address
@@ -76,5 +77,13 @@ public class AddressRepository:IAddressRepository
       return 1;
 
 
+    }
+
+    public async Task<int> makeAddressNotCurrentToId(Guid ownerId)
+    {
+        await  _context.Address
+            .Where(ad=>ad.OwnerId==ownerId)
+            .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, false));
+        return 1;
     }
 }

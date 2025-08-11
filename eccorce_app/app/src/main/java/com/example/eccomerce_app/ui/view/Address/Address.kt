@@ -1,8 +1,12 @@
 package com.example.e_commercompose.ui.view.Address
 
+import android.Manifest
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
@@ -60,11 +63,14 @@ import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.Util.General
 import com.example.e_commercompose.model.Address
+import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
+import com.google.android.gms.location.LocationServices
+import com.mapbox.maps.extension.style.expressions.dsl.generated.array
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -77,19 +83,61 @@ fun AddressScreen(
     nav: NavHostController,
     homeViewModle: HomeViewModel
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val locationss = homeViewModle.myInfo.collectAsState()
-    val addressHolder = remember { mutableStateOf<Address?>(null) }
-
+    val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
-    val isLoading = remember { mutableStateOf<Boolean>(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-    val isPressAddNewAddress = remember { mutableStateOf(false) }
-    val addressTitle = remember { mutableStateOf(TextFieldValue("")) }
+    val locationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
 
-    val sheetState = rememberModalBottomSheetState()
+    val locationss = homeViewModle.myInfo.collectAsState()
+
+    val isLoading = remember { mutableStateOf<Boolean>(false) }
     val isRefresh = remember { mutableStateOf(false) }
+
+
+    val requestPermissionThenNavigate = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val arePermissionsGranted = permissions.values.reduce { acc, next -> acc && next }
+
+            if (arePermissionsGranted) {
+
+                locationClient.lastLocation
+                    .apply {
+                        addOnSuccessListener { location ->
+
+                            location?.toString()
+                            if (location != null)
+                                nav.navigate(
+                                    Screens.MapScreen(
+                                        lognit = location.longitude,
+                                        latitt = location.latitude,
+                                        isFromLogin = false
+                                    )
+                                )
+                            else
+                                coroutine.launch {
+                                    snackbarHostState.showSnackbar("you should enable location services")
+                                }
+                        }
+                        addOnFailureListener { fail ->
+                            Log.d(
+                                "contextError",
+                                "the current location is null ${fail.stackTrace}"
+                            )
+
+                        }
+                    }
+
+
+                // Got last known location. In some srare situations this can be null.
+            } else {
+                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
 
     Scaffold(
         snackbarHost = {
@@ -131,132 +179,36 @@ fun AddressScreen(
             )
         },
         bottomBar = {
-            when (!isPressAddNewAddress.value) {
-                true -> {
-                    BottomAppBar(
-                        containerColor = Color.White
-                    ){
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 10.dp)
-                        ) {
-                            CustomBotton(
-                                operation = {
-                                    isPressAddNewAddress.value = true
-                                },
-                                buttonTitle = "Add New"
-                            )
-                        }
-                    }
-                }
 
-                else -> {
-                    ModalBottomSheet(
-                        onDismissRequest = {
-                            isPressAddNewAddress.value = false
-                        },
-                        sheetState = sheetState,
-
-                    ) {
-
-                        Column(
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp)
-                                .fillMaxWidth()
-                        ) {
-
-                            TextInputWithTitle(
-                                value = addressTitle,
-                                placHolder = addressHolder?.value?.title ?: "Insert Address Name",
-                                title = "Address Title"
-                            )
-                            CustomBotton(
-                                operation = {
-                                    keyboardController?.hide()
-                                    when(addressHolder.value==null){
-                                        true->{}
-                                        else->{
-                                            coroutine.launch {
-
-                                                isLoading.value=true
-                                                var result = async {
-                                                    homeViewModle.updateUserAddress(
-                                                        addressHolder.value!!.id!!,
-                                                        addressTitle = addressTitle.value.text,
-                                                        null,
-                                                        null
-                                                    )
-                                                }.await()
-
-                                                isLoading.value=false
-                                                var message = "Update Adddress Data Seccessfuly"
-
-                                               if(result!=null){
-                                                  message= result
-                                               }
-                                                else{
-                                                   isPressAddNewAddress.value=false;
-
-                                               }
-                                                snackbarHostState.showSnackbar(message)
-
-                                            }
-                                        }
-                                    }
-                                },
-                                buttonTitle =if(addressHolder.value!=null) "Update" else  "Add New"
-                            )
-                            if(addressHolder.value!=null&&addressHolder.value!!.isCurrnt==false)
-                            {
-                                Sizer(10)
-                                CustomBotton(
-                                    operation = {
-                                        keyboardController?.hide()
-                                        when(addressHolder.value==null){
-                                            true->{}
-                                            else->{
-                                                coroutine.launch {
-
-                                                    isLoading.value=true
-                                                    var result = async {
-                                                        homeViewModle.deleteUserAddress(
-                                                            addressHolder.value!!.id!!)
-                                                    }.await()
-
-                                                    isLoading.value=false
-                                                    var message = "delete Adddress Data Seccessfuly"
-
-                                                    if(result!=null){
-                                                        message= result
-                                                    }
-                                                    else{
-                                                        isPressAddNewAddress.value=false;
-
-                                                    }
-                                                    snackbarHostState.showSnackbar(message)
-
-                                                }
-                                            }
-                                        }
-
-                                    },
-                                    buttonTitle ="Delete",
-                                    color = CustomColor.alertColor_1_600
+            BottomAppBar(
+                containerColor = Color.White
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                ) {
+                    CustomBotton(
+                        operation = {
+                            requestPermissionThenNavigate.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
                                 )
-                            }
-                        }
-
-                    }
+                            )
+                        },
+                        buttonTitle = "Add New"
+                    )
                 }
             }
+
         }
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = {homeViewModle.getMyInfo()}
+            onRefresh = { homeViewModle.getMyInfo() }
         ) {
             when (locationss.value?.address.isNullOrEmpty()) {
                 true -> {
@@ -350,8 +302,16 @@ fun AddressScreen(
 
                                         },
                                         onLongClick = {
-                                            addressHolder.value = locationss.value?.address!![index]
-                                            isPressAddNewAddress.value = true
+                                            val currentAddress = locationss.value?.address!![index]
+                                            nav.navigate(
+                                                Screens.MapScreen(
+                                                    id = currentAddress.id.toString(),
+                                                    latitt = currentAddress.latitude,
+                                                    lognit = currentAddress.longitude,
+                                                    title = currentAddress.title,
+                                                    isFromLogin = false
+                                                )
+                                            )
                                         }
                                     )
                                     .border(
@@ -374,7 +334,7 @@ fun AddressScreen(
                                         modifier = Modifier.size(24.dp)
                                     )
                                     Sizer(width = 20)
-                                    Row() {
+                                    Row {
                                         Text(
                                             locationss.value!!.address!![index].title.toString(),
                                             fontFamily = General.satoshiFamily,

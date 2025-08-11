@@ -1,7 +1,6 @@
 package com.example.e_commercompose.ui.view.account.store
 
 import android.Manifest
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,9 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -100,7 +97,6 @@ import com.example.e_commercompose.viewModel.HomeViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
@@ -148,7 +144,7 @@ fun StoreScreen(
     val storeAddress = stores.value?.filter { it.id == store_id }
 
     val subcategories = homeViewModel.subCategories.collectAsState()
-    val storeSubCategories = subcategories.value?.filter { it.store_id == store_id }
+    val storeSubCategories = subcategories.value?.filter { it.storeId == store_id }
 
     val products = homeViewModel.products.collectAsState()
     val storeProduct =

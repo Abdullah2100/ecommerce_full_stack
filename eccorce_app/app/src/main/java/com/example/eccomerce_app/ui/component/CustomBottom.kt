@@ -29,11 +29,11 @@ fun CustomAuthBotton(
     operation: () -> Unit,
     validationFun: () -> Boolean,
     buttonTitle: String
-){
+) {
     val fontScall = LocalDensity.current.fontScale
 
     Button(
-        enabled = isLoading==false,
+        enabled = isLoading == false,
         modifier = Modifier
             .padding(bottom = 50.dp)
             .height(50.dp)
@@ -78,26 +78,28 @@ fun CustomAuthBotton(
 
 @Composable
 fun CustomBotton(
-    isLoading: Boolean=false,
+    isLoading: Boolean = false,
     operation: () -> Unit,
     buttonTitle: String,
-    color: Color?=null,
-    isEnable: Boolean?=true,
-    lableSize:Int?=16
-){
+    color: Color? = null,
+    isEnable: Boolean? = true,
+    lableSize: Int? = 16,
+    modifier: Modifier?=null
+) {
 
+    val modifer = if (modifier == null) Modifier
+        .height(50.dp)
+        .fillMaxWidth() else modifier
     Button(
         enabled = isEnable!!,
-        modifier = Modifier
-            .height(50.dp)
-            .fillMaxWidth(),
+        modifier = modifer,
         onClick = {
 
-                operation()
+            operation()
         },
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor =color?: CustomColor.primaryColor700
+            containerColor = color ?: CustomColor.primaryColor700
         ),
 
         ) {
@@ -133,10 +135,10 @@ fun CustomTitleBotton(
     operation: () -> Unit,
     buttonTitle: String,
     color: Color?
-){
+) {
     val fontScall = LocalDensity.current.fontScale
 
-    TextButton (
+    TextButton(
         modifier = Modifier
 //            .padding(bottom = 50.dp)
             .height(50.dp)
@@ -147,12 +149,11 @@ fun CustomTitleBotton(
         },
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor =Color.Transparent//color?: CustomColor.primaryColor400
-           // ,
+            containerColor = Color.Transparent//color?: CustomColor.primaryColor400
+            // ,
         ),
 
         ) {
-
 
 
         Text(
@@ -160,7 +161,7 @@ fun CustomTitleBotton(
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Bold,
             fontSize = (16 / fontScall).sp,
-            color = color?: CustomColor.primaryColor700
+            color = color ?: CustomColor.primaryColor700
         )
     }
 

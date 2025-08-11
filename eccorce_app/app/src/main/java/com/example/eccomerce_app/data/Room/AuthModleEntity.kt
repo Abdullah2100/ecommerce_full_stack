@@ -9,5 +9,5 @@ data class AuthModleEntity
     (
     @PrimaryKey(autoGenerate = true) val id: Int? = 0,
     val token: String = "",
-    val refreshToken: String = ""
+    val RefreshToken: String = ""
 )

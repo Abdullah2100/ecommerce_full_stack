@@ -101,7 +101,7 @@ fun AccountPage(
             AccountCustomBottom("Your Profile", R.drawable.user, {
                 nav.navigate(Screens.Profile)
             })
-            AccountCustomBottom("Locations", R.drawable.location_address_list, {
+            AccountCustomBottom("Address", R.drawable.location_address_list, {
                 nav.navigate(Screens.Address)
             })
 //           AccountCustomBottom("My Order", R.drawable.order, {})

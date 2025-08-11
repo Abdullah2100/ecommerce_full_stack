@@ -20,8 +20,8 @@ data class SignupDto(
 
 @Serializable
 data class AuthDto(
-    val Token: String="",
-    val RefreshToken: String = ""
+    val token: String="",
+    val refreshToken: String = ""
 )
 
 

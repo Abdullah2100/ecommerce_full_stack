@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,7 +96,6 @@ fun SignUpPage(
     fun validateLoginInput(
         name: String,
         email: String,
-
         password: String,
         confirmPassword: String
     ): Boolean {
@@ -174,8 +176,38 @@ fun SignUpPage(
                 hostState = snackbarHostState,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp))
             )
-        }
-    ) {
+        },
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.padding(end = 15.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                ),
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            "Signup",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            color = CustomColor.neutralColor950,
+                            fontSize = (34 / fontScall).sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+
+                        )
+                    }
+
+                },
+
+
+                )
+        },
+
+
+        ) {
 
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -206,14 +238,6 @@ fun SignUpPage(
 //                        verticalArrangement = Arrangement.Center
             ) {
 
-                Text(
-                    "Signup",
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Bold,
-                    color = CustomColor.neutralColor950,
-                    fontSize = (34 / fontScall).sp
-                )
-                Sizer(heigh = 50)
                 TextInputWithTitle(
                     name,
                     title = "Name",

@@ -41,7 +41,6 @@ public class UserService : IUserServices
     }
 
 
-  
     public async Task<Result<AuthDto?>> signup(SignupDto signupDto)
     {
         if (signupDto.Role != 0 && signupDto.Role != 1)
@@ -200,7 +199,7 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(id);
-        
+
         var isValide = user.isValidateFunc(false);
         if (isValide is not null)
         {
@@ -444,14 +443,22 @@ public class UserService : IUserServices
             Latitude = addressDto.Latitude,
             Title = addressDto.Title,
             OwnerId = user!.Id,
+            IsCurrent = true
         };
 
-        if (addressCount == 0)
+        int result = await _addressRepository.makeAddressNotCurrentToId(user.Id);
+        if (result == 0)
         {
-            address.IsCurrent =  true;
+            return new Result<AddressDto?>
+            (
+                data: null,
+                message: "error while update the new  address as current address",
+                isSeccessful: false,
+                statusCode: 400
+            );
         }
 
-        int result = await _addressRepository.addAsync(address);
+        result = await _addressRepository.addAsync(address);
 
         if (result == 0)
         {
@@ -580,7 +587,7 @@ public class UserService : IUserServices
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        } 
+        }
 
         Address? address = await _addressRepository.getAddress(addressId);
 
@@ -605,7 +612,7 @@ public class UserService : IUserServices
                 statusCode: 400
             );
         }
-        
+
         if (address.IsCurrent)
         {
             return new Result<bool>
@@ -654,7 +661,7 @@ public class UserService : IUserServices
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }  
+        }
 
         Address? address = await _addressRepository.getAddress(addressId);
 
@@ -679,7 +686,7 @@ public class UserService : IUserServices
                 statusCode: 400
             );
         }
-        
+
         if (address.IsCurrent)
         {
             return new Result<bool>
@@ -718,7 +725,7 @@ public class UserService : IUserServices
     {
         User? user = await _userRepository
             .getUser(forgetPasswordDto.Email);
-        
+
         var isValide = user.isValidateFunc(false);
 
         if (isValide is not null)
@@ -729,10 +736,10 @@ public class UserService : IUserServices
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }   
+        }
 
         string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-        bool isOtpExist = await _passwordRepository.isExist(otp,user!.Email);
+        bool isOtpExist = await _passwordRepository.isExist(otp, user!.Email);
         bool isExist = isOtpExist;
 
         if (isExist)
@@ -740,7 +747,7 @@ public class UserService : IUserServices
             do
             {
                 otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                isOtpExist = await _passwordRepository.isExist(otp,user!.Email);
+                isOtpExist = await _passwordRepository.isExist(otp, user!.Email);
             } while (isOtpExist);
         }
 
@@ -853,7 +860,7 @@ public class UserService : IUserServices
             );
         }
 
-        ReseatePasswordOtp? otpResult = await _passwordRepository.getOtp(otp.Otp, otp.Email,true);
+        ReseatePasswordOtp? otpResult = await _passwordRepository.getOtp(otp.Otp, otp.Email, true);
 
 
         if (otpResult is null)
@@ -868,7 +875,7 @@ public class UserService : IUserServices
         }
 
         User? user = await _userRepository.getUser(otp.Email);
-        
+
         var isValide = user.isValidateFunc();
         if (isValide is not null)
         {
@@ -878,7 +885,7 @@ public class UserService : IUserServices
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }   
+        }
 
         user.Password = clsUtil.hashingText(otp.Password);
 

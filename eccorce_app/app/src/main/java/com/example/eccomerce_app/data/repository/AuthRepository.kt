@@ -1,7 +1,7 @@
-package com.example.e_commercompose.data.repository
+package com.example.eccomerce_app.data.repository
 
 import com.example.eccomerce_app.dto.LoginDto
-import com.example.e_commercompose.util.Secrets
+import com.example.eccomerce_app.util.Secrets
 import com.example.eccomerce_app.dto.AuthDto
 import com.example.eccomerce_app.dto.CreateVerificationDto
 import com.example.eccomerce_app.dto.ForgetPasswordDto

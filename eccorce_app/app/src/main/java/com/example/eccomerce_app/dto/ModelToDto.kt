@@ -8,6 +8,7 @@ import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.eccomerce_app.dto.CreateOrderDto
 import com.example.eccomerce_app.dto.CreateOrderItemDto
 import com.example.eccomerce_app.dto.CreateProductVarientDto
+import com.example.eccomerce_app.dto.SubCategoryDto
 import com.example.eccomerce_app.dto.UpdateSubCategoryDto
 
 object ModelToDto {
@@ -53,6 +54,14 @@ object ModelToDto {
             TotalPrice = this.totalPrice ,
             Latitude = this.latitu,
             Longitude=this.longit
+        )
+    }
+
+    fun SubCategoryUpdate.toSubCategoryUpdateDto(): SubCategoryDto{
+        return SubCategoryDto(
+            Id=this.id,
+            CategoryId = this.cateogy_id,
+            Name = this.name,
         )
     }
 }

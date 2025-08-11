@@ -2,8 +2,6 @@
 eccorce_app/app/src/main/res/values/mapbox_access_token.xml
 
 # .NET Core
-appsettings.Development.json
-appsettings.json
 bin/
 obj/
 *.user
