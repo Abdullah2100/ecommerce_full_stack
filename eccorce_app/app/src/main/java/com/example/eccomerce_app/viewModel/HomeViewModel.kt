@@ -536,9 +536,10 @@ class HomeViewModel(
 
     //category
     fun getCategories(pageNumber: Int = 1) {
-        if (pageNumber == 1 && _categories.value != null) return;
+        Log.d("http://","is category not null ${pageNumber == 1 && _categories.value != null}")
+        if (pageNumber == 1 && !_categories.value.isNullOrEmpty()) return;
         viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
-            var result = homeRepository.getCategory(pageNumber)
+            val result = homeRepository.getCategory(pageNumber)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     var categoriesHolder = result.data as List<CategoryDto>

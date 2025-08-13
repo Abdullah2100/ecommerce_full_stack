@@ -15,8 +15,7 @@ import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.eccomerce_app.ui.view.OnBoarding.OnBoardingScreen
 import com.example.e_commercompose.ui.view.Auth.LoginScreen
 import com.example.e_commercompose.View.Pages.SignUpPage
-import com.example.e_commercompose.ui.view.Address.AddressScreen
-import com.example.e_commercompose.ui.view.Address.MapScreen
+import com.example.e_commercompose.ui.view.Address.EditOrAddLocationScreen
 import com.example.e_commercompose.ui.view.account.AccountPage
 import com.example.e_commercompose.ui.view.account.ProfileScreen
 import com.example.e_commercompose.ui.view.account.store.CreateProductScreen
@@ -27,8 +26,8 @@ import com.example.e_commercompose.ui.view.home.CartScreen
 import com.example.e_commercompose.ui.view.home.HomePage
 import com.example.e_commercompose.ui.view.home.OrderScreen
 import com.example.e_commercompose.ui.view.home.ProductCategoryScreen
-import com.example.e_commercompose.ui.view.location.LocationHomeScreen
-import com.example.e_commercompose.ui.view.location.LocationsList
+import com.example.e_commercompose.ui.view.location.AddressHomeScreen
+import com.example.e_commercompose.ui.view.location.PickCurrentAddressFromAddressScreen
 import com.example.e_commercompose.ui.view.ReseatPassword.GenerateOtpScreen
 import com.example.e_commercompose.ui.view.ReseatPassword.OtpVerificationScreen
 import com.example.e_commercompose.ui.view.ReseatPassword.ReseatPasswordScreen
@@ -129,7 +128,7 @@ fun NavController(
                     )
                 }
             ) {
-                LocationHomeScreen(
+                AddressHomeScreen(
                     nav = nav,
                     homeViewModle = homeViewModle
                 )
@@ -154,7 +153,7 @@ fun NavController(
                 }
             ) { value ->
                 var isFromHomeLocation = value.toRoute<Screens.LocationList>()
-                LocationsList(
+                PickCurrentAddressFromAddressScreen(
                     nav = nav,
                     homeViewModle = homeViewModle,
                     isFromHome = isFromHomeLocation.isFromLocationHome
@@ -507,7 +506,7 @@ fun NavController(
                     )
                 }
             ) {
-                AddressScreen(
+                EditOrAddLocationScreen(
                     nav = nav,
                     homeViewModle = homeViewModle
                 )
@@ -527,9 +526,9 @@ fun NavController(
                     )
                 }
             ) {
-                MapScreen(
+                EditOrAddLocationScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    homeViewModle = homeViewModle
                 )
 
             }

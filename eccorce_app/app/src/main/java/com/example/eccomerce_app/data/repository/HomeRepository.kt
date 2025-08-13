@@ -212,13 +212,17 @@ class HomeRepository(val client: HttpClient) {
                     )
                 }
             }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<CategoryDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                return NetworkCallHandler.Error("No Data Found")
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<CategoryDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
 
-            } else {
-                return NetworkCallHandler.Error(result.body())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -248,13 +252,17 @@ class HomeRepository(val client: HttpClient) {
                     )
                 }
             }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<List<GeneralSettingDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                return NetworkCallHandler.Error("No Data Found")
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<GeneralSettingDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
 
-            } else {
-                return NetworkCallHandler.Error(result.body())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -288,14 +296,17 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.Created) {
+            when (result.status) {
+                HttpStatusCode.Created -> {
 
-                NetworkCallHandler.Successful(result.body<OrderDto>())
+                    NetworkCallHandler.Successful(result.body<OrderDto>())
 
-            } else {
+                }
+                else -> {
 
-                NetworkCallHandler.Error(result.body<String>())
+                    NetworkCallHandler.Error(result.body<String>())
 
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -325,16 +336,20 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
+            when (result.status) {
+                HttpStatusCode.OK -> {
 
-                NetworkCallHandler.Successful(result.body<List<OrderDto>>())
+                    NetworkCallHandler.Successful(result.body<List<OrderDto>>())
 
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
 
-                NetworkCallHandler.Error(result.body<String>())
+                    NetworkCallHandler.Error(result.body<String>())
 
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -364,14 +379,17 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.NoContent) {
+            when (result.status) {
+                HttpStatusCode.NoContent -> {
 
-                NetworkCallHandler.Successful(true)
+                    NetworkCallHandler.Successful(true)
 
-            } else {
+                }
+                else -> {
 
-                NetworkCallHandler.Error(result.body<String>())
+                    NetworkCallHandler.Error(result.body<String>())
 
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -401,16 +419,20 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
+            when (result.status) {
+                HttpStatusCode.OK -> {
 
-                NetworkCallHandler.Successful(result.body<List<OrderItemDto>>())
+                    NetworkCallHandler.Successful(result.body<List<OrderItemDto>>())
 
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
 
-                NetworkCallHandler.Error(result.body<String>())
+                    NetworkCallHandler.Error(result.body<String>())
 
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -441,10 +463,13 @@ class HomeRepository(val client: HttpClient) {
                 setBody(UpdateOrderItemStatusDto(id, status))
             }
 
-            if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Successful(true)
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Successful(true)
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -476,12 +501,16 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<ProductDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -510,12 +539,16 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<ProductDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -544,12 +577,16 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<ProductDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -579,12 +616,16 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<ProductDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<ProductDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -676,10 +717,13 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
 
-            if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<ProductDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.Created -> {
+                    NetworkCallHandler.Successful(result.body<ProductDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -808,10 +852,13 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<ProductDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<ProductDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -840,10 +887,13 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Successful(true)
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Successful(true)
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -918,10 +968,13 @@ class HomeRepository(val client: HttpClient) {
                     )
                 )
             }
-            if (result.status == HttpStatusCode.Created) {
-                return NetworkCallHandler.Successful(result.body<StoreDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
+            when (result.status) {
+                HttpStatusCode.Created -> {
+                    NetworkCallHandler.Successful(result.body<StoreDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body())
+                }
             }
         } catch (e: UnknownHostException) {
 
@@ -998,10 +1051,13 @@ class HomeRepository(val client: HttpClient) {
                     )
                 )
             }
-            if (result.status == HttpStatusCode.OK) {
-                return NetworkCallHandler.Successful(result.body<StoreDto>())
-            } else {
-                return NetworkCallHandler.Error(result.body())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<StoreDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body())
+                }
             }
         } catch (e: UnknownHostException) {
 
@@ -1029,10 +1085,13 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<StoreDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<StoreDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1061,10 +1120,13 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<AddressDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<AddressDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1096,12 +1158,16 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<SubCategoryDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<SubCategoryDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1134,10 +1200,13 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<SubCategoryDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.Created -> {
+                    NetworkCallHandler.Successful(result.body<SubCategoryDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1170,10 +1239,13 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<SubCategoryDto>())
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<SubCategoryDto>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1203,10 +1275,13 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Successful(true)
-            } else {
-                NetworkCallHandler.Error(result.body<String>())
+            when (result.status) {
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Successful(true)
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body<String>())
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1243,12 +1318,15 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.Created) {
-                NetworkCallHandler.Successful(result.body<AddressDto?>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
+            when (result.status) {
+                HttpStatusCode.Created -> {
+                    NetworkCallHandler.Successful(result.body<AddressDto?>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(
+                        result.body<String>()
+                    )
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1283,12 +1361,15 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<AddressDto?>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<AddressDto?>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(
+                        result.body<String>()
+                    )
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1319,12 +1400,15 @@ class HomeRepository(val client: HttpClient) {
 
             }
 
-            if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Successful(true)
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
+            when (result.status) {
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Successful(true)
+                }
+                else -> {
+                    NetworkCallHandler.Error(
+                        result.body<String>()
+                    )
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1354,12 +1438,15 @@ class HomeRepository(val client: HttpClient) {
                 }
             }
 
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<Boolean>())
-            } else {
-                NetworkCallHandler.Error(
-                    result.body<String>()
-                )
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<Boolean>())
+                }
+                else -> {
+                    NetworkCallHandler.Error(
+                        result.body<String>()
+                    )
+                }
             }
 
         } catch (e: UnknownHostException) {
@@ -1389,9 +1476,12 @@ class HomeRepository(val client: HttpClient) {
                     )
                 }
             }
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<UserDto>())
-            } else NetworkCallHandler.Error(result.body())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<UserDto>())
+                }
+                else -> NetworkCallHandler.Error(result.body())
+            }
 
         } catch (e: UnknownHostException) {
 
@@ -1455,9 +1545,12 @@ class HomeRepository(val client: HttpClient) {
                     )
                 )
             }
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<UserDto>())
-            } else NetworkCallHandler.Error(result.body())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<UserDto>())
+                }
+                else -> NetworkCallHandler.Error(result.body())
+            }
 
         } catch (e: UnknownHostException) {
 
@@ -1486,12 +1579,16 @@ class HomeRepository(val client: HttpClient) {
                     )
                 }
             }
-            if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<VarientDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
-            } else {
-                NetworkCallHandler.Error(result.body())
+            when (result.status) {
+                HttpStatusCode.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<VarientDto>>())
+                }
+                HttpStatusCode.NoContent -> {
+                    NetworkCallHandler.Error("No Data Found")
+                }
+                else -> {
+                    NetworkCallHandler.Error(result.body())
+                }
             }
 
         } catch (e: UnknownHostException) {

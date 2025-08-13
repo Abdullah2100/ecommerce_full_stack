@@ -698,7 +698,19 @@ public class UserService : IUserServices
             );
         }
 
-        int result = await _addressRepository.updateCurrentLocation(addressId, user!.Id);
+        int result = await _addressRepository.makeAddressNotCurrentToId(user!.Id);
+        if (result == 0)
+        {
+            return new Result<bool>
+            (
+                data: false,
+                message: "error while update the new  address as current address",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+        result = await _addressRepository.updateCurrentLocation(addressId, user!.Id);
 
         if (result == 0)
         {

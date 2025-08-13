@@ -30,9 +30,9 @@ object DtoToModel {
 
     fun CategoryDto.toCategory(): Category{
         return Category(
-            id= this.Id,
-            name =this.Name,
-            image=this.Image.replace("localhost","10.0.2.2")
+            id= this.id,
+            name =this.name,
+            image=this.image.replace("0.0.0.0","192.168.1.44")
         );
     }
     fun SubCategoryDto.toSubCategory(): SubCategory{
@@ -50,8 +50,8 @@ object DtoToModel {
             id = this.Id,
             name = this.Name,
             user_id = this.UserId,
-            pig_image = this.WallpaperImage.replace("localhost", "10.0.2.2"),
-            small_image = this.SmallImage.replace("localhost", "10.0.2.2"),
+            pig_image = this.WallpaperImage.replace("0.0.0.0", "192.168.1.44"),
+            small_image = this.SmallImage.replace("0.0.0.0", "192.168.1.44"),
             latitude = this.Latitude,
             longitude = this.Longitude
         )
@@ -63,7 +63,7 @@ object DtoToModel {
             name = this.name,
             phone = this.phone,
             email = this.email,
-            thumbnail=if(!this.thumbnail.isEmpty())this.thumbnail.replace("localhost","10.0.2.2") else "",
+            thumbnail=if(!this.thumbnail.isEmpty())this.thumbnail.replace("0.0.0.0","192.168.1.44") else "",
             address = this.address?.map { it.toAddress() }?.toList(),
             store_id = this.storeId
         )
@@ -73,7 +73,7 @@ object DtoToModel {
     fun BannerDto.toBanner():BannerModel{
         return BannerModel(
             id=this.Id,
-            image=if(this.Image.isNotEmpty())this.Image.replace("localhost","10.0.2.2") else "",
+            image=if(this.Image.isNotEmpty())this.Image.replace("0.0.0.0","192.168.1.44") else "",
             store_id = this.StoreId
         )
     }
@@ -99,7 +99,7 @@ object DtoToModel {
             id = this.Id,
             name = this.Name,
             description = this.Description,
-            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("localhost","10.0.2.2") else "",
+            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.44") else "",
             subcategory_id = this.SubcategoryId,
             store_id = this.StoreId,
             price = this.Price,
@@ -107,7 +107,7 @@ object DtoToModel {
             productVarients = this.ProductVarients?.map {
                 it.map { it.toProductVarient() }
             },
-            productImages = this.ProductImages.map { it->if(it.isNotEmpty())it.replace("localhost","10.0.2.2") else "" }
+            productImages = this.ProductImages.map { it->if(it.isNotEmpty())it.replace("0.0.0.0","192.168.1.44") else "" }
         )
     }
 
@@ -122,7 +122,7 @@ object DtoToModel {
         return OrderProduct(
             id= this.Id,
             name = this.Name,
-            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("localhost","10.0.2.2") else ""
+            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.44") else ""
         )
     }
 

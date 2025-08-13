@@ -58,16 +58,16 @@ builder.Services.AddTransient<IOrderServices,OrderServices>();
 
 
 
-var fireBaseConfig = Path.Combine(
-    Directory.GetCurrentDirectory(), 
-    "firebase-adminsdk.json"
-);
+// var fireBaseConfig = Path.Combine(
+//     Directory.GetCurrentDirectory(), 
+//     "firebase-adminsdk.json"
+// );
 
-var firebaseCredential = GoogleCredential.FromFile(fireBaseConfig);
-FirebaseApp.Create(new AppOptions()
-{
-    Credential = firebaseCredential
-});
+// var firebaseCredential = GoogleCredential.FromFile(fireBaseConfig);
+// FirebaseApp.Create(new AppOptions()
+// {
+//     Credential = firebaseCredential
+// });
 
 builder.Services.AddCors(options =>
 {

@@ -7,7 +7,7 @@ import java.util.UUID
 @Serializable
 data class CategoryDto(
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
-    val Name: String,
-    val Image: String
+    val id: UUID,
+    val name: String,
+    val image: String
 )

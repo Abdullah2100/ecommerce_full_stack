@@ -5,9 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class AddressRepository:IAddressRepository
+public class AddressRepository : IAddressRepository
 {
-   
     private readonly AppDbContext _context;
 
     public AddressRepository(AppDbContext context)
@@ -63,26 +62,19 @@ public class AddressRepository:IAddressRepository
             .Address
             .FirstOrDefaultAsync(x => x.OwnerId == id);
     }
-
     
     public async Task<int> updateCurrentLocation(Guid id, Guid ownerId)
     {
-      await  _context.Address
-          .Where(ad=>ad.OwnerId==ownerId&&ad.Id !=id)
-            .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, false));
-     
-      await  _context.Address
-          .Where(ad=>ad.OwnerId==ownerId&&ad.Id ==id)
-          .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, true));
-      return 1;
-
-
+        await _context.Address
+            .Where(ad => ad.OwnerId == ownerId && ad.Id == id)
+            .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, true));
+        return 1;
     }
 
     public async Task<int> makeAddressNotCurrentToId(Guid ownerId)
     {
-        await  _context.Address
-            .Where(ad=>ad.OwnerId==ownerId)
+        await _context.Address
+            .Where(ad => ad.OwnerId == ownerId)
             .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, false));
         return 1;
     }
