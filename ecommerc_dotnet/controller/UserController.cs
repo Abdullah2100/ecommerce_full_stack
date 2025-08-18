@@ -11,22 +11,15 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/User")]
-public class UserController : ControllerBase
+public class UserController(IUserServices userServices) : ControllerBase
 {
-    private readonly IUserServices _userServices;
-
-    public UserController(IUserServices userServices)
-    {
-        _userServices = userServices;
-    }
-
     [AllowAnonymous]
     [HttpPost("signup")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> signUp([FromBody] SignupDto data)
     {
-        var result = await _userServices.signup(data);
+        var result = await userServices.signup(data);
 
         return result.IsSeccessful switch
         {
@@ -42,7 +35,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> login([FromBody] LoginDto data)
     {
-        var result = await _userServices.login(data);
+        var result = await userServices.login(data);
 
         return result.IsSeccessful switch
         {
@@ -72,7 +65,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.getMe(userId.Value);
+        var result = await userServices.getMe(userId.Value);
 
         return result.IsSeccessful switch
         {
@@ -103,7 +96,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.getUsers(page, adminId.Value);
+        var result = await userServices.getUsers(page, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -135,7 +128,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.blockOrUnBlockUser(adminId.Value, userId);
+        var result = await userServices.blockOrUnBlockUser(adminId.Value, userId);
 
         return result.IsSeccessful switch
         {
@@ -170,7 +163,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.updateUser(userData, userId.Value);
+        var result = await userServices.updateUser(userData, userId.Value);
 
         return result.IsSeccessful switch
         {
@@ -205,7 +198,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.addAddressToUser(address, userId.Value);
+        var result = await userServices.addAddressToUser(address, userId.Value);
 
         return result.IsSeccessful switch
         {
@@ -240,7 +233,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.updateUserAddress(address, userId.Value);
+        var result = await userServices.updateUserAddress(address, userId.Value);
 
 
         return result.IsSeccessful switch
@@ -276,7 +269,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.deleteUserAddress(addressId, adminId.Value);
+        var result = await userServices.deleteUserAddress(addressId, adminId.Value);
 
 
         return result.IsSeccessful switch
@@ -311,7 +304,7 @@ public class UserController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _userServices.updateUserCurrentAddress(addressId, userId.Value);
+        var result = await userServices.updateUserCurrentAddress(addressId, userId.Value);
 
 
         return result.IsSeccessful switch
@@ -335,7 +328,7 @@ public class UserController : ControllerBase
         [FromBody] ForgetPasswordDto otp
     )
     {
-        var result = await _userServices.generateOtp(otp);
+        var result = await userServices.generateOtp(otp);
 
 
         return result.IsSeccessful switch
@@ -356,7 +349,7 @@ public class UserController : ControllerBase
         [FromBody] CreateVerificationDto verification
     )
     {
-        var result = await _userServices.otpVerification(verification);
+        var result = await userServices.otpVerification(verification);
 
 
         return result.IsSeccessful switch
@@ -375,7 +368,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> reseatPassword([FromBody] CreateReseatePasswordDto data)
     {
-        var result = await _userServices.reseatePassword(data);
+        var result = await userServices.reseatePassword(data);
 
 
         return result.IsSeccessful switch

@@ -43,6 +43,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.R
 import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.CustomTitleBotton
@@ -88,7 +89,9 @@ fun AddressHomeScreen(
                                     Screens.MapScreen(
                                         lognit = location.longitude,
                                         latitt = location.latitude,
-                                        isFromLogin = true
+                                        isFromLogin = true,
+                                        mapType = enMapType.My
+
                                     )
                                 )
                             else
@@ -194,7 +197,7 @@ fun AddressHomeScreen(
             CustomTitleBotton(
                 operation = {
                     homeViewModle.getMyInfo()
-                    nav.navigate(Screens.LocationList(true))
+                    nav.navigate(Screens.PickCurrentAddress)
                 },
                 buttonTitle = "Enter Location Manually",
                 color = CustomColor.primaryColor700

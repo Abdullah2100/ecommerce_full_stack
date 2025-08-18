@@ -14,21 +14,11 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/Store")]
-public class StoreController : ControllerBase
+public class StoreController(
+    IHubContext<EcommerceHub> hubContext,
+    IStoreServices storeServices)
+    : ControllerBase
 {
-    public StoreController(
-        IHubContext<EcommerceHub> hubContext,
-        IStoreServices storeServices
-    )
-    {
-        _hubContext = hubContext;
-        _storeServices = storeServices;
-    }
-
-
-    private readonly IStoreServices _storeServices;
-    private readonly IHubContext<EcommerceHub> _hubContext;
-
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -51,7 +41,7 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _storeServices.createStore(store, userId.Value);
+        var result = await storeServices.createStore(store, userId.Value);
 
         return result.IsSeccessful switch
         {
@@ -86,7 +76,7 @@ public class StoreController : ControllerBase
         }
 
 
-        var result = await _storeServices.updateStore(store, userId.Value);
+        var result = await storeServices.updateStore(store, userId.Value);
 
         return result.IsSeccessful switch
         {
@@ -121,10 +111,10 @@ public class StoreController : ControllerBase
         }
 
 
-        var result = await _storeServices.updateStoreStatus(adminId.Value, storeId);
+        var result = await storeServices.updateStoreStatus(adminId.Value, storeId);
 
         if (result.IsSeccessful)
-            await _hubContext.Clients.All.SendAsync("storeStatus", new StoreStatusDto
+            await hubContext.Clients.All.SendAsync("storeStatus", new StoreStatusDto
             {
                 StoreId = storeId,
                 Status = true
@@ -159,7 +149,7 @@ public class StoreController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _storeServices.getStoreByUserId(userId);
+        var result = await storeServices.getStoreByUserId(userId);
 
         return result.IsSeccessful switch
         {
@@ -174,7 +164,7 @@ public class StoreController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getStore(Guid storeId)
     {
-        var result = await _storeServices.getStoreByStoreId(storeId);
+        var result = await storeServices.getStoreByStoreId(storeId);
 
         return result.IsSeccessful switch
         {
@@ -205,7 +195,7 @@ public class StoreController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _storeServices.getStores(adminId.Value, page,25);
+        var result = await storeServices.getStores(adminId.Value, page,25);
 
         return result.IsSeccessful switch
         {

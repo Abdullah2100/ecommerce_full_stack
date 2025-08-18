@@ -5,17 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class BannerRepository:IBannerRepository
+public class BannerRepository(AppDbContext context) : IBannerRepository
 {
-    private readonly AppDbContext _context;
-
-    public BannerRepository(AppDbContext context)
-    {
-        _context = context;
-    }
     public async Task<IEnumerable<Banner>> getAllAsync(int page, int length)
     {
-        return await  _context.Banner
+        return await  context.Banner
             .OrderByDescending(ba => ba.CreatedAt)
             .AsNoTracking()
             .Skip((page-1)*length)
@@ -25,42 +19,42 @@ public class BannerRepository:IBannerRepository
 
     public async Task<int> addAsync(Banner entity)
     {
-        await _context
+        await context
             .Banner
             .AddAsync(entity);
-        return await _context
+        return await context
             .SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(Banner entity)
     {
-         _context
+         context
              .Banner
              .Update(entity);
-        return await _context
+        return await context
             .SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-       await _context
+       await context
            .Banner
            .Where(ba => ba.Id == id)
            .ExecuteDeleteAsync();
-       return await _context
+       return await context
            .SaveChangesAsync(); 
     }
 
     public async Task<Banner?> getBanner(Guid id)
     {
-     return   await _context 
+     return   await context 
             .Banner
             .FindAsync(id); 
     }
 
     public async Task<Banner?> getBanner(Guid id, Guid storeId)
     {
-        return   await _context
+        return   await context
             .Banner
             .AsNoTracking()
             .FirstOrDefaultAsync(ba=>ba.Id==id&&ba.StoreId==storeId);
@@ -68,7 +62,7 @@ public class BannerRepository:IBannerRepository
 
     public async Task<List<Banner>> getBanners(Guid id, int pageNumber, int pageSize)
     {
-        return await  _context.Banner
+        return await  context.Banner
             .OrderByDescending(ba => ba.CreatedAt)
             .Where(ba=>ba.StoreId==id)
             .AsNoTracking()
@@ -80,7 +74,7 @@ public class BannerRepository:IBannerRepository
 
     public async Task<List<Banner>> getBanners(int pageNumber, int pageSize)
     {
-        return await  _context.Banner
+        return await  context.Banner
             .OrderByDescending(ba => ba.CreatedAt)
             .AsNoTracking()
             .Skip((pageNumber-1)*pageSize)
@@ -90,7 +84,7 @@ public class BannerRepository:IBannerRepository
 
     public async Task<List<Banner>> getBanners(int randomLenght)
     {
-        return await  _context.Banner
+        return await  context.Banner
             .OrderBy(ba=>ba.Id)
             .AsNoTracking()
             .Take(randomLenght)

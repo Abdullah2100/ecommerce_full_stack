@@ -1,6 +1,9 @@
 package com.example.e_commercompose.ui.view.account.store
 
 import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,7 +34,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,6 +79,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
@@ -85,6 +89,7 @@ import com.example.e_commercompose.Util.General.toCustomFil
 import com.example.e_commercompose.Util.General.toLocalDateTime
 import com.example.e_commercompose.model.Category
 import com.example.e_commercompose.model.SubCategoryUpdate
+import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.BannerBage
 import com.example.e_commercompose.ui.component.CustomBotton
@@ -95,10 +100,8 @@ import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.e_commercompose.viewModel.HomeViewModel
 import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
@@ -110,126 +113,147 @@ import kotlin.collections.forEach
 fun StoreScreen(
     nav: NavHostController,
     homeViewModel: HomeViewModel,
-    store_idCopy: String?,
+    copyStoreId: String?,
     isFromHome: Boolean?
 ) {
-    val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
-    val isUpdated = remember { mutableStateOf(false) }
-    val isDeleted = remember { mutableStateOf(false) }
-    val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
-    val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
-    val isSubCategoryCreateError = remember { mutableStateOf(false) }
-    val isChangeSubCategory = remember { mutableStateOf(false) }
-    var isExpandedCategory = remember { mutableStateOf(false) }
-
-
-    var store_id = if (store_idCopy == null) null else UUID.fromString(store_idCopy)
-
-    val myInfo = homeViewModel.myInfo.collectAsState();
-    var myStore_id = myInfo.value?.store_id
-
     val keyboardController = LocalSoftwareKeyboardController.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
+    val createdStoreInfoHolder = homeViewModel.storeCreateData.collectAsState()
+    val myInfo = homeViewModel.myInfo.collectAsState();
     val categories = homeViewModel.categories.collectAsState()
-
-    val stores = homeViewModel.stores.collectAsState()
-    val storeData = stores.value?.firstOrNull { it.id == store_id }
-
     val banners = homeViewModel.banners.collectAsState()
-    val storeBanners = banners.value?.filter { it.store_id == store_id }
-
-    val address = homeViewModel.storeAddress.collectAsState()
-    val storeAddress = stores.value?.filter { it.id == store_id }
-
     val subcategories = homeViewModel.subCategories.collectAsState()
-    val storeSubCategories = subcategories.value?.filter { it.storeId == store_id }
-
     val products = homeViewModel.products.collectAsState()
-    val storeProduct =
-        if (products.value != null && store_id != null) products.value!!.filter { it.store_id == store_id }
-        else emptyList();
-
-    val storeFilter = if (selectedSubCategoryId.value == null) storeProduct
-    else storeProduct.filter { it.subcategory_id == selectedSubCategoryId.value }
-
-    val isLoading = homeViewModel.isLoading.collectAsState()
 
 
-    val wall_paper_image = remember { mutableStateOf<File?>(null) }
-    val small_paper_image = remember { mutableStateOf<File?>(null) }
-    val storeName = remember { mutableStateOf(TextFieldValue("")) }
-    val longint = remember { mutableStateOf(0.0) }
-    val latit = remember { mutableStateOf(0.0) }
-
-    val isPigImage = remember { mutableStateOf<Boolean?>(null) }
-
-
-    val errorMessage = remember { mutableStateOf("") }
-
-
-    val isPressAddNewAddress = remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
-
-    val currutine = rememberCoroutineScope()
-    val isNotEnablePermission = remember { mutableStateOf(false) }
-
-    val categoryName = remember { mutableStateOf(TextFieldValue("")) }
-
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
+    val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
 
     val bannerImage = remember { mutableStateOf<File?>(null) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val errorMessage = remember { mutableStateOf("") }
+
+    val page = remember { mutableIntStateOf(1) }
+
+    val isLoadingMore = remember { mutableStateOf(false) }
+    val isRefresh = remember { mutableStateOf(false) }
+    val isShownSubCategoryBottomSheet = remember { mutableStateOf(false) }
+    val isUpdated = remember { mutableStateOf(false) }
+    val isDeleted = remember { mutableStateOf(false) }
+    val isSubCategoryCreateError = remember { mutableStateOf(false) }
+    val isChangeSubCategory = remember { mutableStateOf(false) }
+    val isExpandedCategory = remember { mutableStateOf(false) }
+    val isLoading = homeViewModel.isLoading.collectAsState()
     val isShownDateDialog = remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
-    val currentTime = Calendar.getInstance().timeInMillis;
     val isSendingData = remember { mutableStateOf(false) }
+    val isPigImage = remember { mutableStateOf<Boolean?>(null) }
 
 
-    var animated = animateDpAsState(
+    val storeId = if (copyStoreId == null) null else UUID.fromString(copyStoreId)
+
+
+    val myStoreId = myInfo.value?.store_id
+    val stores = homeViewModel.stores.collectAsState()
+    val storeData = stores.value?.firstOrNull { it.id == (storeId ?: myStoreId) }
+    val storeBanners = banners.value?.filter { it.store_id == storeId }
+    val storeSubCategories = subcategories.value?.filter { it.storeId == storeId }
+    val storeProduct = if (products.value != null && storeId != null)
+        products.value!!.filter { it.store_id == storeId }
+    else emptyList();
+    val productFilterBySubCategory = if (selectedSubCategoryId.value == null) storeProduct
+    else storeProduct.filter { it.subcategory_id == selectedSubCategoryId.value }
+
+
+    //animation
+    val animated = animateDpAsState(
         if (isExpandedCategory.value) ((categories.value?.size ?: 1) * 35).dp else 0.dp
     )
 
-    var rotation = animateFloatAsState(
+    val rotation = animateFloatAsState(
         if (isExpandedCategory.value) 180f else 0f
     )
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    val requestPermssion = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(), onResult = { permission ->
-            val arePermissionsGranted = permission.values.reduce { acc, next ->
-                acc && next
-            }
+    //text feild
+    val storeName =
+        remember { mutableStateOf(TextFieldValue(createdStoreInfoHolder.value?.name ?: "")) }
+    val categoryName = remember { mutableStateOf(TextFieldValue("")) }
+    val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
+
+
+    val sheetState = rememberModalBottomSheetState()
+    val datePickerState = rememberDatePickerState()
+
+
+    val currentTime = Calendar.getInstance().timeInMillis;
+
+
+    val locationClient = LocationServices.getFusedLocationProviderClient(context)
+    val requestPermissionThenNavigate = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val arePermissionsGranted = permissions.values.reduce { acc, next -> acc && next }
+
             if (arePermissionsGranted) {
-                currutine.launch(Dispatchers.Main) {
 
-                    try {
-                        val data = fusedLocationClient.lastLocation.await()
-                        data?.let { location ->
-                            longint.value = location.longitude ?: 5.5000
-                            latit.value = location.latitude ?: 5.5000
-                        }
-                        if (longint.value == 0.0) {
-                            longint.value = 5.50000
-                            latit.value = 5.50000
-                        }
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
 
-                    } catch (e: SecurityException) {
-                        var error = "Permission exception: ${e.message}"
+                    return@rememberLauncherForActivityResult;
+                } else locationClient.lastLocation
+                    .apply {
+                        addOnSuccessListener { location ->
+
+                            location?.toString()
+                            if (location != null)
+                                nav.navigate(
+                                    Screens.MapScreen(
+                                        lognit = location.longitude,
+                                        latitt = location.latitude,
+                                        isFromLogin = false,
+                                        title = null,
+                                        mapType = when ((myStoreId == storeId || myStoreId == null) && isFromHome == false) {
+                                            true -> enMapType.MyStore
+                                            else -> enMapType.Store
+                                        },
+                                    )
+                                )
+                            else
+                                coroutine.launch {
+                                    snackbarHostState.showSnackbar("you should enable location services")
+                                }
+                        }
+                        addOnFailureListener { fail ->
+                            Log.d(
+                                "contextError",
+                                "the current location is null ${fail.stackTrace}"
+                            )
+
+                        }
                     }
 
-                }
+
+                // Got last known location. In some srare situations this can be null.
             } else {
-                isNotEnablePermission.value = true
+                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
+    )
+
 
     val onImageSelection = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
+    )
+    { uri ->
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context);
             if (fileHolder != null) {
@@ -242,11 +266,15 @@ fun StoreScreen(
                     else -> {
                         when (isPigImage.value) {
                             true -> {
-                                wall_paper_image.value = fileHolder
+                                homeViewModel.setStoreCreateData(
+                                    wallpaper_image = fileHolder
+                                )
                             }
 
                             else -> {
-                                small_paper_image.value = fileHolder
+                                homeViewModel.setStoreCreateData(
+                                    small_image = fileHolder
+                                )
                             }
                         }
                     }
@@ -262,22 +290,22 @@ fun StoreScreen(
             lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
         }
     }
-    var page = remember { mutableStateOf(1) }
-    val isLoadingMore = remember { mutableStateOf(false) }
-    val isRefresh = remember { mutableStateOf(false) }
-
-
 
 
     fun creationValidation(): Boolean {
         keyboardController?.hide()
         var errorMessage = "";
-        if (wall_paper_image.value == null) errorMessage = "You must select the wallpaper image"
-        else if (small_paper_image.value == null) errorMessage = "You must select the small image"
-        else if (longint.value == 0.0) errorMessage = "You must select the store Location"
-        else if (storeName.value.text.isEmpty()) errorMessage = "You write the store name"
+        if (createdStoreInfoHolder.value?.wallpaperImage == null) errorMessage =
+            "You must select the wallpaper image"
+        else if (createdStoreInfoHolder.value?.smallImage == null) errorMessage =
+            "You must select the small image"
+        else if (createdStoreInfoHolder.value?.name == null) errorMessage =
+            "You must write the store name"
+        else if (createdStoreInfoHolder.value?.latitude == null) errorMessage =
+            "You must select the store Location"
+
         if (errorMessage.trim().isNotEmpty()) {
-            currutine.launch {
+            coroutine.launch {
                 snackbarHostState.showSnackbar(errorMessage)
             }
             return false
@@ -288,9 +316,8 @@ fun StoreScreen(
 
 
     LaunchedEffect(Unit) {
-        if (store_id != null)
-        {
-            homeViewModel.getStoreInfoByStoreId(store_id)
+        if (storeId != null) {
+            homeViewModel.getStoreInfoByStoreId(storeId)
         }
     }
 
@@ -299,13 +326,13 @@ fun StoreScreen(
             when (selectedSubCategoryId.value == null) {
                 true -> {
                     homeViewModel.getProducts(
-                        page, store_id = store_id!!, isLoadingMore
+                        page, store_id = storeId!!, isLoadingMore
                     )
                 }
 
                 else -> {
                     homeViewModel.getProducts(
-                        page, store_id = store_id!!, selectedSubCategoryId.value!!, isLoadingMore
+                        page, store_id = storeId!!, selectedSubCategoryId.value!!, isLoadingMore
                     )
                 }
             }
@@ -313,6 +340,8 @@ fun StoreScreen(
         }
 
     }
+
+    Log.d("thisMyStoreId", "store id is : ${isFromHome}")
 
 
 
@@ -326,70 +355,7 @@ fun StoreScreen(
         },
 
         bottomBar = {
-            if (isPressAddNewAddress.value) ModalBottomSheet(
-                onDismissRequest = {
-                    isPressAddNewAddress.value = false
-                }, sheetState = sheetState
-            ) {
 
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .fillMaxWidth()
-                ) {
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                isPressAddNewAddress.value = false
-                                requestPermssion.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    )
-                                )
-                            }, horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            Icons.Outlined.LocationOn,
-                            "",
-                            tint = CustomColor.neutralColor950,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            "Current Address",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = CustomColor.neutralColor950,
-                        )
-                    }
-
-                    Sizer(20)
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.outline_map),
-                            "",
-                            tint = CustomColor.neutralColor950,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            "Chose From Map",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = CustomColor.neutralColor950,
-                        )
-                    }
-
-
-                }
-            }
 
             if (isShownSubCategoryBottomSheet.value)
                 ModalBottomSheet(
@@ -492,7 +458,7 @@ fun StoreScreen(
                         CustomBotton(
                             isLoading = !isDeleted.value && isSendingData.value,
                             operation = {
-                                currutine.launch {
+                                coroutine.launch {
                                     keyboardController?.hide()
                                     var result = async {
                                         isSendingData.value = true;
@@ -528,11 +494,8 @@ fun StoreScreen(
                             },
                             buttonTitle = if (isUpdated.value) "Update" else "Create",
                             color = null,
-                            isEnable = isDeleted.value == false &&
-                                    (
-                                            subCategoryName.value.text.isNotEmpty() &&
-                                                    categoryName.value.text.isNotEmpty()
-                                            )
+                            isEnable = !isDeleted.value && (subCategoryName.value.text.isNotEmpty() &&
+                                    categoryName.value.text.isNotEmpty())
                         )
 
                         if (isUpdated.value) {
@@ -540,7 +503,7 @@ fun StoreScreen(
                             CustomBotton(
                                 isLoading = isDeleted.value && isSendingData.value,
                                 operation = {
-                                    currutine.launch {
+                                    coroutine.launch {
                                         isSendingData.value = true
                                         isDeleted.value = true
                                         keyboardController?.hide()
@@ -645,31 +608,32 @@ fun StoreScreen(
                     }
                 },
                 actions = {
-                    if ((myStore_id == null) && isFromHome == false) {
+                    if ((myStoreId == null) && isFromHome == false) {
                         TextButton(
                             enabled = isLoading.value == false, onClick = {
                                 if (creationValidation()) {
                                     keyboardController?.hide()
-                                    currutine.launch {
+                                    coroutine.launch {
                                         var result = async {
 
                                             homeViewModel.createStore(
-                                                name = storeName.value.text,
-                                                wallpaper_image = wall_paper_image.value!!,
-                                                small_image = small_paper_image.value!!,
-                                                longitude = longint.value,
-                                                latitude = latit.value,
+                                                name = createdStoreInfoHolder.value?.name
+                                                    ?: storeName.value.text,
+                                                wallpaper_image = createdStoreInfoHolder.value!!.wallpaperImage!!,
+                                                small_image = createdStoreInfoHolder.value!!.smallImage!!,
+                                                longitude = createdStoreInfoHolder.value!!.longitude!!,
+                                                latitude = createdStoreInfoHolder.value!!.latitude!!,
                                             );
                                         }.await()
 
                                         if (result != null) {
                                             snackbarHostState.showSnackbar(result)
                                         } else {
-                                            wall_paper_image.value = null
-                                            small_paper_image.value = null
                                             storeName.value = TextFieldValue("")
-                                            longint.value = 0.0;
-                                            latit.value = 0.0
+                                            homeViewModel.getStoreSubCategories(
+                                                myInfo.value!!.store_id!!,
+                                                1
+                                            )
                                         }
                                     }
                                 }
@@ -693,27 +657,32 @@ fun StoreScreen(
                                 }
                             }
                         }
-                    } else if (isFromHome == false && myStore_id != null && myStore_id == store_id && isFromHome == false && (storeName.value.text.isNotEmpty() || latit.value != 0.0 || longint.value != 0.0 || wall_paper_image.value != null || small_paper_image.value != null)) {
+                    } else if (isFromHome == false
+                        && myStoreId != null && myStoreId == storeId
+                        && !isFromHome
+                        && (storeName.value.text.isNotEmpty() ||
+                                createdStoreInfoHolder.value?.wallpaperImage != null ||
+                                createdStoreInfoHolder.value?.smallImage != null ||
+                                createdStoreInfoHolder.value?.latitude != null)
+                    ) {
                         TextButton(
                             enabled = isLoading.value == false, onClick = {
                                 keyboardController?.hide()
-                                currutine.launch {
+                                coroutine.launch {
                                     var result = async {
 
                                         homeViewModel.updateStore(
                                             name = storeName.value.text,
-                                            wallpaper_image = wall_paper_image.value,
-                                            small_image = small_paper_image.value,
-                                            longitude = longint.value,
-                                            latitude = latit.value,
+                                            wallpaper_image = createdStoreInfoHolder.value?.wallpaperImage,
+                                            small_image = createdStoreInfoHolder.value?.smallImage,
+                                            longitude = createdStoreInfoHolder.value?.longitude,
+                                            latitude = createdStoreInfoHolder.value?.latitude,
                                         );
                                     }.await()
 
                                     if (result != null) {
                                         snackbarHostState.showSnackbar(result)
                                     } else {
-                                        wall_paper_image.value = null
-                                        small_paper_image.value = null
                                         storeName.value = TextFieldValue("")
                                     }
                                 }
@@ -745,16 +714,16 @@ fun StoreScreen(
         floatingActionButton = {
             if (isFromHome == false && storeData != null)
                 FloatingActionButton(
-                onClick = {
-                    nav.navigate(Screens.CreateProduct(store_id.toString(), null))
-                },
+                    onClick = {
+                        nav.navigate(Screens.CreateProduct(storeId.toString(), null))
+                    },
                     containerColor = CustomColor.primaryColor500
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    "", tint = Color.White
-                )
-            }
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        "", tint = Color.White
+                    )
+                }
         }
 
     ) {
@@ -762,8 +731,10 @@ fun StoreScreen(
         it.calculateBottomPadding()
 
 
-        if (isSendingData.value) Dialog(
-            onDismissRequest = {}) {
+        if (isSendingData.value)
+            Dialog(
+            onDismissRequest = {})
+            {
             Box(
                 modifier = Modifier
                     .height(90.dp)
@@ -779,20 +750,23 @@ fun StoreScreen(
         }
 
         if (isShownDateDialog.value) DatePickerDialog(
-            modifier = Modifier.background(Color.White),
-            onDismissRequest = { /*TODO*/ },
-            confirmButton = {
+            modifier = Modifier
+                .padding(horizontal = 40.dp),
+
+            onDismissRequest = { isShownDateDialog.value = false },
+            confirmButton =
+                {
                 TextButton(
                     onClick = {
-                        if (datePickerState?.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
+                        if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
                             isShownDateDialog.value = false
-                            currutine.launch {
+                            coroutine.launch {
                                 snackbarHostState.showSnackbar("You must select valide date")
                             }
                         } else {
                             isShownDateDialog.value = false
                             isSendingData.value = true
-                            currutine.launch {
+                            coroutine.launch {
                                 val dattime = Calendar.getInstance().apply {
                                     timeInMillis = datePickerState.selectedDateMillis!!
                                 }
@@ -807,7 +781,7 @@ fun StoreScreen(
                                 if (result.isNullOrEmpty()) errorMessage =
                                     "banner created seccesffuly";
                                 else errorMessage = result;
-                                currutine.launch {
+                                coroutine.launch {
                                     snackbarHostState.showSnackbar(
                                         errorMessage
                                     )
@@ -827,7 +801,8 @@ fun StoreScreen(
                     )
                 }
             },
-            dismissButton = { /*TODO*/ }) {
+            dismissButton = { isShownDateDialog.value = false })
+        {
             DatePicker(state = datePickerState)
         }
 
@@ -835,9 +810,10 @@ fun StoreScreen(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = {homeViewModel.getStoreInfoByStoreId(store_id!!)}
+            onRefresh = { homeViewModel.getStoreInfoByStoreId(storeId!!) }
 
-        ){
+        )
+        {
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
@@ -865,7 +841,8 @@ fun StoreScreen(
                                     bottom.linkTo(parent.bottom)
                                     start.linkTo(parent.start)
                                     end.linkTo(parent.end)
-                                }) {
+                                })
+                        {
                             val (imageRef, cameralRef) = createRefs()
                             Box(
                                 modifier = Modifier
@@ -877,16 +854,17 @@ fun StoreScreen(
                                     }
                                     .height(150.dp)
                                     .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
                                     .border(
                                         width = 1.dp,
-                                        color = if (isFromHome == true) Color.Transparent else CustomColor.neutralColor500,
+                                        color = if (isFromHome == true) CustomColor.neutralColor100 else CustomColor.neutralColor500,
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .background(
                                         color = if (isFromHome == true) CustomColor.primaryColor50
                                         else Color.White,
                                     ), contentAlignment = Alignment.Center) {
-                                when (wall_paper_image.value == null) {
+                                when (createdStoreInfoHolder.value?.wallpaperImage == null) {
                                     true -> {
                                         when (storeData?.pig_image.isNullOrEmpty()) {
                                             true -> {
@@ -935,7 +913,8 @@ fun StoreScreen(
                                                 .fillMaxWidth()
                                                 .clip(RoundedCornerShape(8.dp)),
                                             model = General.handlingImageForCoil(
-                                                wall_paper_image.value!!.absolutePath, context
+                                                createdStoreInfoHolder.value!!.wallpaperImage!!.absolutePath,
+                                                context
                                             ),
                                             contentDescription = "",
                                             loading = {
@@ -977,7 +956,7 @@ fun StoreScreen(
                                     },
                                     modifier = Modifier.size(30.dp),
                                     colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = CustomColor.primaryColor200
+                                        containerColor = CustomColor.primaryColor500
                                     )
                                 ) {
                                     Icon(
@@ -999,7 +978,8 @@ fun StoreScreen(
                                     top.linkTo(bigImageRef.bottom)
                                     start.linkTo(parent.start)
                                     end.linkTo(parent.end)
-                                }) {
+                                })
+                        {
                             val (imageRef, cameralRef) = createRefs()
                             Box(
                                 modifier = Modifier
@@ -1011,9 +991,10 @@ fun StoreScreen(
                                     }
                                     .height(110.dp)
                                     .width(110.dp)
+                                    .clip(RoundedCornerShape(60.dp))
                                     .border(
                                         width = 1.dp,
-                                        color = if (isFromHome == true) Color.Transparent else CustomColor.neutralColor500,
+                                        color = if (isFromHome == true) CustomColor.neutralColor100  else CustomColor.neutralColor500,
                                         shape = RoundedCornerShape(60.dp)
                                     )
                                     .clip(RoundedCornerShape(60.dp))
@@ -1021,7 +1002,7 @@ fun StoreScreen(
                                         color = if (isFromHome == true && storeData == null) CustomColor.primaryColor50
                                         else Color.White, shape = RoundedCornerShape(60.dp)
                                     ), contentAlignment = Alignment.Center) {
-                                when (small_paper_image.value == null) {
+                                when (createdStoreInfoHolder.value?.smallImage == null) {
                                     true -> {
                                         when (storeData?.small_image.isNullOrEmpty()) {
                                             true -> {
@@ -1072,7 +1053,8 @@ fun StoreScreen(
                                                 .width(90.dp)
                                                 .clip(RoundedCornerShape(50.dp)),
                                             model = General.handlingImageForCoil(
-                                                small_paper_image.value?.absolutePath, context
+                                                createdStoreInfoHolder.value!!.smallImage?.absolutePath,
+                                                context
                                             ),
                                             contentDescription = "",
                                             loading = {
@@ -1114,7 +1096,7 @@ fun StoreScreen(
                                     },
                                     modifier = Modifier.size(30.dp),
                                     colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = CustomColor.primaryColor200
+                                        containerColor = CustomColor.primaryColor500
                                     )
                                 ) {
                                     Icon(
@@ -1146,7 +1128,8 @@ fun StoreScreen(
                                                 .width(150.dp)
                                                 .height(30.dp)
                                                 .background(
-                                                    CustomColor.primaryColor50, RoundedCornerShape(8.dp)
+                                                    CustomColor.primaryColor50,
+                                                    RoundedCornerShape(8.dp)
                                                 )
                                         )
                                     }
@@ -1182,6 +1165,7 @@ fun StoreScreen(
                                 title = "",
                                 placHolder = storeData?.name ?: "Write Your Store Name",
                                 isHasError = false,
+                                onChange = { it -> homeViewModel.setStoreCreateData(storetitle = it) }
                             )
 
 
@@ -1189,51 +1173,52 @@ fun StoreScreen(
                     }
 
                 }
-                if(isFromHome==true||myStore_id!=null)
-                item {
-                    if (isFromHome == false) {
-                        Sizer(10)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                "Store Bannel",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (18).sp,
-                                color = CustomColor.neutralColor950,
-                                textAlign = TextAlign.Center,
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .height(40.dp)
-                                    .width(70.dp)
-                                    .background(
-                                        CustomColor.primaryColor500, RoundedCornerShape(8.dp)
-                                    )
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        onImageSelection.launch(
-                                            PickVisualMediaRequest(
-                                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                                            )
-                                        )
-                                    }, contentAlignment = Alignment.Center
 
+                if (isFromHome == true || myStoreId != null)
+                    item {
+                        if (isFromHome == false) {
+                            Sizer(10)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Icon(
-                                    Icons.Default.Add,
-                                    "",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
+                                Text(
+                                    "Store Bannel",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (18).sp,
+                                    color = CustomColor.neutralColor950,
+                                    textAlign = TextAlign.Center,
                                 )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .height(40.dp)
+                                        .width(70.dp)
+                                        .background(
+                                            CustomColor.primaryColor500, RoundedCornerShape(8.dp)
+                                        )
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            onImageSelection.launch(
+                                                PickVisualMediaRequest(
+                                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                                )
+                                            )
+                                        }, contentAlignment = Alignment.Center
 
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        "",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                            }
                         }
                     }
-                }
 
                 item {
 
@@ -1257,7 +1242,7 @@ fun StoreScreen(
                                 true,
                                 deleteBanner = if (isFromHome == true) null else { it ->
                                     isSendingData.value = true;
-                                    currutine.launch {
+                                    coroutine.launch {
                                         var result = async {
                                             homeViewModel.deleteBanner(it)
                                         }.await()
@@ -1281,130 +1266,54 @@ fun StoreScreen(
 
                 item {
 
-                    when (isFromHome) {
-                        true -> {
-                            when (address.value == null) {
-                                true -> {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(40.dp)
-                                            .background(
-                                                CustomColor.primaryColor50, RoundedCornerShape(8.dp)
-                                            )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    )
+                    {
+
+                        Text(
+                            "Store Location",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (18).sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center,
+                        )
+                        IconButton(
+                            onClick = {
+                                keyboardController?.hide()
+                                requestPermissionThenNavigate.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
                                     )
-                                }
-
-                                else -> {
-                                    if (!storeAddress.isNullOrEmpty()) Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-
-                                        Text(
-                                            "Store Location",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = (18).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center,
-                                        )
-                                        IconButton(
-                                            onClick = {
-                                                when (isFromHome == false) {
-                                                    true -> {
-                                                        keyboardController?.hide()
-                                                        isPressAddNewAddress.value = true
-                                                    }
-
-                                                    else -> {
-
-                                                    }
-                                                }
-                                            }) {
-                                            Icon(
-                                                ImageVector.vectorResource(R.drawable.location_address_list),
-                                                "",
-                                                modifier = Modifier.size(24.dp),
-                                                tint = CustomColor.primaryColor700
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        else -> {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                Text(
-                                    "Store Location",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (18).sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.Center,
                                 )
-                                IconButton(
-                                    onClick = {
-                                        when (isFromHome == false) {
-                                            true -> {
-                                                keyboardController?.hide()
-                                                isPressAddNewAddress.value = true
-                                            }
 
-                                            else -> {
-
-                                            }
-                                        }
-                                    }) {
-                                    Icon(
-                                        ImageVector.vectorResource(R.drawable.location_address_list),
-                                        "",
-                                        modifier = Modifier.size(24.dp),
-                                        tint = CustomColor.primaryColor700
-                                    )
-                                }
-                            }
+                            }) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.location_address_list),
+                                "",
+                                modifier = Modifier.size(24.dp),
+                                tint = CustomColor.primaryColor700
+                            )
                         }
                     }
+//                        }
+//                    }
                 }
-
-                item {
-
-                    if (isNotEnablePermission.value) {
-                        AlertDialog(onDismissRequest = {
-                            isNotEnablePermission.value = false
-                        }, title = {
-                            Text("Permission Required")
-                        }, text = {
-                            Text("You need to approve this permission in order to...")
-                        }, confirmButton = {}, dismissButton = {
-                            TextButton(onClick = {
-                                //Logic when user denies to accept permissions
-                            }) {
-                                isNotEnablePermission.value = false;
-                                Text("Deny")
-                            }
-                        })
-                    }
-                }
-
 
                 item {
 
                     AnimatedVisibility(
-                        visible = (store_id != null || storeData != null)
+                        visible = (storeId != null || storeData != null)
                     ) {
 
 
                         Column(
-                            modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.Start
                         ) {
                             Sizer(10)
 
@@ -1459,7 +1368,8 @@ fun StoreScreen(
                                                         .combinedClickable(
                                                             onClick = {
                                                                 if (selectedSubCategoryId.value != null)
-                                                                    selectedSubCategoryId.value = null
+                                                                    selectedSubCategoryId.value =
+                                                                        null
                                                             },
                                                         )
                                                     //
@@ -1477,25 +1387,31 @@ fun StoreScreen(
                                                 }
 
                                             }
-                                            items(storeSubCategories?.size?:0) { index ->
+                                            items(storeSubCategories?.size ?: 0) { index ->
                                                 Box(
                                                     modifier = Modifier
                                                         .padding(end = 4.dp)
                                                         .height(40.dp)
                                                         .width(70.dp)
                                                         .background(
-                                                            if (selectedSubCategoryId.value == storeSubCategories?.get(index)?.id) CustomColor.alertColor_3_300 else Color.White,
+                                                            if (selectedSubCategoryId.value == storeSubCategories?.get(
+                                                                    index
+                                                                )?.id
+                                                            ) CustomColor.alertColor_3_300 else Color.White,
                                                             RoundedCornerShape(8.dp)
                                                         )
                                                         .border(
                                                             width = 1.dp,
-                                                            color = if (selectedSubCategoryId.value == storeSubCategories?.get(index)?.id) Color.White else CustomColor.neutralColor200,
+                                                            color = if (selectedSubCategoryId.value == storeSubCategories?.get(
+                                                                    index
+                                                                )?.id
+                                                            ) Color.White else CustomColor.neutralColor200,
                                                             RoundedCornerShape(8.dp)
 
                                                         )
                                                         .clip(RoundedCornerShape(8.dp))
                                                         .combinedClickable(onClick = {
-                                                            currutine.launch {
+                                                            coroutine.launch {
                                                                 if (
                                                                     selectedSubCategoryId.value !=
                                                                     subcategories.value?.get(index)?.id
@@ -1503,19 +1419,33 @@ fun StoreScreen(
                                                                     isChangeSubCategory.value = true
 //                                                                                                                         delay(500)
                                                                     selectedSubCategoryId.value =
-                                                                        storeSubCategories?.get(index)?.id
-                                                                    isChangeSubCategory.value = false
+                                                                        storeSubCategories?.get(
+                                                                            index
+                                                                        )?.id
+                                                                    isChangeSubCategory.value =
+                                                                        false
                                                                 }
 
                                                             }
 
                                                         }, onLongClick = {
                                                             if (isFromHome == false) {
-                                                                val name = categories.value?.firstOrNull{it.id==
-                                                                        subcategories.value!!.get(index).category_id}?.name?:""
+                                                                val name =
+                                                                    categories.value?.firstOrNull {
+                                                                        it.id ==
+                                                                                subcategories.value!!.get(
+                                                                                    index
+                                                                                ).category_id
+                                                                    }?.name ?: ""
 
-                                                                categoryName.value= TextFieldValue(name)
-                                                                subCategoryName.value= TextFieldValue(subcategories.value!!.get(index).name)
+                                                                categoryName.value =
+                                                                    TextFieldValue(name)
+                                                                subCategoryName.value =
+                                                                    TextFieldValue(
+                                                                        subcategories.value!!.get(
+                                                                            index
+                                                                        ).name
+                                                                    )
                                                                 isUpdated.value = true
 
                                                                 isShownSubCategoryBottomSheet.value =
@@ -1530,7 +1460,10 @@ fun StoreScreen(
                                                         fontFamily = General.satoshiFamily,
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = (18).sp,
-                                                        color = if (selectedSubCategoryId.value ==storeSubCategories.get(index).id) Color.White else CustomColor.neutralColor200,
+                                                        color = if (selectedSubCategoryId.value == storeSubCategories.get(
+                                                                index
+                                                            ).id
+                                                        ) Color.White else CustomColor.neutralColor200,
 
                                                         textAlign = TextAlign.Center,
                                                     )
@@ -1550,7 +1483,8 @@ fun StoreScreen(
                                             .height(40.dp)
                                             .width(70.dp)
                                             .background(
-                                                CustomColor.primaryColor500, RoundedCornerShape(8.dp)
+                                                CustomColor.primaryColor500,
+                                                RoundedCornerShape(8.dp)
                                             )
                                             .clip(RoundedCornerShape(8.dp))
                                             .clickable {
@@ -1600,20 +1534,20 @@ fun StoreScreen(
                                     } else
                                         when (products.value == null) {
                                             true -> {
-                                                ProductLoading(50)
+                                                ProductLoading()
                                             }
 
                                             else -> {
-                                                if (storeFilter.isNotEmpty()) {
+                                                if (productFilterBySubCategory.isNotEmpty()) {
                                                     ProductShape(
-                                                        storeFilter,
+                                                        productFilterBySubCategory,
                                                         nav = nav,
                                                         delFun = if (isFromHome == true) null else { it ->
-                                                            currutine.launch {
+                                                            coroutine.launch {
                                                                 isSendingData.value = true
                                                                 var result =
                                                                     homeViewModel.deleteProduct(
-                                                                        store_id!!, it
+                                                                        storeId!!, it
                                                                     )
 
                                                                 isSendingData.value = false
@@ -1632,7 +1566,8 @@ fun StoreScreen(
                                                         updFun = if (isFromHome == true) null else { it ->
                                                             nav.navigate(
                                                                 Screens.CreateProduct(
-                                                                    store_id.toString(), it.toString()
+                                                                    storeId.toString(),
+                                                                    it.toString()
                                                                 )
                                                             )
                                                         })

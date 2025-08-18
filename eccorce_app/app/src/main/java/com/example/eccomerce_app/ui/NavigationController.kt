@@ -76,13 +76,14 @@ fun NavController(
             val data = result.toRoute<Screens.MapScreen>()
 
             MapHomeScreen(
-                nav = nav,
                 homeViewModle = homeViewModle,
+                lognit = data.lognit,
+                latitt = data.latitt,
                 title = data.title,
-                id=data.id,
-                data.lognit,
-                data.latitt,
-                isFomLogin = data.isFromLogin
+                id = data.id,
+                isFomLogin = data.isFromLogin,
+                mapType = data.mapType,
+                nav = nav
             )
 
         }
@@ -134,7 +135,7 @@ fun NavController(
                 )
             }
 
-            composable<Screens.LocationList>(
+            composable<Screens.PickCurrentAddress>(
                 enterTransition = {
                     return@composable slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.End, tween(750)
@@ -152,11 +153,9 @@ fun NavController(
                     )
                 }
             ) { value ->
-                var isFromHomeLocation = value.toRoute<Screens.LocationList>()
                 PickCurrentAddressFromAddressScreen(
                     nav = nav,
                     homeViewModle = homeViewModle,
-                    isFromHome = isFromHomeLocation.isFromLocationHome
                 )
             }
 
@@ -392,7 +391,7 @@ fun NavController(
             ) { navRef ->
                 var store_id = navRef.toRoute<Screens.Store>()
                 StoreScreen(
-                    store_idCopy = store_id.store_id,
+                    copyStoreId = store_id.store_id,
                     isFromHome = store_id.isFromHome,
                     nav = nav,
                     homeViewModel = homeViewModle

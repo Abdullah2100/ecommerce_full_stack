@@ -12,31 +12,18 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class OrderServices : IOrderServices
+public class OrderServices(
+    IDeliveryRepository deliveryRepository,
+    IOrderRepository orderRepository,
+    IUserRepository userRepository,
+    IHubContext<EcommerceHub> hubContext)
+    : IOrderServices
 {
-    private readonly IOrderRepository _orderRepository;
-    private readonly IDeliveryRepository _deliveryRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IHubContext<EcommerceHub> _hubContext;
-
-    public OrderServices(
-        IDeliveryRepository deliveryRepository,
-        IOrderRepository orderRepository,
-        IUserRepository userRepository,
-        IHubContext<EcommerceHub> hubContext
-    )
-    {
-        _deliveryRepository = deliveryRepository;
-        _orderRepository = orderRepository;
-        _userRepository = userRepository;
-        _hubContext = hubContext;
-    }
-
     private async Task<Result<bool>?> isValideDelivery(Guid id, bool isAdmin = false)
     {
         if (!isAdmin)
         {
-            Delivery? delivery = await _deliveryRepository.getDelivery(id);
+            Delivery? delivery = await deliveryRepository.getDelivery(id);
 
             if (delivery is null)
                 return new Result<bool>
@@ -59,7 +46,7 @@ public class OrderServices : IOrderServices
         }
         else
         {
-            User? user = await _userRepository
+            User? user = await userRepository
                 .getUser(id);
             if (user is null)
             {
@@ -90,7 +77,7 @@ public class OrderServices : IOrderServices
 
     public async Task<Result<OrderDto?>> CreateOrder(Guid userId, CreateOrderDto orderDto)
     {
-        User? user = await _userRepository.getUser(userId);
+        User? user = await userRepository.getUser(userId);
 
         if (user is null)
         {
@@ -114,7 +101,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        if (!(await _orderRepository.isValidTotalPrice(orderDto.TotalPrice, orderDto.Items)))
+        if (!(await orderRepository.isValidTotalPrice(orderDto.TotalPrice, orderDto.Items)))
         {
             return new Result<OrderDto?>
             (
@@ -165,7 +152,7 @@ public class OrderServices : IOrderServices
         }
 
         order.Items = orderItems;
-        int result = await _orderRepository.addAsync(order);
+        int result = await orderRepository.addAsync(order);
 
         if (result == 0)
         {
@@ -178,7 +165,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        await _hubContext.Clients.All.SendAsync("createdOrder", order.toDto());
+        await hubContext.Clients.All.SendAsync("createdOrder", order.toDto());
 
         return new Result<OrderDto?>
         (
@@ -192,7 +179,7 @@ public class OrderServices : IOrderServices
 
     public async Task<Result<List<OrderDto>>> getMyOrders(Guid userId, int pageNum, int pageSize)
     {
-        List<OrderDto> orders = (await _orderRepository
+        List<OrderDto> orders = (await orderRepository
                 .getOrders(userId, pageNum, pageSize))
             .Select(o => o.toDto())
             .ToList();
@@ -222,7 +209,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        List<OrderDto> orders = (await _orderRepository
+        List<OrderDto> orders = (await orderRepository
                 .getAllAsync(pageNum, pageSize))
             .Select(o => o.toDto())
             .ToList();
@@ -238,7 +225,7 @@ public class OrderServices : IOrderServices
 
     public async Task<Result<bool>> updateOrderStatus(Guid id, int status)
     {
-        Order? order = await _orderRepository
+        Order? order = await orderRepository
             .getOrder(id);
 
         if (order is null)
@@ -253,7 +240,7 @@ public class OrderServices : IOrderServices
         }
  
         order.Status = status;
-        int result = await _orderRepository.updateAsync(order);
+        int result = await orderRepository.updateAsync(order);
         
         if (result == 0)
         {
@@ -277,7 +264,7 @@ public class OrderServices : IOrderServices
 
     public async Task<Result<List<OrderItemDto>>> getOrderItmes(Guid storeId, int pageNum, int pageSize)
     {
-        List<OrderItemDto> orderItems = (await _orderRepository
+        List<OrderItemDto> orderItems = (await orderRepository
                 .getOrderItems(storeId: storeId, pageNum: pageNum, pageSize: pageSize))
             .Select(p => p.toOrderItemDto())
             .ToList();
@@ -296,7 +283,7 @@ public class OrderServices : IOrderServices
         Guid userId,
         UpdateOrderItemStatusDto orderItemsStatusDto)
     {
-        OrderItem? orderItem = await _orderRepository.getOrderItem(orderItemsStatusDto.Id);
+        OrderItem? orderItem = await orderRepository.getOrderItem(orderItemsStatusDto.Id);
 
         if (orderItem is null)
         {
@@ -310,7 +297,7 @@ public class OrderServices : IOrderServices
         }
 
         ;
-        int result = await _orderRepository.updateOrderItemStatus(
+        int result = await orderRepository.updateOrderItemStatus(
             orderItemsStatusDto.Id
             , 
             orderItemsStatusDto.Status == enOrderItemStatusDto.Excepted
@@ -335,7 +322,7 @@ public class OrderServices : IOrderServices
             OrderItemId = orderItem.Id,
             Status = enOrderItemStatus.Excepted.ToString()
         };
-        await _hubContext.Clients.All.SendAsync("orderItemsStatusChange", statusEvent);
+        await hubContext.Clients.All.SendAsync("orderItemsStatusChange", statusEvent);
 
         return new Result<int>
         (
@@ -348,7 +335,7 @@ public class OrderServices : IOrderServices
 
     public async Task<Result<bool>> deleteOrder(Guid id, Guid userId)
     {
-        Order? order = await _orderRepository.getOrder(id, userId);
+        Order? order = await orderRepository.getOrder(id, userId);
         if (order is null)
         {
             return new Result<bool>
@@ -360,7 +347,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        int result = await _orderRepository.deleteAsync(id);
+        int result = await orderRepository.deleteAsync(id);
         if (result == 0)
         {
             return new Result<bool>
@@ -397,7 +384,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        List<OrderDto> orders = (await _orderRepository
+        List<OrderDto> orders = (await orderRepository
                 .getOrderBelongToDelivery(deliveryId, pageNum, pageSize))
             .Select(o => o.toDto())
             .ToList();
@@ -425,7 +412,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        List<OrderDto> orders = (await _orderRepository
+        List<OrderDto> orders = (await orderRepository
                 .getOrderNoBelongToAnyDelivery(pageNum, pageSize))
             .Select(o => o.toDto())
             .ToList();
@@ -449,7 +436,7 @@ public class OrderServices : IOrderServices
         }
 
 
-        Order? order = await _orderRepository.getOrder(id);
+        Order? order = await orderRepository.getOrder(id);
 
         if (order is null)
         {
@@ -474,7 +461,7 @@ public class OrderServices : IOrderServices
         }
 
         order.DeleveryId = deliveryId;
-        int result = await _orderRepository.updateAsync(order);
+        int result = await orderRepository.updateAsync(order);
 
         if (result == 0)
         {
@@ -492,7 +479,7 @@ public class OrderServices : IOrderServices
             Id = order.Id,
             DeliveryId = deliveryId
         };
-        await _hubContext.Clients.All.SendAsync("orderGettingByDelivery", eventHolder);
+        await hubContext.Clients.All.SendAsync("orderGettingByDelivery", eventHolder);
 
         return new Result<bool>
         (
@@ -513,7 +500,7 @@ public class OrderServices : IOrderServices
         }
 
 
-        Order? order = await _orderRepository.getOrder(id);
+        Order? order = await orderRepository.getOrder(id);
 
         if (order is null)
         {
@@ -526,7 +513,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        if (!(await _orderRepository.isCanCancelOrder(id)))
+        if (!(await orderRepository.isCanCancelOrder(id)))
         {
             return new Result<bool>
             (
@@ -537,7 +524,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        int result = await _orderRepository.removeOrderFromDelivery(id, deliveryId);
+        int result = await orderRepository.removeOrderFromDelivery(id, deliveryId);
 
         if (result == 0)
         {
@@ -550,7 +537,7 @@ public class OrderServices : IOrderServices
             );
         }
 
-        await _hubContext.Clients.All.SendAsync("createdOrder", order.toDto());
+        await hubContext.Clients.All.SendAsync("createdOrder", order.toDto());
 
         return new Result<bool>
         (

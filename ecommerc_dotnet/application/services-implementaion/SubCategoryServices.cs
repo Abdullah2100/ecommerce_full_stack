@@ -12,31 +12,21 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class SubCategoryServices:ISubCategoryServices
+public class SubCategoryServices(
+    IUserRepository userRepository,
+    IStoreRepository storeRepository,
+    ISubCategoryRepository subCategoryRepository,
+    ICategoryRepository categoryRepository)
+    : ISubCategoryServices
 {
-    private readonly IUserRepository  _userRepository;
-    private readonly IStoreRepository _storeRepository;
-    private readonly ISubCategoryRepository _subCategoryRepository;
-    private readonly ICategoryRepository _categoryRepository;
+    private readonly IStoreRepository _storeRepository = storeRepository;
 
-    public SubCategoryServices(
-        IUserRepository userRepository,
-        IStoreRepository storeRepository,
-        ISubCategoryRepository subCategoryRepository,
-        ICategoryRepository categoryRepository
-    )
-    {
-        _userRepository = userRepository;
-        _storeRepository = storeRepository;
-        _subCategoryRepository = subCategoryRepository;
-        _categoryRepository = categoryRepository;
-    }
     public async Task<Result<SubCategoryDto?>> createSubCategory(
         Guid userId,
         CreateSubCategoryDto subCategoryDto
         )
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
         
         var isValide = user.isValidateFunc(isStore:true);
@@ -52,7 +42,7 @@ public class SubCategoryServices:ISubCategoryServices
         }   
  
 
-        int count = await _subCategoryRepository.getSubCategoriesCount(user.Store.Id);
+        int count = await subCategoryRepository.getSubCategoriesCount(user.Store.Id);
         
         if (count==20 )
         {
@@ -75,7 +65,7 @@ public class SubCategoryServices:ISubCategoryServices
             UpdatedAt = null,
             CreatedAt = DateTime.Now,
         }; 
-        int result = await _subCategoryRepository.addAsync(subCategory);
+        int result = await subCategoryRepository.addAsync(subCategory);
 
         if (result == 0)
         {
@@ -113,7 +103,7 @@ public class SubCategoryServices:ISubCategoryServices
             );
         
         
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
         
         var isValide = user.isValidateFunc(isStore:true);
@@ -128,7 +118,7 @@ public class SubCategoryServices:ISubCategoryServices
             );
         }    
         
-        SubCategory? subCategory = await _subCategoryRepository
+        SubCategory? subCategory = await subCategoryRepository
             .getSubCategory(subCategoryDto.Id);
         
         if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
@@ -143,7 +133,7 @@ public class SubCategoryServices:ISubCategoryServices
         }
 
         if (subCategoryDto.CategoryId is not null &&
-            !(await _categoryRepository.isExist((Guid)subCategoryDto!.CategoryId))
+            !(await categoryRepository.isExist((Guid)subCategoryDto!.CategoryId))
            )
         {
             return new Result<SubCategoryDto?>
@@ -158,7 +148,7 @@ public class SubCategoryServices:ISubCategoryServices
         subCategory.Name = subCategoryDto.Name??subCategory.Name;
         subCategory.CategoryId = subCategoryDto.CategoryId??subCategory.CategoryId;
         subCategory.UpdatedAt = DateTime.Now;
-        int result =  await _subCategoryRepository.updateAsync(subCategory);
+        int result =  await subCategoryRepository.updateAsync(subCategory);
         if (result == 0)
         {
             return new Result<SubCategoryDto?>
@@ -183,7 +173,7 @@ public class SubCategoryServices:ISubCategoryServices
     {
         
         
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
         
         var isValide = user.isValidateFunc(isStore:true);
@@ -198,7 +188,7 @@ public class SubCategoryServices:ISubCategoryServices
             );
         }     
         
-        SubCategory? subCategory = await _subCategoryRepository
+        SubCategory? subCategory = await subCategoryRepository
             .getSubCategory(id);
         
         if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
@@ -211,7 +201,7 @@ public class SubCategoryServices:ISubCategoryServices
                 statusCode: 404
             );
         } 
-        int result = await _subCategoryRepository.deleteAsync(id);
+        int result = await subCategoryRepository.deleteAsync(id);
         if(result == 0)
             return new Result<bool>
             (
@@ -232,7 +222,7 @@ public class SubCategoryServices:ISubCategoryServices
 
     public  async Task<Result<List<SubCategoryDto>>> getSubCategories(Guid id, int page, int length)
     {
-        List<SubCategoryDto> subCategories = (await _subCategoryRepository
+        List<SubCategoryDto> subCategories = (await subCategoryRepository
                 .getSubCategories(id, page, length))
             .Select(su => su.toDto())
             .ToList();
@@ -252,7 +242,7 @@ public class SubCategoryServices:ISubCategoryServices
         int page, 
         int length)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
        var isValide = user.isValidateFunc(isAdmin:true);
 
@@ -267,7 +257,7 @@ public class SubCategoryServices:ISubCategoryServices
         }     
         
         
-        List<SubCategoryDto> subcategories = (await _subCategoryRepository
+        List<SubCategoryDto> subcategories = (await subCategoryRepository
                 .getAllAsync(page:page, length:length))
             .Select(ba => ba.toDto())
             .ToList();

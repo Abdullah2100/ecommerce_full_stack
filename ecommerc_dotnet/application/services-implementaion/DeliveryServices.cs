@@ -14,26 +14,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class DeliveryServices : IDeliveryServices
+public class DeliveryServices(
+    IUserRepository userRepository,
+    IDeliveryRepository deliveryRepository,
+    IConfig config,
+    IWebHostEnvironment host)
+    : IDeliveryServices
 {
-    private readonly IDeliveryRepository _deliveryRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IConfig _config;
-    private readonly IWebHostEnvironment _host;
-
-    public DeliveryServices(
-        IUserRepository userRepository,
-        IDeliveryRepository deliveryRepository,
-        IConfig config,
-        IWebHostEnvironment host
-    )
-    {
-        _deliveryRepository = deliveryRepository;
-        _userRepository = userRepository;
-        _config = config;
-        _host = host;
-    }
-
     public async Task<Result<AuthDto?>> login(LoginDto loginDto)
     {
         if (string.IsNullOrWhiteSpace(loginDto.DeviceToken))
@@ -45,7 +32,7 @@ public class DeliveryServices : IDeliveryServices
                 statusCode: 400
             );
 
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(
                 loginDto.Username,
                 clsUtil.hashingText(loginDto.Password));
@@ -60,7 +47,7 @@ public class DeliveryServices : IDeliveryServices
             );
         }
 
-        Delivery? delivery = await _deliveryRepository.getDeliveryByUserId(user.Id);
+        Delivery? delivery = await deliveryRepository.getDeliveryByUserId(user.Id);
 
         if (delivery is null)
         {
@@ -84,7 +71,7 @@ public class DeliveryServices : IDeliveryServices
             );
         delivery.DeviceToken = loginDto.DeviceToken;
 
-        int result = await _deliveryRepository.updateAsync(delivery);
+        int result = await deliveryRepository.updateAsync(delivery);
         if (result == 0)
         {
             return new Result<AuthDto?>
@@ -101,12 +88,12 @@ public class DeliveryServices : IDeliveryServices
         token = AuthinticationUtil.generateToken(
             userId: delivery.UserId,
             email: delivery.User.Email,
-            _config);
+            config);
 
         refreshToken = AuthinticationUtil.generateToken(
             userId: delivery.UserId,
             email: delivery.User.Email,
-            _config,
+            config,
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
@@ -122,7 +109,7 @@ public class DeliveryServices : IDeliveryServices
         CreateDeliveryDto deliveryDto
     )
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -146,7 +133,7 @@ public class DeliveryServices : IDeliveryServices
             );
         }
 
-        if (await _deliveryRepository.isExistByUserId(deliveryDto.UserId))
+        if (await deliveryRepository.isExistByUserId(deliveryDto.UserId))
         {
             return new Result<DeliveryDto?>
             (
@@ -163,7 +150,7 @@ public class DeliveryServices : IDeliveryServices
             deliveryThumnail = await clsUtil
                 .saveFile(
                     deliveryDto.Thumbnail,
-                    EnImageType.DELIVERY, _host);
+                    EnImageType.DELIVERY, host);
         }
 
         if (deliveryThumnail is null)
@@ -199,7 +186,7 @@ public class DeliveryServices : IDeliveryServices
             Thumbnail = deliveryThumnail,
             Address = address
         };
-        int result = await _deliveryRepository.addAsync(delivery);
+        int result = await deliveryRepository.addAsync(delivery);
 
         if (result == 0)
         {
@@ -214,7 +201,7 @@ public class DeliveryServices : IDeliveryServices
 
         return new Result<DeliveryDto?>
         (
-            data: delivery?.toDto(_config.getKey("url_file")),
+            data: delivery?.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -223,7 +210,7 @@ public class DeliveryServices : IDeliveryServices
 
     public async Task<Result<DeliveryDto?>> updateDeliveryStatus(Guid id, bool status)
     {
-        Delivery? delivery = await _deliveryRepository
+        Delivery? delivery = await deliveryRepository
             .getDelivery(id);
         if (delivery is null)
         {
@@ -248,7 +235,7 @@ public class DeliveryServices : IDeliveryServices
         }
 
         delivery.IsBlocked = status;
-        int result = await _deliveryRepository.updateAsync(delivery);
+        int result = await deliveryRepository.updateAsync(delivery);
 
         if (result == 0)
         {
@@ -263,7 +250,7 @@ public class DeliveryServices : IDeliveryServices
 
         return new Result<DeliveryDto?>
         (
-            data: delivery?.toDto(_config.getKey("url_file")),
+            data: delivery?.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -272,7 +259,7 @@ public class DeliveryServices : IDeliveryServices
 
     public async Task<Result<DeliveryDto?>> getDelivery(Guid userId)
     {
-        Delivery? delivery = await _deliveryRepository
+        Delivery? delivery = await deliveryRepository
             .getDeliveryByUserId(userId);
         if (delivery is null)
         {
@@ -296,8 +283,8 @@ public class DeliveryServices : IDeliveryServices
             );
         }
 
-        var deliveryDto = delivery.toDto(_config.getKey("url_file"));
-        deliveryDto.Analys = await _deliveryRepository.getDeliveryAnalys(delivery.Id);
+        var deliveryDto = delivery.toDto(config.getKey("url_file"));
+        deliveryDto.Analys = await deliveryRepository.getDeliveryAnalys(delivery.Id);
 
         return new Result<DeliveryDto?>
         (
@@ -310,7 +297,7 @@ public class DeliveryServices : IDeliveryServices
 
     public async Task<Result<List<DeliveryDto>>> getDeliveries(Guid adminId, int pageNumber, int pageSize)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -334,13 +321,13 @@ public class DeliveryServices : IDeliveryServices
             );
         }
 
-        List<DeliveryDto> deliveryDtos = (await _deliveryRepository
+        List<DeliveryDto> deliveryDtos = (await deliveryRepository
                 .getAllAsync(pageNumber, pageSize))
-            .Select((de) => de.toDto(_config.getKey("url_file")))
+            .Select((de) => de.toDto(config.getKey("url_file")))
             .ToList();
         foreach (var deliveryDto in deliveryDtos)
         {
-            deliveryDto.Analys = await _deliveryRepository.getDeliveryAnalys(deliveryDto.Id);
+            deliveryDto.Analys = await deliveryRepository.getDeliveryAnalys(deliveryDto.Id);
         }
 
         return new Result<List<DeliveryDto>>

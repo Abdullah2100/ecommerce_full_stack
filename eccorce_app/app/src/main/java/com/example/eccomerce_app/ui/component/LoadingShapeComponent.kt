@@ -1,5 +1,6 @@
 package com.example.e_commercompose.ui.component
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -63,14 +64,50 @@ fun LocationLoadingShape(width: Int) {
 }
 
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun CategoryLoadingShape(length: Int = 1) {
+fun CategoryLoadingShape() {
 
-    LazyRow(modifier = Modifier.padding(top = 10.dp)) {
-        items(count = length) {
-            Column(
-                modifier = Modifier.padding(end = 5.dp)
-            ) {
+    val config = LocalConfiguration.current
+    val screanWidth = config.screenWidthDp.dp
+
+    val items = ((screanWidth - 30.dp) / 75)
+
+
+
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    )
+    {
+
+        Box(
+            modifier = Modifier
+                .height(15.dp)
+                .width(60.dp)
+                .background(CustomColor.primaryColor50)
+        )
+        Sizer(4)
+        Box(
+            modifier = Modifier
+                .height(20.dp)
+                .width(70.dp)
+                .background(CustomColor.primaryColor50)
+        )
+    }
+    LazyRow(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    )
+    {
+        items(count = items.value.toInt()) {
+            Column() {
                 Box(
                     modifier = Modifier
                         .height(69.dp)
@@ -90,56 +127,98 @@ fun CategoryLoadingShape(length: Int = 1) {
 
 }
 
-
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun ProductLoading(size:Int){
-    FlowRow (
+fun BannerLoading() {
+
+    Column {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        )
+        {
+
+            Box(
+                modifier = Modifier
+                    .height(30.dp)
+                    .width(60.dp)
+                    .background(CustomColor.primaryColor50)
+            )
+
+        }
+        Box(
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .height(150.dp)
+                .fillMaxWidth()
+                .background(
+                    CustomColor.primaryColor50,
+                    shape = RoundedCornerShape(8.dp)
+                )
+        )
+    }
+
+}
+
+
+@SuppressLint("ConfigurationScreenWidthHeight")
+@Composable
+fun ProductLoading(lenght: Int? = null) {
+    val config = LocalConfiguration.current
+    val screanWidth = config.screenWidthDp.dp
+
+    val items = ((screanWidth - 30.dp) / 160)
+
+    FlowRow(
         modifier = Modifier
 
             .fillMaxWidth(),
 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.spacedBy(12.dp)
-    ){
-          repeat (size) {
-              Card(
-                  colors = CardDefaults.cardColors(
-                      containerColor = Color.White
-                  ),
-                  elevation = CardDefaults.elevatedCardElevation(
-                      defaultElevation = 8.dp
-                  )
-              ) {
-                  Box(
-                      modifier = Modifier
-                          .height(150.dp)
-                          .width(160.dp)
-                          .background(
-                              CustomColor.primaryColor50,
-                              RoundedCornerShape(8.dp)
-                          )
-                  )
-                  Sizer(10)
-                  Box(
-                      modifier = Modifier
-                          .height(30.dp)
-                          .width(140.dp)
-                          .background(
-                              CustomColor.primaryColor50,
-                              RoundedCornerShape(8.dp)
-                          )
-                  )
-                  Sizer(10)
-                  Box(
-                      modifier = Modifier
-                          .height(30.dp)
-                          .width(50.dp)
-                          .background(
-                              CustomColor.primaryColor50,
-                              RoundedCornerShape(8.dp)
-                          )
-                  )
-              }
-          }
+    ) {
+        repeat(lenght ?: items.value.toInt()) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 8.dp
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(150.dp)
+                        .width(160.dp)
+                        .background(
+                            CustomColor.primaryColor50,
+                            RoundedCornerShape(8.dp)
+                        )
+                )
+                Sizer(10)
+                Box(
+                    modifier = Modifier
+                        .height(30.dp)
+                        .width(140.dp)
+                        .background(
+                            CustomColor.primaryColor50,
+                            RoundedCornerShape(8.dp)
+                        )
+                )
+                Sizer(10)
+                Box(
+                    modifier = Modifier
+                        .height(30.dp)
+                        .width(50.dp)
+                        .background(
+                            CustomColor.primaryColor50,
+                            RoundedCornerShape(8.dp)
+                        )
+                )
+            }
+        }
     }
 }

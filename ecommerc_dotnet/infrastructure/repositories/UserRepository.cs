@@ -7,26 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(AppDbContext dbContext) : IUserRepository
 {
-    private readonly AppDbContext _dbContext;
-    
-
-    public UserRepository(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<User?> getUser(Guid id)
     {
-        User? user = await _dbContext
+        User? user = await dbContext
             .Users
             .Include(u => u.Store)
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id);
         if (user == null) return null;
 
-        user.Addresses = await _dbContext
+        user.Addresses = await dbContext
             .Address
             .AsNoTracking()
             .Where(u => u.OwnerId == id)
@@ -37,14 +29,14 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> getUser(string email)
     {
-        User? user = await _dbContext
+        User? user = await dbContext
             .Users
             .Include(u => u.Store)
             .AsNoTracking()
             .FirstOrDefaultAsync(u =>  u.Email == email);
         if (user == null) return null;
 
-        user.Addresses = await _dbContext
+        user.Addresses = await dbContext
             .Address
             .AsNoTracking()
             .Where(u => u.OwnerId == user.Id)
@@ -55,7 +47,7 @@ public class UserRepository : IUserRepository
 
     public async Task<int> getUserCount()
     {
-        return await _dbContext
+        return await dbContext
             .Users
             .AsNoTracking()
             .CountAsync();
@@ -63,7 +55,7 @@ public class UserRepository : IUserRepository
 
     public async Task<int> getUserAddressCount(Guid id)
     {
-        return await _dbContext
+        return await dbContext
             .Address
             .AsNoTracking()
             .Where(u => u.OwnerId == id)
@@ -72,7 +64,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> getUserByStoreId(Guid id)
     {
-        User? user = await _dbContext
+        User? user = await dbContext
             .Users
             .Include(u => u.Store)
             .AsSplitQuery()
@@ -80,7 +72,7 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Store != null && u.Store.Id == id);
         if (user == null) return null;
 
-        user.Addresses = await _dbContext
+        user.Addresses = await dbContext
             .Address
             .AsNoTracking()
             .Where(u => u.OwnerId == id)
@@ -91,7 +83,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> getUser(string username, string password)
     {
-        User? user = await _dbContext
+        User? user = await dbContext
             .Users
             .Include(u => u.Store)
             .AsNoTracking()
@@ -99,7 +91,7 @@ public class UserRepository : IUserRepository
        
         if (user == null) return null;
 
-        user.Addresses = await _dbContext
+        user.Addresses = await dbContext
             .Address
             .AsNoTracking()
             .Where(u => u.OwnerId == user.Id)
@@ -110,7 +102,7 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> isExist(int role)
     {
-        return await _dbContext
+        return await dbContext
             .Users
             .AsNoTracking()
             .AnyAsync(u => u.Role == role);
@@ -118,7 +110,7 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> isExistByPhone(string phone)
     {
-        return (await _dbContext
+        return (await dbContext
                 .Users
                 .AsNoTracking()
                 .AnyAsync(u => u.Phone == phone)
@@ -127,7 +119,7 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> isExistByEmail(string email)
     {
-        return (await _dbContext
+        return (await dbContext
                 .Users
                 .AsNoTracking()
                 .AnyAsync(u => u.Email == email)
@@ -139,7 +131,7 @@ public class UserRepository : IUserRepository
         int length
     )
     {
-        List<User>? users = await _dbContext
+        List<User>? users = await dbContext
             .Users
             .Include(u => u.Store)
             .AsSplitQuery()
@@ -151,7 +143,7 @@ public class UserRepository : IUserRepository
 
         foreach (var user in users)
         {
-            user.Addresses = await _dbContext
+            user.Addresses = await dbContext
                 .Address
                 .AsNoTracking()
                 .Where(u => u.OwnerId == user.Id)
@@ -163,26 +155,26 @@ public class UserRepository : IUserRepository
 
     public async Task<int> addAsync(User entity)
     {
-        await _dbContext.Users.AddAsync(entity);
-        return await _dbContext.SaveChangesAsync();
+        await dbContext.Users.AddAsync(entity);
+        return await dbContext.SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(User entity)
     {
-         _dbContext.Users.Update(entity);
-        return await _dbContext.SaveChangesAsync();
+         dbContext.Users.Update(entity);
+        return await dbContext.SaveChangesAsync();
     }
 
     public virtual async Task<int> deleteAsync(Guid id)
     {
-        User? user = await _dbContext.Users.FindAsync(id);
+        User? user = await dbContext.Users.FindAsync(id);
         if (user == null) return 0;
         user.IsBlocked = true;
-       return await _dbContext.SaveChangesAsync();
+       return await dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> isExist(Guid id)
     {
-        return await _dbContext.Users.FindAsync(id) != null;
+        return await dbContext.Users.FindAsync(id) != null;
     }
 }

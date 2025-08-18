@@ -61,14 +61,13 @@ import java.util.UUID
 fun PickCurrentAddressFromAddressScreen(
     nav: NavHostController,
     homeViewModle: HomeViewModel,
-    isFromHome: Boolean? = false
 ) {
     val fontScall = LocalDensity.current.fontScale
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val locationss = homeViewModle.myInfo.collectAsState()
     val isLoading = remember { mutableStateOf(false) }
-    val currentLocationId = remember { mutableStateOf<UUID?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+
 
     val coroutine = rememberCoroutineScope()
 

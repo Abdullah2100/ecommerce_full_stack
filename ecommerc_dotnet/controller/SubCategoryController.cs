@@ -12,18 +12,8 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/SubCategory")]
-public class SubCategoryController : ControllerBase
+public class SubCategoryController(ISubCategoryServices subCategoryServices) : ControllerBase
 {
-    public SubCategoryController
-    (
-        ISubCategoryServices subCategoryServices
-    )
-    {
-        _subCategoryServices = subCategoryServices;
-    }
-
-    private readonly ISubCategoryServices _subCategoryServices;
-
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,7 +37,7 @@ public class SubCategoryController : ControllerBase
         }
 
 
-        var result = await _subCategoryServices.createSubCategory(userId.Value, subCategory);
+        var result = await subCategoryServices.createSubCategory(userId.Value, subCategory);
 
         return result.IsSeccessful switch
         {
@@ -78,7 +68,7 @@ public class SubCategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _subCategoryServices.updateSubCategory(userId.Value, subCategory);
+        var result = await subCategoryServices.updateSubCategory(userId.Value, subCategory);
 
         return result.IsSeccessful switch
         {
@@ -114,7 +104,7 @@ public class SubCategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _subCategoryServices.deleteSubCategory(
+        var result = await subCategoryServices.deleteSubCategory(
             userId: userId.Value,
             id: subCateogyId);
 
@@ -145,7 +135,7 @@ public class SubCategoryController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _subCategoryServices.getSubCategoryAll(adminId.Value,page, 25);
+        var result = await subCategoryServices.getSubCategoryAll(adminId.Value,page, 25);
 
         return result.IsSeccessful switch
         {
@@ -160,7 +150,7 @@ public class SubCategoryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getSubCategories(Guid storeId, int page)
     {
-        var result = await _subCategoryServices.getSubCategories(
+        var result = await subCategoryServices.getSubCategories(
             storeId, page, 25);
 
         return result.IsSeccessful switch

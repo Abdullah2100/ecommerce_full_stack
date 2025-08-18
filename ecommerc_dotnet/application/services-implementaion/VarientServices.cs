@@ -12,26 +12,17 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class VarientServices : IVarientServices
+public class VarientServices(
+    IUserRepository userRepository,
+    IVarientRepository varientRepository)
+    : IVarientServices
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IVarientRepository _varientRepository;
-
-    public VarientServices(
-        IUserRepository userRepository,
-        IVarientRepository varientRepository
-    )
-    {
-        _userRepository = userRepository;
-        _varientRepository = varientRepository;
-    }
-
     public async Task<Result<VarientDto?>> createVarient(
         CreateVarientDto varientDto,
         Guid adminId
     )
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         
         var isValid = user.isValidateFunc(true);
@@ -45,7 +36,7 @@ public class VarientServices : IVarientServices
                 statusCode: isValid.StatusCode 
             );
         }   
-        if (await _varientRepository.isExist(varientDto.Name))
+        if (await varientRepository.isExist(varientDto.Name))
         {
             return new Result<VarientDto?>
             (
@@ -64,7 +55,7 @@ public class VarientServices : IVarientServices
             Name = varientDto.Name
         };
         
-        int result = await _varientRepository.addAsync(varient);
+        int result = await varientRepository.addAsync(varient);
 
         if (result == 0)
         {
@@ -100,7 +91,7 @@ public class VarientServices : IVarientServices
                 statusCode: 200
             );
 
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         var isValid = user.isValidateFunc(true);
         if (isValid is not null)
@@ -115,7 +106,7 @@ public class VarientServices : IVarientServices
         }    
 
         if (varientDto.Name is not null)
-            if (await _varientRepository.isExist(varientDto.Name,varientDto.Id))
+            if (await varientRepository.isExist(varientDto.Name,varientDto.Id))
             {
                 return new Result<VarientDto?>
                 (
@@ -126,7 +117,7 @@ public class VarientServices : IVarientServices
                 );
             }
 
-        Varient? varient = await _varientRepository.getVarient(varientDto.Id);
+        Varient? varient = await varientRepository.getVarient(varientDto.Id);
 
         if (varient is null)
         {
@@ -141,7 +132,7 @@ public class VarientServices : IVarientServices
 
         varient.Name = varientDto.Name ?? varient.Name;
 
-        int result = await _varientRepository
+        int result = await varientRepository
             .updateAsync(varient);
 
         if (result == 0)
@@ -168,7 +159,7 @@ public class VarientServices : IVarientServices
     {
            
 
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         var isValid = user.isValidateFunc(true);
         if (isValid is not null)
@@ -184,7 +175,7 @@ public class VarientServices : IVarientServices
 
         
 
-        Varient? varient = await _varientRepository.getVarient(vairentId);
+        Varient? varient = await varientRepository.getVarient(vairentId);
 
         if (varient is null)
         {
@@ -198,7 +189,7 @@ public class VarientServices : IVarientServices
         }
 
 
-        int result = await _varientRepository
+        int result = await varientRepository
             .deleteAsync(vairentId);
 
         if (result == 0)
@@ -223,7 +214,7 @@ public class VarientServices : IVarientServices
 
     public async Task<Result<List<VarientDto>>> getVarients(int page,int pageSize)
     {
-         List<VarientDto> varients =(await _varientRepository
+         List<VarientDto> varients =(await varientRepository
              .getAllAsync(page, pageSize))
              .Select(va=>va.toDto())
              .ToList();

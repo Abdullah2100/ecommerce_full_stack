@@ -11,16 +11,8 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/Product")]
-public class ProductController : ControllerBase
+public class ProductController(IProductSerivces productSerivces) : ControllerBase
 {
-    public ProductController(IProductSerivces productSerivces)
-    {
-     _productSerivces = productSerivces; 
-    }
-
- 
-    private readonly IProductSerivces _productSerivces;
-
     [HttpGet("store/{storeId}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> getProducts
@@ -31,7 +23,7 @@ public class ProductController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await _productSerivces.getProductsByStoreId(storeId,pageNumber,25);
+        var result = await productSerivces.getProductsByStoreId(storeId,pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -50,7 +42,7 @@ public class ProductController : ControllerBase
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
-        var result = await _productSerivces.getProductsByCategoryId(categoryId,pageNumber,25);
+        var result = await productSerivces.getProductsByCategoryId(categoryId,pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -72,7 +64,7 @@ public class ProductController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await _productSerivces.getProducts(
+        var result = await productSerivces.getProducts(
             storeId,
             subcategoryId,
             pageNumber,
@@ -94,7 +86,7 @@ public class ProductController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await _productSerivces.getProducts(pageNumber,25);
+        var result = await productSerivces.getProducts(pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -129,7 +121,7 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _productSerivces.getProductsForAdmin(adminId,
+        var result = await productSerivces.getProductsForAdmin(adminId,
             pageNumber,
             25);
 
@@ -168,7 +160,7 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _productSerivces.createProducts(
+        var result = await productSerivces.createProducts(
             userId,product);
 
         return result.IsSeccessful switch
@@ -205,7 +197,7 @@ public class ProductController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _productSerivces.updateProducts(
+        var result = await productSerivces.updateProducts(
             userId,product);
 
         return result.IsSeccessful switch
@@ -240,7 +232,7 @@ public class ProductController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _productSerivces.deleteProducts(
+        var result = await productSerivces.deleteProducts(
             userId,productId);
 
         return result.IsSeccessful switch

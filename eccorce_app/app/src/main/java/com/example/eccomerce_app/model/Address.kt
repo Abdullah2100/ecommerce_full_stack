@@ -9,3 +9,5 @@ data class Address(
     val title: String?,
     val isCurrnt: Boolean
 )
+
+enum class enMapType{My,MyStore,Store,TrackOrder}

@@ -47,13 +47,13 @@ object DtoToModel {
 
     fun StoreDto.toStore():StoreModel{
         return StoreModel(
-            id = this.Id,
-            name = this.Name,
-            user_id = this.UserId,
-            pig_image = this.WallpaperImage.replace("0.0.0.0", "192.168.1.45"),
-            small_image = this.SmallImage.replace("0.0.0.0", "192.168.1.45"),
-            latitude = this.Latitude,
-            longitude = this.Longitude
+            id = this.id,
+            name = this.name,
+            user_id = this.userId,
+            pig_image = this.wallpaperImage.replace("0.0.0.0", "192.168.1.45"),
+            small_image = this.smallImage.replace("0.0.0.0", "192.168.1.45"),
+            latitude = this.latitude,
+            longitude = this.longitude
         )
     }
 
@@ -72,9 +72,9 @@ object DtoToModel {
 
     fun BannerDto.toBanner():BannerModel{
         return BannerModel(
-            id=this.Id,
-            image=if(this.Image.isNotEmpty())this.Image.replace("0.0.0.0","192.168.1.45") else "",
-            store_id = this.StoreId
+            id=this.id,
+            image=if(this.image.isNotEmpty())this.image.replace("0.0.0.0","192.168.1.45") else "",
+            store_id = this.storeId
         )
     }
 

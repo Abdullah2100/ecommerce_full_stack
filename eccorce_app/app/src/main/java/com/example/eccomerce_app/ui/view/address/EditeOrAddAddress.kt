@@ -56,6 +56,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.model.Address
+import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
@@ -85,6 +87,8 @@ fun EditOrAddLocationScreen(
     val isLoading = remember { mutableStateOf<Boolean>(false) }
     val isRefresh = remember { mutableStateOf(false) }
 
+    val currentAddress = remember { mutableStateOf<Address?>(null) }
+
 
     val requestPermissionThenNavigate = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -103,7 +107,10 @@ fun EditOrAddLocationScreen(
                                     Screens.MapScreen(
                                         lognit = location.longitude,
                                         latitt = location.latitude,
-                                        isFromLogin = false
+                                        isFromLogin = false,
+                                        title = currentAddress.value?.title,
+                                        id = currentAddress.value?.id?.toString(),
+                                        mapType = enMapType.My,
                                     )
                                 )
                             else
@@ -272,7 +279,7 @@ fun EditOrAddLocationScreen(
                                             if (!locationss.value!!.address!![index].isCurrnt) {
                                                 coroutine.launch {
                                                     isLoading.value = true
-                                                    var result = async {
+                                                    val result = async {
                                                         homeViewModle.setCurrentActiveUserAddress(
                                                             locationss.value!!.address!![index].id!!,
                                                         )
@@ -291,16 +298,14 @@ fun EditOrAddLocationScreen(
 
                                         },
                                         onLongClick = {
-                                            val currentAddress = locationss.value?.address!![index]
-                                            nav.navigate(
-                                                Screens.MapScreen(
-                                                    id = currentAddress.id.toString(),
-                                                    latitt = currentAddress.latitude,
-                                                    lognit = currentAddress.longitude,
-                                                    title = currentAddress.title,
-                                                    isFromLogin = false
+                                            currentAddress.value =locationss.value?.address!![index]
+                                            requestPermissionThenNavigate.launch(
+                                                arrayOf(
+                                                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                                                    Manifest.permission.ACCESS_FINE_LOCATION,
                                                 )
                                             )
+
                                         }
                                     )
                                     .border(

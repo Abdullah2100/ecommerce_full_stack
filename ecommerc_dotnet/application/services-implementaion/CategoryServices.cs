@@ -12,29 +12,16 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class CategoryServices : ICategoryServices
+public class CategoryServices(
+    IWebHostEnvironment host,
+    IConfig config,
+    ICategoryRepository categoryRepository,
+    IUserRepository userRepository)
+    : ICategoryServices
 {
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IWebHostEnvironment _host;
-    private readonly IConfig _config;
-
-    public CategoryServices(
-        IWebHostEnvironment host,
-        IConfig config,
-        ICategoryRepository categoryRepository,
-        IUserRepository userRepository
-    )
-    {
-        _host = host;
-        _config = config;
-        _categoryRepository = categoryRepository;
-        _userRepository = userRepository;
-    }
-
     public async Task<Result<CategoryDto?>> createCategory(CreateCategoryDto categoryDto, Guid adminId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
 
         var isValid = user.isValidateFunc(true);
@@ -49,7 +36,7 @@ public class CategoryServices : ICategoryServices
                 );
         }
 
-        if (await _categoryRepository.isExist(categoryDto.Name))
+        if (await categoryRepository.isExist(categoryDto.Name))
         {
             return new Result<CategoryDto?>
             (
@@ -63,7 +50,7 @@ public class CategoryServices : ICategoryServices
         string? imagePath = await clsUtil
             .saveFile(categoryDto.Image,
                 EnImageType.CATEGORY,
-                _host);
+                host);
 
         if (imagePath is null)
             return new Result<CategoryDto?>
@@ -83,7 +70,7 @@ public class CategoryServices : ICategoryServices
             IsBlocked = false,
             OwnerId = user!.Id
         };
-        int result = await _categoryRepository.addAsync(category);
+        int result = await categoryRepository.addAsync(category);
 
         if (result == 0)
         {
@@ -98,7 +85,7 @@ public class CategoryServices : ICategoryServices
 
         return new Result<CategoryDto?>
         (
-            data: category?.toDto(_config.getKey("url_file")),
+            data: category?.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -116,7 +103,7 @@ public class CategoryServices : ICategoryServices
                 statusCode: 200
             );
 
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         
         var isValid = user.isValidateFunc(true);
@@ -131,7 +118,7 @@ public class CategoryServices : ICategoryServices
             );
         } 
         if (categoryDto.Name is not null)
-            if (await _categoryRepository.isExist(categoryDto.Name,categoryDto.Id))
+            if (await categoryRepository.isExist(categoryDto.Name,categoryDto.Id))
             {
                 return new Result<CategoryDto?>
                 (
@@ -141,7 +128,7 @@ public class CategoryServices : ICategoryServices
                     statusCode: 400
                 );
             }
-        Category? category = await _categoryRepository.getCategory(categoryDto.Id);
+        Category? category = await categoryRepository.getCategory(categoryDto.Id);
 
 
         if (category is null)
@@ -160,17 +147,17 @@ public class CategoryServices : ICategoryServices
         if (categoryDto?.Image is not null)
         {
             if (categoryDto?.Image is not null)
-                clsUtil.deleteFile(category.Image, _host);
+                clsUtil.deleteFile(category.Image, host);
             image = await clsUtil
                 .saveFile(categoryDto!.Image!,
                     EnImageType.CATEGORY,
-                    _host);
+                    host);
         }
 
         category.Name = categoryDto?.Name ?? category.Name;
         category.Image = image ?? category.Image;
         category.UpdatedAt = DateTime.Now;
-        int result = await _categoryRepository.updateAsync(category);
+        int result = await categoryRepository.updateAsync(category);
 
         if (result == 0)
         {
@@ -185,7 +172,7 @@ public class CategoryServices : ICategoryServices
 
         return new Result<CategoryDto?>
         (
-            data: category.toDto(_config.getKey("url_file")),
+            data: category.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 200
@@ -194,7 +181,7 @@ public class CategoryServices : ICategoryServices
 
     public async Task<Result<bool>> deleteCategory(Guid categoryId, Guid adminId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         var isValid = user.isValidateFunc(true);
         if (isValid is not null)
@@ -207,7 +194,7 @@ public class CategoryServices : ICategoryServices
                 statusCode: isValid.StatusCode 
             );
         }  
-        if (!(await _categoryRepository.isExist(categoryId)))
+        if (!(await categoryRepository.isExist(categoryId)))
         {
             return new Result<bool>
             (
@@ -218,7 +205,7 @@ public class CategoryServices : ICategoryServices
             );
         }
 
-        int result = await _categoryRepository.deleteAsync(categoryId);
+        int result = await categoryRepository.deleteAsync(categoryId);
         if (result == 0)
         {
             return new Result<bool>
@@ -241,8 +228,8 @@ public class CategoryServices : ICategoryServices
 
     public async Task<Result<List<CategoryDto>>> getCategories(int pageNumber, int pageSize)
     {
-        List<CategoryDto> categories = (await _categoryRepository.getAllAsync(pageNumber, pageSize))
-            .Select(ca => ca.toDto(_config.getKey("url_file")))
+        List<CategoryDto> categories = (await categoryRepository.getAllAsync(pageNumber, pageSize))
+            .Select(ca => ca.toDto(config.getKey("url_file")))
             .ToList();
         return new Result<List<CategoryDto>>
         (

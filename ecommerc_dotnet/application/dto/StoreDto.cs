@@ -18,7 +18,7 @@ namespace ecommerc_dotnet.dto
 
     public class CreateStoreDto
     {
-        [StringLength(maximumLength: 100, MinimumLength = 5, ErrorMessage = "Name must not be empty")]
+        [StringLength(maximumLength: 100, MinimumLength = 2, ErrorMessage = "Name must not be empty")]
         [Required]
         public string Name { get; set; } = string.Empty;
 

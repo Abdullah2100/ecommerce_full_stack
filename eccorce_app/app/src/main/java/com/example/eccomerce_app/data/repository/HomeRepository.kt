@@ -28,6 +28,7 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -148,9 +149,9 @@ class HomeRepository(val client: HttpClient) {
                 )
             }
             if (result.status == HttpStatusCode.Created) {
-                return NetworkCallHandler.Successful(result.body<BannerDto>())
+                NetworkCallHandler.Successful(result.body<BannerDto>())
             } else {
-                return NetworkCallHandler.Error(result.body())
+                NetworkCallHandler.Error(result.body())
             }
         } catch (e: UnknownHostException) {
 
@@ -180,9 +181,9 @@ class HomeRepository(val client: HttpClient) {
 
             }
             if (result.status == HttpStatusCode.NoContent) {
-                return NetworkCallHandler.Successful("deleted Seccessfuly")
+                NetworkCallHandler.Successful("deleted Seccessfuly")
             } else {
-                return NetworkCallHandler.Error(result.body())
+                NetworkCallHandler.Error(result.body())
             }
         } catch (e: UnknownHostException) {
 
@@ -216,10 +217,12 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<CategoryDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
 
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body())
                 }
@@ -256,10 +259,12 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<GeneralSettingDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
 
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body())
                 }
@@ -302,6 +307,7 @@ class HomeRepository(val client: HttpClient) {
                     NetworkCallHandler.Successful(result.body<OrderDto>())
 
                 }
+
                 else -> {
 
                     NetworkCallHandler.Error(result.body<String>())
@@ -342,9 +348,11 @@ class HomeRepository(val client: HttpClient) {
                     NetworkCallHandler.Successful(result.body<List<OrderDto>>())
 
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
 
                     NetworkCallHandler.Error(result.body<String>())
@@ -385,6 +393,7 @@ class HomeRepository(val client: HttpClient) {
                     NetworkCallHandler.Successful(true)
 
                 }
+
                 else -> {
 
                     NetworkCallHandler.Error(result.body<String>())
@@ -425,9 +434,11 @@ class HomeRepository(val client: HttpClient) {
                     NetworkCallHandler.Successful(result.body<List<OrderItemDto>>())
 
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
 
                     NetworkCallHandler.Error(result.body<String>())
@@ -467,6 +478,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Successful(true)
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -505,9 +517,11 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -543,9 +557,11 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -581,9 +597,11 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -620,9 +638,11 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -721,6 +741,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.Created -> {
                     NetworkCallHandler.Successful(result.body<ProductDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -856,6 +877,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<ProductDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -891,6 +913,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Successful(true)
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -921,7 +944,7 @@ class HomeRepository(val client: HttpClient) {
     ): NetworkCallHandler {
         return try {
             val result = client.post(
-                Secrets.getBaseUrl() + "/Store/new"
+                Secrets.getBaseUrl() + "/Store"
             ) {
                 headers {
                     append(
@@ -932,11 +955,11 @@ class HomeRepository(val client: HttpClient) {
                 setBody(
                     MultiPartFormDataContent(
                         formData {
-                            append("name", name)
-                            append("longitude", latitude)
-                            append("latitude", longitude)
+                            append("Name", name)
+                            append("Longitude", latitude)
+                            append("Latitude", longitude)
                             append(
-                                key = "wallpaperImage", // Must match backend expectation
+                                key = "WallpaperImage", // Must match backend expectation
                                 value = wallpaperImage.readBytes(),
                                 headers = Headers.build {
                                     append(
@@ -950,7 +973,7 @@ class HomeRepository(val client: HttpClient) {
                                 }
                             )
                             append(
-                                key = "smallImage", // Must match backend expectation
+                                key = "SmallImage", // Must match backend expectation
                                 value = smallImage.readBytes(),
                                 headers = Headers.build {
                                     append(
@@ -972,6 +995,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.Created -> {
                     NetworkCallHandler.Successful(result.body<StoreDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body())
                 }
@@ -994,8 +1018,8 @@ class HomeRepository(val client: HttpClient) {
         name: String,
         wallpaperImage: File?,
         smallImage: File?,
-        longitude: Double,
-        latitude: Double
+        longitude: Double?,
+        latitude: Double?
     ): NetworkCallHandler {
         return try {
             val result = client.put(
@@ -1012,9 +1036,9 @@ class HomeRepository(val client: HttpClient) {
                         formData {
                             if (name.trim().length > 0)
                                 append("name", name)
-                            if (latitude != 0.0)
+                            if (latitude != null)
                                 append("longitude", latitude)
-                            if (longitude != 0.0)
+                            if (longitude != null)
                                 append("latitude", longitude)
                             if (wallpaperImage != null)
                                 append(
@@ -1055,6 +1079,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<StoreDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body())
                 }
@@ -1089,6 +1114,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<StoreDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -1124,6 +1150,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<AddressDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -1162,9 +1189,11 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<SubCategoryDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -1204,6 +1233,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.Created -> {
                     NetworkCallHandler.Successful(result.body<SubCategoryDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -1243,6 +1273,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<SubCategoryDto>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -1279,6 +1310,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Successful(true)
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body<String>())
                 }
@@ -1322,6 +1354,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.Created -> {
                     NetworkCallHandler.Successful(result.body<AddressDto?>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(
                         result.body<String>()
@@ -1365,6 +1398,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<AddressDto?>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(
                         result.body<String>()
@@ -1404,6 +1438,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Successful(true)
                 }
+
                 else -> {
                     NetworkCallHandler.Error(
                         result.body<String>()
@@ -1427,8 +1462,8 @@ class HomeRepository(val client: HttpClient) {
 
     suspend fun setAddressAsCurrent(addressId: UUID): NetworkCallHandler {
         return try {
-            val result = client.post(
-                Secrets.getBaseUrl() + "/User/address/active${addressId}"
+            val result = client.patch(
+                Secrets.getBaseUrl() + "/User/address/active/${addressId}"
             ) {
                 headers {
                     append(
@@ -1439,9 +1474,10 @@ class HomeRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Successful(result.body<Boolean>())
                 }
+
                 else -> {
                     NetworkCallHandler.Error(
                         result.body<String>()
@@ -1480,6 +1516,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<UserDto>())
                 }
+
                 else -> NetworkCallHandler.Error(result.body())
             }
 
@@ -1549,6 +1586,7 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<UserDto>())
                 }
+
                 else -> NetworkCallHandler.Error(result.body())
             }
 
@@ -1583,9 +1621,11 @@ class HomeRepository(val client: HttpClient) {
                 HttpStatusCode.OK -> {
                     NetworkCallHandler.Successful(result.body<List<VarientDto>>())
                 }
+
                 HttpStatusCode.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
+
                 else -> {
                     NetworkCallHandler.Error(result.body())
                 }

@@ -12,24 +12,16 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class GeneralSettingServices:IGeneralSettingServices
+public class GeneralSettingServices(
+    IGeneralSettingRepository generalSettingRepository,
+    IUserRepository userRepository)
+    : IGeneralSettingServices
 {
-    private readonly IGeneralSettingRepository _generalSettingRepository;
-    private readonly IUserRepository _userRepository;
-
-    public GeneralSettingServices(
-        IGeneralSettingRepository generalSettingRepository,
-        IUserRepository userRepository
-    )
-    {
-        _generalSettingRepository = generalSettingRepository;
-        _userRepository = userRepository;
-    }
     public async Task<Result<GeneralSettingDto?>> createGeneralSetting(
         Guid adminId, 
         GeneralSettingDto settingDto)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -53,7 +45,7 @@ public class GeneralSettingServices:IGeneralSettingServices
             );
         }
 
-        if (await _generalSettingRepository.isExist(settingDto.Name))
+        if (await generalSettingRepository.isExist(settingDto.Name))
         {
             return new Result<GeneralSettingDto?>
             (
@@ -71,7 +63,7 @@ public class GeneralSettingServices:IGeneralSettingServices
             Name = settingDto.Name,
             Value = settingDto.Value
         };
-        int result = await _generalSettingRepository.addAsync(generalSetting);
+        int result = await generalSettingRepository.addAsync(generalSetting);
         
 
         if (result == 0)
@@ -109,7 +101,7 @@ public class GeneralSettingServices:IGeneralSettingServices
                 statusCode: 200
             ); 
         
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -133,7 +125,7 @@ public class GeneralSettingServices:IGeneralSettingServices
             );
         }
 
-        GeneralSetting? generalSetting = await _generalSettingRepository.getGeneralSetting(id);
+        GeneralSetting? generalSetting = await generalSettingRepository.getGeneralSetting(id);
         if (generalSetting is null)
         {
             return new Result<GeneralSettingDto?>
@@ -148,7 +140,7 @@ public class GeneralSettingServices:IGeneralSettingServices
         generalSetting.Value = settingDto.Value??generalSetting.Value;
         generalSetting.UpdatedAt = DateTime.Now;
        
-        int result = await _generalSettingRepository.addAsync(generalSetting);
+        int result = await generalSettingRepository.addAsync(generalSetting);
         
 
         if (result == 0)
@@ -175,7 +167,7 @@ public class GeneralSettingServices:IGeneralSettingServices
 
     public async Task<Result<bool>> deleteGeneralSetting(Guid id, Guid adminId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -199,7 +191,7 @@ public class GeneralSettingServices:IGeneralSettingServices
             );
         }
         
-        if (!(await _generalSettingRepository.isExist(id)))
+        if (!(await generalSettingRepository.isExist(id)))
         {
             return new Result<bool>
             (
@@ -210,7 +202,7 @@ public class GeneralSettingServices:IGeneralSettingServices
             );
         }
 
-        int result = await _generalSettingRepository.deleteAsync(id);
+        int result = await generalSettingRepository.deleteAsync(id);
         
 
         if (result == 0)
@@ -235,7 +227,7 @@ public class GeneralSettingServices:IGeneralSettingServices
 
     public async Task<Result<List<GeneralSettingDto>>> getGeneralSettings(int pageNum, int pageSize)
     {
-        List<GeneralSettingDto>  categories = (await _generalSettingRepository.getAllAsync(pageNum, pageSize))
+        List<GeneralSettingDto>  categories = (await generalSettingRepository.getAllAsync(pageNum, pageSize))
             .Select(ca => ca.toDto())
             .ToList();
         return new Result<List<GeneralSettingDto>>

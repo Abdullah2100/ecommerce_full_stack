@@ -8,22 +8,16 @@ using Exception = System.Exception;
 
 namespace hotel_api.Services.EmailService;
 
-public class Email :IEmail
+public class Email(IConfig config) : IEmail
 {
-    private readonly IConfig _config;
-
-  public  Email(IConfig config)
-    {
-        _config=config;
-    }
     public async Task<bool>sendingEmail( string receivedEmail, string otp)
     {
         try
         {
-            var serverUrl = _config.getKey("smtp_data:url");
-            var userName = _config.getKey("smtp_data:username");
-            var password = _config.getKey("smtp_data:password");
-            var port =_config.getKey("smtp_data:port");
+            var serverUrl = config.getKey("smtp_data:url");
+            var userName = config.getKey("smtp_data:username");
+            var password = config.getKey("smtp_data:password");
+            var port =config.getKey("smtp_data:port");
             
             var client = new SmtpClient(serverUrl, Convert.ToInt32((port)))
             {

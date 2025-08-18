@@ -37,6 +37,7 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationGroup
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.example.e_commercompose.R
+import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
@@ -55,12 +56,16 @@ fun MapHomeScreen(
     id: String? = null,
     lognit: Double?,
     latitt: Double?,
+    mapType: enMapType = enMapType.My,
     isFomLogin: Boolean = true,
 ) {
 
+    Log.d("thisTheMapType","${mapType}")
     val context = LocalContext.current
     val isLoading = remember { mutableStateOf(false) }
     val isOpenSheet = remember { mutableStateOf(false) }
+    val isCanIntractWithMap = (mapType == enMapType.My || mapType == enMapType.MyStore);
+    val isHasTitle = (mapType == enMapType.My);
 
     val addressTitle = remember { mutableStateOf<TextFieldValue>(TextFieldValue(title ?: "")) }
 
@@ -74,6 +79,20 @@ fun MapHomeScreen(
         setCameraOptions {
             center(Point.fromLngLat(lognit ?: -98.0, latitt ?: 39.5)) // Example location
             zoom(20.0)
+        }
+    }
+
+    fun handleMapClick(point: Point) {
+        when (mapType) {
+            enMapType.My -> markers.value = point
+            enMapType.MyStore -> {
+                coroutine.launch {
+                    homeViewModle.setStoreCreateData(point.longitude(), point.latitude())
+                    nav.popBackStack()
+                }
+            }
+
+            else -> {}
         }
     }
 
@@ -168,7 +187,7 @@ fun MapHomeScreen(
         it.calculateBottomPadding()
 
         ConstraintLayout {
-            val (bottonRef) = createRefs()
+            val (bottomRef) = createRefs()
             MapboxMap(
                 modifier = Modifier
                     .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
@@ -184,7 +203,8 @@ fun MapHomeScreen(
                 },
 
                 onMapClickListener = { value ->
-                    markers.value = value
+                    //this to make ability to track with map only for my or myStore
+                    handleMapClick(value)
                     true
                 },
 
@@ -205,27 +225,37 @@ fun MapHomeScreen(
                     )
                 }
             }
-            CustomBotton(
-                buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
-                color = CustomColor.primaryColor700,
-                isEnable = true,
-                modifier = Modifier
-                    .padding(bottom = it.calculateBottomPadding())
 
-                    .height(50.dp)
-                    .fillMaxWidth(0.9f)
-                    .constrainAs(bottonRef) {
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
+            if (isCanIntractWithMap)
+                CustomBotton(
+                    buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
+                    color = CustomColor.primaryColor700,
+                    isEnable = true,
+                    modifier = Modifier
+                        .padding(bottom = it.calculateBottomPadding())
+
+                        .height(50.dp)
+                        .fillMaxWidth(0.9f)
+                        .constrainAs(bottomRef) {
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        },
+
+                    isLoading = false,
+                    operation = {
+                        when (isHasTitle) {
+                            true -> {
+                                isOpenSheet.value = true;
+                            }
+
+                            else -> {
+
+                            }
+                        }
                     },
-
-                isLoading = false,
-                operation = {
-                    isOpenSheet.value = true;
-                },
-                lableSize = 20
-            )
+                    lableSize = 20
+                )
 
 
         }
@@ -253,4 +283,3 @@ fun MapHomeScreen(
 
 
 }
-

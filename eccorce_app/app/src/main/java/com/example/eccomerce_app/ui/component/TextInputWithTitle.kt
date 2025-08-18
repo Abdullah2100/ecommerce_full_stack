@@ -91,15 +91,14 @@ fun TextInputWithTitle(
     isHasError: Boolean = false,
     erroMessage: String? = null,
     isEnable: Boolean? = true,
-    focusRequester: FocusRequester? = null
+    focusRequester: FocusRequester? = null,
+    onChange: ((value: String) -> Unit)? = null
 ) {
 
     var modifierWithFocus =
-//        if (focusRequester == null)
-            Modifier.fillMaxWidth()
-//        else Modifier
-//            .fillMaxWidth()
-//            .focusRequester(focusRequester)
+        Modifier.fillMaxWidth()
+
+
     val fontScall = LocalDensity.current.fontScale
     Column {
         if (title.trim().isNotEmpty())
@@ -112,10 +111,15 @@ fun TextInputWithTitle(
             )
         Sizer(heigh = 5)
         OutlinedTextField(
+
             enabled = isEnable == true,
             maxLines = 1,
             value = value.value,
-            onValueChange = { value.value = it },
+            onValueChange = {
+                value.value = it
+                if (onChange != null)
+                    onChange(it.text)
+            },
             placeholder = {
                 Text(
                     placHolder,

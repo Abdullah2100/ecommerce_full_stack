@@ -4,8 +4,11 @@ import android.util.Log
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,7 +35,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
@@ -52,10 +60,9 @@ fun BannerBage(
 ) {
 
     val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
 
-    val currentPage = remember { mutableStateOf(0) }
-    var pagerState = rememberPagerState { banners.size }
+    val currentPage = remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState { banners.size }
 
     var operationType = remember { mutableStateOf('+') }
 
@@ -87,10 +94,31 @@ fun BannerBage(
     }
 
 
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    )
+    {
+
+        Text(
+            "Banners",
+            fontFamily = General.satoshiFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = CustomColor.neutralColor950,
+            textAlign = TextAlign.Center
+
+        )
+
+    }
 
 
     HorizontalPager(
-        modifier = Modifier.padding(top = 15.dp), state = pagerState,
+        modifier = Modifier
+            .padding(top = 15.dp), state = pagerState,
         pageSpacing = 2.dp
     ) { page ->
 
@@ -108,6 +136,11 @@ fun BannerBage(
                             .height(150.dp)
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
+                            .border(
+                                width = 1.dp,
+                                color =  CustomColor.neutralColor100,
+                                shape = RoundedCornerShape(8.dp)
+                            )
                             .clickable {
                                 Log.d("navBannerIsPresing", "true")
                                 nav!!.navigate(Screens.Store(banners[page].store_id.toString()))
@@ -167,3 +200,4 @@ fun BannerBage(
     }
 
 }
+

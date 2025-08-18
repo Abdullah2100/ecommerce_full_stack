@@ -12,38 +12,23 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class ProductServices : IProductSerivces
+public class ProductServices(
+    IConfig config,
+    IWebHostEnvironment host,
+    IProductRepository productRepository,
+    IUserRepository userRepository,
+    ISubCategoryRepository subCategoryRepository)
+    : IProductSerivces
 {
-    private readonly IConfig _config;
-    private readonly IWebHostEnvironment _host;
-    private readonly IProductRepository _productRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly ISubCategoryRepository _subCategoryRepository;
-
-    public ProductServices(
-        IConfig config,
-        IWebHostEnvironment host,
-        IProductRepository productRepository,
-        IUserRepository userRepository,
-        ISubCategoryRepository subCategoryRepository
-    )
-    {
-        _config = config;
-        _host = host;
-        _productRepository = productRepository;
-        _userRepository = userRepository;
-        _subCategoryRepository = subCategoryRepository;
-    }
-
     public async Task<Result<List<ProductDto>>> getProductsByStoreId(
         Guid storeId,
         int pageNum,
         int pageSize
     )
     {
-        List<ProductDto> products = (await _productRepository
+        List<ProductDto> products = (await productRepository
                 .getProducts(storeId, pageNum, pageSize))
-            .Select((de) => de.toDto(_config.getKey("url_file")))
+            .Select((de) => de.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -60,9 +45,9 @@ public class ProductServices : IProductSerivces
         int pageSize
     )
     {
-        List<ProductDto> products = (await _productRepository
+        List<ProductDto> products = (await productRepository
                 .getProductsByCategory(categryId, pageNum, pageSize))
-            .Select((de) => de.toDto(_config.getKey("url_file")))
+            .Select((de) => de.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -80,9 +65,9 @@ public class ProductServices : IProductSerivces
         int pageSize
     )
     {
-        List<ProductDto> products = (await _productRepository
+        List<ProductDto> products = (await productRepository
                 .getProducts(storeId, subCategoryId, pageNum, pageSize))
-            .Select((de) => de.toDto(_config.getKey("url_file")))
+            .Select((de) => de.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -98,9 +83,9 @@ public class ProductServices : IProductSerivces
         int pageSize
     )
     {
-        List<ProductDto> products = (await _productRepository
+        List<ProductDto> products = (await productRepository
                 .getAllAsync(pageNum, pageSize))
-            .Select((de) => de.toDto(_config.getKey("url_file")))
+            .Select((de) => de.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -117,7 +102,7 @@ public class ProductServices : IProductSerivces
         int pageSize
     )
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -142,9 +127,9 @@ public class ProductServices : IProductSerivces
         }
 
 
-        List<AdminProductsDto> products = (await _productRepository
+        List<AdminProductsDto> products = (await productRepository
                 .getAllAsync(pageNum, pageSize))
-            .Select((de) => de.toAdminDto(_config.getKey("url_file")))
+            .Select((de) => de.toAdminDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<AdminProductsDto>>(
@@ -157,7 +142,7 @@ public class ProductServices : IProductSerivces
 
     private async Task<Result<ProductDto?>?> isUserNotExistOrNotHasStore(Guid userId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
         if (user is null)
         {
@@ -222,11 +207,11 @@ public class ProductServices : IProductSerivces
         string? savedThumbnail = await clsUtil.saveFile(
             productDto.Thmbnail,
             EnImageType.PRODUCT,
-            _host);
+            host);
         List<string>? savedImage = await clsUtil.saveFile(
             productDto.Images,
             EnImageType.PRODUCT,
-            _host);
+            host);
         if (savedImage is null || savedThumbnail is null)
         {
             return new Result<ProductDto?>
@@ -302,7 +287,7 @@ public class ProductServices : IProductSerivces
             ProductVarients = productVarients
         };
 
-        int result = await _productRepository.addAsync(product);
+        int result = await productRepository.addAsync(product);
 
         if (result == 0)
         {
@@ -317,7 +302,7 @@ public class ProductServices : IProductSerivces
 
         return new Result<ProductDto?>
         (
-            data: product?.toDto(_config.getKey("url_file")),
+            data: product?.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -345,7 +330,7 @@ public class ProductServices : IProductSerivces
         }
 
         if (productDto.SubcategoryId is not null &&
-            !(await _subCategoryRepository.isExist((Guid)productDto!.SubcategoryId!)))
+            !(await subCategoryRepository.isExist((Guid)productDto!.SubcategoryId!)))
         {
             return new Result<ProductDto?>
             (
@@ -356,7 +341,7 @@ public class ProductServices : IProductSerivces
             );
         }
 
-        Product? product = await _productRepository.getProduct(productDto.Id, productDto.StoreId);
+        Product? product = await productRepository.getProduct(productDto.Id, productDto.StoreId);
 
         if (product is null)
         {
@@ -374,7 +359,7 @@ public class ProductServices : IProductSerivces
         //delete preview images
         if (productDto.Deletedimages is not null)
         {
-            result = await _productRepository.deleteProductImages(productDto.Deletedimages, productDto.Id);
+            result = await productRepository.deleteProductImages(productDto.Deletedimages, productDto.Id);
             if (result == 0)
             {
                 return new Result<ProductDto?>
@@ -390,7 +375,7 @@ public class ProductServices : IProductSerivces
         //delete preview productvarients
         if (productDto.DeletedProductVarients is not null)
         {
-            result = await _productRepository.deleteProductVarient(productDto.DeletedProductVarients, productDto.Id);
+            result = await productRepository.deleteProductVarient(productDto.DeletedProductVarients, productDto.Id);
             if (result == 0)
             {
                 return new Result<ProductDto?>
@@ -410,13 +395,13 @@ public class ProductServices : IProductSerivces
             savedThumbnail = await clsUtil.saveFile(
                 productDto.Thmbnail,
                 EnImageType.PRODUCT,
-                _host);
+                host);
 
         if (productDto.Images is not null)
             savedImage = (await clsUtil.saveFile(
                     productDto.Images,
                     EnImageType.PRODUCT,
-                    _host))
+                    host))
                 ?.Select(im => new ProductImage
                 {
                     Id = clsUtil.generateGuid(),
@@ -483,7 +468,7 @@ public class ProductServices : IProductSerivces
         product.ProductVarients = productVarients;
         product.ProductImages = savedImage;
 
-        result = await _productRepository.updateAsync(product);
+        result = await productRepository.updateAsync(product);
 
         if (result == 0)
         {
@@ -496,11 +481,11 @@ public class ProductServices : IProductSerivces
             );
         }
 
-        Product? finalUpdateProduct = await _productRepository.getProduct(product.Id);
+        Product? finalUpdateProduct = await productRepository.getProduct(product.Id);
 
         return new Result<ProductDto?>
         (
-            data: finalUpdateProduct?.toDto(_config.getKey("url_file")),
+            data: finalUpdateProduct?.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 200
@@ -526,7 +511,7 @@ public class ProductServices : IProductSerivces
         }
 
 
-        Product? product = await _productRepository.getProduct(id, userId);
+        Product? product = await productRepository.getProduct(id, userId);
 
         if (product is null)
         {
@@ -539,7 +524,7 @@ public class ProductServices : IProductSerivces
             );
         }
 
-        int result = await _productRepository.deleteAsync(product.Id);
+        int result = await productRepository.deleteAsync(product.Id);
 
         if (result == 0)
         {
@@ -555,7 +540,7 @@ public class ProductServices : IProductSerivces
         if (product.ProductImages is not null)
             foreach (var image in product.ProductImages)
             {
-                clsUtil.deleteFile(image.Path, _host);
+                clsUtil.deleteFile(image.Path, host);
             }
 
         return new Result<bool>

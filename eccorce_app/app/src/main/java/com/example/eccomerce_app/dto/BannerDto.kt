@@ -8,10 +8,10 @@ import java.util.UUID
 @Serializable
 data class BannerDto(
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
-    val Image: String,
+    val id: UUID,
+    val image: String,
     @Serializable(with = UUIDKserialize::class)
-    val StoreId: UUID,
+    val storeId: UUID,
 )
 
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,14 +33,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,7 +61,7 @@ import com.example.e_commercompose.ui.component.LocationLoadingShape
 import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.Util.General.reachedBottom
-import kotlinx.coroutines.delay
+import com.example.e_commercompose.ui.component.BannerLoading
 import kotlin.collections.isNullOrEmpty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,11 +72,19 @@ fun HomePage(
     homeViewModel: HomeViewModel
 ) {
     val configuration = LocalConfiguration.current
-    var myInfo = homeViewModel.myInfo.collectAsState()
-    var bannel = homeViewModel.homeBanners.collectAsState()
-    var categories = homeViewModel.categories.collectAsState()
-    var products = homeViewModel.products.collectAsState()
+    val lazyState = rememberLazyListState()
+
+
+    val myInfo = homeViewModel.myInfo.collectAsState()
+
+    val banner = homeViewModel.bannersRadmom.collectAsState()
+
+    val categories = homeViewModel.categories.collectAsState()
+
+    val products = homeViewModel.products.collectAsState()
+
     val interactionSource = remember { MutableInteractionSource() }
+
     val isClickingSearch = remember { mutableStateOf(false) }
 
     val requestPermssion = rememberLauncherForActivityResult(
@@ -89,19 +95,20 @@ fun HomePage(
         }
     )
 
-    val lazyState = rememberLazyListState()
+    val page = remember { mutableIntStateOf(1) }
+
+    val sizeAnimation = animateDpAsState(if (!isClickingSearch.value) 80.dp else 0.dp)
+
+    val isLoadingMore = remember { mutableStateOf(false) }
+    val isRefresh = remember { mutableStateOf(false) }
+
     val reachedBottom = remember {
         derivedStateOf {
             lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
         }
     }
-    var page = remember { mutableStateOf(1) }
 
-    val sizeAnimation = animateDpAsState(
-        if (!isClickingSearch.value) 80.dp else 0.dp,
-    )
-    val isLoadingMore = remember { mutableStateOf(false) }
-    val isRefresh = remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -112,7 +119,7 @@ fun HomePage(
 
     LaunchedEffect(reachedBottom.value) {
         if (!products.value.isNullOrEmpty() && reachedBottom.value) {
-            Log.d("scrollReachToBotton", "true")
+            Log.d("scrollReachToBottom", "true")
             homeViewModel.getProducts(
                 page,
                 isLoadingMore
@@ -132,7 +139,10 @@ fun HomePage(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { homeViewModel.initialFun() }
+            onRefresh = {
+                homeViewModel.initialFun()
+                isRefresh.value = false;
+            }
         ) {
             LazyColumn(
                 state = lazyState,
@@ -144,65 +154,69 @@ fun HomePage(
 
             ) {
 
+                //address info
                 item {
-                    when (myInfo.value?.address == null) {
+                    when (myInfo.value?.address == null && categories.value == null) {
                         true -> {
                             LocationLoadingShape((configuration.screenWidthDp))
                         }
 
                         else -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.height(sizeAnimation.value)
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .width(width = (configuration.screenWidthDp - 30 - 34).dp)
-                                        .clickable(
-                                            enabled = true,
-                                            interactionSource = interactionSource,
-                                            indication = null,
-                                            onClick = {
-                                                nav.navigate(Screens.Address)
-                                            }
-                                        )
+                            if (!myInfo.value?.address.isNullOrEmpty())
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.height(sizeAnimation.value)
                                 ) {
-                                    Text(
-                                        "Loaction",
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 16.sp,
-                                        color = CustomColor.neutralColor800,
-                                        textAlign = TextAlign.Center
+                                    Column(
+                                        modifier = Modifier
+                                            .width(width = (configuration.screenWidthDp - 30 - 34).dp)
+                                            .clickable(
+                                                enabled = true,
+                                                interactionSource = interactionSource,
+                                                indication = null,
+                                                onClick = {
+                                                    nav.navigate(Screens.Address)
+                                                }
+                                            )
+                                    ) {
+                                        Text(
+                                            "Loaction",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 16.sp,
+                                            color = CustomColor.neutralColor800,
+                                            textAlign = TextAlign.Center
 
-                                    )
-                                    Sizer(1)
-                                    Text(
-                                        myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
-                                            ?: "",
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 18.sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center
+                                        )
+                                        Sizer(1)
+                                        Text(
+                                            myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
+                                                ?: "",
+                                            fontFamily = General.satoshiFamily,
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 18.sp,
+                                            color = CustomColor.neutralColor950,
+                                            textAlign = TextAlign.Center
+
+                                        )
+                                    }
+
+                                    Icon(
+                                        Icons.Outlined.Notifications,
+                                        "",
+                                        tint = CustomColor.neutralColor950,
+                                        modifier = Modifier.size(30.dp)
 
                                     )
                                 }
-
-                                Icon(
-                                    Icons.Outlined.Notifications,
-                                    "",
-                                    tint = CustomColor.neutralColor950,
-                                    modifier = Modifier.size(30.dp)
-
-                                )
-                            }
                         }
                     }
 
 
                 }
+
+                //this the search box
                 if (!products.value.isNullOrEmpty())
                     item {
                         Card(
@@ -253,47 +267,17 @@ fun HomePage(
                     }
 
 
-             if (categories.value.isNullOrEmpty() == false)
                 item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp, bottom = 5.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            "Category",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = CustomColor.neutralColor950,
-                            textAlign = TextAlign.Center
-
-                        )
-                        if(categories.value!!.size>4) Text(
-                            "View All",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 14.sp,
-                            color = CustomColor.neutralColor950,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.clickable {
-                                nav.navigate(Screens.Category)
-                            }
-
-                        )
-                    }
-
                     when (categories.value == null) {
                         true -> {
-                            CategoryLoadingShape(20)
+                            CategoryLoadingShape()
                         }
 
                         else -> {
-
                             when (categories.value!!.isEmpty()) {
                                 true -> {}
                                 else -> {
+
                                     CategoryShape(
                                         categories.value!!.take(4),
                                         homeViewModel,
@@ -305,22 +289,35 @@ fun HomePage(
                     }
                 }
 
-                if (bannel.value != null) {
-                    item {
-                        BannerBage(
-                            banners = bannel.value!!,
-                            isMe = false,
-                            nav = nav
-                        )
+                //banner section
+                item {
+                    when (banner.value == null) {
+                        true -> {
+                            BannerLoading()
+                        }
+
+                        else -> {
+                            if (!banner.value.isNullOrEmpty())
+                                BannerBage(
+                                    banners = banner.value!!,
+                                    isMe = false,
+                                    nav = nav
+                                )
+                        }
                     }
+
+
                 }
+
+
+                //product
 
                 item {
 
                     Sizer(10)
                     when (products.value == null) {
                         true -> {
-                            ProductLoading(50)
+                            ProductLoading()
                         }
 
                         else -> {

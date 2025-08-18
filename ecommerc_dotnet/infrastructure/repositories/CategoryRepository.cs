@@ -6,18 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class CategoryRepository:ICategoryRepository
+public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
-    private readonly AppDbContext _context;
-
-    public CategoryRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-    
     public async Task<IEnumerable<Category>> getAllAsync(int page, int length)
     {
-        return await _context
+        return await context
             .Categories
             .AsNoTracking()
             .Skip((page - 1) * length)
@@ -28,30 +21,30 @@ public class CategoryRepository:ICategoryRepository
 
     public async Task<int> addAsync(Category entity)
     {
-        await _context.Categories.AddAsync(entity);
-        return await _context.SaveChangesAsync();
+        await context.Categories.AddAsync(entity);
+        return await context.SaveChangesAsync();
     }
 
     public Task<int> updateAsync(Category entity)
     {
-        _context.Categories.Update(entity);
-        return _context.SaveChangesAsync();
+        context.Categories.Update(entity);
+        return context.SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-        await _context.Categories.Where(ca => ca.Id == id).ExecuteDeleteAsync();
+        await context.Categories.Where(ca => ca.Id == id).ExecuteDeleteAsync();
         return 1;
     }
 
     public async Task<Category?> getCategory(Guid id)
     {
-        return await _context.Categories.FindAsync(id);
+        return await context.Categories.FindAsync(id);
     }
 
     public async Task<bool> isExist(Guid id)
     {
-        return await _context
+        return await context
             .Categories
             .AsNoTracking()
             .AnyAsync(e => e.Id == id);
@@ -59,7 +52,7 @@ public class CategoryRepository:ICategoryRepository
 
     public async Task<bool> isExist(string name)
     {
-        return await _context
+        return await context
             .Categories
             .AsNoTracking()
             .AnyAsync(e => e.Name == name);
@@ -67,7 +60,7 @@ public class CategoryRepository:ICategoryRepository
 
     public async Task<bool> isExist(string name,Guid id)
     {
-        return await _context
+        return await context
             .Categories
             .AsNoTracking()
             .AnyAsync(e => e.Name == name && e.Id != id);

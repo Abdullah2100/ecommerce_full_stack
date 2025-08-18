@@ -1,21 +1,15 @@
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class VarientRepository : IVarientRepository
+public class VarientRepository(AppDbContext context) : IVarientRepository
 {
-    private readonly AppDbContext _context;
-
-    public VarientRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<IEnumerable<Varient>> getAllAsync(int page, int length)
     {
-        return await _context
+        return await context
             .Varients
             .AsNoTracking()
             .Skip((page - 1) * length)
@@ -25,19 +19,19 @@ public class VarientRepository : IVarientRepository
 
     public async Task<int> addAsync(Varient entity)
     {
-        await _context.Varients.AddAsync(entity);
-        return await _context.SaveChangesAsync();
+        await context.Varients.AddAsync(entity);
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(Varient entity)
     {
-        _context.Varients.Update(entity);
-        return await _context.SaveChangesAsync();
+        context.Varients.Update(entity);
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-        await _context
+        await context
             .Varients
             .Where(i => i.Id == id)
             .ExecuteDeleteAsync();
@@ -46,14 +40,14 @@ public class VarientRepository : IVarientRepository
 
     public async Task<Varient?> getVarient(Guid id)
     {
-        return await _context
+        return await context
             .Varients
             .FindAsync(id);
     }
 
     public async Task<int> getVarientCount()
     {
-        return await _context
+        return await context
             .Varients
             .AsNoTracking()
             .CountAsync();
@@ -61,7 +55,7 @@ public class VarientRepository : IVarientRepository
 
     public async Task<bool> isExist(Guid id)
     {
-        return await _context
+        return await context
             .Varients
             .AsNoTracking()
             .AnyAsync(i => i.Id == id);
@@ -69,7 +63,7 @@ public class VarientRepository : IVarientRepository
 
     public async Task<bool> isExist(string name)
     {
-        return await _context
+        return await context
             .Varients
             .AsNoTracking()
             .AnyAsync(i => i.Name == name); 
@@ -77,7 +71,7 @@ public class VarientRepository : IVarientRepository
 
     public async Task<bool> isExist(string name, Guid id)
     {
-        return await _context
+        return await context
             .Varients
             .AsNoTracking()
             .AnyAsync(i => i.Name == name && i.Id != id); 

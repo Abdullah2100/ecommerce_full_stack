@@ -5,17 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class GeneralSettingRepository:IGeneralSettingRepository
+public class GeneralSettingRepository(AppDbContext context) : IGeneralSettingRepository
 {
-    private readonly AppDbContext _context;
-
-    public GeneralSettingRepository(AppDbContext context)
-    {
-        _context = context;
-    }
     public async Task<IEnumerable<GeneralSetting>> getAllAsync(int page, int length)
     {
-        return await _context
+        return await context
             .GeneralSettings
             .AsNoTracking()
             .Skip((page - 1) * length)
@@ -25,39 +19,39 @@ public class GeneralSettingRepository:IGeneralSettingRepository
 
     public async Task<int> addAsync(GeneralSetting entity)
     {
-        await  _context.GeneralSettings.AddAsync(entity);
-        return await _context.SaveChangesAsync();
+        await  context.GeneralSettings.AddAsync(entity);
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(GeneralSetting entity)
     {
-        _context.GeneralSettings.Update(entity);
-        return await _context.SaveChangesAsync();
+        context.GeneralSettings.Update(entity);
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-        await _context.GeneralSettings
+        await context.GeneralSettings
             .Where(gs => gs.Id == id)
             .ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<GeneralSetting?> getGeneralSetting(Guid id)
     {
-        return  await _context.GeneralSettings.FindAsync(id);
+        return  await context.GeneralSettings.FindAsync(id);
     }
 
  
 
     public async Task<bool> isExist(Guid id)
     {
-        return  await _context.GeneralSettings.FindAsync(id)!=null;
+        return  await context.GeneralSettings.FindAsync(id)!=null;
     }
 
     public async Task<bool> isExist(string name)
     {
-        return await _context
+        return await context
             .GeneralSettings
             .AsNoTracking()
             .AnyAsync(gs => gs.Name == name);
@@ -65,7 +59,7 @@ public class GeneralSettingRepository:IGeneralSettingRepository
 
     public async Task<bool> isExist(Guid id, string name)
     {
-        return  await _context
+        return  await context
             .GeneralSettings
             .AsNoTracking()
             .AnyAsync(gs=>gs.Id==id&&gs.Name==name);

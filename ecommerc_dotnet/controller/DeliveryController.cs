@@ -13,21 +13,11 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/Delivery")]
-public class DeliveryController : ControllerBase
+public class DeliveryController(
+    IDeliveryServices deliveryServices,
+    IOrderServices orderServices)
+    : ControllerBase
 {
-    public DeliveryController(
-        IDeliveryServices deliveryServices,
-        IOrderServices orderServices
-        )
-    {
-        _deliveryServices = deliveryServices;
-        _orderServices = orderServices;
-    }
-
-    private readonly IDeliveryServices _deliveryServices;
-    private readonly IOrderServices _orderServices;
-
-
     [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -35,7 +25,7 @@ public class DeliveryController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> login([FromBody] LoginDto data)
     {
-        var result = await _deliveryServices.login(data);
+        var result = await deliveryServices.login(data);
 
         return result.IsSeccessful switch
         {
@@ -70,7 +60,7 @@ public class DeliveryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _deliveryServices.createDelivery(
+        var result = await deliveryServices.createDelivery(
             adminId.Value,
             delivery);
 
@@ -101,7 +91,7 @@ public class DeliveryController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _deliveryServices.getDelivery(userId.Value);
+        var result = await deliveryServices.getDelivery(userId.Value);
 
         return result.IsSeccessful switch
         {
@@ -131,7 +121,7 @@ public class DeliveryController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _deliveryServices.getDeliveries(adminId.Value,pageNumber,25);
+        var result = await deliveryServices.getDeliveries(adminId.Value,pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -163,7 +153,7 @@ public class DeliveryController : ControllerBase
         }
 
 
-        var result = await _deliveryServices.updateDeliveryStatus(userId.Value,status);
+        var result = await deliveryServices.updateDeliveryStatus(userId.Value,status);
 
         return result.IsSeccessful switch
         {
@@ -201,7 +191,7 @@ public class DeliveryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices
+        var result = await orderServices
             .getOrdersNotBelongToDeliveries(deliveryId.Value,pageNumber,25);
 
         return result.IsSeccessful switch
@@ -240,7 +230,7 @@ public class DeliveryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices.getOrdersbyDeliveryId(
+        var result = await orderServices.getOrdersbyDeliveryId(
             deliveryId.Value,pageNumber,25);
 
         return result.IsSeccessful switch
@@ -272,7 +262,7 @@ public class DeliveryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices.submitOrderToDelivery(orderId,deliveryId.Value);
+        var result = await orderServices.submitOrderToDelivery(orderId,deliveryId.Value);
 
         return result.IsSeccessful switch
         {
@@ -302,7 +292,7 @@ public class DeliveryController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _orderServices.cancelOrderFromDelivery(orderId,deliveryId.Value);
+        var result = await orderServices.cancelOrderFromDelivery(orderId,deliveryId.Value);
 
         return result.IsSeccessful switch
         {

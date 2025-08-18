@@ -1,8 +1,6 @@
-using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace ecommerc_dotnet.application.Repository;
 
 public interface IVarientRepository:IRepository<Varient>
 {

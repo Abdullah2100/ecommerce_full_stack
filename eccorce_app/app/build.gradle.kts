@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialize.plugin)
     alias(libs.plugins.google.gms)
 }
+
 android {
     namespace = "com.example.e_commercompose"
     compileSdk = 35

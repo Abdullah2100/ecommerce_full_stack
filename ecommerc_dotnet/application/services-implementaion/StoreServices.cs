@@ -12,43 +12,27 @@ using hotel_api.util;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class StoreServices : IStoreServices
+public class StoreServices(
+    IWebHostEnvironment host,
+    IConfig config,
+    IStoreRepository storeRepository,
+    IUserRepository userRepository,
+    IAddressRepository addressRepository)
+    : IStoreServices
 {
-    private readonly IStoreRepository _storeRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IAddressRepository _addressRepository;
-    private readonly IWebHostEnvironment _host;
-    private readonly IConfig _config;
-
-
-    public StoreServices(
-        IWebHostEnvironment host,
-        IConfig config,
-        IStoreRepository storeRepository,
-        IUserRepository userRepository,
-        IAddressRepository addressRepository
-    )
-    {
-        _host = host;
-        _config = config;
-        _storeRepository = storeRepository;
-        _userRepository = userRepository;
-        _addressRepository = addressRepository;
-    }
-
     private void deleteStoreImage(string? wallperper, string? smallImage)
     {
         if (wallperper is not null)
-            clsUtil.deleteFile(wallperper, _host);
+            clsUtil.deleteFile(wallperper, host);
         if (smallImage is not null)
-            clsUtil.deleteFile(smallImage, _host);
+            clsUtil.deleteFile(smallImage, host);
     }
 
     public async Task<Result<StoreDto?>> createStore(
         CreateStoreDto store,
         Guid userId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
 
         var isValide = user.isValidateFunc();
@@ -64,7 +48,7 @@ public class StoreServices : IStoreServices
         }
 
 
-        if (await _storeRepository.isExist(store.Name))
+        if (await storeRepository.isExist(store.Name))
         {
             return new Result<StoreDto?>
             (
@@ -80,11 +64,11 @@ public class StoreServices : IStoreServices
         smallImage = await clsUtil.saveFile(
             store.SmallImage,
             EnImageType.STORE,
-            _host);
+            host);
         wallperper = await clsUtil.saveFile(
             store.WallpaperImage,
             EnImageType.STORE,
-            _host);
+            host);
 
 
         if (smallImage is null || wallperper is null)
@@ -123,7 +107,7 @@ public class StoreServices : IStoreServices
             OwnerId = id
         };
 
-        int result = await _storeRepository.addAsync(storeData);
+        int result = await storeRepository.addAsync(storeData);
 
         if (result == 0)
         {
@@ -137,11 +121,11 @@ public class StoreServices : IStoreServices
             );
         }
 
-        result = await _addressRepository.addAsync(address);
+        result = await addressRepository.addAsync(address);
         if (result == 0)
         {
             deleteStoreImage(wallperper, smallImage);
-            await _addressRepository.deleteAsync(id);
+            await addressRepository.deleteAsync(id);
             return new Result<StoreDto?>
             (
                 data: null,
@@ -157,7 +141,7 @@ public class StoreServices : IStoreServices
 
         return new Result<StoreDto?>
         (
-            data: storeData?.toDto(_config.getKey("url_file")),
+            data: storeData?.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -180,7 +164,7 @@ public class StoreServices : IStoreServices
             );
         }
 
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
 
         var isValide = user.isValidateFunc(isStore: true);
@@ -197,7 +181,7 @@ public class StoreServices : IStoreServices
 
         if (storeDto.Name is not null)
         {
-            bool isExist = await _storeRepository.isExist(storeDto.Name, user!.Store!.Id);
+            bool isExist = await storeRepository.isExist(storeDto.Name, user!.Store!.Id);
 
             if (isExist)
             {
@@ -219,7 +203,7 @@ public class StoreServices : IStoreServices
             wallperper = await clsUtil.saveFile(
                 storeDto.WallpaperImage,
                 EnImageType.STORE,
-                _host);
+                host);
 
             deleteStoreImage(user!.Store!.WallpaperImage, null);
         }
@@ -229,7 +213,7 @@ public class StoreServices : IStoreServices
             smallImage = await clsUtil.saveFile(
                 storeDto.SmallImage,
                 EnImageType.STORE,
-                _host);
+                host);
             deleteStoreImage(null, user!.Store?.SmallImage);
         }
 
@@ -238,7 +222,7 @@ public class StoreServices : IStoreServices
         user!.Store!.Name = storeDto.Name ?? user!.Store!.Name;
         user!.Store!.UpdatedAt = DateTime.Now;
 
-        int result = await _storeRepository.updateAsync(user!.Store!);
+        int result = await storeRepository.updateAsync(user!.Store!);
 
         if (result == 0)
             return new Result<StoreDto?>
@@ -264,7 +248,7 @@ public class StoreServices : IStoreServices
 
         if (storeDto?.Longitude is not null && storeDto?.Latitude is not null)
         {
-            Address? address = await _addressRepository
+            Address? address = await addressRepository
                 .getAddressByOwnerId(user!.Store!.Id);
 
             if (address is null)
@@ -279,7 +263,7 @@ public class StoreServices : IStoreServices
             address.UpdatedAt = DateTime.Now;
             address.Longitude = (decimal)storeDto?.Longitude!;
             address.Latitude = (decimal)storeDto!.Latitude;
-            result = await _addressRepository.updateAsync(address);
+            result = await addressRepository.updateAsync(address);
 
             if (result == 0)
                 return new Result<StoreDto?>
@@ -291,11 +275,11 @@ public class StoreServices : IStoreServices
                 );
         }
 
-        Store? store = await _storeRepository.getStore(user.Store.Id);
+        Store? store = await storeRepository.getStore(user.Store.Id);
 
         return new Result<StoreDto?>
         (
-            data: store?.toDto(_config.getKey("url_file")),
+            data: store?.toDto(config.getKey("url_file")),
             message: "error while update store Data",
             isSeccessful: true,
             statusCode: 200
@@ -304,7 +288,7 @@ public class StoreServices : IStoreServices
 
     public async Task<Result<StoreDto?>> getStoreByUserId(Guid userId)
     {
-        Store? store = await _storeRepository.getStoreByUserId(userId);
+        Store? store = await storeRepository.getStoreByUserId(userId);
 
         if (store is null)
             return new Result<StoreDto?>
@@ -317,7 +301,7 @@ public class StoreServices : IStoreServices
 
         return new Result<StoreDto?>
         (
-            data: store.toDto(_config.getKey("url_file")),
+            data: store.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 200
@@ -327,7 +311,7 @@ public class StoreServices : IStoreServices
 
     public async Task<Result<StoreDto?>> getStoreByStoreId(Guid id)
     {
-        Store? store = await _storeRepository.getStore(id);
+        Store? store = await storeRepository.getStore(id);
 
         if (store is null)
             return new Result<StoreDto?>
@@ -340,7 +324,7 @@ public class StoreServices : IStoreServices
 
         return new Result<StoreDto?>
         (
-            data: store.toDto(_config.getKey("url_file")),
+            data: store.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true,
             statusCode: 200
@@ -350,7 +334,7 @@ public class StoreServices : IStoreServices
 
     public async Task<Result<List<StoreDto>?>> getStores(Guid adminId, int pageNumber, int pageSize)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
 
         var isValide = user.isValidateFunc(true);
@@ -365,9 +349,9 @@ public class StoreServices : IStoreServices
             );
         }
 
-        List<StoreDto> stores = (await _storeRepository
+        List<StoreDto> stores = (await storeRepository
                 .getAllAsync(pageNumber, pageSize)
-            ).Select(st => st.toDto(_config.getKey("url_file")))
+            ).Select(st => st.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<StoreDto>?>
@@ -381,7 +365,7 @@ public class StoreServices : IStoreServices
 
     public async Task<Result<bool?>> updateStoreStatus(Guid adminId, Guid storeId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
 
         var isValide = user.isValidateFunc(true);
@@ -396,7 +380,7 @@ public class StoreServices : IStoreServices
             );
         }
 
-        Store? store = await _storeRepository.getStore(storeId);
+        Store? store = await storeRepository.getStore(storeId);
 
         if (store is null)
             return new Result<bool?>
@@ -421,7 +405,7 @@ public class StoreServices : IStoreServices
 
 
         store.IsBlock = !store.IsBlock;
-        int result = await _storeRepository.updateAsync(store);
+        int result = await storeRepository.updateAsync(store);
         if (result == 0)
             return new Result<bool?>
             (

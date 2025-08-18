@@ -1,7 +1,7 @@
 package com.example.e_commercompose.ui
 
+import com.example.e_commercompose.model.enMapType
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 object Screens {
 
@@ -37,7 +37,7 @@ object Screens {
 
 
     @Serializable
-    data class LocationList(var isFromLocationHome: Boolean)
+    object  PickCurrentAddress
 
     @Serializable
     object HomeGraph
@@ -80,10 +80,11 @@ object Screens {
 
     @Serializable
     data class MapScreen(
-        var title:String?=null,
+        val title:String?=null,
         val id:String?=null,
-        val lognit: Double?,
-        val latitt: Double?,
+        val lognit: Double?=null,
+        val latitt: Double?=null,
+        val mapType: enMapType,
         val isFromLogin: Boolean
     )
 

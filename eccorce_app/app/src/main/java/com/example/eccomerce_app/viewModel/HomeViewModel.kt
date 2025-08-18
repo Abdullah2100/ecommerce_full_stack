@@ -50,6 +50,7 @@ import com.example.e_commercompose.model.Order
 import com.example.e_commercompose.model.OrderItem
 import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.CreateOrderDto
+import com.example.eccomerce_app.dto.CreateStoreDto
 import com.example.eccomerce_app.dto.CreateSubCategoryDto
 import com.example.eccomerce_app.dto.OrderItemsStatusEvent
 import com.example.eccomerce_app.dto.StoreStatusDto
@@ -81,6 +82,7 @@ class HomeViewModel(
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading = _isLoading.asStateFlow()
 
+    val storeCreateData = MutableStateFlow<CreateStoreDto?>(null)
     private var _categories = MutableStateFlow<MutableList<Category>?>(null)
     var categories = _categories.asStateFlow()
 
@@ -94,9 +96,10 @@ class HomeViewModel(
     private var _banners = MutableStateFlow<List<BannerModel>?>(null);
     var banners = _banners.asStateFlow();
 
-    //this for home only to prevent the size when getting new banner for defferent store
-    private var _homeBanners = MutableStateFlow<List<BannerModel>?>(null);
-    var homeBanners = _homeBanners.asStateFlow();
+    private var _bannersRadmom = MutableStateFlow<List<BannerModel>?>(null);
+    var bannersRadmom = _bannersRadmom.asStateFlow();
+
+
 
     private var _stores = MutableStateFlow<List<StoreModel>?>(null);
     var stores = _stores.asStateFlow();
@@ -138,8 +141,41 @@ class HomeViewModel(
     }
 
 
-   suspend fun userPassLocation(){
-       dao.savePassingLocation(IsPassSetLocationScreen(0,true))
+    fun setStoreCreateData(
+        longit: Double? = null,
+        latit: Double? = null,
+        wallpaper_image: File? = null,
+        small_image: File? = null,
+        storetitle: String? = null
+    ) {
+        var myStoreData: CreateStoreDto? = null;
+        if (storeCreateData.value == null)
+            viewModelScope.launch {
+                storeCreateData.emit(CreateStoreDto())
+            }
+        if (longit != null && latit != null) {
+            myStoreData = storeCreateData.value?.copy(latitude = latit, longitude = longit)
+        }
+
+
+        if (storetitle != null) {
+            myStoreData = storeCreateData.value?.copy(name = storetitle)
+        }
+
+        if (wallpaper_image != null) {
+            myStoreData = storeCreateData.value?.copy(wallpaperImage = wallpaper_image)
+        }
+
+        if (small_image != null) {
+            myStoreData = storeCreateData.value?.copy(smallImage = small_image)
+        }
+        viewModelScope.launch {
+            storeCreateData.emit(myStoreData);
+        }
+    }
+
+    suspend fun userPassLocation() {
+        dao.savePassingLocation(IsPassSetLocationScreen(0, true))
     }
 
     fun addToCart(product: CardProductModel) {
@@ -414,34 +450,23 @@ class HomeViewModel(
 
     //banner
     private fun getStoresBanner() {
-        viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
-            var result = homeRepository.getRandomBanner();
+        viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
+            val result = homeRepository.getRandomBanner();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<BannerDto>
+                    val data = result.data as List<BannerDto>
 
-                    var bannersHolder = mutableListOf<BannerModel>()
-                    var bannersResponse = data.map { it.toBanner() }.toList()
+                    val bannersResponse = data.map { it.toBanner() }.toList()
 
-                    bannersHolder.addAll(bannersResponse)
-                    if (_banners.value != null) {
-                        bannersHolder.addAll(_banners.value!!)
-                    }
-
-                    var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
-                    if (distinticBanner.size > 0)
-                        _banners.emit(distinticBanner)
-                    else
-                        _banners.emit(emptyList<BannerModel>())
-
+                    _bannersRadmom.emit(bannersResponse);
                 }
 
                 is NetworkCallHandler.Error -> {
-                    _banners.emit(emptyList<BannerModel>())
+                    _bannersRadmom.emit(emptyList<BannerModel>())
 
                     _isLoading.emit(false)
 
-                    var errorMessage = (result.data.toString())
+                    val errorMessage = (result.data.toString())
                     if (errorMessage.contains(General.BASED_URL)) {
                         errorMessage.replace(General.BASED_URL, " Server ")
                     }
@@ -536,7 +561,7 @@ class HomeViewModel(
 
     //category
     fun getCategories(pageNumber: Int = 1) {
-        Log.d("http://","is category not null ${pageNumber == 1 && _categories.value != null}")
+        Log.d("http://", "is category not null ${pageNumber == 1 && _categories.value != null}")
         if (pageNumber == 1 && !_categories.value.isNullOrEmpty()) return;
         viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
             val result = homeRepository.getCategory(pageNumber)
@@ -696,19 +721,19 @@ class HomeViewModel(
         addressId: UUID,
     ): String? {
         _isLoading.emit(true)
-        var result = homeRepository.setAddressAsCurrent(addressId)
+        val result = homeRepository.setAddressAsCurrent(addressId)
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 _isLoading.emit(false)
-                if (myInfo.value?.address.isNullOrEmpty() == false) {
-                    var addresses = _myInfo.value?.address?.map { address ->
+                if (!myInfo.value?.address.isNullOrEmpty()) {
+                    val addresses = _myInfo.value?.address?.map { address ->
                         if (address.id == addressId) {
                             address.copy(isCurrnt = true);
                         } else {
                             address.copy(isCurrnt = false);
                         }
                     }
-                    var copyMyAddress = _myInfo.value?.copy(address = addresses);
+                    val copyMyAddress = _myInfo.value?.copy(address = addresses);
                     _myInfo.emit(copyMyAddress)
                     dao.savePassingLocation(IsPassSetLocationScreen(0, true))
 
@@ -866,7 +891,7 @@ class HomeViewModel(
     ): String? {
         _isLoading.emit(true)
 
-        var result = homeRepository.createStore(
+        val result = homeRepository.createStore(
             name,
             wallpaper_image,
             small_image,
@@ -875,32 +900,36 @@ class HomeViewModel(
         );
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
-                var data = result.data as StoreDto
-                var storesHolder = mutableListOf<StoreModel>()
+                storeCreateData.emit(CreateStoreDto())
+                val data = result.data as StoreDto
+                val storesHolder = mutableListOf<StoreModel>()
+                storesHolder.add(data.toStore())
+
                 if (_stores.value != null) {
-                    storesHolder.add(data.toStore())
                     storesHolder.addAll(_stores.value!!.toList())
-                } else {
-                    storesHolder.add(data.toStore())
                 }
-                var distinticStore = storesHolder.distinctBy { it.id }.toMutableList()
+
+                val distinticStore = storesHolder.distinctBy { it.id }.toMutableList()
+                val copyMyinfo = _myInfo.value!!.copy(store_id = data.id)
                 _stores.emit(distinticStore)
+
+                //this to update store_id in myinfo
+                _myInfo.emit(copyMyinfo)
+                _isLoading.emit(false)
                 return null;
             }
 
             is NetworkCallHandler.Error -> {
                 _isLoading.emit(false)
 
-                var errorMessage = (result.data.toString())
+                val errorMessage = (result.data.toString())
                 if (errorMessage.contains(General.BASED_URL)) {
                     errorMessage.replace(General.BASED_URL, " Server ")
                 }
                 return errorMessage
             }
 
-            else -> {
-                return null;
-            }
+
         }
     }
 
@@ -908,8 +937,8 @@ class HomeViewModel(
         name: String,
         wallpaper_image: File?,
         small_image: File?,
-        longitude: Double,
-        latitude: Double,
+        longitude: Double?,
+        latitude: Double?,
     ): String? {
         _isLoading.emit(true)
 
@@ -1112,12 +1141,12 @@ class HomeViewModel(
 
     private fun getStoreBanner(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.IO + _coroutinExption) {
-            var result = homeRepository.getBannerByStoreId(store_id, pageNumber);
+            val result = homeRepository.getBannerByStoreId(store_id, pageNumber);
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as List<BannerDto>
+                    val data = result.data as List<BannerDto>
 
-                    var bannersHolder = mutableListOf<BannerModel>()
+                    val bannersHolder = mutableListOf<BannerModel>()
                     var bannersResponse = data.map { it.toBanner() }.toList()
 
                     bannersHolder.addAll(bannersResponse)
@@ -1125,7 +1154,7 @@ class HomeViewModel(
                         bannersHolder.addAll(_banners.value!!)
                     }
 
-                    var distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
+                    val distinticBanner = bannersHolder.distinctBy { it.id }.toMutableList()
                     if (distinticBanner.size > 0)
                         _banners.emit(distinticBanner)
                     else
@@ -1189,7 +1218,7 @@ class HomeViewModel(
 
     }
 
-    private fun getStoreSubCategories(store_id: UUID, pageNumber: Int = 1) {
+    fun getStoreSubCategories(store_id: UUID, pageNumber: Int = 1) {
         viewModelScope.launch(Dispatchers.Main + _coroutinExption) {
             var result = homeRepository.getStoreSubCategory(store_id, pageNumber);
             when (result) {

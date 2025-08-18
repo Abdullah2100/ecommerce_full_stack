@@ -19,7 +19,7 @@ data class AddressDto(
 data class CreateAddressDto(
     val Longitude: Double,
     val Latitude: Double,
-    val Title: String
+    val Title: String?
 )
 
 @Serializable

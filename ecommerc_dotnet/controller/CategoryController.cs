@@ -11,15 +11,8 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/Category")]
-public class CategoryController : ControllerBase
+public class CategoryController(ICategoryServices categoryServices) : ControllerBase
 {
-    public CategoryController(ICategoryServices categoryServices)
-    {
-        _categoryServices = categoryServices;
-    }
-
-    private readonly ICategoryServices _categoryServices;
-
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -41,7 +34,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _categoryServices.createCategory(category, adminId.Value);
+        var result = await categoryServices.createCategory(category, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -73,7 +66,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _categoryServices.updateCategory(category, adminId.Value);
+        var result = await categoryServices.updateCategory(category, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -104,7 +97,7 @@ public class CategoryController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _categoryServices.deleteCategory(categoryId, adminId.Value);
+        var result = await categoryServices.deleteCategory(categoryId, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -123,7 +116,7 @@ public class CategoryController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        var result = await _categoryServices.getCategories(pageNumber, 25);
+        var result = await categoryServices.getCategories(pageNumber, 25);
 
         return result.IsSeccessful switch
         {

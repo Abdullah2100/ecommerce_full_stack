@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -48,7 +50,35 @@ fun CategoryShape(
     var context = LocalContext.current
 
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp, bottom = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    )
+    {
+        Text(
+            "Category",
+            fontFamily = General.satoshiFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = CustomColor.neutralColor950,
+            textAlign = TextAlign.Center
 
+        )
+        if (categories.size > 4) Text(
+            "View All",
+            fontFamily = General.satoshiFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            color = CustomColor.neutralColor950,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.clickable {
+                nav.navigate(Screens.Category)
+            }
+
+        )
+    }
     LazyRow(
 
         horizontalArrangement = Arrangement.SpaceBetween,

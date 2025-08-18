@@ -14,17 +14,8 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/Order")]
-public class OrderController : ControllerBase
+public class OrderController(IOrderServices orderServices) : ControllerBase
 {
-    private readonly IOrderServices _orderServices;
-    
-
-    public OrderController(IOrderServices orderServices)
-    {
-        _orderServices = orderServices;
-    }
-
-
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -48,7 +39,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices.CreateOrder(userId.Value,orderDto);
+        var result = await orderServices.CreateOrder(userId.Value,orderDto);
 
         return result.IsSeccessful switch
         {
@@ -86,7 +77,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices.getOrders(adminId.Value,pageNumber,25);
+        var result = await orderServices.getOrders(adminId.Value,pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -124,7 +115,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices
+        var result = await orderServices
             .getMyOrders(
                 userId.Value,
                 pageNumber,
@@ -162,7 +153,7 @@ public class OrderController : ControllerBase
         }
 
      
-        var result = await _orderServices
+        var result = await orderServices
             .deleteOrder(
                 orderId,userId.Value);
 
@@ -200,7 +191,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices
+        var result = await orderServices
             .updateOrderStatus(
                 orderStatus.Id,
                 orderStatus.Status);
@@ -244,7 +235,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices
+        var result = await orderServices
             .getOrderItmes(
                 storeId.Value,
                 pageNumber,
@@ -280,7 +271,7 @@ public class OrderController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _orderServices
+        var result = await orderServices
             .updateOrderItmesStatus(
                 userId.Value,
                 orderItemStatusDto);

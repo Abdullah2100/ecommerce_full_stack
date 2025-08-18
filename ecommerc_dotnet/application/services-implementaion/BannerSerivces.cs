@@ -12,38 +12,24 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
-public class BannerSerivces:IBannerSerivces
+public class BannerSerivces(
+    IConfig config,
+    IWebHostEnvironment host,
+    IHubContext<EcommerceHub> hubContext,
+    IStoreRepository storeRepository,
+    IBannerRepository bannerRepository,
+    IUserRepository userRepository)
+    : IBannerSerivces
 {
-    private readonly IConfig _config ;
-    private readonly IWebHostEnvironment _host ;
-    private readonly IStoreRepository _storeRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IBannerRepository _bannerRepository;
-    private readonly IHubContext<EcommerceHub> _hubContext;
+    private readonly IStoreRepository _storeRepository = storeRepository;
 
 
-    public BannerSerivces(
-        IConfig config,
-        IWebHostEnvironment host,
-        IHubContext<EcommerceHub> hubContext,
-        IStoreRepository storeRepository,
-        IBannerRepository bannerRepository,
-        IUserRepository userRepository
-    )
-    {
-        _config = config;
-        _host = host;
-        _hubContext = hubContext;
-        _storeRepository = storeRepository;
-        _bannerRepository = bannerRepository;
-        _userRepository = userRepository;
-    }
     public async Task<Result<BannerDto?>> createBanner(
         Guid userId, 
         CreateBannerDto bannerDto
         )
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
         if (user is null)
         {
@@ -83,7 +69,7 @@ public class BannerSerivces:IBannerSerivces
             return new Result<BannerDto?>
             (
                 data: null,
-                message: "contact admin to remove the block from you account ",
+                message: "contact admin to remove the block from you store ",
                 isSeccessful: false,
                 statusCode: 400
             );
@@ -92,7 +78,7 @@ public class BannerSerivces:IBannerSerivces
         string? image = await clsUtil.saveFile(
             bannerDto.Image, 
             EnImageType.BANNER, 
-            _host);
+            host);
 
         if (image is null)
         {
@@ -113,7 +99,7 @@ public class BannerSerivces:IBannerSerivces
             StoreId = user.Store.Id,
         };
         
-        int result = await _bannerRepository.addAsync(banner);
+        int result = await bannerRepository.addAsync(banner);
 
         if (result == 0)
         {
@@ -126,11 +112,11 @@ public class BannerSerivces:IBannerSerivces
             );
         } 
         
-        await _hubContext.Clients.All.SendAsync("createdBanner", result);
+        await hubContext.Clients.All.SendAsync("createdBanner", result);
 
         return new Result<BannerDto?>
         (
-            data: banner.toDto(_config.getKey("url_file")),
+            data: banner.toDto(config.getKey("url_file")),
             message: "",
             isSeccessful: true ,
             statusCode: 201
@@ -141,7 +127,7 @@ public class BannerSerivces:IBannerSerivces
 
     public async Task<Result<bool>> deleteBanner(Guid id, Guid userId)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(userId);
         if (user is null)
         {
@@ -187,7 +173,7 @@ public class BannerSerivces:IBannerSerivces
             );
         }
 
-        Banner? banner = await _bannerRepository
+        Banner? banner = await bannerRepository
             .getBanner(id);
         
 
@@ -213,7 +199,7 @@ public class BannerSerivces:IBannerSerivces
             );
         }
        
-        int result = await _bannerRepository.deleteAsync(id);
+        int result = await bannerRepository.deleteAsync(id);
 
         if (result == 0)
         {
@@ -226,9 +212,9 @@ public class BannerSerivces:IBannerSerivces
             );
         }
 
-        clsUtil.deleteFile(banner.Image, _host);
+        clsUtil.deleteFile(banner.Image, host);
        
-        await _hubContext.Clients.All.SendAsync("deletedOrder", id);
+        await hubContext.Clients.All.SendAsync("deletedOrder", id);
 
         
         return new Result<bool>
@@ -247,7 +233,7 @@ public class BannerSerivces:IBannerSerivces
         int pageNumber,
         int pageSize)
     {
-        User? user = await _userRepository
+        User? user = await userRepository
             .getUser(adminId);
         if (user is null)
         {
@@ -271,9 +257,9 @@ public class BannerSerivces:IBannerSerivces
                 statusCode: 400
             );
         }
-        List<BannerDto> banners = (await _bannerRepository
+        List<BannerDto> banners = (await bannerRepository
                 .getBanners(pageNumber, pageSize))
-            .Select(ba => ba.toDto(_config.getKey("url_file")))
+            .Select(ba => ba.toDto(config.getKey("url_file")))
             .ToList();
         
         return new Result<List<BannerDto>>
@@ -291,9 +277,9 @@ public class BannerSerivces:IBannerSerivces
         int pageSize
         )
     {
-        List<BannerDto> banners = (await _bannerRepository
+        List<BannerDto> banners = (await bannerRepository
                 .getBanners(storeId,pageNumber, pageSize))
-            .Select(ba => ba.toDto(_config.getKey("url_file")))
+            .Select(ba => ba.toDto(config.getKey("url_file")))
             .ToList();
         
         return new Result<List<BannerDto>>
@@ -301,16 +287,16 @@ public class BannerSerivces:IBannerSerivces
             data: banners,
             message: "",
             isSeccessful: true ,
-            statusCode: 201
+            statusCode: 200
         ); 
     }
     public async Task<Result<List<BannerDto>>> getBanners(
         int randomLenght
     )
     {
-        List<BannerDto> banners = (await _bannerRepository
+        List<BannerDto> banners = (await bannerRepository
                 .getBanners(randomLenght))
-            .Select(ba => ba.toDto(_config.getKey("url_file")))
+            .Select(ba => ba.toDto(config.getKey("url_file")))
             .ToList();
         
         return new Result<List<BannerDto>>
@@ -318,7 +304,7 @@ public class BannerSerivces:IBannerSerivces
             data: banners,
             message: "",
             isSeccessful: true ,
-            statusCode: 201
+            statusCode: 200
         ); 
     }
 }

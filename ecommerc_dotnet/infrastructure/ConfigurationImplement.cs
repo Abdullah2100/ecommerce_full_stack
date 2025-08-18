@@ -1,13 +1,9 @@
 namespace ecommerc_dotnet.midleware.ConfigImplment;
 
-public class ConfigurationImplement : IConfig 
-    {
+public class ConfigurationImplement(IConfiguration configurationService) : IConfig
+{
 
-        private readonly IConfiguration? _configurationService;
-
-        public ConfigurationImplement(IConfiguration configurationService){
-            _configurationService = configurationService;
-        }
+        private readonly IConfiguration? _configurationService = configurationService;
 
         public string getKey(string key)
         {

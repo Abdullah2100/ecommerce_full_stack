@@ -11,18 +11,8 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/General")]
-public class GeneralController : ControllerBase
+public class GeneralController(IGeneralSettingServices generalSettingServices) : ControllerBase
 {
-    public GeneralController(
-        IGeneralSettingServices generalSettingServices
-        )
-    {
-        _generalSettingServices = generalSettingServices;
-    }
-
-    private readonly IGeneralSettingServices _generalSettingServices;
-
-
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -47,7 +37,7 @@ public class GeneralController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _generalSettingServices.createGeneralSetting(
+        var result = await generalSettingServices.createGeneralSetting(
             adminId:adminId.Value,
             generalSetting
             );
@@ -84,7 +74,7 @@ public class GeneralController : ControllerBase
         }
 
        
-        var result = await _generalSettingServices.deleteGeneralSetting(
+        var result = await generalSettingServices.deleteGeneralSetting(
             adminId:adminId.Value,
             id:genralSettingId
         );
@@ -121,7 +111,7 @@ public class GeneralController : ControllerBase
         }
 
         
-        var result = await _generalSettingServices.updateGeneralSetting(
+        var result = await generalSettingServices.updateGeneralSetting(
             adminId:admin.Value,
             id:genralSettingId,
             settingDto:generalSetting
@@ -147,7 +137,7 @@ public class GeneralController : ControllerBase
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await _generalSettingServices.getGeneralSettings(
+        var result = await generalSettingServices.getGeneralSettings(
             pageNum:pageNumber,
             pageSize:25
         );

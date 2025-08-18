@@ -5,18 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class AddressRepository : IAddressRepository
+public class AddressRepository(AppDbContext context) : IAddressRepository
 {
-    private readonly AppDbContext _context;
-
-    public AddressRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-    
     public async Task<IEnumerable<Address>> getAllAsync(int page, int length)
     {
-        return await _context.Address
+        return await context.Address
             .AsNoTracking()
             .Skip((page - 1) * length).Take(length)
             .ToListAsync();
@@ -24,28 +17,28 @@ public class AddressRepository : IAddressRepository
 
     public async Task<int> addAsync(Address entity)
     {
-        _context.Address.Add(entity);
-        return await _context.SaveChangesAsync();
+        context.Address.Add(entity);
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(Address entity)
     {
-        _context.Address.Update(entity);
-        return await _context.SaveChangesAsync();
+        context.Address.Update(entity);
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-        await _context
+        await context
             .Address
             .Where(x => x.Id == id)
             .ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public Task<int> getAddressCount(Guid id)
     {
-        return _context
+        return context
             .Address
             .AsNoTracking().Where(ad => ad.OwnerId == id)
             .CountAsync();
@@ -53,19 +46,19 @@ public class AddressRepository : IAddressRepository
 
     public async Task<Address?> getAddress(Guid id)
     {
-        return await _context.Address.FindAsync(id);
+        return await context.Address.FindAsync(id);
     }
 
     public async Task<Address?> getAddressByOwnerId(Guid id)
     {
-        return await _context
+        return await context
             .Address
             .FirstOrDefaultAsync(x => x.OwnerId == id);
     }
     
     public async Task<int> updateCurrentLocation(Guid id, Guid ownerId)
     {
-        await _context.Address
+        await context.Address
             .Where(ad => ad.OwnerId == ownerId && ad.Id == id)
             .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, true));
         return 1;
@@ -73,7 +66,7 @@ public class AddressRepository : IAddressRepository
 
     public async Task<int> makeAddressNotCurrentToId(Guid ownerId)
     {
-        await _context.Address
+        await context.Address
             .Where(ad => ad.OwnerId == ownerId)
             .ExecuteUpdateAsync(ad => ad.SetProperty(state => state.IsCurrent, false));
         return 1;

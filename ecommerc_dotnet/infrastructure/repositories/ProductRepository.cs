@@ -9,18 +9,11 @@ using NuGet.DependencyResolver;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository(AppDbContext context) : IProductRepository
 {
-    private readonly AppDbContext _context;
-
-    public ProductRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<IEnumerable<Product>> getAllAsync(int page, int length)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
@@ -34,7 +27,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<int> addAsync(Product entity)
     {
-        await _context.Products.AddAsync(new Product
+        await context.Products.AddAsync(new Product
         {
             Id = entity.Id,
             Name = entity.Name,
@@ -50,7 +43,7 @@ public class ProductRepository : IProductRepository
         if (entity.ProductVarients is not null)
             foreach (var x in entity.ProductVarients)
             {
-                await _context.ProductVarients.AddAsync(new ProductVarient
+                await context.ProductVarients.AddAsync(new ProductVarient
                 {
                     Id = clsUtil.generateGuid(),
                     Precentage = x.Precentage == 0 ? 1 : (decimal)x.Precentage!,
@@ -63,7 +56,7 @@ public class ProductRepository : IProductRepository
         if (entity.ProductImages is not null)
             foreach (var productImage in entity.ProductImages)
             {
-                await _context.ProductImages.AddAsync(new ProductImage
+                await context.ProductImages.AddAsync(new ProductImage
                 {
                     Id = productImage.Id,
                     Path = productImage.Path,
@@ -71,7 +64,7 @@ public class ProductRepository : IProductRepository
                 });
             }
 
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(Product entity)
@@ -79,7 +72,7 @@ public class ProductRepository : IProductRepository
         if (entity.ProductVarients is not null)
             foreach (var x in entity.ProductVarients)
             {
-                await _context.ProductVarients.AddAsync(new ProductVarient
+                await context.ProductVarients.AddAsync(new ProductVarient
                 {
                     Id = clsUtil.generateGuid(),
                     Precentage = x.Precentage == 0 ? 1 : (decimal)x.Precentage!,
@@ -92,7 +85,7 @@ public class ProductRepository : IProductRepository
         if (entity.ProductImages is not null)
             foreach (var productImage in entity.ProductImages)
             {
-                await _context.ProductImages.AddAsync(new ProductImage
+                await context.ProductImages.AddAsync(new ProductImage
                 {
                     Id = productImage.Id,
                     Path = productImage.Path,
@@ -100,7 +93,7 @@ public class ProductRepository : IProductRepository
                 });
             }
         
-        _context.Products.Update(new Product
+        context.Products.Update(new Product
         {
             Id = entity.Id,
             Name = entity.Name,
@@ -115,20 +108,20 @@ public class ProductRepository : IProductRepository
 
       
 
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-        await _context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        await _context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        await _context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        await context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
+        await context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
+        await context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<Product?> getProduct(Guid id)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro=>pro.store)
             .Include(pro => pro.subCategory)
@@ -140,7 +133,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> getProduct(Guid id, Guid storeId)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro=>pro.store)
             .Include(pro => pro.subCategory)
@@ -152,7 +145,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> getProductByUser(Guid id, Guid userId)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro=>pro.store)
             .Include(pro => pro.subCategory)
@@ -170,7 +163,7 @@ public class ProductRepository : IProductRepository
         int pageSize
     )
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro=>pro.store)
             .Include(pro => pro.subCategory)
@@ -189,7 +182,7 @@ public class ProductRepository : IProductRepository
         int pageNum,
         int pageSize)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro=>pro.store)
             .Include(pro => pro.subCategory)
@@ -209,7 +202,7 @@ public class ProductRepository : IProductRepository
         int pageSize
     )
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Include(pro=>pro.store)
             .Include(pro => pro.subCategory)
@@ -226,46 +219,46 @@ public class ProductRepository : IProductRepository
 
     public async Task<bool> isExist(Guid id)
     {
-        return await _context.Products.FindAsync(id) != null;
+        return await context.Products.FindAsync(id) != null;
     }
 
     public async Task<int> deleteProductVarient(Guid id)
     {
-        await _context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        await context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteProductImages(Guid id)
     {
-        await _context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        return await _context.SaveChangesAsync();
+        await context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteProductImages(List<string> images, Guid id)
     {
         foreach (var image in images)
         {
-          await _context.ProductImages.Where(pi=>pi.Path==image&&pi.ProductId==id).ExecuteDeleteAsync(); 
+          await context.ProductImages.Where(pi=>pi.Path==image&&pi.ProductId==id).ExecuteDeleteAsync(); 
         }
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteProductVarient(List<CreateProductVarientDto> productVarients, Guid productId)
     {
         productVarients.ForEach((x) =>
         {
-            _context.ProductVarients
+            context.ProductVarients
                 .Include(pi => pi.VarientId)
                 .Where(pv =>
                     pv.ProductId == productId && pv.VarientId == x.VarientId && pv.Name == x.Name)
                 .ExecuteDelete();
         });
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public async Task<List<string>> getProductImages(Guid id)
     {
-        return await _context.ProductImages
+        return await context.ProductImages
             .AsNoTracking()
             .Where(pi => pi.ProductId == id)
             .Select(pi => pi.Path)

@@ -11,17 +11,8 @@ namespace ecommerc_dotnet.controller;
 [Authorize]
 [ApiController]
 [Route("api/Banner")]
-public class BannerController : ControllerBase
+public class BannerController(IBannerSerivces bannerSerivces) : ControllerBase
 {
-
-    private readonly IBannerSerivces _bannerSerivces;
-
-    public BannerController(IBannerSerivces bannerSerivces)
-    {
-        _bannerSerivces = bannerSerivces;
-    }
-
-
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -31,10 +22,10 @@ public class BannerController : ControllerBase
         [FromForm] CreateBannerDto banner
     )
     {
-         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-     
+
         Guid? userId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
         {
@@ -46,13 +37,13 @@ public class BannerController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _bannerSerivces.createBanner(userId.Value,banner);
+        var result = await bannerSerivces.createBanner(userId.Value, banner);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
+        };
     }
 
 
@@ -80,42 +71,42 @@ public class BannerController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _bannerSerivces
-            .deleteBanner(bannerId,userId.Value);
+        var result = await bannerSerivces
+            .deleteBanner(bannerId, userId.Value);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
+        };
     }
 
-
-    [HttpGet("store/{storeId:guid}/{pageNumber:int}")]
+    [HttpGet("{storeId:guid}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> getBanner(
         Guid storeId, int pageNumber
     )
     {
-        if(pageNumber<1)
+        if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await _bannerSerivces
-            .getBanners(storeId,pageNumber,25);
+        var result = await bannerSerivces
+            .getBanners(storeId, pageNumber, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
+        };
     }
-    
+
     //this method for dashboard only
     [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> getBannerRandom(int  pageNumber)
+    public async Task<IActionResult> getBannerRandom(int pageNumber)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
@@ -131,14 +122,15 @@ public class BannerController : ControllerBase
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await _bannerSerivces
-            .getBanners(adminId.Value,pageNumber,25);
+
+        var result = await bannerSerivces
+            .getBanners(adminId.Value, pageNumber, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        };  
+        };
     }
 
     [HttpGet("")]
@@ -146,14 +138,13 @@ public class BannerController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> getBannerRandom()
     {
-        var result = await _bannerSerivces
+        var result = await bannerSerivces
             .getBanners(15);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        };  
+        };
     }
-    
 }
