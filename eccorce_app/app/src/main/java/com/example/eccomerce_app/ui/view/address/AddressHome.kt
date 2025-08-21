@@ -1,6 +1,7 @@
-package com.example.e_commercompose.ui.view.location
+package com.example.eccomerce_app.ui.view.address
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,16 +39,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
 import com.example.e_commercompose.R
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.enMapType
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.CustomTitleBotton
 import com.example.e_commercompose.ui.component.Sizer
+import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 
@@ -55,23 +57,22 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddressHomeScreen(
     nav: NavHostController,
-    homeViewModle: HomeViewModel,
+    userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
     val fontScall = LocalDensity.current.fontScale
 
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
+    val coroutine = rememberCoroutineScope()
 
     val isNotEnablePermission = remember { mutableStateOf(false) }
 
-    val locationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
-    val coroutine = rememberCoroutineScope()
 
-    val requestPermssion = rememberLauncherForActivityResult(
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+    val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
             val arePermissionsGranted = permissions.values.reduce { acc, next -> acc && next }
@@ -79,52 +80,64 @@ fun AddressHomeScreen(
             if (arePermissionsGranted) {
 
 
-                locationClient.lastLocation
-                    .apply {
-                        addOnSuccessListener { location ->
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
 
-                            location?.toString()
-                            if (location != null)
-                                nav.navigate(
-                                    Screens.MapScreen(
-                                        lognit = location.longitude,
-                                        latitt = location.latitude,
-                                        isFromLogin = true,
-                                        mapType = enMapType.My
+                    return@rememberLauncherForActivityResult
+                } else {
+                    locationClient.lastLocation
+                        .apply {
+                            addOnSuccessListener { location ->
 
+                                location?.toString()
+                                if (location != null)
+                                    nav.navigate(
+                                        Screens.MapScreen(
+                                            lognit = location.longitude,
+                                            latitt = location.latitude,
+                                            isFromLogin = true,
+                                            mapType = enMapType.My
+                                        )
                                     )
+                                else
+                                    coroutine.launch {
+                                        snackBarHostState.showSnackbar("you should enable location services")
+                                    }
+                            }
+                            addOnFailureListener { fail ->
+                                Log.d(
+                                    "contextError",
+                                    "the current location is null ${fail.stackTrace}"
                                 )
-                            else
-                                coroutine.launch {
-                                    snackbarHostState.showSnackbar("you should enable location services")
-                                }
+
+                            }
                         }
-                        addOnFailureListener { fail ->
-                            Log.d(
-                                "contextError",
-                                "the current location is null ${fail.stackTrace}"
-                            )
-
-                        }
-                    }
 
 
-                // Got last known location. In some srare situations this can be null.
+                }
+
             } else {
                 Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
             }
         }
     )
 
+
     LaunchedEffect(Unit) {
-        homeViewModle.getMyInfo()
+        userViewModel.getMyInfo()
     }
 
     Scaffold(
 
 
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         },
         modifier = Modifier
             .fillMaxSize()
@@ -172,7 +185,7 @@ fun AddressHomeScreen(
             )
             Sizer(8)
             Text(
-                "We need to know your loacation in order to suggest nearby services.",
+                "We need to know your location in order to suggest nearby services.",
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = (16 / fontScall).sp,
@@ -183,7 +196,7 @@ fun AddressHomeScreen(
             CustomBotton(
                 //isLoading = isLoading.value,
                 operation = {
-                    requestPermssion.launch(
+                    requestPermission.launch(
                         arrayOf(
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.ACCESS_COARSE_LOCATION
@@ -196,7 +209,7 @@ fun AddressHomeScreen(
             Sizer(20)
             CustomTitleBotton(
                 operation = {
-                    homeViewModle.getMyInfo()
+                    userViewModel.getMyInfo()
                     nav.navigate(Screens.PickCurrentAddress)
                 },
                 buttonTitle = "Enter Location Manually",

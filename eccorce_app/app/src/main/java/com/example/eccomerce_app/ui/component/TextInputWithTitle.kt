@@ -1,6 +1,7 @@
 package com.example.e_commercompose.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import com.example.e_commercompose.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,7 +34,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.theme.CustomColor
 
 
@@ -95,7 +95,7 @@ fun TextInputWithTitle(
     onChange: ((value: String) -> Unit)? = null
 ) {
 
-    var modifierWithFocus =
+    val modifierWithFocus =
         Modifier.fillMaxWidth()
 
 
@@ -251,12 +251,14 @@ fun TextSecureInputWithTitle(
     value: MutableState<TextFieldValue>,
     title: String = "",
     isHasError: Boolean = false,
-    errMessage: String
+    errMessage: String,
 ) {
 
     val showPassword = remember { mutableStateOf(false) }
     val fontScall = LocalDensity.current.fontScale
-    Column {
+    Column(
+        modifier = Modifier.background(Color.Green)
+    ){
         Text(
             title,
             fontFamily = General.satoshiFamily,

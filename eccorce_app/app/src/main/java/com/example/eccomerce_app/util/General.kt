@@ -1,9 +1,6 @@
-package com.example.e_commercompose.Util
+package com.example.eccomerce_app.util
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.compose.foundation.lazy.LazyListState
@@ -16,7 +13,6 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
 import com.example.e_commercompose.data.Room.AuthModleEntity
-import com.example.eccomerce_app.util.Secrets
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
@@ -29,7 +25,7 @@ import java.util.Calendar
 object General {
 
 
-    var authData = MutableStateFlow<AuthModleEntity?>(null);
+    val authData = MutableStateFlow<AuthModleEntity?>(null)
 
     val BASED_URL = Secrets.getBaseUrl()
 
@@ -45,16 +41,17 @@ object General {
         Font(R.font.satoshi_regular, FontWeight.Normal)
     )
 
-    fun handlingImageForCoil(imageUrl:String?,context: Context):ImageRequest?{
-        if(imageUrl==null)return null
-       return  when (imageUrl.endsWith(".svg")){
-            true->{
+    fun handlingImageForCoil(imageUrl: String?, context: Context): ImageRequest? {
+        if (imageUrl == null) return null
+        return when (imageUrl.endsWith(".svg")) {
+            true -> {
                 ImageRequest.Builder(context)
                     .data(imageUrl)
                     .decoderFactory(SvgDecoder.Factory())
                     .build()
-        }
-            else->{
+            }
+
+            else -> {
                 ImageRequest.Builder(context)
                     .data(imageUrl)
                     .build()
@@ -64,20 +61,16 @@ object General {
     }
 
 
-    fun isValideMony(number:String): Boolean{
-        var reges= Regex("/^(?:100(?:\\.0(?:0)?)?|\\d{1,2}(?:\\.\\d{1,2})?)\$")
-        return reges.containsMatchIn(number)
-    }
+
 
     fun Uri.toCustomFil(context: Context): File? {
-        var file: File? = null;
+        var file: File? = null
 
         try {
-            val resolver = context.contentResolver;
+            val resolver = context.contentResolver
             resolver.query(this, null, null, null, null)
-                .use {
-                        cursor->
-                    if(cursor==null) throw Exception("could not accesss Local Storage")
+                .use { cursor ->
+                    if (cursor == null) throw Exception("could not accesses Local Storage")
 
                     cursor.moveToFirst()
                     val column = arrayOf(MediaStore.Images.Media.DATA)
@@ -85,11 +78,12 @@ object General {
                     file = File(cursor.getString(filePath))
 
                 }
-            return  file;
+            return file
         } catch (e: Exception) {
-            throw e;
+            throw e
         }
     }
+
     fun Calendar.toLocalDateTime(): LocalDateTime? {
 
         val tz = this.getTimeZone()
@@ -97,15 +91,13 @@ object General {
         return LocalDateTime.ofInstant(this.toInstant(), zid)
     }
 
-    fun convertColorToInt(value: String): Color?{
-        try{
-            return Color("#${value}".toColorInt())
-        }catch(ex: Exception)
-        {
-            return null;
+    fun convertColorToInt(value: String): Color? {
+        return try {
+            Color("#${value}".toColorInt())
+        } catch (ex: Exception) {
+            null
         }
     }
-
 
 
     fun LazyListState.reachedBottom(): Boolean {
@@ -114,9 +106,7 @@ object General {
             false // Return false if there are no items
         } else {
             val lastVisibleItem = visibleItemsInfo.last() // Get the last visible item
-            val viewportHeight =
-                layoutInfo.viewportEndOffset +
-                        layoutInfo.viewportStartOffset // Calculate the viewport height
+            val viewportHeight =    layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset // Calculate the viewport height
 
             // Check if the last visible item is the last item in the list and fully visible
             // This indicates that the user has scrolled to the bottom

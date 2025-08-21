@@ -1,7 +1,8 @@
-package com.example.e_commercompose.View.Pages
+package com.example.eccomerce_app.ui.view.Auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,15 +36,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.viewModel.AuthViewModel
-import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.viewModel.AuthViewModel
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.CustomAuthBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
@@ -51,7 +50,6 @@ import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.hotel_mobile.Util.Validation
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
@@ -62,37 +60,34 @@ fun SignUpPage(
     authKoin: AuthViewModel
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-
-
-    val isLoading = authKoin.isLoading.collectAsState()
     val fontScall = LocalDensity.current.fontScale
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val focusRequester = FocusRequester()
+
+    val coroutine = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
+
+    val errorMessage = authKoin.errorMessage.collectAsState()
+    val isLoading = authKoin.isLoading.collectAsState()
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val name = remember { mutableStateOf(TextFieldValue("slime")) }
     val email = remember { mutableStateOf(TextFieldValue("salime@gmail.com")) }
     val phone = remember { mutableStateOf(TextFieldValue("778537385")) }
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
-    val confirm_password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
+    val confirmPassword = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
-    val isCheckBox = remember { mutableStateOf<Boolean>(false) }
-
-
-    val isEmailError = remember { mutableStateOf<Boolean>(false) }
-    val isNameError = remember { mutableStateOf<Boolean>(false) }
-    val isPhoneError = remember { mutableStateOf<Boolean>(false) }
-    val isPasswordError = remember { mutableStateOf<Boolean>(false) }
-    val isPasswordConfirm = remember { mutableStateOf<Boolean>(false) }
-    val erroMessage = remember { mutableStateOf("") }
-
-    val focusRequester = FocusRequester()
-
-    val isSendingData = authKoin.isLoading.collectAsState()
-    val errorMessage = authKoin.errorMesssage.collectAsState()
-    val coroutine = rememberCoroutineScope()
+    val isCheckBox = remember { mutableStateOf(false) }
+    val isEmailError = remember { mutableStateOf(false) }
+    val isNameError = remember { mutableStateOf(false) }
+    val isPhoneError = remember { mutableStateOf(false) }
+    val isPasswordError = remember { mutableStateOf(false) }
+    val isPasswordConfirm = remember { mutableStateOf(false) }
+    val errorMessageValidation = remember { mutableStateOf("") }
 
 
-    val scrollState = rememberScrollState()
     fun validateLoginInput(
         name: String,
         email: String,
@@ -100,63 +95,62 @@ fun SignUpPage(
         confirmPassword: String
     ): Boolean {
 
-        isNameError.value = false;
-        isEmailError.value = false;
-        isPasswordError.value = false;
+        isNameError.value = false
+        isEmailError.value = false
+        isPasswordError.value = false
         isPasswordConfirm.value = false
 
         if (name.trim().isEmpty()) {
-            erroMessage.value = "name must not be empty"
-            isNameError.value = true;
-            return false;
+            errorMessageValidation.value = "name must not be empty"
+            isNameError.value = true
+            return false
         }
 
         if (email.trim().isEmpty()) {
-            erroMessage.value = "email must not be empty"
-            isEmailError.value = true;
-            return false;
+            errorMessageValidation.value = "email must not be empty"
+            isEmailError.value = true
+            return false
         } else if (!Validation.emailValidation(email)) {
-            erroMessage.value = "write valid email"
-            isEmailError.value = true;
-            return false;
+            errorMessageValidation.value = "write valid email"
+            isEmailError.value = true
+            return false
         } else if (phone.value.text.trim().isEmpty()) {
-            erroMessage.value = "phone must not Empty"
-            isPhoneError.value = true;
-            return false;
+            errorMessageValidation.value = "phone must not Empty"
+            isPhoneError.value = true
+            return false
         } else if (password.trim().isEmpty()) {
-            erroMessage.value = ("password must not be empty")
+            errorMessageValidation.value = ("password must not be empty")
             isPasswordError.value = true
-            return false;
+            return false
         } else if (!Validation.passwordSmallValidation(password)) {
-            erroMessage.value = ("password must not contain two small letter")
+            errorMessageValidation.value = ("password must not contain two small letter")
             isPasswordError.value = true
-            return false;
+            return false
         } else if (!Validation.passwordNumberValidation(password)) {
-            erroMessage.value = ("password must not contain two number")
+            errorMessageValidation.value = ("password must not contain two number")
             isPasswordError.value = true
-            return false;
+            return false
         } else if (!Validation.passwordCapitalValidation(password)) {
-            erroMessage.value = ("password must not contain two capitalLetter")
+            errorMessageValidation.value = ("password must not contain two capitalLetter")
             isPasswordError.value = true
-            return false;
+            return false
         } else if (!Validation.passwordSpicialCharracterValidation(password)) {
-            erroMessage.value = ("password must not contain two spical character")
+            errorMessageValidation.value = ("password must not contain two spical character")
             isPasswordError.value = true
-            return false;
+            return false
         } else if (confirmPassword.trim().isEmpty()) {
-            erroMessage.value = ("password must not be empty")
+            errorMessageValidation.value = ("password must not be empty")
             isPasswordConfirm.value = true
-            return false;
+            return false
         } else if (password != confirmPassword) {
-            erroMessage.value = ("confirm password not equal to password")
+            errorMessageValidation.value = ("confirm password not equal to password")
             isPasswordConfirm.value = true
-            return false;
+            return false
         } else if (!isCheckBox.value) {
-            coroutine.launch {
 
-                snackbarHostState.showSnackbar("You should check the condition box to signup")
-            }
-            return false;
+            coroutine.launch { snackBarHostState.showSnackbar("You should check the condition box to signup") }
+
+            return false
         }
 
 
@@ -166,14 +160,14 @@ fun SignUpPage(
     LaunchedEffect(errorMessage.value) {
         if (errorMessage.value != null)
             coroutine.launch {
-                snackbarHostState.showSnackbar(errorMessage.value.toString())
+                snackBarHostState.showSnackbar(errorMessage.value.toString())
                 authKoin.clearErrorMessage()
             }
     }
     Scaffold(
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp))
             )
         },
@@ -215,15 +209,15 @@ fun SignUpPage(
 
         ConstraintLayout(
             modifier = Modifier
+                .background(Color.White)
                 .padding(horizontal = 10.dp)
                 .padding(
                     top = it.calculateTopPadding(),
                     bottom = it.calculateBottomPadding()
                 )
-                .background(Color.White)
                 .fillMaxSize()
         ) {
-            val (inputRef) = createRefs();
+            val (inputRef) = createRefs()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -243,7 +237,7 @@ fun SignUpPage(
                     title = "Name",
                     placHolder = "Enter Your name",
                     isHasError = isNameError.value,
-                    erroMessage = erroMessage.value,
+                    erroMessage = errorMessageValidation.value,
                     focusRequester = focusRequester
                 )
                 TextInputWithTitle(
@@ -251,7 +245,7 @@ fun SignUpPage(
                     title = "Email",
                     placHolder = "Enter Your email",
                     isHasError = isEmailError.value,
-                    erroMessage = erroMessage.value,
+                    erroMessage = errorMessageValidation.value,
                     focusRequester = focusRequester
                 )
                 TextNumberInputWithTitle(
@@ -259,41 +253,43 @@ fun SignUpPage(
                     placHolder = "Enter Phone",
                     title = "Phone",
                     isHasError = isPhoneError.value,
-                    erroMessage = erroMessage.value
+                    erroMessage = errorMessageValidation.value
                 )
                 TextSecureInputWithTitle(
                     password,
                     "Password",
                     isPasswordError.value,
-                    erroMessage.value
+                    errorMessageValidation.value
                 )
                 TextSecureInputWithTitle(
-                    confirm_password,
+                    confirmPassword,
                     "Confirm Password",
                     isPasswordConfirm.value,
-                    erroMessage.value
+                    errorMessageValidation.value
                 )
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterStart
+                    modifier = Modifier.background(Color.Red)
                 ) {
-                    Checkbox(
-                        checked = isCheckBox.value,
-                        onCheckedChange = { isCheckBox.value = !isCheckBox.value },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = CustomColor.primaryColor700
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(), horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
                     )
-                    Row {
+                    {
+                        Checkbox(
+                            checked = isCheckBox.value,
+                            onCheckedChange = { isCheckBox.value = !isCheckBox.value },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = CustomColor.primaryColor700
+                            ),
+                            modifier = Modifier.padding()
+                        )
                         Text(
                             "Agree With",
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
                             color = CustomColor.neutralColor950,
                             fontSize = (16 / fontScall).sp,
-                            modifier = Modifier
-                                .padding(start = 39.dp)
-
                         )
                         Text(
                             "Term & Condition",
@@ -311,16 +307,16 @@ fun SignUpPage(
                     }
                 }
 
-                Sizer(heigh = 30)
+//                Sizer(heigh = 10)
 
                 CustomAuthBotton(
                     isLoading = isLoading.value,
                     validationFun = {
-                            validateLoginInput(
-                                email = email.value.text,
-                                name = name.value.text,
-                                password = password.value.text,
-                                confirmPassword = confirm_password.value.text
+                        validateLoginInput(
+                            email = email.value.text,
+                            name = name.value.text,
+                            password = password.value.text,
+                            confirmPassword = confirmPassword.value.text
                         )
                     },
                     buttonTitle = "Login",
@@ -335,7 +331,6 @@ fun SignUpPage(
                             nav = nav
                         )
                     })
-
 
 
             }

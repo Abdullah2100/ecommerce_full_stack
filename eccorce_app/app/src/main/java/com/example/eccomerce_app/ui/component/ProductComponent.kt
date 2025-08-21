@@ -37,9 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.ProductModel
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import java.util.UUID
 
@@ -52,7 +52,7 @@ fun  ProductShape(
     nav: NavHostController,
     isFromHome: Boolean=false
 ) {
-    val context = LocalContext.current;
+    val context = LocalContext.current
 
     FlowRow(
         modifier = Modifier
@@ -107,7 +107,7 @@ fun  ProductShape(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp)),
                             model = General.handlingImageForCoil(
-                                product[index].thmbnail,
+                                product[index].thumbnail,
                                 context
                             ),
                             contentDescription = "",

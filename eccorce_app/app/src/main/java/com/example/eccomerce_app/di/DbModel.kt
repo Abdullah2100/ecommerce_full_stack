@@ -2,9 +2,9 @@ package com.example.e_commercompose.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.e_commercompose.data.Room.AuthDataBase
+import com.example.eccomerce_app.data.Room.AuthDataBase
 import com.example.eccomerce_app.util.Secrets
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import org.koin.dsl.module
 
 fun provideDataBase(application: Context): AuthDataBase {

@@ -1,7 +1,7 @@
 package com.example.e_commercompose.di
 
 import android.util.Log
-import com.example.e_commercompose.data.Room.AuthDao
+import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.util.Secrets
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
@@ -51,7 +51,7 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
 //                            markAsRefreshTokenRequest()
 //                        }
 //                        if(RefreshToken.status== HttpStatusCode.OK){
-//                            var result = RefreshToken.body<AuthDto>()
+//                            val result = RefreshToken.body<AuthDto>()
 //                            General.updateSavedToken(authDao, result)
 //                            BearerTokens(
 //                                Token = result.Token,
@@ -59,14 +59,14 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
 //                            )
 //                        }else if(RefreshToken.status== HttpStatusCode.Unauthorized) {
 //                            authDao.nukeTable()
-//                            null;
+//                            null
 //                        }else {
-//                            null;
+//                            null
 //                        }
 //                    } catch (cause: Exception) {
 //                        null
 //                    }
-null;
+null
 
                     // Update saved tokens
 //                }
@@ -96,13 +96,13 @@ null;
 
 fun socketClient(): HubConnection? {
     try {
-        var connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
+        val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
             .withTransport(com.microsoft.signalr.TransportEnum.LONG_POLLING)
             .build()
     }catch(e: Exception){
-        return null;
+        return null
     }
 }
 

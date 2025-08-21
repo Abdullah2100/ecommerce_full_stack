@@ -7,7 +7,7 @@ data class Address(
     val longitude: Double,
     val latitude: Double,
     val title: String?,
-    val isCurrnt: Boolean
+    val isCurrent: Boolean
 )
 
 enum class enMapType{My,MyStore,Store,TrackOrder}

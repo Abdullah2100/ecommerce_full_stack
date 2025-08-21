@@ -6,9 +6,9 @@ data class CardProductModel(
     val id: UUID,
     val productId: UUID,
     val name: String,
-    val thmbnail:String,
-    val store_id: UUID,
+    val thumbnail:String,
+    val storeId: UUID,
     val price: Double,
-    val productvarients:List<ProductVarient>,
+    val productVariants:List<ProductVariant>,
     val quantity:Int=1
-) ;
+) 

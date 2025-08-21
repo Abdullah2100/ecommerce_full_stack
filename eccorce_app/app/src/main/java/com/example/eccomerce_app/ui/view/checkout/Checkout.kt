@@ -1,14 +1,12 @@
 package com.example.e_commercompose.ui.view.checkout
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,14 +49,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.PaymentMethodModel
 import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.OrderViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -67,31 +69,43 @@ import kotlinx.coroutines.launch
 @Composable
 fun CheckoutScreen(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    cartViewModel: CartViewModel,
+    userViewModel: UserViewModel,
+    generalSettingViewModel: GeneralSettingViewModel,
+    orderViewModel: OrderViewModel,
 ) {
     val config = LocalConfiguration.current
 
-    var cartData = homeViewModel.cartImes.collectAsState()
-    var myInfo = homeViewModel.myInfo.collectAsState()
-    var currentAddress = myInfo.value?.address?.firstOrNull { it.isCurrnt == true }
-    val listOfPaymentMethod = listOf<PaymentMethodModel>(
-        PaymentMethodModel("Cach", R.drawable.money, 1)
-    )
-    val slectedPaymentMethod = remember { mutableStateOf(0) }
+    val cartData = cartViewModel.cartItems.collectAsState()
+    val myInfo = userViewModel.userInfo.collectAsState()
+    val generalSetting = generalSettingViewModel.generalSetting.collectAsState()
+    val distanceToUser = cartViewModel.distance.collectAsState()
 
-    val coroutin = rememberCoroutineScope()
+    val coroutine = rememberCoroutineScope()
+
     val isSendingData = remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    val generalSetting = homeViewModel.generalSetting.collectAsState()
-    val kiloPrice = generalSetting.value?.firstOrNull{it.name=="one_kilo_price"}?.value
-    val distancToUser = homeViewModel.distance.collectAsState();
+    val kiloPrice = generalSetting.value?.firstOrNull { it.name == "one_kilo_price" }?.value
 
-    val totalDeclivaryPrice = (distancToUser.value) *(kiloPrice?:0.0);
-    Log.d("UserDistanc",distancToUser.value.toString())
+    val currentAddress = myInfo.value?.address?.firstOrNull { it.isCurrent }
+
+
+    val totalDeliveryPrice = (distanceToUser.value) * (kiloPrice ?: 0.0)
+
+
+    val selectedPaymentMethod = remember { mutableIntStateOf(0) }
+
+
+    val listOfPaymentMethod = listOf(PaymentMethodModel("Cach", R.drawable.money, 1))
+
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         },
         topBar = {
             CenterAlignedTopAppBar(
@@ -128,28 +142,30 @@ fun CheckoutScreen(
         bottomBar = {
             BottomAppBar(
                 containerColor = Color.White
-            ){
+            ) {
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 10.dp)
                         .padding()
-                ){
+                ) {
                     CustomBotton(
                         isEnable = !isSendingData.value,
                         operation = {
-                            coroutin.launch {
-                                isSendingData.value=true;
-                               val  result = async {
-                                   homeViewModel.submitCartTitems()
-                               }.await()
-                                isSendingData.value= false
-                                var message  = "Order Submit Seccesffuly"
-                                if(!result.isNullOrEmpty())
-                                {
+                            coroutine.launch {
+                                isSendingData.value = true
+                                val result = async {
+                                    orderViewModel.submitOrder(
+                                        cartItems = cartData.value,
+                                        userAddress = currentAddress!!,
+                                        clearCartData = { cartViewModel.clearCart() })
+                                }.await()
+                                isSendingData.value = false
+                                var message = "Order Submit Successfully"
+                                if (!result.isNullOrEmpty()) {
                                     message = result
                                 }
-                                snackbarHostState.showSnackbar(message)
-                                if(result.isNullOrEmpty()){
+                                snackBarHostState.showSnackbar(message)
+                                if (result.isNullOrEmpty()) {
                                     nav.navigate(Screens.HomeGraph) {
                                         popUpTo(nav.graph.id) {
                                             inclusive = true
@@ -165,7 +181,7 @@ fun CheckoutScreen(
             }
         }
 
-        )
+    )
     {
         it.calculateBottomPadding()
         it.calculateTopPadding()
@@ -175,7 +191,8 @@ fun CheckoutScreen(
                 .background(Color.White)
                 .padding(horizontal = 15.dp)
                 .padding(
-                    top = it.calculateTopPadding() + 20.dp, bottom = it.calculateBottomPadding()
+                    top = it.calculateTopPadding() + 20.dp,
+                    bottom = it.calculateBottomPadding()
                 )
 
         ) {
@@ -206,9 +223,7 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
 
                             )
-                            TextButton(onClick = {
-                                nav.navigate(Screens.Address)
-                            }) {
+                            TextButton(onClick = { nav.navigate(Screens.EditeOrAddNewAddress) }) {
                                 Text(
                                     "Change",
                                     fontFamily = General.satoshiFamily,
@@ -238,7 +253,7 @@ fun CheckoutScreen(
                                 tint = CustomColor.neutralColor600
                             )
                             TextButton(onClick = {
-                                nav.navigate(Screens.Address)
+                                nav.navigate(Screens.EditeOrAddNewAddress)
                             }) {
                                 Text(
                                     currentAddress?.title ?: "",
@@ -289,34 +304,34 @@ fun CheckoutScreen(
 
                         Sizer(15)
 
-                        LazyRow() {
+                        LazyRow {
                             items(listOfPaymentMethod.size) { index ->
                                 Row(
                                     modifier = Modifier
                                         .height(50.dp)
                                         .width(((config.screenWidthDp - 30) / listOfPaymentMethod.size).dp)
                                         .border(
-                                            if (slectedPaymentMethod.value == index) 0.dp else 1.dp,
-                                            CustomColor.neutralColor200,
-                                            RoundedCornerShape(8.dp)
+                                            width = if (selectedPaymentMethod.intValue == index) 0.dp else 1.dp,
+                                            color = CustomColor.neutralColor200,
+                                            shape = RoundedCornerShape(8.dp)
                                         )
                                         .background(
-                                            if (slectedPaymentMethod.value == index) CustomColor.primaryColor700 else Color.Transparent,
-                                            RoundedCornerShape(8.dp)
+                                            color = if (selectedPaymentMethod.intValue == index) CustomColor.primaryColor700 else Color.Transparent,
+                                            shape = RoundedCornerShape(8.dp)
                                         )
                                         .clip(
-                                            RoundedCornerShape(8.dp)
+                                            shape = RoundedCornerShape(8.dp)
                                         )
                                         .clickable {
-                                            slectedPaymentMethod.value = index
+                                            selectedPaymentMethod.intValue = index
                                         },
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
                                         ImageVector.vectorResource(listOfPaymentMethod[index].icon),
-                                        "",
-                                        tint = if (slectedPaymentMethod.value == index) Color.White else Color.Black
+                                        contentDescription = "",
+                                        tint = if (selectedPaymentMethod.intValue == index) Color.White else Color.Black
                                     )
                                     Sizer(width = 5)
                                     Text(
@@ -324,7 +339,7 @@ fun CheckoutScreen(
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp,
-                                        color = if (slectedPaymentMethod.value == index) Color.White else CustomColor.neutralColor950,
+                                        color = if (selectedPaymentMethod.intValue == index) Color.White else CustomColor.neutralColor950,
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -359,7 +374,7 @@ fun CheckoutScreen(
                         modifier = Modifier
                     ) {
                         Text(
-                            "Order Summary",
+                            text = "Order Summary",
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
@@ -409,7 +424,7 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                "\$${(totalDeclivaryPrice).toString()}",
+                                "\$${(totalDeliveryPrice)}",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16).sp,
@@ -433,7 +448,7 @@ fun CheckoutScreen(
                                 textAlign = TextAlign.Center
                             )
                             Text(
-                                "${distancToUser.value}",
+                                "${distanceToUser.value}",
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16).sp,

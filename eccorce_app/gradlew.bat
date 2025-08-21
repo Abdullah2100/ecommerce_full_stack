@@ -1,7 +1,7 @@
 @rem
 @rem Copyright 2015 the original author or authors.
 @rem
-@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem Licensed under the Apache License, Version 2.0 (the "License")
 @rem you may not use this file except in compliance with the License.
 @rem You may obtain a copy of the License at
 @rem
@@ -21,7 +21,7 @@
 @rem
 @rem ##########################################################################
 
-@rem Set local scope for the variables with windows NT shell
+@rem Set local scope for the valiables with windows NT shell
 if "%OS%"=="Windows_NT" setlocal
 
 set DIRNAME=%~dp0
@@ -45,7 +45,7 @@ if "%ERRORLEVEL%" == "0" goto execute
 echo.
 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 echo.
-echo Please set the JAVA_HOME variable in your environment to match the
+echo Please set the JAVA_HOME valiable in your environment to match the
 echo location of your Java installation.
 
 goto fail
@@ -59,7 +59,7 @@ if exist "%JAVA_EXE%" goto execute
 echo.
 echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
 echo.
-echo Please set the JAVA_HOME variable in your environment to match the
+echo Please set the JAVA_HOME valiable in your environment to match the
 echo location of your Java installation.
 
 goto fail
@@ -74,11 +74,11 @@ set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
 
 :end
-@rem End local scope for the variables with windows NT shell
+@rem End local scope for the valiables with windows NT shell
 if "%ERRORLEVEL%"=="0" goto mainEnd
 
 :fail
-rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem Set valiable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
 rem the _cmd.exe /c_ return code!
 if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
 exit /b 1

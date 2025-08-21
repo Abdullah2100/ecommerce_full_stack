@@ -1,7 +1,6 @@
-package com.example.e_commercompose.ui.view.location
+package com.example.eccomerce_app.ui.view.address
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +13,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,7 +27,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapInitOptions
 import com.mapbox.maps.MapboxExperimental
@@ -38,10 +37,18 @@ import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationGro
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.enMapType
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
+import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.OrderViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -51,35 +58,56 @@ import java.util.UUID
 @Composable
 fun MapHomeScreen(
     nav: NavHostController,
-    homeViewModle: HomeViewModel,
+    userViewModel: UserViewModel,
+    storeViewModel: StoreViewModel,
+    generalSettingViewModel: GeneralSettingViewModel,
+    categoryViewModel: CategoryViewModel,
+    orderViewModel: OrderViewModel,
+    bannerViewModel: BannerViewModel,
+    variantViewModel: VariantViewModel,
+    productViewModel: ProductViewModel,
     title: String? = null,
     id: String? = null,
-    lognit: Double?,
-    latitt: Double?,
+    longitude: Double?,
+    latitude: Double?,
     mapType: enMapType = enMapType.My,
     isFomLogin: Boolean = true,
-) {
 
-    Log.d("thisTheMapType","${mapType}")
+    ) {
+
     val context = LocalContext.current
-    val isLoading = remember { mutableStateOf(false) }
-    val isOpenSheet = remember { mutableStateOf(false) }
-    val isCanIntractWithMap = (mapType == enMapType.My || mapType == enMapType.MyStore);
-    val isHasTitle = (mapType == enMapType.My);
-
-    val addressTitle = remember { mutableStateOf<TextFieldValue>(TextFieldValue(title ?: "")) }
-
-    val markers =
-        remember { mutableStateOf<Point?>(Point.fromLngLat(lognit ?: -98.0, latitt ?: 39.5)) }
+    val sheetState = rememberModalBottomSheetState()
 
     val coroutine = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val sheetState = rememberModalBottomSheetState()
+
+
+    val isLoading = remember { mutableStateOf(false) }
+    val isOpenSheet = remember { mutableStateOf(false) }
+    val isCanInteractWithMap = (mapType == enMapType.My || mapType == enMapType.MyStore)
+    val isHasTitle = (mapType == enMapType.My)
+
+    val addressTitle = remember { mutableStateOf(TextFieldValue(title ?: "")) }
+
+    val markers =
+        remember { mutableStateOf<Point?>(Point.fromLngLat(longitude ?: -98.0, latitude ?: 39.5)) }
+
+    val snackBarHostState = remember { SnackbarHostState() }
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            center(Point.fromLngLat(lognit ?: -98.0, latitt ?: 39.5)) // Example location
+            center(Point.fromLngLat(longitude ?: -98.0, latitude ?: 39.5)) // Example location
             zoom(20.0)
         }
+    }
+
+
+    fun initial() {
+        userViewModel.getMyInfo()
+        generalSettingViewModel.getGeneral(1)
+        categoryViewModel.getCategories(1)
+        bannerViewModel.getStoresBanner()
+        variantViewModel.getVariants(1)
+        productViewModel.getProducts(mutableIntStateOf(1))
+        orderViewModel.getMyOrders(mutableIntStateOf(1))
     }
 
     fun handleMapClick(point: Point) {
@@ -87,7 +115,7 @@ fun MapHomeScreen(
             enMapType.My -> markers.value = point
             enMapType.MyStore -> {
                 coroutine.launch {
-                    homeViewModle.setStoreCreateData(point.longitude(), point.latitude())
+                    storeViewModel.setStoreCreateData(point.longitude(), point.latitude())
                     nav.popBackStack()
                 }
             }
@@ -97,12 +125,12 @@ fun MapHomeScreen(
     }
 
     LaunchedEffect(Unit) {
-        homeViewModle.getMyInfo()
+        userViewModel.getMyInfo()
     }
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         },
         bottomBar = {
             if (isOpenSheet.value)
@@ -129,32 +157,32 @@ fun MapHomeScreen(
                         CustomBotton(
                             operation = {
                                 coroutine.launch {
-                                    isLoading.value = true;
-                                    isOpenSheet.value = false;
+                                    isLoading.value = true
+                                    isOpenSheet.value = false
                                     val result = async {
                                         if (id.isNullOrEmpty())
-                                            homeViewModle
+                                            userViewModel
                                                 .addUserAddress(
-                                                    longit = markers.value?.longitude(),
-                                                    latit = markers.value?.latitude(),
+                                                    longitude = markers.value?.longitude(),
+                                                    latitude = markers.value?.latitude(),
                                                     title = addressTitle.value.text
-
-                                                ) else homeViewModle.updateUserAddress(
+                                                )
+                                        else userViewModel.updateUserAddress(
                                             addressId = UUID.fromString(id),
                                             addressTitle = addressTitle.value.text,
-                                            longit = markers.value?.longitude(),
-                                            latit = markers.value?.latitude(),
+                                            longitude = markers.value?.longitude(),
+                                            latitude = markers.value?.latitude(),
 
                                             )
                                     }.await()
                                     isLoading.value = false
                                     if (!result.isNullOrEmpty()) {
-                                        snackbarHostState.showSnackbar(result)
-                                        return@launch;
+                                        snackBarHostState.showSnackbar(result)
+                                        return@launch
                                     }
 
-                                    snackbarHostState.showSnackbar(
-                                        if (id.isNullOrEmpty()) "Address Add Seccessfuly"
+                                    snackBarHostState.showSnackbar(
+                                        message = if (id.isNullOrEmpty()) "Address Add Successfully"
                                         else "Address Updated Successfully"
                                     )
 
@@ -163,8 +191,8 @@ fun MapHomeScreen(
                                         return@launch
                                     }
 
-                                    homeViewModle.userPassLocation()
-                                    homeViewModle.initialFun()
+                                    userViewModel.userPassLocation()
+                                    initial()
                                     nav.navigate(Screens.HomeGraph) {
                                         popUpTo(nav.graph.id) {
                                             inclusive = true
@@ -226,7 +254,7 @@ fun MapHomeScreen(
                 }
             }
 
-            if (isCanIntractWithMap)
+            if (isCanInteractWithMap)
                 CustomBotton(
                     buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
                     color = CustomColor.primaryColor700,
@@ -246,7 +274,7 @@ fun MapHomeScreen(
                     operation = {
                         when (isHasTitle) {
                             true -> {
-                                isOpenSheet.value = true;
+                                isOpenSheet.value = true
                             }
 
                             else -> {

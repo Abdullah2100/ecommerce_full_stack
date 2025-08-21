@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui.view.ReseatPassword
+package com.example.eccomerce_app.ui.view.ReseatPassword
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,12 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.AuthViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -42,26 +42,26 @@ fun ReseatPasswordScreen(
     nav: NavHostController,
     authViewModel: AuthViewModel,
     email: String,
-    otp:String
-){
+    otp: String
+) {
 
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val snackbarHostState = remember { SnackbarHostState() }
+
+    val coroutine = rememberCoroutineScope()
+
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val newPassword = remember { mutableStateOf(TextFieldValue("")) }
 
 
     val isSendingData = remember { mutableStateOf(false) }
-    val coroutine = rememberCoroutineScope()
 
 
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        }
-    ) {
+    Scaffold(snackbarHost = { SnackbarHost(hostState = snackBarHostState) })
+    {
 
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -82,17 +82,17 @@ fun ReseatPasswordScreen(
                 modifier = Modifier
                     .fillMaxHeight(0.9f)
                     .fillMaxWidth()
-                    .padding(top = 50.dp)
-                   ,
+                    .padding(top = 50.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center
             ) {
 
                 Icon(
                     ImageVector.vectorResource(R.drawable.password_icon),
                     "",
                     tint = CustomColor.primaryColor700,
-                    modifier = Modifier.size(200.dp))
+                    modifier = Modifier.size(200.dp)
+                )
                 Sizer(heigh = 5)
 
                 TextInputWithTitle(
@@ -107,18 +107,16 @@ fun ReseatPasswordScreen(
                     isLoading = isSendingData.value,
                     operation = {
                         keyboardController?.hide()
-                        isSendingData.value=true
+                        isSendingData.value = true
                         coroutine.launch {
                             val result = async {
-                                authViewModel.reseatPassword(email,otp,newPassword.value.text)
+                                authViewModel.reseatPassword(email, otp, newPassword.value.text)
                             }.await()
-                            isSendingData.value=false
+                            isSendingData.value = false
 
-                            if(!result.isNullOrEmpty())
-                            {
-                                snackbarHostState.showSnackbar(result)
-                            }
-                            else{
+                            if (!result.isNullOrEmpty()) {
+                                snackBarHostState.showSnackbar(result)
+                            } else {
                                 nav.navigate(Screens.LocationGraph) {
                                     popUpTo(nav.graph.id) {
                                         inclusive = true
@@ -130,7 +128,7 @@ fun ReseatPasswordScreen(
                     isEnable = newPassword.value.text.trim().isNotEmpty(),
                     buttonTitle = "Update",
 
-                )
+                    )
 
             }
         }

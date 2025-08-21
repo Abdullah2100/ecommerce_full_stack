@@ -31,23 +31,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import coil.decode.SvgDecoder
-import coil.request.ImageRequest
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.Category
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.ProductViewModel
 
 
 @Composable
 fun CategoryShape(
     categories:List<Category>,
-    viewModel: HomeViewModel,
+    productViewModel: ProductViewModel,
     nav: NavHostController
 ){
     Log.d("category_image",categories[0].image)
-    var context = LocalContext.current
+    val context = LocalContext.current
 
 
     Row(
@@ -91,9 +89,9 @@ fun CategoryShape(
                     .padding(end = 5.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable{
-                        viewModel.getProductsByCategoryID(
+                        productViewModel.getProductsByCategoryID(
                             pageNumber = mutableStateOf(1),
-                            cateogry_id = categories[index].id
+                            categoryId = categories[index].id
                         )
                         nav.navigate(Screens.ProductCategory(
                             categories[index].id.toString()

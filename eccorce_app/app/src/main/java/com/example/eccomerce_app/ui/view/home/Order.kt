@@ -1,9 +1,8 @@
-package com.example.e_commercompose.ui.view.home
+package com.example.eccomerce_app.ui.view.home
 
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,16 +14,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -35,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,62 +38,52 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
-import com.example.e_commercompose.R
-import com.example.e_commercompose.Util.General.reachedBottom
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.eccomerce_app.viewModel.OrderViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderScreen(
-    nav: NavHostController,
-    homeViewModel: HomeViewModel
-) {
+fun OrderScreen(orderViewModel: OrderViewModel) {
 
-    var orders = homeViewModel.orders.collectAsState()
-    var context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val isSendingData = remember { mutableStateOf(false) }
-    val deletedId = remember { mutableStateOf<UUID?>(null) }
-    val coroutin = rememberCoroutineScope()
+    val context = LocalContext.current
 
-
+    val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
-    val reachedBottom = remember {
-        derivedStateOf {
-            lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
-        }
-    }
-    var page = remember { mutableStateOf(1) }
-    val isLoadingMore = remember { mutableStateOf(false) }
 
+    val orders = orderViewModel.orders.collectAsState()
+
+    val isSendingData = remember { mutableStateOf(false) }
+    val reachedBottom = remember { derivedStateOf { lazyState.reachedBottom() } }
+    val isLoadingMore = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
+
+    val deletedId = remember { mutableStateOf<UUID?>(null) }
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+    val page = remember { mutableIntStateOf(1) }
 
     Log.d("loadingState", isLoadingMore.value.toString())
     LaunchedEffect(reachedBottom.value) {
 
         if (!orders.value.isNullOrEmpty() && reachedBottom.value) {
-            homeViewModel.getMyOrder(
+            orderViewModel.getMyOrders(
                 page,
                 isLoadingMore
             )
@@ -109,7 +95,7 @@ fun OrderScreen(
     Scaffold(
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -152,7 +138,7 @@ fun OrderScreen(
         it.calculateBottomPadding()
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { homeViewModel.getMyOrder(mutableStateOf(1)) }
+            onRefresh = { orderViewModel.getMyOrders(mutableIntStateOf(1)) }
         ) {
             LazyColumn(
                 state = lazyState,
@@ -177,7 +163,7 @@ fun OrderScreen(
                                 .padding(horizontal = 5.dp, vertical = 10.dp)
 
                         ) {
-                            order.order_items.forEach { value ->
+                            order.orderItems.forEach { value ->
                                 Row {
                                     SubcomposeAsyncImage(
                                         contentScale = ContentScale.Crop,
@@ -186,7 +172,7 @@ fun OrderScreen(
                                             .width(80.dp)
                                             .clip(RoundedCornerShape(8.dp)),
                                         model = General.handlingImageForCoil(
-                                            value.product.thmbnail,
+                                            value.product.thumbnail,
                                             context
                                         ),
                                         contentDescription = "",
@@ -215,17 +201,17 @@ fun OrderScreen(
                                             color = CustomColor.neutralColor950,
                                             textAlign = TextAlign.Start
                                         )
-                                        if (value.productVarient.isNotEmpty())
+                                        if (value.productVariant.isNotEmpty())
                                             Sizer(5)
 
-                                        value.productVarient.forEach { varient ->
+                                        value.productVariant.forEach { variant ->
 
                                             Row(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
 
                                                 Text(
-                                                    varient.varient_name + " :",
+                                                    variant.variantName + " :",
                                                     fontFamily = General.satoshiFamily,
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = (16).sp,
@@ -233,10 +219,10 @@ fun OrderScreen(
                                                     textAlign = TextAlign.Center
                                                 )
                                                 Sizer(width = 5)
-                                                when (varient.varient_name == "Color") {
+                                                when (variant.variantName == "Color") {
                                                     true -> {
                                                         val colorValue =
-                                                            General.convertColorToInt(varient.product_varient_name)
+                                                            General.convertColorToInt(variant.productVariantName)
 
                                                         if (colorValue != null)
                                                             Box(
@@ -261,7 +247,7 @@ fun OrderScreen(
                                                             contentAlignment = Alignment.Center
                                                         ) {
                                                             Text(
-                                                                text = varient.product_varient_name,
+                                                                text = variant.productVariantName,
                                                                 fontFamily = General.satoshiFamily,
                                                                 fontWeight = FontWeight.Normal,
                                                                 fontSize = (16).sp,
@@ -321,7 +307,7 @@ fun OrderScreen(
                                         textAlign = TextAlign.Center
                                     )
                                     Text(
-                                        "\$${order.totalPrice}",
+                                        "$${order.totalPrice}",
 
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Bold,
@@ -346,7 +332,7 @@ fun OrderScreen(
                                         textAlign = TextAlign.Center
                                     )
                                     Text(
-                                        "\$${order.deliveryFee}",
+                                        "$${order.deliveryFee}",
 
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Bold,
@@ -360,20 +346,21 @@ fun OrderScreen(
 
                                 CustomBotton(
 
-                                    buttonTitle = "Cencle Order",
+                                    buttonTitle = "Cancel Order",
                                     operation = {
                                         deletedId.value = order.id
-                                        coroutin.launch {
-                                            isSendingData.value = true;
+                                        coroutine.launch {
+
+                                            isSendingData.value = true
+
                                             val result = async {
-                                                homeViewModel.deleteOrder(order.id)
+                                                orderViewModel.deleteOrder(order.id)
                                             }.await()
+
                                             isSendingData.value = false
-                                            var message = "Order deleted Seccesffuly"
-                                            if (!result.isNullOrEmpty()) {
-                                                message = result
-                                            }
-                                            snackbarHostState.showSnackbar(message)
+                                            val message = result ?: "Order deleted Successfully"
+
+                                            snackBarHostState.showSnackbar(message)
                                         }
 
                                     },

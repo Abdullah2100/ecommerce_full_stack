@@ -1,4 +1,4 @@
-package com.example.e_commercompose
+package com.example.eccomerce_app
 
 import android.app.Application
 import com.example.e_commercompose.di.dataBaseModule
@@ -19,7 +19,7 @@ class MyApplication : Application() {
                 httpClientModule,
                 viewModelModel,
                 repositoryModel,
-              )
+            )
         }
     }
 }

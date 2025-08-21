@@ -1,13 +1,8 @@
 package com.example.e_commercompose.View.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.viewModel.AuthViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import com.example.eccomerce_app.viewModel.AuthViewModel
 
 @Composable
 fun CustomErrorSnackBar(
@@ -46,7 +41,7 @@ fun CustomErrorSnackBar(
 //
 //    LaunchedEffect(error.value) {
 //        if (error.value?.isNotEmpty() == true) {
-//            isVisible.targetState = true;
+//            isVisible.targetState = true
 //        }
 //    }
 //
@@ -54,7 +49,7 @@ fun CustomErrorSnackBar(
 //        if (error.value?.isNotEmpty() == true) {
 //            coroutine.launch {
 //                delay(5000)
-//                isVisible.targetState = false;
+//                isVisible.targetState = false
 //                delay(50)
 //               // viewModel.clearErrorMessage()
 //                (when(homeViewModel==null){true->authViewModel!!.clearErrorMessage()

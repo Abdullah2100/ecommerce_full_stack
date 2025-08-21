@@ -4,6 +4,6 @@ import java.util.UUID
 
 data class ProductVarientSelection(
     val name: String,
-    val precentage: Double?,
-    val varientId: UUID,
+    val percentage: Double?,
+    val variantId: UUID,
     )

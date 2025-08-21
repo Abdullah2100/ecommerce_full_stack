@@ -6,11 +6,11 @@ data class ProductModel(
     val id: UUID,
     val name: String,
     val description:String,
-    val thmbnail:String,
-    val subcategory_id: UUID,
-    val store_id: UUID,
-    val category_id: UUID,
+    val thumbnail:String,
+    val subcategoryId: UUID,
+    val storeId: UUID,
+    val categoryId: UUID,
     val price: Double,
-    val productVarients:List<List<ProductVarient>>?=null,
+    val productVariants:List<List<ProductVariant>>?=null,
     val productImages:List<String>
-) ;
+) 

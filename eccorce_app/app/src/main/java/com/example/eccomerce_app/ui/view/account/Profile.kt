@@ -1,6 +1,5 @@
-package com.example.e_commercompose.ui.view.account
+package com.example.eccomerce_app.ui.view.account
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,14 +52,14 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
-import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.Util.General.toCustomFil
-import com.example.e_commercompose.model.MyInfoUpdate
+import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.General.toCustomFil
+import com.example.eccomerce_app.dto.UpdateMyInfoDto
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import com.example.hotel_mobile.Util.Validation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -71,37 +70,37 @@ import java.io.File
 @Composable
 fun ProfileScreen(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    userViewModel: UserViewModel
 ) {
+    val focusRequester = FocusRequester()
     val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val myInfo = homeViewModel.myInfo.collectAsState();
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    val coroutine = rememberCoroutineScope()
+
+    val myInfo = userViewModel.userInfo.collectAsState()
+
 
     val fullName = remember { mutableStateOf(TextFieldValue("")) }
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val phone = remember { mutableStateOf(TextFieldValue("")) }
     val oldPassword = remember { mutableStateOf(TextFieldValue("")) }
     val newPassword = remember { mutableStateOf(TextFieldValue("")) }
-
-    val currotine = rememberCoroutineScope()
-
     val file = remember { mutableStateOf<File?>(null) }
-    val focusRequester = FocusRequester()
 
-    val keyboardController = LocalSoftwareKeyboardController.current
 
-    Log.d("thumnail",myInfo.value?.thumbnail.toString())
+    val snackBarHostState = remember { SnackbarHostState() }
 
 
     val onImageSelection = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            val fileHolder = uri.toCustomFil(context = context);
-            if (fileHolder != null){
-                file.value = fileHolder;
+            val fileHolder = uri.toCustomFil(context = context)
+            if (fileHolder != null) {
+                file.value = fileHolder
             }
         }
     }
@@ -109,44 +108,55 @@ fun ProfileScreen(
     fun validateLoginInput(
 
     ): Boolean {
-        var erroMessage=""
+        var errorMessage = ""
 
-        if(oldPassword.value.text.isEmpty()&&newPassword.value.text.isEmpty()&&phone.value.text.isEmpty())
-            return true;
-        else if (phone.value.text.trim().length<9) {
-            erroMessage = "Write Valide Phone"
+        if (oldPassword.value.text.isEmpty() && newPassword.value.text.isEmpty() && phone.value.text.isEmpty())
+            return true
+        else if (phone.value.text.trim().length < 9) {
+            errorMessage = "Write Valid Phone"
+        } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordSmallValidation(
+                oldPassword.value.text
+            )
+        ) {
+            errorMessage = ("password must not contain two small letter")
+        } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordNumberValidation(
+                oldPassword.value.text
+            )
+        ) {
+            errorMessage = ("password must not contain two number")
+        } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordCapitalValidation(
+                oldPassword.value.text
+            )
+        ) {
+            errorMessage = ("password must not contain two capitalLetter")
+        } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordSpicialCharracterValidation(
+                oldPassword.value.text
+            )
+        ) {
+            errorMessage = ("password must not contain two spical character")
+        } else if (newPassword.value.text.isNotEmpty() && newPassword.value.text.trim().isEmpty()) {
+            errorMessage = ("password must not be empty")
+        } else if (oldPassword.value.text.isNotEmpty() && newPassword.value.text.isNotEmpty() && oldPassword.value.text != newPassword.value.text) {
+            errorMessage = ("confirm password not equal to password")
         }
-        else  if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordSmallValidation(oldPassword.value.text)) {
-            erroMessage = ("password must not contain two small letter")
-        } else if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordNumberValidation(oldPassword.value.text)) {
-            erroMessage = ("password must not contain two number")
-        } else if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordCapitalValidation(oldPassword.value.text)) {
-            erroMessage = ("password must not contain two capitalLetter")
-        } else if (oldPassword.value.text.isNotEmpty()&&!Validation.passwordSpicialCharracterValidation(oldPassword.value.text)) {
-            erroMessage = ("password must not contain two spical character")
-        } else if (newPassword.value.text.isNotEmpty()&&newPassword.value.text.trim().isEmpty()) {
-            erroMessage = ("password must not be empty")
-        } else if (oldPassword.value.text.isNotEmpty()&&newPassword.value.text.isNotEmpty()&&oldPassword.value.text != newPassword.value.text) {
-            erroMessage = ("confirm password not equal to password")
-        }
 
-        if (erroMessage.isNotEmpty()) {
-            currotine.launch {
+        if (errorMessage.isNotEmpty()) {
+            coroutine.launch {
 
-                snackbarHostState.showSnackbar(erroMessage)
+                snackBarHostState.showSnackbar(errorMessage)
             }
-            return false;
+            return false
         }
 
 
-        return erroMessage.isEmpty();
+        return errorMessage.isEmpty()
     }
 
 
     Scaffold(
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp))
             )
         },
@@ -176,7 +186,7 @@ fun ProfileScreen(
                         }
                     ) {
                         Icon(
-                            Icons.Default.KeyboardArrowLeft,
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             "",
                             modifier = Modifier.size(30.dp),
                             tint = CustomColor.neutralColor950
@@ -185,61 +195,61 @@ fun ProfileScreen(
                 },
 
                 actions = {
-                    if(
-                        file.value!=null||
-                        (fullName.value.text.isNotEmpty()&&
-                                fullName.value.text!=myInfo.value?.name)||
-                        newPassword.value.text.isNotEmpty()||
-                        oldPassword.value.text.isNotEmpty()||
+                    if (
+                        file.value != null ||
+                        (fullName.value.text.isNotEmpty() &&
+                                fullName.value.text != myInfo.value?.name) ||
+                        newPassword.value.text.isNotEmpty() ||
+                        oldPassword.value.text.isNotEmpty() ||
                         phone.value.text.isNotEmpty()
 
-                        )
+                    )
 
-                    TextButton(
-                        onClick = {
-                            keyboardController?.hide()
-                            var result = validateLoginInput()
-                            if((result)==true){
-                                var data = MyInfoUpdate(
-                                    name =if(fullName.value.text.isEmpty())null else fullName.value.text,
-                                    oldPassword =if(oldPassword.value.text.isEmpty())null else oldPassword.value.text,
-                                    newPassword =if(newPassword.value.text.isEmpty())null else newPassword.value.text,
-                                    phone =if(phone.value.text.isEmpty())null else phone.value.text,
-                                    thumbnail = file.value,
-                                )
-                                currotine.launch {
-                                    var result=async {
-                                        homeViewModel.updateMyInfo(data);
-                                    }.await()
-                                    if(result.isNullOrEmpty()){
-                                        phone.value= TextFieldValue("")
-                                        oldPassword.value= TextFieldValue("")
-                                        newPassword.value= TextFieldValue("")
-                                        fullName.value= TextFieldValue("")
-                                        file===null
-                                        currotine.launch {
-                                            snackbarHostState.showSnackbar("profile update seccessfuly");
+                        TextButton(
+                            onClick = {
+                                keyboardController?.hide()
+                                val result = validateLoginInput()
+                                if (result) {
+                                    val data = UpdateMyInfoDto(
+                                        name = fullName.value.text.ifEmpty { null },
+                                        oldPassword = oldPassword.value.text.ifEmpty { null },
+                                        newPassword = newPassword.value.text.ifEmpty { null },
+                                        phone = phone.value.text.ifEmpty { null },
+                                        thumbnail = file.value,
+                                    )
+                                    coroutine.launch {
+                                        val result = async {
+                                            userViewModel.updateMyInfo(data)
+                                        }.await()
+
+                                        if (result.isNullOrEmpty()) {
+                                            phone.value = TextFieldValue("")
+                                            oldPassword.value = TextFieldValue("")
+                                            newPassword.value = TextFieldValue("")
+                                            fullName.value = TextFieldValue("")
+                                            file.value = null
                                         }
-                                    }else{
-                                        currotine.launch {
-                                            snackbarHostState.showSnackbar(result);
-                                        }
+
+                                        val message = result ?: "profile update successfully"
+
+                                        coroutine.launch { snackBarHostState.showSnackbar(message) }
+
+
                                     }
                                 }
                             }
+                        ) {
+                            Text(
+                                "Save",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (18).sp,
+                                color = CustomColor.primaryColor700,
+                                textAlign = TextAlign.Center
+                            )
                         }
-                    ) {
-                        Text(
-                            "Save",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = (18).sp,
-                            color = CustomColor.primaryColor700,
-                            textAlign = TextAlign.Center
-                        )
-                    }
                 },
-//                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior
             )
         }
     ) {
@@ -296,7 +306,6 @@ fun ProfileScreen(
                                     SubcomposeAsyncImage(
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
-//                                                .padding(top = 35.dp)
                                             .height(90.dp)
                                             .width(90.dp)
                                             .clip(RoundedCornerShape(50.dp)),

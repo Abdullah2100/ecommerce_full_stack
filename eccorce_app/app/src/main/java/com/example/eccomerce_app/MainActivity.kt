@@ -1,12 +1,9 @@
-package com.example.e_commercompose
+package com.example.eccomerce_app
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
@@ -38,25 +34,23 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.e_commercompose.Util.General
+import com.example.e_commercompose.R
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.NavController
-import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.e_commercompose.model.ButtonNavItem
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
-    var keepSplash = true;
-//    private  var connection: HubConnection?=null;
+    var keepSplash = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
-    installSplashScreen().apply {
+        installSplashScreen().apply {
             setKeepOnScreenCondition {
                 keepSplash
             }
@@ -66,15 +60,30 @@ class MainActivity : ComponentActivity() {
         setContent {
 
 
-
-            val nav = rememberNavController();
-            val authViewModle: AuthViewModel = koinViewModel();
-            val currentScreen = authViewModle.currentScreen.collectAsState()
-            val buttonNavItemHolder = listOf<ButtonNavItem>(
-                ButtonNavItem(name ="Home", imageId = Icons.Outlined.Home,0 ),
-                ButtonNavItem(name ="Order", imageId = ImageVector.vectorResource(R.drawable.order),1 ),
-                ButtonNavItem(name ="Cart", imageId = Icons.Outlined.ShoppingCart,2 ),
-                ButtonNavItem(name ="Account", imageId = Icons.Outlined.Person ,3),
+            val nav = rememberNavController()
+            val authViewModel: AuthViewModel = koinViewModel()
+            val currentScreen = authViewModel.currentScreen.collectAsState()
+            val buttonNavItemHolder = listOf(
+                ButtonNavItem(
+                    name = "Home",
+                    imageId = Icons.Outlined.Home,
+                    0
+                ),
+                ButtonNavItem(
+                    name = "Order",
+                    imageId = ImageVector.vectorResource(R.drawable.order),
+                    1
+                ),
+                ButtonNavItem(
+                    name = "Cart",
+                    imageId = Icons.Outlined.ShoppingCart,
+                    2
+                ),
+                ButtonNavItem(
+                    name = "Account",
+                    imageId = Icons.Outlined.Person,
+                    3
+                ),
             )
 
             val pages = listOf(
@@ -86,46 +95,51 @@ class MainActivity : ComponentActivity() {
 
 
 
-            if (currentScreen.value!=null) {
-                keepSplash = false;
+            if (currentScreen.value != null) {
+                keepSplash = false
             }
-            if(currentScreen.value!=null)
+            if (currentScreen.value != null)
 
                 Scaffold(
                     bottomBar = {
                         val navBackStackEntry = nav.currentBackStackEntryAsState()
-                        if(
-                            navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true||
-                            navBackStackEntry.value?.destination?.hasRoute(Screens.Cart::class) == true||
-                            navBackStackEntry.value?.destination?.hasRoute(Screens.Order::class) == true||
+                        if (
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Home::class) == true ||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Cart::class) == true ||
+                            navBackStackEntry.value?.destination?.hasRoute(Screens.Order::class) == true ||
                             navBackStackEntry.value?.destination?.hasRoute(Screens.Account::class) == true
-                            )
-                        {
+                        ) {
                             Column {
-                                Box(modifier=Modifier
-                                    .fillMaxWidth()
-                                    .height(0.2.dp
-                                    ).background(CustomColor.neutralColor200))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(
+                                            0.2.dp
+                                        )
+                                        .background(CustomColor.neutralColor200)
+                                )
                                 NavigationBar(
                                     modifier = Modifier.background(Color.White),
                                     tonalElevation = 5.dp,
                                     containerColor = Color.White,
                                     content = {
                                         buttonNavItemHolder.fastForEachIndexed { index, value ->
-                                            var isSelectedItem = navBackStackEntry.value?.destination?.hasRoute(
-                                                pages[index]::class)==true;
+                                            val isSelectedItem =
+                                                navBackStackEntry.value?.destination?.hasRoute(
+                                                    pages[index]::class
+                                                ) == true
                                             NavigationBarItem(
                                                 colors = NavigationBarItemDefaults.colors(
                                                     selectedIconColor = CustomColor.primaryColor700,
-                                                    unselectedIconColor =CustomColor.neutralColor600,
+                                                    unselectedIconColor = CustomColor.neutralColor600,
                                                     selectedTextColor = CustomColor.primaryColor700,
-                                                    unselectedTextColor =CustomColor.neutralColor600,
+                                                    unselectedTextColor = CustomColor.neutralColor600,
                                                 ),
 
-                                                selected =isSelectedItem,
+                                                selected = isSelectedItem,
                                                 onClick = {
-                                                if (!isSelectedItem)
-                                                    nav.navigate(pages[index])
+                                                    if (!isSelectedItem)
+                                                        nav.navigate(pages[index])
                                                 },
                                                 label = {
                                                     Text(
@@ -151,10 +165,10 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 )
-            {
+                {
                     it.calculateTopPadding()
                     it.calculateBottomPadding()
-                    NavController(nav, currentScreen=currentScreen.value?:1)
+                    NavController(nav, currentScreen = currentScreen.value ?: 1)
                 }
         }
     }

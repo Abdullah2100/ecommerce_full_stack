@@ -24,7 +24,7 @@ object DtoToModel {
             title =this.title,
             latitude = this.latitude,
             longitude = this.longitude,
-            isCurrnt = this.isCurrent?:false
+            isCurrent = this.isCurrent?:false
         )
     }
 
@@ -33,13 +33,13 @@ object DtoToModel {
             id= this.id,
             name =this.name,
             image=this.image.replace("0.0.0.0","192.168.1.45")
-        );
+        )
     }
     fun SubCategoryDto.toSubCategory(): SubCategory{
         return SubCategory(
             id = this.Id,
             name=this.Name,
-            category_id=this.CategoryId,
+            categoryId=this.CategoryId,
             storeId= UUID.randomUUID()
         )
     }
@@ -49,9 +49,9 @@ object DtoToModel {
         return StoreModel(
             id = this.id,
             name = this.name,
-            user_id = this.userId,
-            pig_image = this.wallpaperImage.replace("0.0.0.0", "192.168.1.45"),
-            small_image = this.smallImage.replace("0.0.0.0", "192.168.1.45"),
+            userId = this.userId,
+            pigImage = this.wallpaperImage.replace("0.0.0.0", "192.168.1.45"),
+            smallImage = this.smallImage.replace("0.0.0.0", "192.168.1.45"),
             latitude = this.latitude,
             longitude = this.longitude
         )
@@ -65,7 +65,7 @@ object DtoToModel {
             email = this.email,
             thumbnail=if(!this.thumbnail.isEmpty())this.thumbnail.replace("0.0.0.0","192.168.1.45") else "",
             address = this.address?.map { it.toAddress() }?.toList(),
-            store_id = this.storeId
+            storeId = this.storeId
         )
     }
 
@@ -74,23 +74,23 @@ object DtoToModel {
         return BannerModel(
             id=this.id,
             image=if(this.image.isNotEmpty())this.image.replace("0.0.0.0","192.168.1.45") else "",
-            store_id = this.storeId
+            storeId = this.storeId
         )
     }
 
-    fun VarientDto.toVarient(): VarientModel{
-        return VarientModel(
+    fun VarientDto.toVarient(): VarirntModel{
+        return VarirntModel(
             id =  this.Id,
             name=this.Name
         )
     }
 
-    fun ProductVarientDto.toProductVarient(): ProductVarient {
-        return ProductVarient(
+    fun ProductVarientDto.toProductVarient(): ProductVariant {
+        return ProductVariant(
             id = this.Id,
             name=this.Name,
-            precentage = this.Precentage,
-            varient_id =this.VarientId
+            percentage = this.Precentage,
+            variantId =this.VarientId
         )
     }
 
@@ -99,22 +99,22 @@ object DtoToModel {
             id = this.Id,
             name = this.Name,
             description = this.Description,
-            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.45") else "",
-            subcategory_id = this.SubcategoryId,
-            store_id = this.StoreId,
+            thumbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.45") else "",
+            subcategoryId = this.SubcategoryId,
+            storeId = this.StoreId,
             price = this.Price,
-            category_id = this.CategoryId,
-            productVarients = this.ProductVarients?.map {
+            categoryId = this.CategoryId,
+            productVariants = this.ProductVarients?.map {
                 it.map { it.toProductVarient() }
             },
             productImages = this.ProductImages.map { it->if(it.isNotEmpty())it.replace("0.0.0.0","192.168.1.45") else "" }
         )
     }
 
-    fun OrderVarientDto.toOrderVarient(): OrderVarient{
-        return OrderVarient(
-            varient_name=this.VarientName,
-            product_varient_name=this.ProductVarientName
+    fun OrderVarientDto.toOrderVarient(): OrderVariant{
+        return OrderVariant(
+            variantName=this.VarientName,
+            productVariantName=this.ProductVarientName
         )
     }
 
@@ -122,17 +122,17 @@ object DtoToModel {
         return OrderProduct(
             id= this.Id,
             name = this.Name,
-            thmbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.45") else ""
+            thumbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.45") else ""
         )
     }
 
     fun OrderItemDto.toOrderItem(): OrderItem{
         return OrderItem(
             id=this.Id,
-            quanity= this.Quanity,
+            quantity= this.Quanity,
             price = this.Price,
             product = this.Product.toOrderProduct(),
-            productVarient = this.ProductVarient.map { it.toOrderVarient() },
+            productVariant = this.ProductVarient.map { it.toOrderVarient() },
              orderItemStatus = this.OrderItemStatus
         )
     }
@@ -143,9 +143,9 @@ object DtoToModel {
            latitude = this.Latitude,
            longitude = this.Longitude,
            deliveryFee = this.DeliveryFee,
-           user_phone = this.UserPhone,
+           userPhone = this.UserPhone,
            totalPrice=this.TotalPrice,
-           order_items = this.OrderItems.map { it.toOrderItem() },
+           orderItems = this.OrderItems.map { it.toOrderItem() },
            status = this.Status
        )
     }

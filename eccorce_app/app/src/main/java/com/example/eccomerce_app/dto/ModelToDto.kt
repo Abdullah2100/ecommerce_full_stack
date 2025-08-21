@@ -2,7 +2,7 @@ package com.example.e_commercompose.dto
 
 import com.example.e_commercompose.model.CardProductModel
 import com.example.e_commercompose.model.CartModel
-import com.example.e_commercompose.model.ProductVarient
+import com.example.e_commercompose.model.ProductVariant
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.eccomerce_app.dto.CreateOrderDto
@@ -19,32 +19,32 @@ object ModelToDto {
         return UpdateSubCategoryDto(
             Name=this.name,
             Id=this.id,
-            CateogyId=this.cateogy_id
+            CateogyId=this.cateogyId
         )
     }
 
     fun ProductVarientSelection.toProdcutVarientRequestDto(): CreateProductVarientDto{
         return CreateProductVarientDto(
             Name = this.name,
-            Precentage = this.precentage,
-            VarientId =this.varientId
+            Precentage = this.percentage,
+            VarientId =this.variantId
         )
     }
-    fun List<List<ProductVarient>>.toListOfProductVarient(): List<ProductVarientSelection> {
+    fun List<List<ProductVariant>>.toListOfProductVarient(): List<ProductVarientSelection> {
         return   this.map{it->it.map {
                 data->
-            ProductVarientSelection(name = data.name, precentage = data.precentage, varientId = data.varient_id)
+            ProductVarientSelection(name = data.name, percentage = data.percentage, variantId = data.variantId)
 
         }}.flatten()
     }
 
     fun CardProductModel.toOrderRequestItemDto(): CreateOrderItemDto{
         return CreateOrderItemDto(
-            StoreId =  this.store_id,
+            StoreId =  this.storeId,
             ProductId = this.productId,
             Price = this.price,
             Quantity = this.quantity,
-            ProductsVarientId =  this.productvarients.map { it.id }
+            ProductsVarientId =  this.productVariants.map { it.id }
         )
     }
 
@@ -52,15 +52,15 @@ object ModelToDto {
         return CreateOrderDto(
             Items = this.cartProducts.map { it.toOrderRequestItemDto() },
             TotalPrice = this.totalPrice ,
-            Latitude = this.latitu,
-            Longitude=this.longit
+            Latitude = this.latitude,
+            Longitude=this.longitude
         )
     }
 
     fun SubCategoryUpdate.toSubCategoryUpdateDto(): SubCategoryDto{
         return SubCategoryDto(
             Id=this.id,
-            CategoryId = this.cateogy_id,
+            CategoryId = this.cateogyId,
             Name = this.name,
         )
     }

@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui.view.Auth
+package com.example.eccomerce_app.ui.view.Auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.AuthViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,8 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomAuthBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
@@ -47,41 +47,45 @@ fun LoginScreen(
     nav: NavHostController,
     authKoin: AuthViewModel
 ) {
+    val focusRequester = FocusRequester()
+
     val fontScall = LocalDensity.current.fontScale
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val snackbarHostState = remember { SnackbarHostState() }
+
+    val isSendingData = authKoin.isLoading.collectAsState()
+    val errorMessage = authKoin.errorMessage.collectAsState()
+
+    val coroutine = rememberCoroutineScope()
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+    val isEmailError = remember { mutableStateOf(false) }
+    val isPasswordError = remember { mutableStateOf(false) }
 
     val userNameOrEmail = remember { mutableStateOf(TextFieldValue("ali@gmail.com")) }
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
-    val isEmailError = remember { mutableStateOf<Boolean>(false) }
-    val isPasswordError = remember { mutableStateOf<Boolean>(false) }
-    val erroMessage = remember { mutableStateOf("") }
 
-    val isSendingData = authKoin.isLoading.collectAsState()
-    val errorMessage = authKoin.errorMesssage.collectAsState()
-    val coroutine = rememberCoroutineScope()
+    val errorMessageValidation = remember { mutableStateOf("") }
 
-
-    val focusRequester = FocusRequester()
 
     fun validateLoginInput(
         username: String,
         password: String
     ): Boolean {
 
-        isEmailError.value = false;
-        isPasswordError.value = false;
+        isEmailError.value = false
+        isPasswordError.value = false
 
         if (username.trim().isEmpty()) {
-            erroMessage.value = "email must not be empty"
-            isEmailError.value = true;
-            return false;
+            errorMessageValidation.value = "email must not be empty"
+            isEmailError.value = true
+            return false
         } else if (password.trim().isEmpty()) {
-            erroMessage.value = ("password must not be empty")
+            errorMessageValidation.value = ("password must not be empty")
             isPasswordError.value = true
-            return false;
+            return false
         }
 
         return true
@@ -91,14 +95,14 @@ fun LoginScreen(
     LaunchedEffect(errorMessage.value) {
         if (errorMessage.value != null)
             coroutine.launch {
-                snackbarHostState.showSnackbar(errorMessage.value.toString())
+                snackBarHostState.showSnackbar(errorMessage.value.toString())
                 authKoin.clearErrorMessage()
             }
     }
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         }
     ) {
 
@@ -116,11 +120,11 @@ fun LoginScreen(
                 )
                 .fillMaxSize()
         ) {
-            val (bottonRef, inputRef) = createRefs();
+            val (bottomRef, inputRef) = createRefs()
             Box(
                 modifier = Modifier
                     .padding(bottom = 50.dp)
-                    .constrainAs(bottonRef) {
+                    .constrainAs(bottomRef) {
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
@@ -169,7 +173,6 @@ fun LoginScreen(
                         end.linkTo(parent.end)
                     },
                 horizontalAlignment = Alignment.Start,
-//                        verticalArrangement = Arrangement.Center
             ) {
 
                 Text(
@@ -186,14 +189,14 @@ fun LoginScreen(
                     title = "Email",
                     placHolder = "Enter Your email",
                     isHasError = isEmailError.value,
-                    erroMessage = erroMessage.value,
+                    erroMessage = errorMessageValidation.value,
                     focusRequester = focusRequester
                 )
                 TextSecureInputWithTitle(
                     password,
                     "Password",
                     isPasswordError.value,
-                    erroMessage.value
+                    errorMessageValidation.value
                 )
                 Box(
                     modifier = Modifier.fillMaxWidth(),
@@ -218,22 +221,17 @@ fun LoginScreen(
                     isLoading = isSendingData.value,
                     operation = {
                         keyboardController?.hide()
-
                         if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
                             coroutine.launch {
-                                snackbarHostState.showSnackbar("User name Or Password is Blanck")
+                                snackBarHostState.showSnackbar("User name Or Password is Blank")
                             }
                         } else {
-
                             authKoin.loginUser(
                                 userNameOrEmail.value.text,
                                 password = password.value.text,
                                 nav = nav
                             )
-
-
                         }
-
                     },
                     buttonTitle = "Login",
                     validationFun = {
@@ -251,10 +249,6 @@ fun LoginScreen(
 
 
     }
-
-
-//        }
-//    )
 
 
 }

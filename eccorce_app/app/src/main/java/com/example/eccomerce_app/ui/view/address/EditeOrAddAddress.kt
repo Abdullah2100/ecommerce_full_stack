@@ -1,6 +1,7 @@
-package com.example.e_commercompose.ui.view.Address
+package com.example.eccomerce_app.ui.view.address
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,7 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,16 +54,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.model.enMapType
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -72,17 +74,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditOrAddLocationScreen(
     nav: NavHostController,
-    homeViewModle: HomeViewModel
+    userViewModel: UserViewModel
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val context = LocalContext.current
-    val coroutine = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val locationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
+    val userInfo = userViewModel.userInfo.collectAsState()
 
-    val locationss = homeViewModle.myInfo.collectAsState()
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    val coroutine = rememberCoroutineScope()
+
+    val snackBarHostState = remember { SnackbarHostState() }
+    val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
     val isLoading = remember { mutableStateOf<Boolean>(false) }
     val isRefresh = remember { mutableStateOf(false) }
@@ -97,38 +100,48 @@ fun EditOrAddLocationScreen(
 
             if (arePermissionsGranted) {
 
-                locationClient.lastLocation
-                    .apply {
-                        addOnSuccessListener { location ->
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@rememberLauncherForActivityResult
+                } else {
+                    locationClient.lastLocation
+                        .apply {
+                            addOnSuccessListener { location ->
 
-                            location?.toString()
-                            if (location != null)
-                                nav.navigate(
-                                    Screens.MapScreen(
-                                        lognit = location.longitude,
-                                        latitt = location.latitude,
-                                        isFromLogin = false,
-                                        title = currentAddress.value?.title,
-                                        id = currentAddress.value?.id?.toString(),
-                                        mapType = enMapType.My,
+                                location?.toString()
+                                if (location != null)
+                                    nav.navigate(
+                                        Screens.MapScreen(
+                                            lognit = location.longitude,
+                                            latitt = location.latitude,
+                                            isFromLogin = false,
+                                            title = currentAddress.value?.title,
+                                            id = currentAddress.value?.id?.toString(),
+                                            mapType = enMapType.My,
+                                        )
                                     )
+                                else
+                                    coroutine.launch {
+                                        snackBarHostState.showSnackbar("you should enable location services")
+                                    }
+                            }
+                            addOnFailureListener { fail ->
+                                Log.d(
+                                    "contextError",
+                                    "the current location is null ${fail.stackTrace}"
                                 )
-                            else
-                                coroutine.launch {
-                                    snackbarHostState.showSnackbar("you should enable location services")
-                                }
+
+                            }
                         }
-                        addOnFailureListener { fail ->
-                            Log.d(
-                                "contextError",
-                                "the current location is null ${fail.stackTrace}"
-                            )
-
-                        }
-                    }
 
 
-                // Got last known location. In some srare situations this can be null.
+                }
             } else {
                 Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
             }
@@ -137,7 +150,7 @@ fun EditOrAddLocationScreen(
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         },
         modifier = Modifier
             .fillMaxSize()
@@ -161,7 +174,7 @@ fun EditOrAddLocationScreen(
                         }
                     ) {
                         Icon(
-                            Icons.Default.KeyboardArrowLeft,
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             "",
                             modifier = Modifier.size(30.dp),
                             tint = CustomColor.neutralColor950
@@ -204,9 +217,9 @@ fun EditOrAddLocationScreen(
         it.calculateBottomPadding()
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { homeViewModle.getMyInfo() }
+            onRefresh = { userViewModel.getMyInfo() }
         ) {
-            when (locationss.value?.address.isNullOrEmpty()) {
+            when (userInfo.value?.address.isNullOrEmpty()) {
                 true -> {
                     Column(
                         modifier = Modifier
@@ -267,7 +280,7 @@ fun EditOrAddLocationScreen(
                             Sizer(20)
                         }
 
-                        items(locationss.value!!.address!!.size)
+                        items(userInfo.value!!.address!!.size)
                         { index ->
 
                             Row(
@@ -276,21 +289,19 @@ fun EditOrAddLocationScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .combinedClickable(
                                         onClick = {
-                                            if (!locationss.value!!.address!![index].isCurrnt) {
+                                            if (!userInfo.value!!.address!![index].isCurrent) {
                                                 coroutine.launch {
                                                     isLoading.value = true
                                                     val result = async {
-                                                        homeViewModle.setCurrentActiveUserAddress(
-                                                            locationss.value!!.address!![index].id!!,
+                                                        userViewModel.setCurrentActiveUserAddress(
+                                                            userInfo.value!!.address!![index].id!!,
                                                         )
                                                     }.await()
                                                     isLoading.value = false
-                                                    var message =
-                                                        "update Current Address Seccessfuly"
-                                                    if (result != null) {
-                                                        message = result
-                                                    }
-                                                    snackbarHostState.showSnackbar(message)
+                                                    val message = result
+                                                        ?: "update Current Address Successfully"
+
+                                                    snackBarHostState.showSnackbar(message)
                                                 }
 
                                             }
@@ -298,7 +309,7 @@ fun EditOrAddLocationScreen(
 
                                         },
                                         onLongClick = {
-                                            currentAddress.value =locationss.value?.address!![index]
+                                            currentAddress.value = userInfo.value?.address!![index]
                                             requestPermissionThenNavigate.launch(
                                                 arrayOf(
                                                     Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -330,7 +341,7 @@ fun EditOrAddLocationScreen(
                                     Sizer(width = 20)
                                     Row {
                                         Text(
-                                            locationss.value!!.address!![index].title.toString(),
+                                            userInfo.value!!.address!![index].title.toString(),
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Medium,
                                             fontSize = 16.sp,
@@ -338,7 +349,7 @@ fun EditOrAddLocationScreen(
                                             textAlign = TextAlign.Center
 
                                         )
-                                        if (locationss.value!!.address!![index].isCurrnt) {
+                                        if (userInfo.value!!.address!![index].isCurrent) {
                                             Sizer(width = 5)
                                             Box(
                                                 modifier = Modifier
@@ -366,23 +377,23 @@ fun EditOrAddLocationScreen(
                                 }
 
                                 RadioButton(
-                                    selected = locationss.value!!.address!![index].isCurrnt,
+                                    selected = userInfo.value!!.address!![index].isCurrent,
                                     onClick = {
-                                        if (!locationss.value!!.address!![index].isCurrnt) {
+                                        if (!userInfo.value!!.address!![index].isCurrent) {
                                             coroutine.launch {
                                                 isLoading.value = true
-                                                var result = async {
-                                                    homeViewModle.setCurrentActiveUserAddress(
-                                                        locationss.value!!.address!![index].id!!,
+                                                val result = async {
+                                                    userViewModel.setCurrentActiveUserAddress(
+                                                        userInfo.value!!.address!![index].id!!,
                                                     )
                                                 }.await()
                                                 isLoading.value = false
                                                 var message = "update Current Address Seccessfuly"
-                                                homeViewModle.getMyInfo()
+                                                userViewModel.getMyInfo()
                                                 if (result != null) {
                                                     message = result
                                                 }
-                                                snackbarHostState.showSnackbar(message)
+                                                snackBarHostState.showSnackbar(message)
                                             }
 
                                         }

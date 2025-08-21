@@ -1,6 +1,5 @@
 package com.example.e_commercompose.ui.view.account.store
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,7 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,15 +51,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.CardProductModel
-import com.example.e_commercompose.model.ProductVarient
-import com.example.e_commercompose.ui.Screens
-import com.example.e_commercompose.ui.component.CustomBotton
-import com.example.e_commercompose.ui.component.CustomTitleBotton
+import com.example.e_commercompose.model.ProductVariant
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.CartViewModel
+import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
+import com.example.eccomerce_app.viewModel.SubCategoryViewModel
+import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.BannerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -72,50 +72,67 @@ import java.util.UUID
 @Composable
 fun ProductDetail(
     nav: NavHostController,
-    homeViewModel: HomeViewModel,
+    cartViewModel: CartViewModel,
     productID: String?,
-    isFromHome: Boolean
-) {
-    val myInfo = homeViewModel.myInfo.collectAsState()
-    val product_id = if (productID == null) null else UUID.fromString(productID)
-
-    val products = homeViewModel.products.collectAsState()
-    val varients = homeViewModel.varients.collectAsState()
-    val stores = homeViewModel.stores.collectAsState()
-
-    val productData = products.value?.firstOrNull { it.id == product_id }
-    val storeData = stores.value?.firstOrNull { it.id == productData?.store_id }
+    isFromHome: Boolean,
+    variantViewModel: VariantViewModel,
+    storeViewModel: StoreViewModel,
+    bannerViewModel: BannerViewModel,
+    subCategoryViewModel: SubCategoryViewModel,
+    productViewModel: ProductViewModel,
+    ) {
 
     val context = LocalContext.current
 
-    val selectedImage = remember { mutableStateOf(productData?.thmbnail) }
-    val selectedProdcutVarients = remember { mutableStateOf<List<ProductVarient>>(emptyList()) }
-    if (selectedProdcutVarients.value.isEmpty() && productData?.productVarients?.isNotEmpty() == true) {
-        productData.productVarients?.forEach { it ->
+    val coroutine = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+    val productId = if (productID == null) null else UUID.fromString(productID)
+
+
+
+    val products = productViewModel.products.collectAsState()
+    val variants = variantViewModel.variants.collectAsState()
+    val stores = storeViewModel.stores.collectAsState()
+
+
+
+    val productData = products.value?.firstOrNull { it.id == productId }
+    val storeData = stores.value?.firstOrNull { it.id == productData?.storeId }
+
+
+
+    val selectedImage = remember { mutableStateOf(productData?.thumbnail) }
+
+    val selectedProductVariants = remember { mutableStateOf<List<ProductVariant>>(emptyList()) }
+    if (selectedProductVariants.value.isEmpty() && productData?.productVariants?.isNotEmpty() == true) {
+        productData.productVariants.forEach { it ->
             val firstElement = it.first()
-            val copySelectedList = mutableListOf<ProductVarient>()
+            val copySelectedList = mutableListOf<ProductVariant>()
             copySelectedList.add(
-                ProductVarient(
+                ProductVariant(
                     id = firstElement.id,
                     name = firstElement.name,
-                    precentage = firstElement.precentage,
-                    varient_id = firstElement.varient_id
+                    percentage = firstElement.percentage,
+                    variantId = firstElement.variantId
                 )
             )
-            if (selectedProdcutVarients.value.isNotEmpty())
-                copySelectedList.addAll(selectedProdcutVarients.value)
-            selectedProdcutVarients.value = copySelectedList
+            if (selectedProductVariants.value.isNotEmpty())
+                copySelectedList.addAll(selectedProductVariants.value)
+            selectedProductVariants.value = copySelectedList
         }
     }
+
+
     val images = remember { mutableStateOf(productData?.productImages) }
 
-    val coroutine = rememberCoroutineScope()
 
-    if (productData?.thmbnail != null) {
-        if (images.value != null && !images.value!!.contains(productData.thmbnail)) {
+    if (productData?.thumbnail != null) {
+        if (images.value != null && !images.value!!.contains(productData.thumbnail)) {
 
-            var imageWithThumbnails = mutableListOf<String>()
-            imageWithThumbnails.add(productData.thmbnail)
+            val imageWithThumbnails = mutableListOf<String>()
+            imageWithThumbnails.add(productData.thumbnail)
 
             if (images.value != null) {
                 imageWithThumbnails.addAll(images.value!!)
@@ -124,18 +141,24 @@ fun ProductDetail(
             images.value = imageWithThumbnails
 
         } else if (images.value == null) {
-            images.value = listOf<String>(productData.thmbnail)
+            images.value = listOf<String>(productData.thumbnail)
         }
     }
 
 
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    Log.d("isFromHomeValue", isFromHome.toString())
+    fun getStoreInfoByStoreId(id:UUID?=UUID.randomUUID()){
+        storeViewModel.getStoreData(storeId = id!!)
+        bannerViewModel.getStoreBanner(id)
+        subCategoryViewModel.getStoreSubCategories(id,1)
+    }
+
+
+
     if (!isFromHome) {
         LaunchedEffect(Unit) {
-            homeViewModel.getStoreInfoByStoreId(
-                store_id = productData?.store_id ?: UUID.randomUUID()
+            getStoreInfoByStoreId(
+                id = productData?.storeId ?: UUID.randomUUID()
             )
             delay(3000)
 
@@ -145,7 +168,7 @@ fun ProductDetail(
     Scaffold(
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -198,19 +221,19 @@ fun ProductDetail(
                         .height(50.dp)
                         .fillMaxWidth(),
                     onClick = {
-                        homeViewModel.addToCart(
+                        cartViewModel.addToCart(
                             product = CardProductModel(
                                 id = UUID.randomUUID(),
                                 productId = productData!!.id,
                                 name = productData.name,
-                                thmbnail = productData.thmbnail,
+                                thumbnail = productData.thumbnail,
                                 price = productData.price,
-                                productvarients = selectedProdcutVarients.value,
-                                store_id = productData.store_id
+                                productVariants = selectedProductVariants.value,
+                                storeId = productData.storeId
                             )
                         )
                         coroutine.launch {
-                            snackbarHostState.showSnackbar("Item Added to Cart")
+                            snackBarHostState.showSnackbar("Item Added to Cart")
 
                         }
                     },
@@ -374,10 +397,10 @@ fun ProductDetail(
                 }
             }
 
-            if (!productData?.productVarients.isNullOrEmpty()) {
-                items(productData.productVarients?.size ?: 0) { index ->
+            if (!productData?.productVariants.isNullOrEmpty()) {
+                items(productData.productVariants?.size ?: 0) { index ->
                     val title =
-                        varients.value?.firstOrNull { it.id == productData.productVarients!![index][0].varient_id }?.name
+                        variants.value?.firstOrNull { it.id == productData.productVariants!![index][0].variantId }?.name
                             ?: ""
                     Text(
                         text = "Select ${title}",
@@ -394,18 +417,18 @@ fun ProductDetail(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        repeat(productData.productVarients!![index].size) { pvIndex ->
+                        repeat(productData.productVariants!![index].size) { pvIndex ->
 
-                            var productVarientHolder = ProductVarient(
-                                id = productData.productVarients!![index][pvIndex].id,
-                                name = productData.productVarients!![index][pvIndex].name,
-                                precentage = productData.productVarients!![index][pvIndex].precentage,
-                                varient_id = productData.productVarients!![index][pvIndex].varient_id
+                            val productVarientHolder = ProductVariant(
+                                id = productData.productVariants!![index][pvIndex].id,
+                                name = productData.productVariants!![index][pvIndex].name,
+                                percentage = productData.productVariants!![index][pvIndex].percentage,
+                                variantId = productData.productVariants!![index][pvIndex].variantId
                             )
                             when (title == "Color") {
                                 true -> {
                                     val colorValue =
-                                        General.convertColorToInt(productData.productVarients!![index][pvIndex].name)
+                                        General.convertColorToInt(productData.productVariants!![index][pvIndex].name)
 
                                     if (colorValue != null)
                                         Box(
@@ -417,11 +440,11 @@ fun ProductDetail(
                                                     RoundedCornerShape(20.dp)
                                                 )
                                                 .border(
-                                                    width = if (selectedProdcutVarients.value.contains(
+                                                    width = if (selectedProductVariants.value.contains(
                                                             productVarientHolder
                                                         )
                                                     ) 1.dp else 0.dp,
-                                                    color = if (selectedProdcutVarients.value.contains(
+                                                    color = if (selectedProductVariants.value.contains(
                                                             productVarientHolder
                                                         )
                                                     ) CustomColor.primaryColor700
@@ -432,12 +455,12 @@ fun ProductDetail(
                                                 .clickable {
 
                                                     val copyVarient =
-                                                        mutableListOf<ProductVarient>()
+                                                        mutableListOf<ProductVariant>()
 
                                                     copyVarient.add(productVarientHolder)
-                                                    copyVarient.addAll(selectedProdcutVarients.value)
-                                                    selectedProdcutVarients.value =
-                                                        copyVarient.distinctBy { it.varient_id }
+                                                    copyVarient.addAll(selectedProductVariants.value)
+                                                    selectedProductVariants.value =
+                                                        copyVarient.distinctBy { it.variantId }
 
                                                 }
                                                 .padding(5.dp)
@@ -449,7 +472,7 @@ fun ProductDetail(
                                         modifier = Modifier
                                             .border(
                                                 1.dp,
-                                                if (selectedProdcutVarients.value.contains(
+                                                if (selectedProductVariants.value.contains(
                                                         productVarientHolder
                                                     )
                                                 ) CustomColor.primaryColor700 else CustomColor.neutralColor200,
@@ -459,18 +482,18 @@ fun ProductDetail(
                                             .clip(RoundedCornerShape(20.dp))
                                             .clickable {
 
-                                                val copyVarient = mutableListOf<ProductVarient>()
+                                                val copyVarient = mutableListOf<ProductVariant>()
 
                                                 copyVarient.add(productVarientHolder)
-                                                copyVarient.addAll(selectedProdcutVarients.value)
-                                                selectedProdcutVarients.value = copyVarient
-                                                    .distinctBy { it.varient_id }
+                                                copyVarient.addAll(selectedProductVariants.value)
+                                                selectedProductVariants.value = copyVarient
+                                                    .distinctBy { it.variantId }
 
                                             },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = productData.productVarients!![index][pvIndex].name,
+                                            text = productData.productVariants!![index][pvIndex].name,
                                             color = CustomColor.neutralColor950,
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Bold,
@@ -503,7 +526,7 @@ fun ProductDetail(
                                 .width(50.dp)
                                 .clip(RoundedCornerShape(50.dp)),
                             model = General.handlingImageForCoil(
-                                storeData.small_image,
+                                storeData.smallImage,
                                 context
                             ),
                             contentDescription = "",
@@ -543,14 +566,14 @@ fun ProductDetail(
                                 color = CustomColor.primaryColor700,
                                 modifier = Modifier.clickable {
                                     if (productData != null)
-                                        homeViewModel
+                                       productViewModel
                                             .getProducts(
                                                 pageNumber = mutableStateOf(1),
-                                                store_id = productData.store_id
+                                                storeId = productData.storeId
                                             )
                                     nav.navigate(
                                         Screens.Store(
-                                            store_id = storeData.id.toString(),
+                                            storeId = storeData.id.toString(),
                                             isFromHome = true
                                         )
                                     )

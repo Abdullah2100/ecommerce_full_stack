@@ -28,7 +28,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,9 +41,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.BannerModel
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import kotlinx.coroutines.delay
 import java.util.UUID
@@ -64,7 +63,7 @@ fun BannerBage(
     val currentPage = remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState { banners.size }
 
-    var operationType = remember { mutableStateOf('+') }
+    val operationType = remember { mutableStateOf('+') }
 
     if (banners.size > 1) {
         LaunchedEffect(Unit) {
@@ -75,17 +74,17 @@ fun BannerBage(
                 ))
 
                 if (currentPage.value== banners.size-1 ) {
-                    operationType.value='-';
+                    operationType.value='-'
                 } else if(currentPage.value==-1) {
-                    operationType.value='+';
+                    operationType.value='+'
                 }
 
                 when(operationType.value){
                     '-'->{
-                        currentPage.value-=1;
+                        currentPage.value-=1
                     }
                     else->{
-                        currentPage.value+=1;
+                        currentPage.value+=1
                     }
                 }
                 delay(3000)
@@ -143,7 +142,7 @@ fun BannerBage(
                             )
                             .clickable {
                                 Log.d("navBannerIsPresing", "true")
-                                nav!!.navigate(Screens.Store(banners[page].store_id.toString()))
+                                nav!!.navigate(Screens.Store(banners[page].storeId.toString()))
                             }.constrainAs(imageRef) {
                                 top.linkTo(parent.top)
                                 bottom.linkTo(parent.bottom)

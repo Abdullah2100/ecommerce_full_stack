@@ -6,41 +6,62 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.AuthViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.ui.view.OnBoarding.OnBoardingScreen
-import com.example.e_commercompose.ui.view.Auth.LoginScreen
-import com.example.e_commercompose.View.Pages.SignUpPage
-import com.example.e_commercompose.ui.view.Address.EditOrAddLocationScreen
+import com.example.eccomerce_app.ui.view.Auth.LoginScreen
+import com.example.eccomerce_app.ui.view.Auth.SignUpPage
+import com.example.eccomerce_app.ui.view.address.EditOrAddLocationScreen
 import com.example.e_commercompose.ui.view.account.AccountPage
-import com.example.e_commercompose.ui.view.account.ProfileScreen
-import com.example.e_commercompose.ui.view.account.store.CreateProductScreen
+import com.example.eccomerce_app.ui.view.account.ProfileScreen
+import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
 import com.example.e_commercompose.ui.view.account.store.ProductDetail
 import com.example.e_commercompose.ui.view.account.store.StoreScreen
 import com.example.e_commercompose.ui.view.checkout.CheckoutScreen
-import com.example.e_commercompose.ui.view.home.CartScreen
-import com.example.e_commercompose.ui.view.home.HomePage
-import com.example.e_commercompose.ui.view.home.OrderScreen
-import com.example.e_commercompose.ui.view.home.ProductCategoryScreen
-import com.example.e_commercompose.ui.view.location.AddressHomeScreen
+import com.example.eccomerce_app.ui.view.home.CartScreen
+import com.example.eccomerce_app.ui.view.home.HomePage
+import com.example.eccomerce_app.ui.view.home.OrderScreen
+import com.example.eccomerce_app.ui.view.home.ProductCategoryScreen
+import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
 import com.example.e_commercompose.ui.view.location.PickCurrentAddressFromAddressScreen
-import com.example.e_commercompose.ui.view.ReseatPassword.GenerateOtpScreen
-import com.example.e_commercompose.ui.view.ReseatPassword.OtpVerificationScreen
-import com.example.e_commercompose.ui.view.ReseatPassword.ReseatPasswordScreen
-import com.example.e_commercompose.ui.view.account.OrderForMyStoreScreen
-import com.example.e_commercompose.ui.view.home.CategoryScreen
-import com.example.e_commercompose.ui.view.location.MapHomeScreen
+import com.example.eccomerce_app.ui.view.ReseatPassword.GenerateOtpScreen
+import com.example.eccomerce_app.ui.view.ReseatPassword.OtpVerificationScreen
+import com.example.eccomerce_app.ui.view.ReseatPassword.ReseatPasswordScreen
+import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
+import com.example.eccomerce_app.ui.view.home.CategoryScreen
+import com.example.eccomerce_app.ui.view.address.MapHomeScreen
+import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.eccomerce_app.viewModel.StoreViewModel
+import com.example.eccomerce_app.viewModel.SubCategoryViewModel
+import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.ui.Screens
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.OrderItemsViewModel
+import com.example.eccomerce_app.viewModel.OrderViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 
 
 @Composable
 fun NavController(
     nav: NavHostController,
-    authViewModle: AuthViewModel = koinViewModel(),
-    homeViewModle: HomeViewModel = koinViewModel(),
+    authViewModel: AuthViewModel = koinViewModel(),
+    cartViewModel: CartViewModel = koinViewModel(),
+    bannerViewModel: BannerViewModel = koinViewModel(),
+    categoryViewModel: CategoryViewModel = koinViewModel(),
+    subCategoryViewModel: SubCategoryViewModel = koinViewModel(),
+    variantViewModel: VariantViewModel = koinViewModel(),
+    storeViewModel: StoreViewModel = koinViewModel(),
+    productViewModel: ProductViewModel = koinViewModel(),
+    userViewModel: UserViewModel = koinViewModel(),
+    generalSettingViewModel: GeneralSettingViewModel = koinViewModel(),
+    orderViewModel: OrderViewModel = koinViewModel(),
+    orderItemViewModel: OrderItemsViewModel = koinViewModel(),
     currentScreen: Int,
 ) {
 
@@ -76,14 +97,21 @@ fun NavController(
             val data = result.toRoute<Screens.MapScreen>()
 
             MapHomeScreen(
-                homeViewModle = homeViewModle,
-                lognit = data.lognit,
-                latitt = data.latitt,
+                longitude = data.lognit,
+                latitude = data.latitt,
                 title = data.title,
                 id = data.id,
                 isFomLogin = data.isFromLogin,
                 mapType = data.mapType,
-                nav = nav
+                nav = nav,
+                userViewModel = userViewModel,
+                storeViewModel = storeViewModel,
+                orderViewModel = orderViewModel,
+                generalSettingViewModel = generalSettingViewModel,
+                bannerViewModel = bannerViewModel,
+                productViewModel = productViewModel,
+                variantViewModel = variantViewModel,
+                categoryViewModel = categoryViewModel
             )
 
         }
@@ -101,7 +129,7 @@ fun NavController(
             },
 
             ) {
-            OnBoardingScreen(nav, authViewModle)
+            OnBoardingScreen(nav, authViewModel)
         }
 
 
@@ -131,7 +159,7 @@ fun NavController(
             ) {
                 AddressHomeScreen(
                     nav = nav,
-                    homeViewModle = homeViewModle
+                    userViewModel = userViewModel
                 )
             }
 
@@ -155,7 +183,13 @@ fun NavController(
             ) { value ->
                 PickCurrentAddressFromAddressScreen(
                     nav = nav,
-                    homeViewModle = homeViewModle,
+                    userViewModel = userViewModel,
+                    orderViewModel = orderViewModel,
+                    generalSettingViewModel = generalSettingViewModel,
+                    bannerViewModel = bannerViewModel,
+                    productViewModel = productViewModel,
+                    variantViewModel = variantViewModel,
+                    categoryViewModel = categoryViewModel
                 )
             }
 
@@ -181,7 +215,7 @@ fun NavController(
             ) {
                 GenerateOtpScreen(
                     nav = nav,
-                    authViewModle
+                    authViewModel
                 )
             }
             composable<Screens.OtpVerification>(
@@ -199,7 +233,7 @@ fun NavController(
                 val data = result.toRoute<Screens.OtpVerification>()
                 OtpVerificationScreen(
                     nav = nav,
-                    authViewModle,
+                    authViewModel,
                     email = data.email
                 )
             }
@@ -219,7 +253,7 @@ fun NavController(
                 val data = result.toRoute<Screens.ReseatPassword>()
                 ReseatPasswordScreen(
                     nav = nav,
-                    authViewModle,
+                    authViewModel,
                     email = data.email,
                     otp = data.otp
                 )
@@ -252,7 +286,7 @@ fun NavController(
             ) {
                 LoginScreen(
                     nav = nav,
-                    authKoin = authViewModle
+                    authKoin = authViewModel
                 )
             }
 
@@ -271,7 +305,7 @@ fun NavController(
             ) {
                 SignUpPage(
                     nav = nav,
-                    authKoin = authViewModle
+                    authKoin = authViewModel
                 )
             }
         }
@@ -295,7 +329,14 @@ fun NavController(
             ) {
                 HomePage(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    bannerViewModel = bannerViewModel,
+                    categoryViewModel = categoryViewModel,
+                    variantViewModel = variantViewModel,
+                    productViewModel = productViewModel,
+                    userViewModel = userViewModel,
+                    generalSettingViewModel = generalSettingViewModel,
+                    orderViewModel = orderViewModel
+
                 )
             }
 
@@ -313,7 +354,8 @@ fun NavController(
             ) {
                 CategoryScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    categoryViewModel = categoryViewModel,
+                    productViewModel = productViewModel
                 )
             }
 
@@ -332,8 +374,9 @@ fun NavController(
                 val data = result.toRoute<Screens.ProductCategory>()
                 ProductCategoryScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle,
-                    category_id = data.cateogry_id
+                    categoryId = data.categoryId,
+                    categoryViewModel = categoryViewModel,
+                    productViewModel = productViewModel
                 )
             }
 
@@ -353,7 +396,10 @@ fun NavController(
             ) {
                 AccountPage(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    userViewModel = userViewModel,
+                    orderItemsViewModel = orderItemViewModel,
+                    authViewModel = authViewModel
+
                 )
             }
 
@@ -369,10 +415,11 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) {
+            )
+            {
                 ProfileScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    userViewModel = userViewModel
                 )
             }
 
@@ -388,13 +435,19 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) { navRef ->
-                var store_id = navRef.toRoute<Screens.Store>()
+            )
+            { navRef ->
+                val storeId = navRef.toRoute<Screens.Store>()
                 StoreScreen(
-                    copyStoreId = store_id.store_id,
-                    isFromHome = store_id.isFromHome,
+                    copyStoreId = storeId.storeId,
+                    isFromHome = storeId.isFromHome,
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    bannerViewModel = bannerViewModel,
+                    categoryViewModel = categoryViewModel,
+                    subCategoryViewModel = subCategoryViewModel,
+                    storeViewModel = storeViewModel,
+                    productViewModel = productViewModel,
+                    userViewModel = userViewModel
                 )
             }
 
@@ -410,15 +463,18 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) { navRef ->
+            )
+            { navRef ->
 
-                var store = navRef.toRoute<Screens.CreateProduct>()
+                val store = navRef.toRoute<Screens.CreateProduct>()
 
                 CreateProductScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle,
-                    storeId = store.store_id,
-                    productId = store.product_id
+                    storeId = store.storeId,
+                    productId = store.productId,
+                    subCategoryViewModel = subCategoryViewModel,
+                    variantViewModel = variantViewModel,
+                    productViewModel = productViewModel
                 )
 
             }
@@ -435,15 +491,21 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) { navRef ->
+            )
+            { navRef ->
 
-                var store = navRef.toRoute<Screens.ProductDetails>()
+                val store = navRef.toRoute<Screens.ProductDetails>()
 
                 ProductDetail(
                     nav = nav,
-                    homeViewModel = homeViewModle,
-                    productID = store.product_Id,
-                    isFromHome = store.isFromHome
+                    cartViewModel = cartViewModel,
+                    productID = store.productId,
+                    isFromHome = store.isFromHome,
+                    variantViewModel = variantViewModel,
+                    storeViewModel = storeViewModel,
+                    bannerViewModel = bannerViewModel,
+                    subCategoryViewModel = subCategoryViewModel,
+                    productViewModel = productViewModel,
                 )
 
             }
@@ -460,12 +522,16 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) { navRef ->
+            )
+            { navRef ->
 
 
                 CartScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle,
+                    cartViewModel = cartViewModel,
+                    variantViewModel = variantViewModel,
+                    userViewModel = userViewModel,
+                    storeViewModel = storeViewModel
                 )
 
             }
@@ -482,17 +548,22 @@ fun NavController(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
                     )
                 }
-            ) { navRef ->
+            )
+            { navRef ->
 
 
                 CheckoutScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle,
+                    cartViewModel = cartViewModel,
+                    userViewModel = userViewModel,
+                    generalSettingViewModel = generalSettingViewModel,
+                    orderViewModel = orderViewModel
                 )
 
             }
 
-            composable<Screens.Address>(
+
+            composable<Screens.EditeOrAddNewAddress>(
 
                 enterTransition = {
                     return@composable slideIntoContainer(
@@ -507,27 +578,8 @@ fun NavController(
             ) {
                 EditOrAddLocationScreen(
                     nav = nav,
-                    homeViewModle = homeViewModle
-                )
+                    userViewModel = userViewModel
 
-            }
-
-            composable<Screens.Map>(
-
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
-            ) {
-                EditOrAddLocationScreen(
-                    nav = nav,
-                    homeViewModle = homeViewModle
                 )
 
             }
@@ -545,10 +597,7 @@ fun NavController(
                     )
                 }
             ) {
-                OrderScreen(
-                    nav = nav,
-                    homeViewModel = homeViewModle
-                )
+                OrderScreen(orderViewModel = orderViewModel)
 
             }
 
@@ -567,7 +616,8 @@ fun NavController(
             ) {
                 OrderForMyStoreScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    userViewModel = userViewModel,
+                    orderItemsViewModel = orderItemViewModel
                 )
 
             }

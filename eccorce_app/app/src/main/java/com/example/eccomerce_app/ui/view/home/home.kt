@@ -1,5 +1,6 @@
-package com.example.e_commercompose.ui.view.home
+package com.example.eccomerce_app.ui.view.home
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
@@ -49,19 +50,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.e_commercompose.viewModel.HomeViewModel
-import com.example.e_commercompose.Util.General
+import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.BannerBage
 import com.example.e_commercompose.ui.component.CategoryLoadingShape
 import com.example.e_commercompose.ui.component.CategoryShape
 import com.example.e_commercompose.ui.component.LocationLoadingShape
 import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.e_commercompose.ui.component.ProductShape
-import com.example.e_commercompose.Util.General.reachedBottom
+import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.BannerLoading
+import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.OrderViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlin.collections.isNullOrEmpty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,50 +76,58 @@ import kotlin.collections.isNullOrEmpty
 @Composable
 fun HomePage(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    bannerViewModel: BannerViewModel,
+    categoryViewModel: CategoryViewModel,
+    variantViewModel: VariantViewModel,
+    productViewModel: ProductViewModel,
+    userViewModel: UserViewModel,
+    generalSettingViewModel: GeneralSettingViewModel,
+    orderViewModel: OrderViewModel
 ) {
     val configuration = LocalConfiguration.current
     val lazyState = rememberLazyListState()
 
 
-    val myInfo = homeViewModel.myInfo.collectAsState()
+    val myInfo = userViewModel.userInfo.collectAsState()
+    val banner = bannerViewModel.bannersRadom.collectAsState()
+    val categories = categoryViewModel.categories.collectAsState()
+    val products = productViewModel.products.collectAsState()
 
-    val banner = homeViewModel.bannersRadmom.collectAsState()
-
-    val categories = homeViewModel.categories.collectAsState()
-
-    val products = homeViewModel.products.collectAsState()
-
-    val interactionSource = remember { MutableInteractionSource() }
 
     val isClickingSearch = remember { mutableStateOf(false) }
+    val isLoadingMore = remember { mutableStateOf(false) }
+    val isRefresh = remember { mutableStateOf(false) }
+    val reachedBottom = remember { derivedStateOf { lazyState.reachedBottom() } }
 
-    val requestPermssion = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { permission ->
-
-
-        }
-    )
 
     val page = remember { mutableIntStateOf(1) }
 
     val sizeAnimation = animateDpAsState(if (!isClickingSearch.value) 80.dp else 0.dp)
 
-    val isLoadingMore = remember { mutableStateOf(false) }
-    val isRefresh = remember { mutableStateOf(false) }
 
-    val reachedBottom = remember {
-        derivedStateOf {
-            lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
+    val interactionSource = remember { MutableInteractionSource() }
+
+
+    val requestPermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { permission ->
         }
+    )
+
+
+    fun initial() {
+        userViewModel.getMyInfo()
+        generalSettingViewModel.getGeneral(1)
+        categoryViewModel.getCategories(1)
+        bannerViewModel.getStoresBanner()
+        variantViewModel.getVariants(1)
+        productViewModel.getProducts(mutableIntStateOf(1))
+        orderViewModel.getMyOrders(mutableIntStateOf(1))
     }
-
-
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermssion.launch(input = android.Manifest.permission.POST_NOTIFICATIONS)
+            requestPermission.launch(input = Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
@@ -120,7 +135,7 @@ fun HomePage(
     LaunchedEffect(reachedBottom.value) {
         if (!products.value.isNullOrEmpty() && reachedBottom.value) {
             Log.d("scrollReachToBottom", "true")
-            homeViewModel.getProducts(
+            productViewModel.getProducts(
                 page,
                 isLoadingMore
             )
@@ -132,16 +147,16 @@ fun HomePage(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    ) { scaffoldState ->
+        scaffoldState.calculateTopPadding()
+        scaffoldState.calculateBottomPadding()
 
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
             onRefresh = {
-                homeViewModel.initialFun()
-                isRefresh.value = false;
+                initial()
+                isRefresh.value = false
             }
         ) {
             LazyColumn(
@@ -176,7 +191,7 @@ fun HomePage(
                                                 interactionSource = interactionSource,
                                                 indication = null,
                                                 onClick = {
-                                                    nav.navigate(Screens.Address)
+                                                    nav.navigate(Screens.EditeOrAddNewAddress)
                                                 }
                                             )
                                     ) {
@@ -191,7 +206,7 @@ fun HomePage(
                                         )
                                         Sizer(1)
                                         Text(
-                                            myInfo.value?.address?.firstOrNull { it.isCurrnt == true }?.title
+                                            myInfo.value?.address?.firstOrNull { it.isCurrent }?.title
                                                 ?: "",
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Medium,
@@ -279,9 +294,9 @@ fun HomePage(
                                 else -> {
 
                                     CategoryShape(
-                                        categories.value!!.take(4),
-                                        homeViewModel,
-                                        nav
+                                        categories = categories.value!!.take(4),
+                                        productViewModel = productViewModel,
+                                        nav = nav
                                     )
                                 }
                             }

@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui
+package com.example.eccomerce_app.ui
 
 import com.example.e_commercompose.model.enMapType
 import kotlinx.serialization.Serializable
@@ -49,7 +49,7 @@ object Screens {
     object Category
 
     @Serializable
-    data class ProductCategory(val cateogry_id: String)
+    data class ProductCategory(val categoryId: String)
 
     @Serializable
     object Account
@@ -60,21 +60,21 @@ object Screens {
 
     @Serializable
     data class Store(
-        var store_id: String? = null,
-        var isFromHome: Boolean? = true
+        val storeId: String? = null,
+        val isFromHome: Boolean? = true
     )
 
 
     @Serializable
     data class CreateProduct(
-        var store_id: String,
-        var product_id: String? = null
+        val storeId: String,
+        val productId: String? = null
     )
 
     @Serializable
     data class ProductDetails(
-        var product_Id: String,
-        var isFromHome: Boolean
+        val productId: String,
+        val isFromHome: Boolean
     )
 
 
@@ -95,10 +95,7 @@ object Screens {
     object Checkout
 
     @Serializable
-    object Address
-
-    @Serializable
-    object Map
+    object EditeOrAddNewAddress
 
     @Serializable
     object Order

@@ -20,7 +20,7 @@ object Validation {
     }
     fun passwordSpicialCharracterValidation(password:String): Boolean {
         val passwordContainSpicialCharecterRegex = """
-                   ^(?=(.*[!@#\\${'$'}%^&*()_+|/?<>:;'\\"-].*[!@#\\${'$'}%^&*()_+|/?<>:;'\\"-])).*${'$'}
+                   ^(?=(.*[!@#\\${'$'}%^&*()_+|/?<>:'\\"-].*[!@#\\${'$'}%^&*()_+|/?<>:'\\"-])).*${'$'}
         """.trimIndent()
             .toRegex()
 
@@ -33,4 +33,8 @@ object Validation {
         return password.matches(passwordContainNumberRegex)
     }
 
+    fun isValidMoney(number: String): Boolean {
+        val regex = Regex("/^(?:100(?:\\.0(?:0)?)?|\\d{1,2}(?:\\.\\d{1,2})?)\$")
+        return regex.containsMatchIn(number)
+    }
 }

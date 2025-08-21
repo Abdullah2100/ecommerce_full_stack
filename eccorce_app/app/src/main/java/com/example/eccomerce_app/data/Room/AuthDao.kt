@@ -1,9 +1,12 @@
-package com.example.e_commercompose.data.Room
+package com.example.eccomerce_app.data.Room
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.e_commercompose.data.Room.AuthModleEntity
+import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
+import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,17 +22,17 @@ interface AuthDao {
 
 
     @Query("SELECT * FROM AuthModleEntity WHERE id = 0")
-     fun   readChunksLive(): Flow<AuthModleEntity?>;
+     fun   readChunksLive(): Flow<AuthModleEntity?>
 
     @Query("SELECT count(*)>0 FROM ispassonboardingscreen WHERE  id = 0")
-    fun   isPassOnBoarding(): Boolean;
+    fun   isPassOnBoarding(): Boolean
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveIsPassingOnBoarding(value : IsPassOnBoardingScreen)
 
 
     @Query("SELECT count(*)>0 FROM location WHERE  id = 0")
-   suspend fun   isPassLocationScreen(): Boolean;
+   suspend fun   isPassLocationScreen(): Boolean
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun savePassingLocation(authData : IsPassSetLocationScreen)

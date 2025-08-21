@@ -11,12 +11,12 @@ object UUIDListKserialize: KSerializer<List<UUID>> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
     override fun serialize(encoder: Encoder, value: List<UUID>){
-        val listSerialize = ListSerializer(String.serializer());
+        val listSerialize = ListSerializer(String.serializer())
         encoder.encodeSerializableValue(listSerialize,value.map { it.toString() })
     }
 
     override fun deserialize(decoder: Decoder): List<UUID> {
-        val listSerialize = ListSerializer(String.serializer());
+        val listSerialize = ListSerializer(String.serializer())
     return    decoder.decodeSerializableValue(listSerialize).map { UUID.fromString(it) }
     }
 }

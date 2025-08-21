@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,11 +47,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
-import com.example.e_commercompose.Util.General
-import com.example.e_commercompose.ui.Screens
+import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.HomeViewModel
+import com.example.eccomerce_app.viewModel.ProductViewModel
+import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.OrderViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -60,20 +67,38 @@ import java.util.UUID
 @Composable
 fun PickCurrentAddressFromAddressScreen(
     nav: NavHostController,
-    homeViewModle: HomeViewModel,
+    bannerViewModel: BannerViewModel,
+    categoryViewModel: CategoryViewModel,
+    variantViewModel: VariantViewModel,
+    productViewModel: ProductViewModel,
+    userViewModel: UserViewModel,
+    generalSettingViewModel: GeneralSettingViewModel,
+    orderViewModel: OrderViewModel
 ) {
     val fontScall = LocalDensity.current.fontScale
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val locationss = homeViewModle.myInfo.collectAsState()
-    val isLoading = remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val locations = userViewModel.userInfo.collectAsState()
 
     val coroutine = rememberCoroutineScope()
 
+    val isLoading = remember { mutableStateOf(false) }
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+    fun initial() {
+        userViewModel.getMyInfo()
+        generalSettingViewModel.getGeneral(1)
+        categoryViewModel.getCategories(1)
+        bannerViewModel.getStoresBanner()
+        variantViewModel.getVariants(1)
+        productViewModel.getProducts(mutableIntStateOf(1))
+        orderViewModel.getMyOrders(mutableIntStateOf(1))
+    }
+
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         },
         modifier = Modifier
             .fillMaxSize()
@@ -98,7 +123,7 @@ fun PickCurrentAddressFromAddressScreen(
                         }
                     ) {
                         Icon(
-                            Icons.Default.KeyboardArrowLeft,
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             "",
                             modifier = Modifier.size(30.dp),
                             tint = CustomColor.neutralColor950
@@ -115,7 +140,7 @@ fun PickCurrentAddressFromAddressScreen(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        when (locationss.value?.address.isNullOrEmpty()) {
+        when (locations.value?.address.isNullOrEmpty()) {
             true -> {
                 Column(
                     modifier = Modifier
@@ -155,7 +180,7 @@ fun PickCurrentAddressFromAddressScreen(
                         .fillMaxWidth()
                 ) {
 
-                    items(locationss.value!!.address!!.size)
+                    items(locations.value!!.address!!.size)
                     { index ->
                         Column(
                             modifier = Modifier
@@ -163,10 +188,10 @@ fun PickCurrentAddressFromAddressScreen(
                                 .clickable {
                                     coroutine.launch {
                                         isLoading.value = true
-                                        val currentLocation = locationss.value!!.address!![index]
+                                        val currentLocation = locations.value!!.address!![index]
                                         val result = async {
 
-                                            homeViewModle.updateUserAddress(
+                                            userViewModel.updateUserAddress(
                                                 currentLocation.id ?: UUID.randomUUID(),
                                                 currentLocation.title,
                                                 currentLocation.longitude,
@@ -176,11 +201,11 @@ fun PickCurrentAddressFromAddressScreen(
 
                                         isLoading.value = false
                                         if (!result.isNullOrEmpty()) {
-                                            snackbarHostState.showSnackbar(result)
+                                            snackBarHostState.showSnackbar(result)
                                             return@launch
                                         }
 
-                                        homeViewModle.initialFun()
+                                        initial()
                                         nav.navigate(Screens.HomeGraph) {
                                             popUpTo(nav.graph.id) {
                                                 inclusive = true
@@ -206,7 +231,7 @@ fun PickCurrentAddressFromAddressScreen(
                                 )
                                 Sizer(width = 20)
                                 Text(
-                                    locationss.value!!.address!![index].title ?: "",
+                                    locations.value!!.address!![index].title ?: "",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = (16 / fontScall).sp,

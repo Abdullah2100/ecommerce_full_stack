@@ -1,8 +1,8 @@
-package com.example.e_commercompose.model
+package com.example.eccomerce_app.dto
 
 import java.io.File
 
-data class MyInfoUpdate(
+data class UpdateMyInfoDto(
     val name:String?=null,
     val thumbnail: File?=null,
     val newPassword:String?=null,

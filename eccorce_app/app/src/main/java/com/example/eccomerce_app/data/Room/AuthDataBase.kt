@@ -1,7 +1,10 @@
-package com.example.e_commercompose.data.Room
+package com.example.eccomerce_app.data.Room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.example.e_commercompose.data.Room.AuthModleEntity
+import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
+import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
 
 @Database(entities = [
     AuthModleEntity::class,

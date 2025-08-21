@@ -1,6 +1,5 @@
-package com.example.e_commercompose.ui.view.ReseatPassword
+package com.example.eccomerce_app.ui.view.ReseatPassword
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,10 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -30,13 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
-import com.example.e_commercompose.ui.Screens
-import com.example.e_commercompose.ui.component.CustomAuthBotton
+import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.e_commercompose.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.AuthViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -46,23 +42,26 @@ fun OtpVerificationScreen(
     nav: NavHostController,
     authViewModel: AuthViewModel,
     email: String
-){
+) {
 
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val snackbarHostState = remember { SnackbarHostState() }
+
+    val coroutine = rememberCoroutineScope()
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val otpValue = remember { mutableStateOf(TextFieldValue("")) }
 
 
     val isSendingData = remember { mutableStateOf(false) }
-    val coroutine = rememberCoroutineScope()
+
 
 
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
         }
     ) {
 
@@ -85,16 +84,16 @@ fun OtpVerificationScreen(
                 modifier = Modifier
                     .fillMaxHeight(0.9f)
                     .fillMaxWidth()
-                    .padding(top = 50.dp)
-                   ,
+                    .padding(top = 50.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center
             ) {
                 Icon(
                     ImageVector.vectorResource(R.drawable.otp_verification),
                     "",
                     tint = CustomColor.primaryColor700,
-                    modifier = Modifier.size(200.dp))
+                    modifier = Modifier.size(200.dp)
+                )
                 Sizer(heigh = 5)
 
                 TextInputWithTitle(
@@ -108,17 +107,16 @@ fun OtpVerificationScreen(
                     isLoading = isSendingData.value,
                     operation = {
                         keyboardController?.hide()
-                        isSendingData.value=true
+                        isSendingData.value = true
                         coroutine.launch {
                             val result = async {
-                                authViewModel.otpVerifing(email,otpValue.value.text)
+                                authViewModel.otpVerifing(email, otpValue.value.text)
                             }.await()
-                            isSendingData.value=false
+                            isSendingData.value = false
 
-                            if(!result.isNullOrEmpty())
-                            {
-                            snackbarHostState.showSnackbar(result)
-                            }else{
+                            if (!result.isNullOrEmpty()) {
+                                snackBarHostState.showSnackbar(result)
+                            } else {
                                 nav.navigate(Screens.ReseatPassword(email, otpValue.value.text))
                             }
                         }
@@ -126,7 +124,7 @@ fun OtpVerificationScreen(
                     isEnable = otpValue.value.text.trim().isNotEmpty(),
                     buttonTitle = "Verifying",
 
-                )
+                    )
 
             }
         }
