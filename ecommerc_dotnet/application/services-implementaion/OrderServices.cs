@@ -1,12 +1,15 @@
 using ecommerc_dotnet.application.Repository;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
+using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
 using ecommerc_dotnet.services;
+using ecommerc_dotnet.shared.extentions;
 using hotel_api.util;
 using Microsoft.AspNetCore.SignalR;
 
@@ -16,6 +19,7 @@ public class OrderServices(
     IDeliveryRepository deliveryRepository,
     IOrderRepository orderRepository,
     IUserRepository userRepository,
+    IConfig config,
     IHubContext<EcommerceHub> hubContext)
     : IOrderServices
 {
@@ -113,7 +117,7 @@ public class OrderServices(
         }
 
         var id = clsUtil.generateGuid();
-        Order order = new Order
+        Order? order = new Order
         {
             Id = id,
             Longitude = orderDto.Longitude,
@@ -165,11 +169,24 @@ public class OrderServices(
             );
         }
 
-        await hubContext.Clients.All.SendAsync("createdOrder", order.toDto());
+        order = await orderRepository.getOrder(order.Id);
+        if (order is null)
+        {
+            return new Result<OrderDto?>
+            (
+                data: null,
+                message: "error while create order",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+        var dtoOrder = order.toDto(config.getKey("url_file"));
+        await hubContext.Clients.All.SendAsync("createdOrder", dtoOrder);
 
         return new Result<OrderDto?>
         (
-            data: order.toDto(),
+            data: dtoOrder,
             message: "",
             isSeccessful: true,
             statusCode: 201
@@ -181,7 +198,7 @@ public class OrderServices(
     {
         List<OrderDto> orders = (await orderRepository
                 .getOrders(userId, pageNum, pageSize))
-            .Select(o => o.toDto())
+            .Select(o => o.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -211,7 +228,7 @@ public class OrderServices(
 
         List<OrderDto> orders = (await orderRepository
                 .getAllAsync(pageNum, pageSize))
-            .Select(o => o.toDto())
+            .Select(o => o.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -238,10 +255,10 @@ public class OrderServices(
                 statusCode: 404
             );
         }
- 
+
         order.Status = status;
         int result = await orderRepository.updateAsync(order);
-        
+
         if (result == 0)
         {
             return new Result<bool>
@@ -252,87 +269,16 @@ public class OrderServices(
                 statusCode: 400
             );
         }
-        
+
         return new Result<bool>
         (
             data: true,
             message: "",
             isSeccessful: true,
-            statusCode: 204 
-        );
-    }
-
-    public async Task<Result<List<OrderItemDto>>> getOrderItmes(Guid storeId, int pageNum, int pageSize)
-    {
-        List<OrderItemDto> orderItems = (await orderRepository
-                .getOrderItems(storeId: storeId, pageNum: pageNum, pageSize: pageSize))
-            .Select(p => p.toOrderItemDto())
-            .ToList();
-        
-        return new Result<List<OrderItemDto>>
-        (
-            data: orderItems,
-            message: "",
-            isSeccessful: true,
-            statusCode: 200
-        );
-        
-    }
-
-    public async Task<Result<int>> updateOrderItmesStatus(
-        Guid userId,
-        UpdateOrderItemStatusDto orderItemsStatusDto)
-    {
-        OrderItem? orderItem = await orderRepository.getOrderItem(orderItemsStatusDto.Id);
-
-        if (orderItem is null)
-        {
-            return new Result<int>
-            (
-                data: 0,
-                message: "orderItem not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
-
-        ;
-        int result = await orderRepository.updateOrderItemStatus(
-            orderItemsStatusDto.Id
-            , 
-            orderItemsStatusDto.Status == enOrderItemStatusDto.Excepted
-                ? enOrderItemStatus.Excepted
-                : enOrderItemStatus.Cancelled
-            );
-
-        if (result == 0)
-        {
-            return new Result<int>
-            (
-                data: 0,
-                message: "error while update orderItme status",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
-        OrderItemsStatusEvent statusEvent = new OrderItemsStatusEvent
-        {
-            OrderId = orderItem.OrderId,
-            OrderItemId = orderItem.Id,
-            Status = enOrderItemStatus.Excepted.ToString()
-        };
-        await hubContext.Clients.All.SendAsync("orderItemsStatusChange", statusEvent);
-
-        return new Result<int>
-        (
-            data: 1,
-            message: "",
-            isSeccessful: true,
             statusCode: 204
         );
     }
-
+  
     public async Task<Result<bool>> deleteOrder(Guid id, Guid userId)
     {
         Order? order = await orderRepository.getOrder(id, userId);
@@ -386,7 +332,7 @@ public class OrderServices(
 
         List<OrderDto> orders = (await orderRepository
                 .getOrderBelongToDelivery(deliveryId, pageNum, pageSize))
-            .Select(o => o.toDto())
+            .Select(o => o.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -414,7 +360,7 @@ public class OrderServices(
 
         List<OrderDto> orders = (await orderRepository
                 .getOrderNoBelongToAnyDelivery(pageNum, pageSize))
-            .Select(o => o.toDto())
+            .Select(o => o.toDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -537,7 +483,7 @@ public class OrderServices(
             );
         }
 
-        await hubContext.Clients.All.SendAsync("createdOrder", order.toDto());
+        await hubContext.Clients.All.SendAsync("createdOrder", order.toDto(config.getKey("url_file")));
 
         return new Result<bool>
         (

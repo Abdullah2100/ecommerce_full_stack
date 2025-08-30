@@ -1,10 +1,11 @@
-package com.example.e_commercompose.di
+package com.example.eccomerce_app.di
 
 import android.util.Log
 import com.example.eccomerce_app.data.Room.AuthDao
 import com.example.eccomerce_app.util.Secrets
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
+import com.microsoft.signalr.TransportEnum
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpTimeout
@@ -38,26 +39,26 @@ fun provideHttpClient(authDao:AuthDao): HttpClient {
 //                loadTokens {
 //                    BearerTokens(
 //                        General.authData.value?.token?:"",
-//                        General.authData.value?.RefreshToken ?:""
+//                        General.authData.value?.refreshToken ?:""
 //                    )
 //                }
 
 //                    try {
-//                        val RefreshToken = client.
-//                        post("${General.BASED_URL}/RefreshToken/refresh") {
+//                        val refreshToken = client.
+//                        post("${General.BASED_URL}/refreshToken/refresh") {
 //                            url {
-//                                parameters.append("tokenHolder", General.authData.value?.RefreshToken ?: "")
+//                                parameters.append("tokenHolder", General.authData.value?.refreshToken ?: "")
 //                            }
-//                            markAsRefreshTokenRequest()
+//                            markAsrefreshTokenRequest()
 //                        }
-//                        if(RefreshToken.status== HttpStatusCode.OK){
-//                            val result = RefreshToken.body<AuthDto>()
+//                        if(refreshToken.status== HttpStatusCode.OK){
+//                            val result = refreshToken.body<AuthDto>()
 //                            General.updateSavedToken(authDao, result)
 //                            BearerTokens(
 //                                Token = result.Token,
-//                                RefreshToken = result.RefreshToken
+//                                refreshToken = result.refreshToken
 //                            )
-//                        }else if(RefreshToken.status== HttpStatusCode.Unauthorized) {
+//                        }else if(refreshToken.status== HttpStatusCode.Unauthorized) {
 //                            authDao.nukeTable()
 //                            null
 //                        }else {
@@ -99,7 +100,7 @@ fun socketClient(): HubConnection? {
         val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
         return  HubConnectionBuilder
             .create(connectionUrl)
-            .withTransport(com.microsoft.signalr.TransportEnum.LONG_POLLING)
+            .withTransport(TransportEnum.LONG_POLLING)
             .build()
     }catch(e: Exception){
         return null

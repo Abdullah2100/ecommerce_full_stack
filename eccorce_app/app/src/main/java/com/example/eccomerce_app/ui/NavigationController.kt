@@ -19,7 +19,7 @@ import com.example.eccomerce_app.ui.view.address.EditOrAddLocationScreen
 import com.example.e_commercompose.ui.view.account.AccountPage
 import com.example.eccomerce_app.ui.view.account.ProfileScreen
 import com.example.eccomerce_app.ui.view.account.store.CreateProductScreen
-import com.example.e_commercompose.ui.view.account.store.ProductDetail
+import com.example.eccomerce_app.ui.view.account.store.ProductDetail
 import com.example.e_commercompose.ui.view.account.store.StoreScreen
 import com.example.e_commercompose.ui.view.checkout.CheckoutScreen
 import com.example.eccomerce_app.ui.view.home.CartScreen
@@ -37,7 +37,7 @@ import com.example.eccomerce_app.ui.view.address.MapHomeScreen
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
@@ -129,7 +129,7 @@ fun NavController(
             },
 
             ) {
-            OnBoardingScreen(nav, authViewModel)
+            OnBoardingScreen(nav = nav, userViewModel = userViewModel)
         }
 
 
@@ -189,7 +189,7 @@ fun NavController(
                     bannerViewModel = bannerViewModel,
                     productViewModel = productViewModel,
                     variantViewModel = variantViewModel,
-                    categoryViewModel = categoryViewModel
+                    categoryViewModel = categoryViewModel,
                 )
             }
 
@@ -506,6 +506,7 @@ fun NavController(
                     bannerViewModel = bannerViewModel,
                     subCategoryViewModel = subCategoryViewModel,
                     productViewModel = productViewModel,
+                    isCanNavigateToStore=store.isCanNavigateToStore
                 )
 
             }

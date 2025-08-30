@@ -1,11 +1,12 @@
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.shared.extentions;
 
 namespace ecommerc_dotnet.mapper;
 
 public static class OrderItemMapperExtention
 {
-    public static OrderItemDto toOrderItemDto(this OrderItem item)
+    public static OrderItemDto toOrderItemDto(this OrderItem item,string url)
     {
         return new OrderItemDto
         {
@@ -13,7 +14,7 @@ public static class OrderItemMapperExtention
             OrderId = item.OrderId,
             OrderItemStatus = item.Status.ToString(),
             Price = item.Price,
-            Product = item.ToOrderProductDto(),
+            Product = item.ToOrderProductDto(url),
             Quanity = item?.Quanity ?? 0,
             ProductVarient = item
                 ?.OrderProductsVarients
@@ -22,7 +23,7 @@ public static class OrderItemMapperExtention
         };
     }
     
-    public static DeliveryOrderItemDto toDeliveryOrderItemDto(this OrderItem item)
+    public static DeliveryOrderItemDto toDeliveryOrderItemDto(this OrderItem item,string url)
     {
         return new DeliveryOrderItemDto 
         {
@@ -30,7 +31,7 @@ public static class OrderItemMapperExtention
             OrderId = item.OrderId,
             OrderItemStatus = item.Status.ToString(),
             Price = item.Price,
-            Product = item.ToOrderProductDto(),
+            Product = item.ToOrderProductDto(url),
             Quanity = item?.Quanity ?? 0,
             ProductVarient = item
                 ?.OrderProductsVarients

@@ -62,7 +62,7 @@ import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.eccomerce_app.viewModel.StoreViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -121,7 +121,8 @@ fun CartScreen(
                 },
 
                 )
-        }, floatingActionButton = {
+        },
+        floatingActionButton = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

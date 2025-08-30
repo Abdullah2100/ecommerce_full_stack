@@ -1,13 +1,13 @@
-package com.example.e_commercompose.viewModel
+package com.example.eccomerce_app.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commercompose.data.repository.VariantRepository
 import com.example.eccomerce_app.dto.VarientDto
 import com.example.e_commercompose.model.DtoToModel.toVarient
 import com.example.e_commercompose.model.VarirntModel
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.VariantRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

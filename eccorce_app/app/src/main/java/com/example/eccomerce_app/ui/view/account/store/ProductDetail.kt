@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui.view.account.store
+package com.example.eccomerce_app.ui.view.account.store
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -61,7 +62,7 @@ import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -80,7 +81,8 @@ fun ProductDetail(
     bannerViewModel: BannerViewModel,
     subCategoryViewModel: SubCategoryViewModel,
     productViewModel: ProductViewModel,
-    ) {
+    isCanNavigateToStore: Boolean,
+) {
 
     val context = LocalContext.current
 
@@ -91,16 +93,13 @@ fun ProductDetail(
     val productId = if (productID == null) null else UUID.fromString(productID)
 
 
-
     val products = productViewModel.products.collectAsState()
     val variants = variantViewModel.variants.collectAsState()
     val stores = storeViewModel.stores.collectAsState()
 
 
-
     val productData = products.value?.firstOrNull { it.id == productId }
     val storeData = stores.value?.firstOrNull { it.id == productData?.storeId }
-
 
 
     val selectedImage = remember { mutableStateOf(productData?.thumbnail) }
@@ -125,7 +124,7 @@ fun ProductDetail(
     }
 
 
-    val images = remember { mutableStateOf(productData?.productImages) }
+    val images = remember { mutableStateOf<List<String>?>(productData?.productImages) }
 
 
     if (productData?.thumbnail != null) {
@@ -147,10 +146,10 @@ fun ProductDetail(
 
 
 
-    fun getStoreInfoByStoreId(id:UUID?=UUID.randomUUID()){
+    fun getStoreInfoByStoreId(id: UUID? = UUID.randomUUID()) {
         storeViewModel.getStoreData(storeId = id!!)
         bannerViewModel.getStoreBanner(id)
-        subCategoryViewModel.getStoreSubCategories(id,1)
+        subCategoryViewModel.getStoreSubCategories(id, 1)
     }
 
 
@@ -313,13 +312,15 @@ fun ProductDetail(
                             verticalAlignment = Alignment.CenterVertically,
 
                             ) {
-                            items(images.value?.size ?: 0) { index ->
+                            if(!images.value.isNullOrEmpty())
+                            items(items = images.value as List<String> ,key={ image->image}) { image ->
+
                                 Box(
                                     modifier = Modifier
                                         .padding(end = 5.dp)
                                         .border(
                                             1.dp,
-                                            if (images.value!![index] == selectedImage.value)
+                                            if (image == selectedImage.value)
                                                 CustomColor.primaryColor700 else CustomColor.neutralColor200,
                                             RoundedCornerShape(8.dp)
                                         )
@@ -333,11 +334,11 @@ fun ProductDetail(
                                                 RoundedCornerShape(8.dp)
                                             )
                                             .clickable {
-                                                if (images.value!![index] != selectedImage.value)
-                                                    selectedImage.value = images.value!![index]
+                                                if (image != selectedImage.value)
+                                                    selectedImage.value = image
                                             },
                                         model = General.handlingImageForCoil(
-                                            images.value!![index],
+                                            image,
                                             context
                                         ),
                                         contentDescription = "",
@@ -349,7 +350,7 @@ fun ProductDetail(
                                             ) {
                                                 CircularProgressIndicator(
                                                     color = Color.Black,
-                                                    modifier = Modifier.size(54.dp) // Adjust the size here
+                                                    modifier = Modifier.size(25.dp) // Adjust the size here
                                                 )
                                             }
                                         },
@@ -398,7 +399,7 @@ fun ProductDetail(
             }
 
             if (!productData?.productVariants.isNullOrEmpty()) {
-                items(productData.productVariants?.size ?: 0) { index ->
+                items(productData.productVariants.size) { index ->
                     val title =
                         variants.value?.firstOrNull { it.id == productData.productVariants!![index][0].variantId }?.name
                             ?: ""
@@ -417,13 +418,13 @@ fun ProductDetail(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        repeat(productData.productVariants!![index].size) { pvIndex ->
+                        repeat(productData.productVariants[index].size) { pvIndex ->
 
                             val productVarientHolder = ProductVariant(
-                                id = productData.productVariants!![index][pvIndex].id,
-                                name = productData.productVariants!![index][pvIndex].name,
-                                percentage = productData.productVariants!![index][pvIndex].percentage,
-                                variantId = productData.productVariants!![index][pvIndex].variantId
+                                id = productData.productVariants[index][pvIndex].id,
+                                name = productData.productVariants[index][pvIndex].name,
+                                percentage = productData.productVariants[index][pvIndex].percentage,
+                                variantId = productData.productVariants[index][pvIndex].variantId
                             )
                             when (title == "Color") {
                                 true -> {
@@ -557,28 +558,28 @@ fun ProductDetail(
                                 overflow = TextOverflow.Ellipsis
                             )
 
-
-                            Text(
-                                "Visit Store",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (16).sp,
-                                color = CustomColor.primaryColor700,
-                                modifier = Modifier.clickable {
-                                    if (productData != null)
-                                       productViewModel
-                                            .getProducts(
-                                                pageNumber = mutableStateOf(1),
-                                                storeId = productData.storeId
+                            if (isCanNavigateToStore)
+                                Text(
+                                    "Visit Store",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (16).sp,
+                                    color = CustomColor.primaryColor700,
+                                    modifier = Modifier.clickable {
+                                        if (productData != null)
+                                            productViewModel
+                                                .getProducts(
+                                                    pageNumber = mutableStateOf(1),
+                                                    storeId = productData.storeId
+                                                )
+                                        nav.navigate(
+                                            Screens.Store(
+                                                storeId = storeData.id.toString(),
+                                                isFromHome = true
                                             )
-                                    nav.navigate(
-                                        Screens.Store(
-                                            storeId = storeData.id.toString(),
-                                            isFromHome = true
                                         )
-                                    )
-                                }
-                            )
+                                    }
+                                )
 
 
                         }

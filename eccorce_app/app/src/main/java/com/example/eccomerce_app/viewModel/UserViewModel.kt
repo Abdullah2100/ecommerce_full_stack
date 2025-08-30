@@ -5,19 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
+import com.example.eccomerce_app.data.Room.Model.IsPassLocationScreen
 import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.model.DtoToModel.toAddress
 import com.example.e_commercompose.model.DtoToModel.toUser
 import com.example.eccomerce_app.dto.UpdateMyInfoDto
 import com.example.e_commercompose.model.UserModel
-import com.example.eccomerce_app.data.repository.AddressRepository
-import com.example.eccomerce_app.data.repository.UserRepository
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
 import com.example.eccomerce_app.dto.UserDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
+import com.example.eccomerce_app.data.repository.AddressRepository
+import com.example.eccomerce_app.data.repository.UserRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -39,8 +40,17 @@ class UserViewModel(
     }
 
 
-    suspend fun userPassLocation() {
-        dao.savePassingLocation(IsPassSetLocationScreen(0, true))
+    fun setIsPassOnBoardingScreen() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = dao.savePassingOnBoarding(IsPassOnBoardingScreen(0, true))
+            Log.d("insertNewPassingOnBoarding", result.toString())
+
+
+        }
+    }
+
+    suspend fun userPassLocation(status: Boolean? = false) {
+        dao.savePassingLocation(IsPassLocationScreen(0, true))
     }
 
 
@@ -163,8 +173,8 @@ class UserViewModel(
                     }
                     val copyMyAddress = _userInfo.value?.copy(address = addresses)
                     _userInfo.emit(copyMyAddress)
-                    dao.savePassingLocation(IsPassSetLocationScreen(0, true))
 
+                    userPassLocation(true)
                 }
                 return null
             }

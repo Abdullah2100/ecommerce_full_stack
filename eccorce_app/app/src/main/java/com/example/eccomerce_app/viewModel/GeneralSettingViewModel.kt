@@ -3,11 +3,11 @@ package com.example.eccomerce_app.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eccomerce_app.data.repository.GeneralSettingRepository
 import com.example.e_commercompose.model.DtoToModel.toGeneralSetting
 import com.example.e_commercompose.model.GeneralSetting
 import com.example.eccomerce_app.dto.GeneralSettingDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.GeneralSettingRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class GeneralSettingViewModel(
     val generalSettingRepository: GeneralSettingRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _generalSetting = MutableStateFlow<List<GeneralSetting>?>(null)
     val generalSetting = _generalSetting.asStateFlow()
@@ -50,7 +50,7 @@ class GeneralSettingViewModel(
                 }
 
                 is NetworkCallHandler.Error -> {
-                    Log.d("GeneralSettingError",result.data.toString())
+                    Log.d("GeneralSettingError", result.data.toString())
                 }
             }
         }

@@ -1,9 +1,9 @@
 package com.example.eccomerce_app.data.repository
 
+import com.example.eccomerce_app.dto.GeneralSettingDto
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.eccomerce_app.dto.GeneralSettingDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -13,9 +13,9 @@ import io.ktor.http.HttpStatusCode
 import java.io.IOException
 import java.net.UnknownHostException
 
-class GeneralSettingRepository(val client: HttpClient) {
+class GeneralSettingRepository(val client: HttpClient)   {
 
-    suspend fun getGeneral(pageNumber: Int = 1): NetworkCallHandler {
+     suspend fun getGeneral(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
                 Secrets.getBaseUrl() + "/General/all/${pageNumber}"
@@ -23,16 +23,16 @@ class GeneralSettingRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<List<GeneralSettingDto>>())
                 }
 
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
 
                 }

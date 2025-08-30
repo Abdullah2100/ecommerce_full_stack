@@ -98,7 +98,7 @@ fun ReseatPasswordScreen(
                 TextInputWithTitle(
                     newPassword,
                     title = "",
-                    placHolder = "Enter Your New Password",
+                    placeHolder = "Enter Your New Password",
                 )
 
 

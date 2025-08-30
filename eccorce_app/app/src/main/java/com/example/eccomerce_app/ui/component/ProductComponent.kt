@@ -50,7 +50,8 @@ fun  ProductShape(
     delFun: ((it: UUID) -> Unit)? = null,
     updFun: ((product_id: UUID) -> Unit)? = null,
     nav: NavHostController,
-    isFromHome: Boolean=false
+    isFromHome: Boolean=false,
+    isCanNavigateToStore:Boolean = true
 ) {
     val context = LocalContext.current
 
@@ -79,7 +80,8 @@ fun  ProductShape(
                         .clickable{
                             nav.navigate(Screens.ProductDetails(
                                 product[index].id.toString(),
-                                isFromHome = isFromHome)
+                                isFromHome = isFromHome,
+                                isCanNavigateToStore=isCanNavigateToStore)
                             )
                         }
                         .border(

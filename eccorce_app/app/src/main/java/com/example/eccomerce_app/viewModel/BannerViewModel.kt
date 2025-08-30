@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.BannerModel
 import com.example.e_commercompose.model.DtoToModel.toBanner
-import com.example.eccomerce_app.data.repository.BannerRepository
 import com.example.eccomerce_app.dto.BannerDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.BannerRepository
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers

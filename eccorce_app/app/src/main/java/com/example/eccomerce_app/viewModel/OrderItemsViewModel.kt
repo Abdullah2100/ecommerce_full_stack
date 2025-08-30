@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.e_commercompose.model.DtoToModel.toOrderItem
 import com.example.e_commercompose.model.OrderItem
-import com.example.eccomerce_app.data.repository.OrderItemRepository
 import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderItemsStatusEvent
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.OrderItemRepository
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -96,7 +96,6 @@ class OrderItemsViewModel(
     }
 
     fun getMyOrderItemBelongToMyStore(
-        storeId: UUID,
         pageNumber: MutableState<Int>,
         isLoading: MutableState<Boolean>? = null
     ) {
@@ -106,7 +105,7 @@ class OrderItemsViewModel(
                 isLoading.value = true
                 delay(500)
             }
-            val result = orderItemRepository.getMyOrderItemForStoreId(storeId, pageNumber.value)
+            val result = orderItemRepository.getMyOrderItemForStoreId( pageNumber.value)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<OrderItemDto>

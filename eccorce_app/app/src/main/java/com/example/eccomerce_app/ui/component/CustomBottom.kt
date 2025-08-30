@@ -23,7 +23,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 
 
 @Composable
-fun CustomAuthBotton(
+fun CustomAuthBottom(
     isLoading: Boolean,
     operation: () -> Unit,
     validationFun: () -> Boolean,
@@ -82,7 +82,7 @@ fun CustomBotton(
     buttonTitle: String,
     color: Color? = null,
     isEnable: Boolean? = true,
-    lableSize: Int? = 16,
+    labelSize: Int? = 16,
     modifier: Modifier?=null
 ) {
 
@@ -117,7 +117,7 @@ fun CustomBotton(
                     buttonTitle,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = (lableSize!!).sp,
+                    fontSize = (labelSize!!).sp,
                     textAlign = TextAlign.Center
                 )
             }

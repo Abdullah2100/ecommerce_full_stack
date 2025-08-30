@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,6 +58,7 @@ import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.ui.component.OrderItemForMyStoreShape
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.async
@@ -104,7 +106,6 @@ fun OrderForMyStoreScreen(
         if (!orderData.value.isNullOrEmpty() && reachedBottom.value) {
             Log.d("scrollReachToBottom", "true")
             orderItemsViewModel.getMyOrderItemBelongToMyStore(
-                storeId = myInfo.value?.storeId ?: UUID.randomUUID(),
                 page,
                 isLoadingMore
             )
@@ -112,66 +113,66 @@ fun OrderForMyStoreScreen(
 
     }
 
+    PullToRefreshBox(
+        isRefreshing = isRefresh.value,
+        onRefresh = {
+            orderItemsViewModel.getMyOrderItemBelongToMyStore(
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackBarHostState,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                mutableIntStateOf(1),
+                null
             )
         },
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.padding(end = 15.dp),
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                ),
-                title = {
-                    Text(
-                        "Order Belong To My Store",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (24).sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            nav.popBackStack()
-                        }
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            "",
-                            modifier = Modifier.size(30.dp),
-                            tint = CustomColor.neutralColor950
+    )
+    {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackBarHostState,
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    modifier = Modifier.padding(end = 15.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White
+                    ),
+                    title = {
+                        Text(
+                            "Order Belong To My Store",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (24).sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center
                         )
-                    }
-                },
-            )
-        },
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
-        PullToRefreshBox(
-            isRefreshing = isRefresh.value,
-            onRefresh = {
-                orderItemsViewModel.getMyOrderItemBelongToMyStore(
-
-                    storeId = myInfo.value!!.storeId!!,
-                    mutableIntStateOf(1),
-                    null
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                nav.popBackStack()
+                            }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                "",
+                                modifier = Modifier.size(30.dp),
+                                tint = CustomColor.neutralColor950
+                            )
+                        }
+                    },
                 )
             },
         )
         {
+            it.calculateTopPadding()
+            it.calculateBottomPadding()
+
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
@@ -180,277 +181,139 @@ fun OrderForMyStoreScreen(
                     .background(Color.White),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(orderData.value?.size ?: 0) { index ->
+                if (orderData.value != null)
+                    items(
+                        items = orderData.value!!,
+                        key = { order -> order.id }) { order ->
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White)
-                            .padding(horizontal = 10.dp)
-                    ) {
-                        Row(
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(horizontal = 10.dp)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp)
-                                    .wrapContentHeight()
-                                    .width((screenWidth).dp),
+                            OrderItemForMyStoreShape(
+                                orderItem = order,
+                                context = context,
+                                screenWidth = screenWidth
 
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                SubcomposeAsyncImage(
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .height(80.dp)
-                                        .width(80.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
-                                    model = General.handlingImageForCoil(
-                                        orderData.value?.get(index)?.product?.thumbnail,
-                                        context
-                                    ),
-                                    contentDescription = "",
-                                    loading = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize(),
-                                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                        ) {
-                                            CircularProgressIndicator(
-                                                color = Color.Black,
-                                                modifier = Modifier.size(53.dp) // Adjust the size here
-                                            )
-                                        }
-                                    },
-                                )
-                                Sizer(width = 10)
-                                Column {
-                                    Text(
-                                        orderData.value?.get(index)?.product?.name ?: "",
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = (16).sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Sizer(width = 5)
-                                    orderData.value?.get(index)?.productVariant?.forEach { value ->
-
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            val title = value.variantName
-                                            Text(
-                                                "$title :",
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Normal,
-                                                fontSize = (16).sp,
-                                                color = CustomColor.neutralColor950,
-                                                textAlign = TextAlign.Center
-                                            )
-                                            Sizer(width = 5)
-                                            when (title == "Color") {
-                                                true -> {
-                                                    val colorValue =
-                                                        General.convertColorToInt(value.productVariantName)
-
-                                                    if (colorValue != null)
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .height(20.dp)
-                                                                .width(20.dp)
-                                                                .background(
-                                                                    colorValue,
-                                                                    RoundedCornerShape(20.dp)
-                                                                )
-
-                                                                .clip(RoundedCornerShape(20.dp))
-//                                                    .padding(5.dp)
-                                                        )
-                                                }
-
-                                                else -> {
-                                                    Box(
-                                                        modifier = Modifier
-
-                                                            .clip(RoundedCornerShape(20.dp)),
-                                                        contentAlignment = Alignment.Center
-                                                    ) {
-                                                        Text(
-                                                            text = value.productVariantName,
-                                                            fontFamily = General.satoshiFamily,
-                                                            fontWeight = FontWeight.Normal,
-                                                            fontSize = (16).sp,
-                                                            color = CustomColor.neutralColor800,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                        }
-                                    }
-
-                                    Row {
-                                        Text(
-                                            "Quantity :",
-
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Normal,
-                                            fontSize = (16).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-                                        )
-                                        Sizer(width = 5)
-                                        Text(
-                                            "${orderData.value?.get(index)?.quantity}",
-
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Normal,
-                                            fontSize = (16).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-
-                            }
-
-
-                        }
-
-                        Sizer(10)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            when (orderData.value?.get(index)?.orderItemStatus) {
-                                "Cancelled" -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-
-                                        CustomBotton(
-                                            isEnable = true,
-                                            operation = {},
-                                            buttonTitle = "Cancelled",
-                                            color = CustomColor.alertColor_1_600
-                                        )
-                                    }
-
-                                }
-
-                                "Excepted" -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-
-                                        CustomBotton(
-                                            isEnable = true,
-                                            operation = {},
-                                            buttonTitle = "Excepted",
-                                            color = CustomColor.alertColor_2_600
-                                        )
-                                    }
-
-                                }
-
-                                else -> {
-                                    Box(
-                                        modifier = Modifier.width(((screenWidth / 2) - 10).dp)
-                                    ) {
-
-                                        CustomBotton(
-                                            isLoading = isSendingData.value && currentUpdateOrderItemId.value == orderData.value?.get(
-                                                index
-                                            )!!.id,
-                                            isEnable = !isSendingData.value,
-                                            operation = {
-                                                coroutineScop.launch {
-                                                    currentUpdateOrderItemId.value =
-                                                        orderData.value?.get(index)!!.id
-                                                    isSendingData.value = true
-                                                    val result = async {
-                                                        orderItemsViewModel.updateOrderItemStatusFromStore(
-                                                            orderData.value?.get(index)!!.id,
-                                                            0
-                                                        )
-                                                    }.await()
-                                                    isSendingData.value = false
-                                                    var message =
-                                                        "Complete Update OrderItem Status"
-                                                    if (!result.isNullOrEmpty()) {
-                                                        message = result
-                                                    }
-                                                    snackBarHostState.showSnackbar(message)
-
-                                                }
-                                            },
-
-                                            buttonTitle = "Except",
-                                            color = CustomColor.primaryColor700
-                                        )
-                                    }
-                                    Box(
-                                        modifier = Modifier.width(((screenWidth / 2) - 10).dp)
-                                    ) {
-
-                                        CustomBotton(
-                                            isLoading = isSendingData.value && currentUpdateOrderItemId.value == orderData.value?.get(
-                                                index
-                                            )!!.id,
-                                            isEnable = !isSendingData.value,
-                                            operation = {
-                                                coroutineScop.launch {
-                                                    currentUpdateOrderItemId.value =
-                                                        orderData.value?.get(index)!!.id
-                                                    isSendingData.value = true
-                                                    val result = async {
-                                                        orderItemsViewModel.updateOrderItemStatusFromStore(
-                                                            orderData.value?.get(index)!!.id,
-                                                            1
-                                                        )
-                                                    }.await()
-                                                    isSendingData.value = false
-
-                                                    var message =
-                                                        "Complete Update OrderItem Status"
-                                                    if (!result.isNullOrEmpty()) {
-                                                        message = result
-                                                    }
-                                                    snackBarHostState.showSnackbar(message)
-
-                                                }
-                                            },
-                                            buttonTitle = "Reject",
-                                            color = CustomColor.alertColor_1_600
-                                        )
-                                    }
-                                }
-                            }
-
-                        }
-
-                        if (index + 1 != orderData.value?.size) {
-                            Sizer(10)
-                            Box(
-                                modifier = Modifier
-                                    .padding(top = 5.dp)
-                                    .height(1.dp)
-                                    .fillMaxWidth()
-                                    .background(CustomColor.neutralColor200)
                             )
+                            Sizer(10)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            )
+                            {
+                                when (order.orderItemStatus) {
+                                    "Cancelled" -> {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+
+                                            CustomBotton(
+                                                isEnable = true,
+                                                operation = {},
+                                                buttonTitle = "Cancelled",
+                                                color = CustomColor.alertColor_1_600
+                                            )
+                                        }
+
+                                    }
+
+                                    "Excepted" -> {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+
+                                            CustomBotton(
+                                                isEnable = true,
+                                                operation = {},
+                                                buttonTitle = "Excepted",
+                                                color = CustomColor.alertColor_2_600
+                                            )
+                                        }
+
+                                    }
+
+                                    else -> {
+                                        Box(
+                                            modifier = Modifier.width(((screenWidth / 2) - 15).dp)
+                                        )
+                                        {
+
+                                            CustomBotton(
+                                                isLoading = isSendingData.value && currentUpdateOrderItemId.value == order.id,
+                                                isEnable = !isSendingData.value,
+                                                operation = {
+                                                    coroutineScop.launch {
+                                                        currentUpdateOrderItemId.value =
+                                                            order.id
+                                                        isSendingData.value = true
+                                                        val result = async {
+                                                            orderItemsViewModel.updateOrderItemStatusFromStore(
+                                                                order.id,
+                                                                0
+                                                            )
+                                                        }.await()
+                                                        isSendingData.value = false
+                                                        var message =
+                                                            "Complete Update OrderItem Status"
+                                                        if (!result.isNullOrEmpty()) {
+                                                            message = result
+                                                        }
+                                                        snackBarHostState.showSnackbar(message)
+
+                                                    }
+                                                },
+
+                                                buttonTitle = "Except",
+                                                color = CustomColor.primaryColor700
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier.width(((screenWidth / 2) - 16).dp)
+                                        )
+                                        {
+
+                                            CustomBotton(
+                                                isLoading = isSendingData.value && currentUpdateOrderItemId.value == order.id,
+                                                isEnable = !isSendingData.value,
+                                                operation = {
+                                                    coroutineScop.launch {
+                                                        currentUpdateOrderItemId.value =
+                                                            order.id
+                                                        isSendingData.value = true
+                                                        val result = async {
+                                                            orderItemsViewModel.updateOrderItemStatusFromStore(
+                                                                order.id,
+                                                                1
+                                                            )
+                                                        }.await()
+                                                        isSendingData.value = false
+
+                                                        var message =
+                                                            "Complete Update OrderItem Status"
+                                                        if (!result.isNullOrEmpty()) {
+                                                            message = result
+                                                        }
+                                                        snackBarHostState.showSnackbar(message)
+
+                                                    }
+                                                },
+                                                buttonTitle = "Reject",
+                                                color = CustomColor.alertColor_1_600
+                                            )
+                                        }
+                                    }
+                                }
+
+                            }
+
+
                         }
+
 
                     }
-
-
-                }
 
                 if (isLoadingMore.value) {
                     item {

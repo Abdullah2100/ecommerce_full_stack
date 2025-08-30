@@ -52,7 +52,7 @@ import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
@@ -73,7 +73,7 @@ fun PickCurrentAddressFromAddressScreen(
     productViewModel: ProductViewModel,
     userViewModel: UserViewModel,
     generalSettingViewModel: GeneralSettingViewModel,
-    orderViewModel: OrderViewModel
+    orderViewModel: OrderViewModel,
 ) {
     val fontScall = LocalDensity.current.fontScale
 
@@ -204,6 +204,7 @@ fun PickCurrentAddressFromAddressScreen(
                                             snackBarHostState.showSnackbar(result)
                                             return@launch
                                         }
+                                        userViewModel.userPassLocation(true)
 
                                         initial()
                                         nav.navigate(Screens.HomeGraph) {

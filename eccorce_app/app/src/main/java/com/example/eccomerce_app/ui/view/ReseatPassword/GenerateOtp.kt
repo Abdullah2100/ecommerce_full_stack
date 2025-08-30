@@ -96,7 +96,7 @@ fun GenerateOtpScreen(
                 TextInputWithTitle(
                     email,
                     title = "",
-                    placHolder = "Enter Your email",
+                    placeHolder = "Enter Your email",
                 )
 
 

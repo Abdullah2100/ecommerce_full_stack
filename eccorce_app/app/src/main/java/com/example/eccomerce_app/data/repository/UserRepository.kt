@@ -1,10 +1,10 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.UpdateMyInfoDto
 import com.example.eccomerce_app.dto.UserDto
+import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -19,9 +19,9 @@ import io.ktor.http.HttpStatusCode
 import java.io.IOException
 import java.net.UnknownHostException
 
-class UserRepository(val client: HttpClient)  {
+class UserRepository(val client: HttpClient) {
 
-    suspend fun getMyInfo(): NetworkCallHandler {
+     suspend fun getMyInfo(): NetworkCallHandler {
         return try {
             val result = client.get(
                 Secrets.getBaseUrl() + "/User/me"
@@ -29,12 +29,12 @@ class UserRepository(val client: HttpClient)  {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<UserDto>())
                 }
 
@@ -55,7 +55,7 @@ class UserRepository(val client: HttpClient)  {
         }
     }
 
-    suspend fun UpdateMyInfo(data: UpdateMyInfoDto): NetworkCallHandler {
+     suspend fun UpdateMyInfo(data: UpdateMyInfoDto): NetworkCallHandler {
         return try {
             val result = client.put(
                 Secrets.getBaseUrl() + "/User"
@@ -63,7 +63,7 @@ class UserRepository(val client: HttpClient)  {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -87,7 +87,7 @@ class UserRepository(val client: HttpClient)  {
                                 append(
                                     key = "thumbnail", // Must match backend expectation
                                     value = data.thumbnail!!.readBytes(),
-                                    headers = Headers.build {
+                                    headers = Headers.Companion.build {
                                         append(
                                             HttpHeaders.ContentType,
                                             "image/${data.thumbnail!!.extension}"
@@ -104,7 +104,7 @@ class UserRepository(val client: HttpClient)  {
                 )
             }
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<UserDto>())
                 }
 

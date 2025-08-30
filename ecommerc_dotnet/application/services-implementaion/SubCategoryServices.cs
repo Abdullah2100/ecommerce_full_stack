@@ -24,12 +24,12 @@ public class SubCategoryServices(
     public async Task<Result<SubCategoryDto?>> createSubCategory(
         Guid userId,
         CreateSubCategoryDto subCategoryDto
-        )
+    )
     {
         User? user = await userRepository
             .getUser(userId);
-        
-        var isValide = user.isValidateFunc(isStore:true);
+
+        var isValide = user.isValidateFunc(isStore: true);
 
         if (isValide is not null)
         {
@@ -39,12 +39,12 @@ public class SubCategoryServices(
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }   
- 
+        }
+
 
         int count = await subCategoryRepository.getSubCategoriesCount(user.Store.Id);
-        
-        if (count==20 )
+
+        if (count == 20)
         {
             return new Result<SubCategoryDto?>
             (
@@ -54,6 +54,7 @@ public class SubCategoryServices(
                 statusCode: 400
             );
         }
+
         Guid id = clsUtil.generateGuid();
 
         SubCategory subCategory = new SubCategory
@@ -64,7 +65,7 @@ public class SubCategoryServices(
             Name = subCategoryDto.Name,
             UpdatedAt = null,
             CreatedAt = DateTime.Now,
-        }; 
+        };
         int result = await subCategoryRepository.addAsync(subCategory);
 
         if (result == 0)
@@ -76,37 +77,36 @@ public class SubCategoryServices(
                 isSeccessful: false,
                 statusCode: 400
             );
-        } 
-        
+        }
+
         return new Result<SubCategoryDto?>
         (
             data: subCategory.toDto(),
             message: "",
             isSeccessful: true,
-            statusCode: 201 
+            statusCode: 201
         );
-
     }
 
     public async Task<Result<SubCategoryDto?>> updateSubCategory(
         Guid userId,
         UpdateSubCategoryDto subCategoryDto
-        )
+    )
     {
-        if(subCategoryDto.isEmpty())
-           return new Result<SubCategoryDto?>
+        if (subCategoryDto.isEmpty())
+            return new Result<SubCategoryDto?>
             (
                 data: null,
                 message: "",
                 isSeccessful: true,
                 statusCode: 200
             );
-        
-        
+
+
         User? user = await userRepository
             .getUser(userId);
-        
-        var isValide = user.isValidateFunc(isStore:true);
+
+        var isValide = user.isValidateFunc(isStore: true);
 
         if (isValide is not null)
         {
@@ -116,11 +116,11 @@ public class SubCategoryServices(
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }    
-        
+        }
+
         SubCategory? subCategory = await subCategoryRepository
             .getSubCategory(subCategoryDto.Id);
-        
+
         if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
         {
             return new Result<SubCategoryDto?>
@@ -142,13 +142,13 @@ public class SubCategoryServices(
                 message: "invalide category",
                 isSeccessful: false,
                 statusCode: 404
-            ); 
+            );
         }
-        
-        subCategory.Name = subCategoryDto.Name??subCategory.Name;
-        subCategory.CategoryId = subCategoryDto.CategoryId??subCategory.CategoryId;
+
+        subCategory.Name = subCategoryDto.Name ?? subCategory.Name;
+        subCategory.CategoryId = subCategoryDto.CategoryId ?? subCategory.CategoryId;
         subCategory.UpdatedAt = DateTime.Now;
-        int result =  await subCategoryRepository.updateAsync(subCategory);
+        int result = await subCategoryRepository.updateAsync(subCategory);
         if (result == 0)
         {
             return new Result<SubCategoryDto?>
@@ -158,8 +158,8 @@ public class SubCategoryServices(
                 isSeccessful: false,
                 statusCode: 400
             );
-        } 
-        
+        }
+
         return new Result<SubCategoryDto?>
         (
             data: subCategory.toDto(),
@@ -169,14 +169,12 @@ public class SubCategoryServices(
         );
     }
 
-    public async Task<Result<bool>> deleteSubCategory(Guid id,Guid userId)
+    public async Task<Result<bool>> deleteSubCategory(Guid id, Guid userId)
     {
-        
-        
         User? user = await userRepository
             .getUser(userId);
-        
-        var isValide = user.isValidateFunc(isStore:true);
+
+        var isValide = user.isValidateFunc(isStore: true);
 
         if (isValide is not null)
         {
@@ -186,11 +184,11 @@ public class SubCategoryServices(
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }     
-        
+        }
+
         SubCategory? subCategory = await subCategoryRepository
             .getSubCategory(id);
-        
+
         if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
         {
             return new Result<bool>
@@ -200,9 +198,10 @@ public class SubCategoryServices(
                 isSeccessful: false,
                 statusCode: 404
             );
-        } 
+        }
+
         int result = await subCategoryRepository.deleteAsync(id);
-        if(result == 0)
+        if (result == 0)
             return new Result<bool>
             (
                 data: false,
@@ -210,7 +209,7 @@ public class SubCategoryServices(
                 isSeccessful: false,
                 statusCode: 404
             );
-        
+
         return new Result<bool>
         (
             data: true,
@@ -220,31 +219,41 @@ public class SubCategoryServices(
         );
     }
 
-    public  async Task<Result<List<SubCategoryDto>>> getSubCategories(Guid id, int page, int length)
+    public async Task<Result<List<SubCategoryDto>>> getSubCategories(Guid id, int page, int length)
     {
         List<SubCategoryDto> subCategories = (await subCategoryRepository
                 .getSubCategories(id, page, length))
             .Select(su => su.toDto())
             .ToList();
-        
-        return new Result<List<SubCategoryDto>>
-        (
-            data: subCategories,
-            message: "",
-            isSeccessful: true,
-            statusCode: 204
-        );
-        
+        return (subCategories.Count > 0) switch
+        {
+            true =>
+                new Result<List<SubCategoryDto>>
+                (
+                    data: subCategories,
+                    message: "",
+                    isSeccessful: true,
+                    statusCode: 200
+                ),
+            _ => new Result<List<SubCategoryDto>>
+            (
+                data: new List<SubCategoryDto>(),
+                message: "",
+                isSeccessful: true,
+                statusCode: 204
+            )
+        };
+
     }
 
     public async Task<Result<List<SubCategoryDto>>> getSubCategoryAll(
-        Guid adminId, 
-        int page, 
+        Guid adminId,
+        int page,
         int length)
     {
         User? user = await userRepository
             .getUser(adminId);
-       var isValide = user.isValidateFunc(isAdmin:true);
+        var isValide = user.isValidateFunc(isAdmin: true);
 
         if (isValide is not null)
         {
@@ -254,20 +263,20 @@ public class SubCategoryServices(
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
             );
-        }     
-        
-        
+        }
+
+
         List<SubCategoryDto> subcategories = (await subCategoryRepository
-                .getAllAsync(page:page, length:length))
+                .getAllAsync(page: page, length: length))
             .Select(ba => ba.toDto())
             .ToList();
-        
+
         return new Result<List<SubCategoryDto>>
         (
             data: subcategories,
             message: "",
-            isSeccessful: true ,
+            isSeccessful: true,
             statusCode: 200
-        ); 
+        );
     }
 }

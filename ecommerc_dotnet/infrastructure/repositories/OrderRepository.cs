@@ -3,14 +3,13 @@ using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.module;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.dto;
 using hotel_api.util;
 using Npgsql;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
-
-
 
 public class OrderRepository(AppDbContext context) : IOrderRepository
 {
@@ -20,7 +19,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
         int pageSize
     )
     {
-        return await context.Orders
+        var orders = await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
@@ -30,26 +29,54 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
             .Take(pageSize)
             .OrderDescending()
             .ToListAsync();
+        foreach (var order in orders)
+        {
+            order.Items = await context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Store)
+                .AsSplitQuery()
+                .Where(oi => oi.OrderId == order.Id)
+                .ToListAsync();
+        }
+
+        return orders;
     }
 
     public async Task<Order?> getOrder(Guid id)
     {
-        return await context.Orders
+        var order = await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == id);
+        if (order is null) return null;
+        order.Items = await context.OrderItems
+            .Include(oi => oi.Product)
+            .Include(oi => oi.Store)
+            .AsSplitQuery()
+            .Where(oi => oi.OrderId == order.Id)
+            .ToListAsync();
+        return order;
     }
 
     public async Task<Order?> getOrder(Guid id, Guid userId)
     {
-        return await context.Orders
+        var order = await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+        if (order is null) return null;
+        order.Items = await context.OrderItems
+            .Include(oi => oi.Product)
+            .Include(oi => oi.Store)
+            .AsSplitQuery()
+            .Where(oi => oi.OrderId == order.Id)
+            .ToListAsync();
+
+        return order;
     }
 
     public async Task<bool> isExist(Guid id)
@@ -115,7 +142,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
 
     public async Task<IEnumerable<Order>> getOrderNoBelongToAnyDelivery(int pageNum, int pageSize)
     {
-        return await context.Orders
+        var orders= await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
@@ -125,11 +152,22 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
             .Take(pageSize)
             .OrderDescending()
             .ToListAsync();
+        foreach (var order in orders)
+        {
+            order.Items = await context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Store)
+                .AsSplitQuery()
+                .Where(oi => oi.OrderId == order.Id)
+                .ToListAsync(); 
+        }
+
+        return orders;
     }
 
     public async Task<IEnumerable<Order>> getOrderBelongToDelivery(Guid deliveryId, int pageNum, int pageSize)
     {
-        return await context.Orders
+        var orders = await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
@@ -139,6 +177,17 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
             .Take(pageSize)
             .OrderDescending()
             .ToListAsync();
+        foreach (var order in orders)
+        {
+            order.Items = await context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Store)
+                .AsSplitQuery()
+                .Where(oi => oi.OrderId == order.Id)
+                .ToListAsync(); 
+        }
+
+        return orders;
     }
 
     public async Task<int> removeOrderFromDelivery(Guid id, Guid deliveryId)
@@ -156,7 +205,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
 
     public async Task<IEnumerable<Order>> getAllAsync(int page, int length)
     {
-        return await context.Orders
+        var orders= await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
@@ -165,72 +214,99 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
             .Take(length)
             .OrderDescending()
             .ToListAsync();
+        foreach (var order in orders)
+        {
+            order.Items = await context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Store)
+                .AsSplitQuery()
+                .Where(oi => oi.OrderId == order.Id)
+                .ToListAsync(); 
+        }
+
+        return orders;
     }
 
     private async Task<bool> isSavedDistance(Guid orderId)
     {
-        using (var command = context
-                   .Database
-                   .GetDbConnection()
-                   .CreateCommand())
+        try
         {
-            command.CommandText = "SELECT * FROM fun_calculate_distance_between_user_and_stores(@orderId)";
-            command.Parameters.Add(new NpgsqlParameter("@orderId", orderId));
-            await context.Database.OpenConnectionAsync();
-            var result = await command.ExecuteScalarAsync();
-            return (bool?)result == true ? true : false;
+            using (var command = context
+                       .Database
+                       .GetDbConnection()
+                       .CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM fun_calculate_distance_between_user_and_stores(@orderId)";
+                command.Parameters.Add(new NpgsqlParameter("@orderId", orderId));
+                await context.Database.OpenConnectionAsync();
+                var result = await command.ExecuteScalarAsync();
+                return (bool?)result == true ? true : false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error from isSavedDistance " + ex);
+            return false;
         }
     }
 
 
     public async Task<int> addAsync(Order entity)
     {
-        await context.Orders.AddAsync(new Order
+        try
         {
-            Id = entity.Id,
-            Longitude = entity.Longitude,
-            Latitude = entity.Latitude,
-            UserId = entity.UserId,
-            TotalPrice = entity.TotalPrice,
-            Status = 1,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = null,
-        });
-
-        foreach (var orderItem in entity.Items)
-        {
-            var orderItemId = clsUtil.generateGuid();
-            await context.OrderItems.AddAsync(new OrderItem
+            await context.Orders.AddAsync(new Order
             {
-                Id = orderItemId,
-                OrderId = entity.Id,
-                ProductId = orderItem.ProductId,
-                Quanity = orderItem.Quanity,
-                StoreId = orderItem.StoreId,
-                Price = orderItem.Price,
+                Id = entity.Id,
+                Longitude = entity.Longitude,
+                Latitude = entity.Latitude,
+                UserId = entity.UserId,
+                TotalPrice = entity.TotalPrice,
+                Status = 1,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = null,
             });
-            if (orderItem.OrderProductsVarients is not null)
-                foreach (var orderProductVarient in orderItem.OrderProductsVarients)
-                {
-                    await context.OrdersProductsVarients.AddAsync(new OrderProductsVarient()
-                    {
-                        Id = clsUtil.generateGuid(),
-                        OrderItemId = orderItemId,
-                        ProductVarientId = orderProductVarient.ProductVarientId,
-                    });
-                }
-        }
 
-        int result = await context.SaveChangesAsync();
-        if (result == 0) return 0;
-        result = (await isSavedDistance(entity.Id)) == true ? 1 : 0;
-        if (result == 0)
+            foreach (var orderItem in entity.Items)
+            {
+                var orderItemId = clsUtil.generateGuid();
+                await context.OrderItems.AddAsync(new OrderItem
+                {
+                    Id = orderItemId,
+                    OrderId = entity.Id,
+                    ProductId = orderItem.ProductId,
+                    Quanity = orderItem.Quanity,
+                    StoreId = orderItem.StoreId,
+                    Price = orderItem.Price,
+                });
+                if (orderItem.OrderProductsVarients is not null)
+                    foreach (var orderProductVarient in orderItem.OrderProductsVarients)
+                    {
+                        await context.OrdersProductsVarients.AddAsync(new OrderProductsVarient()
+                        {
+                            Id = clsUtil.generateGuid(),
+                            OrderItemId = orderItemId,
+                            ProductVarientId = orderProductVarient.ProductVarientId,
+                        });
+                    }
+            }
+
+            int result = await context.SaveChangesAsync();
+            if (result == 0) return 0;
+            result = (await isSavedDistance(entity.Id)) == true ? 1 : 0;
+            if (result == 0)
+            {
+                await deleteAsync(entity.Id);
+                return 0;
+            }
+
+            return 1;
+        }
+        catch (Exception ex)
         {
-            await deleteAsync(entity.Id);
+            Console.WriteLine("Error from add New Order " + ex);
             return 0;
         }
-
-        return 1;
     }
 
     public Task<int> updateAsync(Order entity)
@@ -244,9 +320,9 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
         await context.Orders.Where(o => o.Id == id).ExecuteDeleteAsync();
         return await context.SaveChangesAsync();
     }
-    
+
     //orderitmes
-    
+
     public async Task<int> updateOrderItemStatus(Guid id, enOrderItemStatus status)
     {
         OrderItem? orderItem = await context.OrderItems.FindAsync(id);
@@ -254,8 +330,8 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
         orderItem.Status = status;
         return await context.SaveChangesAsync();
     }
-    
-    
+
+
     public async Task<IEnumerable<OrderItem>> getOrderItems(
         Guid storeId,
         int pageNum,
@@ -292,12 +368,9 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
             .Include(oi => oi.Product)
             .Include(oi => oi.OrderProductsVarients)
             .Include(oi => oi.Store)
-            .Include(oi=>oi.Order)
+            .Include(oi => oi.Order)
             .AsSplitQuery()
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == id);
-
     }
-
-
 }

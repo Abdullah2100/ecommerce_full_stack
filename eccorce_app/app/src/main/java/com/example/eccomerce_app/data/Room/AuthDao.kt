@@ -4,42 +4,37 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.e_commercompose.data.Room.AuthModleEntity
-import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
-import com.example.e_commercompose.data.Room.IsPassSetLocationScreen
-import kotlinx.coroutines.flow.Flow
+import com.example.eccomerce_app.data.Room.Model.IsPassLocationScreen
+import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
+import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
 
 @Dao
 interface AuthDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveAuthData(authData : AuthModleEntity)
-
-    @Query("SELECT * FROM AuthModleEntity")
-    suspend  fun getAuthData(): AuthModleEntity?
-
-    @Query("DELETE FROM AuthModleEntity ")
-   suspend fun nukeTable()
-
-
-    @Query("SELECT * FROM AuthModleEntity WHERE id = 0")
-     fun   readChunksLive(): Flow<AuthModleEntity?>
-
-    @Query("SELECT count(*)>0 FROM ispassonboardingscreen WHERE  id = 0")
-    fun   isPassOnBoarding(): Boolean
+    suspend fun saveAuthData(authData: AuthModelEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveIsPassingOnBoarding(value : IsPassOnBoardingScreen)
-
-
-    @Query("SELECT count(*)>0 FROM location WHERE  id = 0")
-   suspend fun   isPassLocationScreen(): Boolean
+    suspend fun savePassingOnBoarding(value: IsPassOnBoardingScreen)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun savePassingLocation(authData : IsPassSetLocationScreen)
+    suspend fun savePassingLocation(authData: IsPassLocationScreen)
 
-    @Query("SELECT * FROM location WHERE id =0")
-    suspend fun getSavedLocation(): IsPassSetLocationScreen?
+
+    @Query("SELECT * FROM AuthModelEntity")
+    suspend fun getAuthData(): AuthModelEntity?
+
+    @Query("SELECT COUNT(*)>0 FROM IsPassOnBoardingScreen")
+    fun isPassOnBoarding(): Boolean?
+
+    @Query("SELECT count(*)>0 FROM location ")
+    suspend fun isPassLocationScreen(): Boolean
+
+
+    @Query("DELETE FROM AuthModelEntity ")
+    suspend fun nukeAuthTable()
 
     @Query("DELETE FROM location ")
-    suspend fun nukePassLocationTable()
+    suspend fun nukeIsPassAddressTable()
+
+
 }

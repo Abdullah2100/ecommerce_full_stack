@@ -1,9 +1,9 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.StoreDto
+import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -21,9 +21,9 @@ import java.io.IOException
 import java.net.UnknownHostException
 import java.util.UUID
 
-class StoreRepository(val client: HttpClient) {
+class StoreRepository(val client: HttpClient)   {
 
-    suspend fun createStore(
+     suspend fun createStore(
         name: String,
         wallpaperImage: File,
         smallImage: File,
@@ -37,7 +37,7 @@ class StoreRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -49,7 +49,7 @@ class StoreRepository(val client: HttpClient) {
                             append(
                                 key = "WallpaperImage", // Must match backend expectation
                                 value = wallpaperImage.readBytes(),
-                                headers = Headers.build {
+                                headers = Headers.Companion.build {
                                     append(
                                         HttpHeaders.ContentType,
                                         "image/${wallpaperImage.extension}"
@@ -63,7 +63,7 @@ class StoreRepository(val client: HttpClient) {
                             append(
                                 key = "SmallImage", // Must match backend expectation
                                 value = smallImage.readBytes(),
-                                headers = Headers.build {
+                                headers = Headers.Companion.build {
                                     append(
                                         HttpHeaders.ContentType,
                                         "image/${smallImage.extension}"
@@ -80,7 +80,7 @@ class StoreRepository(val client: HttpClient) {
                 )
             }
             when (result.status) {
-                HttpStatusCode.Created -> {
+                HttpStatusCode.Companion.Created -> {
                     NetworkCallHandler.Successful(result.body<StoreDto>())
                 }
 
@@ -102,7 +102,7 @@ class StoreRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun updateStore(
+     suspend fun updateStore(
         name: String,
         wallpaperImage: File?,
         smallImage: File?,
@@ -116,7 +116,7 @@ class StoreRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -132,7 +132,7 @@ class StoreRepository(val client: HttpClient) {
                                 append(
                                     key = "wallpaper_image", // Must match backend expectation
                                     value = wallpaperImage.readBytes(),
-                                    headers = Headers.build {
+                                    headers = Headers.Companion.build {
                                         append(
                                             HttpHeaders.ContentType,
                                             "image/${wallpaperImage.extension}"
@@ -147,7 +147,7 @@ class StoreRepository(val client: HttpClient) {
                                 append(
                                     key = "small_image", // Must match backend expectation
                                     value = smallImage.readBytes(),
-                                    headers = Headers.build {
+                                    headers = Headers.Companion.build {
                                         append(
                                             HttpHeaders.ContentType,
                                             "image/${smallImage.extension}"
@@ -164,7 +164,7 @@ class StoreRepository(val client: HttpClient) {
                 )
             }
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<StoreDto>())
                 }
 
@@ -186,20 +186,20 @@ class StoreRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getStoreById(id: UUID): NetworkCallHandler {
+     suspend fun getStoreById(id: UUID): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Store/${id}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<StoreDto>())
                 }
 

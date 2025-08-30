@@ -1,9 +1,9 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.BannerDto
+import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -30,13 +30,13 @@ class BannerRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
+            if (result.status == HttpStatusCode.Companion.OK) {
                 NetworkCallHandler.Successful(result.body<List<BannerDto>>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -63,15 +63,15 @@ class BannerRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
 
             }
 
-            if (result.status == HttpStatusCode.OK) {
+            if (result.status == HttpStatusCode.Companion.OK) {
                 NetworkCallHandler.Successful(result.body<List<BannerDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
+            } else if (result.status == HttpStatusCode.Companion.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
             } else {
                 NetworkCallHandler.Error(result.body<String>())
@@ -99,7 +99,7 @@ class BannerRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -109,7 +109,7 @@ class BannerRepository(val client: HttpClient) {
                             append(
                                 key = "image", // Must match backend expectation
                                 value = image.readBytes(),
-                                headers = Headers.build {
+                                headers = Headers.Companion.build {
                                     append(
                                         HttpHeaders.ContentType,
                                         "image/${image.extension}"
@@ -125,7 +125,7 @@ class BannerRepository(val client: HttpClient) {
                     )
                 )
             }
-            if (result.status == HttpStatusCode.Created) {
+            if (result.status == HttpStatusCode.Companion.Created) {
                 NetworkCallHandler.Successful(result.body<BannerDto>())
             } else {
                 NetworkCallHandler.Error(result.body())
@@ -152,12 +152,12 @@ class BannerRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
 
             }
-            if (result.status == HttpStatusCode.NoContent) {
+            if (result.status == HttpStatusCode.Companion.NoContent) {
                 NetworkCallHandler.Successful("deleted Seccessfuly")
             } else {
                 NetworkCallHandler.Error(result.body())

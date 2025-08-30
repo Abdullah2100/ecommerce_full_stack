@@ -8,14 +8,14 @@ import java.util.UUID
 @Serializable
 data class OrderDto(
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
-    val Longitude: Double,
-    val Latitude: Double,
-    val TotalPrice: Double,
-    val DeliveryFee: Double,
-    val UserPhone: String,
-    val Status:Int,
-    val OrderItems:List<OrderItemDto>
+    val id: UUID,
+    val longitude: Double,
+    val latitude: Double,
+    val totalPrice: Double,
+    val deliveryFee: Double,
+    val userPhone: String,
+    val status:Int,
+    val orderItems:List<OrderItemDto>
 )
 
 @Serializable

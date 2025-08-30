@@ -74,7 +74,8 @@ object Screens {
     @Serializable
     data class ProductDetails(
         val productId: String,
-        val isFromHome: Boolean
+        val isFromHome: Boolean,
+        val isCanNavigateToStore: Boolean
     )
 
 

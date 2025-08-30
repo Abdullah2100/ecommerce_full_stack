@@ -1,13 +1,12 @@
-package com.example.e_commercompose.data.Room
+package com.example.eccomerce_app.data.Room.Model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-
 @Entity
-data class AuthModleEntity
+data class AuthModelEntity
     (
     @PrimaryKey(autoGenerate = true) val id: Int? = 0,
     val token: String = "",
-    val RefreshToken: String = ""
+    val refreshToken: String = ""
 )

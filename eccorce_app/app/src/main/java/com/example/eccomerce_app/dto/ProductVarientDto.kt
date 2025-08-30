@@ -7,11 +7,11 @@ import java.util.UUID
 @Serializable()
 data class ProductVarientDto(
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
-    val Name: String,
-    val Precentage: Double,
+    val id: UUID,
+    val name: String,
+    val precentage: Double,
     @Serializable(with = UUIDKserialize::class)
-    val VarientId: UUID,
+    val varientId: UUID,
     )
 
 @Serializable

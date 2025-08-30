@@ -14,7 +14,6 @@ import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderProductDto
 import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderVarientDto
-import java.util.UUID
 import kotlin.text.replace
 
 object DtoToModel {
@@ -37,10 +36,10 @@ object DtoToModel {
     }
     fun SubCategoryDto.toSubCategory(): SubCategory{
         return SubCategory(
-            id = this.Id,
-            name=this.Name,
-            categoryId=this.CategoryId,
-            storeId= UUID.randomUUID()
+            id = this.id,
+            name=this.name,
+            categoryId=this.categoryId,
+            storeId= this.storeId
         )
     }
 
@@ -87,66 +86,68 @@ object DtoToModel {
 
     fun ProductVarientDto.toProductVarient(): ProductVariant {
         return ProductVariant(
-            id = this.Id,
-            name=this.Name,
-            percentage = this.Precentage,
-            variantId =this.VarientId
+            id = this.id,
+            name=this.name,
+            percentage = this.precentage,
+            variantId =this.varientId
         )
     }
 
     fun ProductDto.toProdcut(): ProductModel {
         return ProductModel(
-            id = this.Id,
-            name = this.Name,
-            description = this.Description,
-            thumbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.45") else "",
-            subcategoryId = this.SubcategoryId,
-            storeId = this.StoreId,
-            price = this.Price,
-            categoryId = this.CategoryId,
-            productVariants = this.ProductVarients?.map {
+            id = this.id,
+            name = this.name,
+            description = this.description,
+            thumbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("0.0.0.0","192.168.1.45") else "",
+            subcategoryId = this.subcategoryId,
+            storeId = this.storeId,
+            price = this.price,
+            categoryId = this.categoryId,
+            productVariants = this.productVarients?.map {
                 it.map { it.toProductVarient() }
             },
-            productImages = this.ProductImages.map { it->if(it.isNotEmpty())it.replace("0.0.0.0","192.168.1.45") else "" }
+            productImages = this.productImages.map { it->if(it.isNotEmpty())it.replace("0.0.0.0","192.168.1.45") else "" }
         )
     }
 
     fun OrderVarientDto.toOrderVarient(): OrderVariant{
         return OrderVariant(
-            variantName=this.VarientName,
-            productVariantName=this.ProductVarientName
+            variantName=this.varientName,
+            productVariantName=this.productVarientName
         )
     }
 
     fun OrderProductDto.toOrderProduct(): OrderProduct{
         return OrderProduct(
-            id= this.Id,
-            name = this.Name,
-            thumbnail = if(this.Thmbnail.isNotEmpty())this.Thmbnail.replace("0.0.0.0","192.168.1.45") else ""
+            id= this.id,
+            name = this.name,
+            thumbnail = if(this.thmbnail!=null&&this.thmbnail.isNotEmpty())this.thmbnail.replace("0.0.0.0","192.168.1.45") else ""
         )
     }
 
     fun OrderItemDto.toOrderItem(): OrderItem{
         return OrderItem(
-            id=this.Id,
-            quantity= this.Quanity,
-            price = this.Price,
-            product = this.Product.toOrderProduct(),
-            productVariant = this.ProductVarient.map { it.toOrderVarient() },
-             orderItemStatus = this.OrderItemStatus
+            id=this.id,
+            quantity= this.quanity,
+            price = this.price,
+            product = this.product.toOrderProduct(),
+            productVariant =if(this.productVarient.isNullOrEmpty())
+                listOf()
+                else this.productVarient.map { it.toOrderVarient() },
+             orderItemStatus = this.orderItemStatus
         )
     }
 
     fun OrderDto.toOrderItem():Order{
        return Order(
-          id = this.Id,
-           latitude = this.Latitude,
-           longitude = this.Longitude,
-           deliveryFee = this.DeliveryFee,
-           userPhone = this.UserPhone,
-           totalPrice=this.TotalPrice,
-           orderItems = this.OrderItems.map { it.toOrderItem() },
-           status = this.Status
+          id = this.id,
+           latitude = this.latitude,
+           longitude = this.longitude,
+           deliveryFee = this.deliveryFee,
+           userPhone = this.userPhone,
+           totalPrice=this.totalPrice,
+           orderItems = this.orderItems.map { it.toOrderItem() },
+           status = this.status
        )
     }
 

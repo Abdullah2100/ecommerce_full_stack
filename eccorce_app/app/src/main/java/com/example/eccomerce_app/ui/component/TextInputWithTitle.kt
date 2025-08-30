@@ -1,7 +1,6 @@
 package com.example.e_commercompose.ui.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import com.example.e_commercompose.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,9 +28,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eccomerce_app.util.General
@@ -39,61 +40,20 @@ import com.example.e_commercompose.ui.theme.CustomColor
 
 
 @Composable
-fun TextInputWithNoTitle(
-    value: MutableState<TextFieldValue>,
-    placHolder: String,
-) {
-
-    val fontScall = LocalDensity.current.fontScale
-    Column {
-        OutlinedTextField(
-
-            maxLines = 1,
-            value = value.value,
-            onValueChange = { value.value = it },
-            placeholder = {
-                Text(
-                    placHolder,
-                    color = CustomColor.neutralColor500,
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16 / fontScall).sp
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = CustomColor.neutralColor50,
-                focusedBorderColor = Color.Black
-            ),
-
-            textStyle = TextStyle(
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = (16 / fontScall).sp,
-                color = CustomColor.neutralColor950
-            ),
-
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-
-            )
-    }
-
-}
-
-
-@Composable
 fun TextInputWithTitle(
     value: MutableState<TextFieldValue>,
     title: String,
-    placHolder: String,
-    isHasError: Boolean = false,
-    erroMessage: String? = null,
+    placeHolder: String,
+    errorMessage: String? = null,
     isEnable: Boolean? = true,
-    focusRequester: FocusRequester? = null,
-    onChange: ((value: String) -> Unit)? = null
-) {
+    isHasError: Boolean? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+    onChange: ((value: String) -> Unit)? = null,
+    fontTitle: TextUnit? = null,
+    fontWeight: FontWeight? = null,
+    maxLines: Int?=null,
+
+    ) {
 
     val modifierWithFocus =
         Modifier.fillMaxWidth()
@@ -105,15 +65,15 @@ fun TextInputWithTitle(
             Text(
                 title,
                 fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                color = CustomColor.neutralColor950,
-                fontSize = (16 / fontScall).sp
+                fontWeight = fontWeight ?: FontWeight.Bold,
+                color = if (isHasError == true) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
+                fontSize = fontTitle ?: (16 / fontScall).sp
             )
         Sizer(heigh = 5)
         OutlinedTextField(
-
+            singleLine = false,
             enabled = isEnable == true,
-            maxLines = 1,
+            maxLines = maxLines?:1,
             value = value.value,
             onValueChange = {
                 value.value = it
@@ -122,7 +82,7 @@ fun TextInputWithTitle(
             },
             placeholder = {
                 Text(
-                    placHolder,
+                    placeHolder,
                     color = CustomColor.neutralColor500,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Normal,
@@ -132,13 +92,13 @@ fun TextInputWithTitle(
             modifier = modifierWithFocus,
             shape = RoundedCornerShape(8.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = if (!isHasError) Color.Gray.copy(alpha = 0.46f) else CustomColor.alertColor_1_400,
-                focusedBorderColor = if (!isHasError) Color.Black else CustomColor.alertColor_1_400
+                unfocusedBorderColor = if (isHasError != true) Color.Gray.copy(alpha = 0.46f) else CustomColor.alertColor_1_400,
+                focusedBorderColor = if (isHasError != true) Color.Black else CustomColor.alertColor_1_400
             ),
             supportingText = {
-                if (isHasError && erroMessage != null)
+                if (isHasError == true && errorMessage != null)
                     Text(
-                        erroMessage,
+                        errorMessage,
                         color = CustomColor.alertColor_1_400,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Medium,
@@ -153,7 +113,7 @@ fun TextInputWithTitle(
                 color = CustomColor.neutralColor950
             ),
             trailingIcon = {
-                if (isHasError) {
+                if (isHasError == true) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.allert),
                         contentDescription = "",
@@ -161,7 +121,7 @@ fun TextInputWithTitle(
                     )
                 }
             },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardOptions = keyboardOptions,
 
             )
     }
@@ -172,10 +132,18 @@ fun TextInputWithTitle(
 fun TextNumberInputWithTitle(
     value: MutableState<TextFieldValue>,
     title: String,
-    placHolder: String,
+    placeHolder: String,
     isHasError: Boolean = false,
-    erroMessage: String
-) {
+    errorMessage: String,
+    fontTitle: TextUnit? = null,
+    fontWeight: FontWeight? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        imeAction = ImeAction.Next,
+        keyboardType = KeyboardType.Number
+    ),
+    maxLines: Int = 1,
+
+    ) {
 
     val pattern = remember { Regex("^\\d+\$") }
     val fontScall = LocalDensity.current.fontScale
@@ -183,14 +151,14 @@ fun TextNumberInputWithTitle(
         Text(
             title,
             fontFamily = General.satoshiFamily,
-            fontWeight = FontWeight.Medium,
-            color = CustomColor.neutralColor950,
-            fontSize = (16 / fontScall).sp
+            fontWeight = fontWeight ?: FontWeight.Medium,
+            color = if (isHasError) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
+            fontSize = fontTitle ?: (16 / fontScall).sp
         )
         Sizer(heigh = 5)
         OutlinedTextField(
 
-            maxLines = 1,
+            maxLines = maxLines,
             value = value.value,
             onValueChange = {
                 if ((it.text.isEmpty() || it.text.matches(pattern)) && it.text.length < 13)
@@ -198,7 +166,7 @@ fun TextNumberInputWithTitle(
             },
             placeholder = {
                 Text(
-                    placHolder,
+                    placeHolder,
                     color = CustomColor.neutralColor500,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Normal,
@@ -215,7 +183,7 @@ fun TextNumberInputWithTitle(
             supportingText = {
                 if (isHasError)
                     Text(
-                        erroMessage,
+                        errorMessage,
                         color = CustomColor.alertColor_1_400,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Medium,
@@ -238,7 +206,8 @@ fun TextNumberInputWithTitle(
                     )
                 }
             },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+
+            keyboardOptions = keyboardOptions,
 
             )
     }
@@ -252,18 +221,17 @@ fun TextSecureInputWithTitle(
     title: String = "",
     isHasError: Boolean = false,
     errMessage: String,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
 ) {
 
     val showPassword = remember { mutableStateOf(false) }
     val fontScall = LocalDensity.current.fontScale
-    Column(
-        modifier = Modifier.background(Color.Green)
-    ){
+    Column() {
         Text(
             title,
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Medium,
-            color = CustomColor.neutralColor950,
+            color = if (isHasError) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
             fontSize = (16 / fontScall).sp
         )
         Sizer(heigh = 5)
@@ -299,8 +267,7 @@ fun TextSecureInputWithTitle(
                         modifier = Modifier.offset(x = -15.dp)
                     )
             },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = {}),
+            keyboardOptions = keyboardOptions,
             textStyle = TextStyle(
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Normal,

@@ -300,6 +300,8 @@ public class ProductServices(
             );
         }
 
+        product =await productRepository.getProduct(product.Id);
+
         return new Result<ProductDto?>
         (
             data: product?.toDto(config.getKey("url_file")),
@@ -497,6 +499,7 @@ public class ProductServices(
         Guid id
     )
     {
+        var user =await userRepository.getUser(userId);
         var isPassed = await isUserNotExistOrNotHasStore(userId);
 
         if (isPassed is not null)
@@ -511,15 +514,15 @@ public class ProductServices(
         }
 
 
-        Product? product = await productRepository.getProduct(id, userId);
+        Product? product = await productRepository.getProduct(id, user.Store.Id);
 
-        if (product is null)
+        if (product is null || id != product.Id)
         {
             return new Result<bool>
             (
                 data: false,
                 message: "product is not found ",
-                isSeccessful: true,
+                isSeccessful: false,
                 statusCode: 404
             );
         }
@@ -532,7 +535,7 @@ public class ProductServices(
             (
                 data: false,
                 message: "product had linke with some order",
-                isSeccessful: true,
+                isSeccessful: false,
                 statusCode: 400
             );
         }

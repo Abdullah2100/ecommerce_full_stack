@@ -6,27 +6,29 @@ import java.util.UUID
 
 @Serializable
 data class SubCategoryDto(
-    val Name: String,
+    val name: String,
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
+    val id: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val CategoryId: UUID,
+    val storeId: UUID,
+    @Serializable(with = UUIDKserialize::class)
+    val categoryId: UUID,
 )
 
 
 @Serializable
 data class UpdateSubCategoryDto(
-    val Name: String,
+    val name: String,
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
+    val id: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val CateogyId: UUID
+    val categoryId: UUID
 )
 
 @Serializable
 data class CreateSubCategoryDto(
     val Name: String,
     @Serializable(with = UUIDKserialize::class)
-    val CateogyId: UUID
+    val CategoryId: UUID
 )
 

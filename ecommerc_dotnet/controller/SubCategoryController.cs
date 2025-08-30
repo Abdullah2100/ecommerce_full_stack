@@ -77,8 +77,7 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
         };
     }
 
-    
-    
+
     [HttpDelete("{subCateogyId}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -115,7 +114,7 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
         };
     }
 
-    
+
     [HttpGet("all/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -135,7 +134,8 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await subCategoryServices.getSubCategoryAll(adminId.Value,page, 25);
+
+        var result = await subCategoryServices.getSubCategoryAll(adminId.Value, page, 25);
 
         return result.IsSeccessful switch
         {

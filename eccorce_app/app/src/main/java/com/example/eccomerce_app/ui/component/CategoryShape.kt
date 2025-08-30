@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -83,7 +84,8 @@ fun CategoryShape(
         modifier = Modifier.padding(top = 10.dp)
             .fillMaxWidth()
     ) {
-        items(count = categories.size) { index->
+        items(items = categories,
+            key = {it->it.id}) { category->
             Column(
                 modifier = Modifier
                     .padding(end = 5.dp)
@@ -91,10 +93,10 @@ fun CategoryShape(
                     .clickable{
                         productViewModel.getProductsByCategoryID(
                             pageNumber = mutableStateOf(1),
-                            categoryId = categories[index].id
+                            categoryId = category.id
                         )
                         nav.navigate(Screens.ProductCategory(
-                            categories[index].id.toString()
+                            category.id.toString()
                         ))
 
                     },
@@ -113,7 +115,7 @@ fun CategoryShape(
                         modifier = Modifier
                             .height(69.dp)
                             .width(70.dp),
-                        model = General.handlingImageForCoil(categories[index].image,context) ,
+                        model = General.handlingImageForCoil(category.image,context) ,
                         contentDescription = "",
                         loading = {
                             Box(
@@ -135,7 +137,7 @@ fun CategoryShape(
 
                 }
                 Sizer(4)
-                Text(categories[index].name,
+                Text( category.name,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp,

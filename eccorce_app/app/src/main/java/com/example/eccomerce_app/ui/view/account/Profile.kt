@@ -72,7 +72,6 @@ fun ProfileScreen(
     nav: NavHostController,
     userViewModel: UserViewModel
 ) {
-    val focusRequester = FocusRequester()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -335,7 +334,6 @@ fun ProfileScreen(
                             SubcomposeAsyncImage(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-//                                                .padding(top = 35.dp)
                                     .height(90.dp)
                                     .width(90.dp)
                                     .clip(RoundedCornerShape(50.dp)),
@@ -402,26 +400,23 @@ fun ProfileScreen(
             TextInputWithTitle(
                 value = fullName,
                 title = "Full Name",
-                placHolder = myInfo.value?.name ?: "",
-                erroMessage = "",
-                focusRequester = focusRequester
+                placeHolder = myInfo.value?.name ?: "",
+                errorMessage = "",
             )
 
             TextInputWithTitle(
                 value = email,
                 title = "Email",
-                placHolder = myInfo.value?.email ?: "",
-                erroMessage = "",
+                placeHolder = myInfo.value?.email ?: "",
+                errorMessage = "",
                 isEnable = false,
-                focusRequester = focusRequester
             )
 
             TextNumberInputWithTitle(
                 value = phone,
                 title = "Phone",
-                placHolder = myInfo.value?.phone ?: "",
-                isHasError = false,
-                erroMessage = "",
+                placeHolder = myInfo.value?.phone ?: "",
+                errorMessage = "",
             )
             TextSecureInputWithTitle(
                 value = oldPassword,

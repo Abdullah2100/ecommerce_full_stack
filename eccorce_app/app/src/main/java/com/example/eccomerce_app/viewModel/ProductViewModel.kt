@@ -9,9 +9,9 @@ import com.example.eccomerce_app.dto.ProductDto
 import com.example.e_commercompose.model.DtoToModel.toProdcut
 import com.example.e_commercompose.model.ProductModel
 import com.example.e_commercompose.model.ProductVarientSelection
-import com.example.eccomerce_app.data.repository.ProductRepository
 import com.example.eccomerce_app.dto.StoreStatusDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.ProductRepository
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers

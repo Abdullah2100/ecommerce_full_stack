@@ -1,19 +1,20 @@
 package com.example.eccomerce_app.viewModel
 
+import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.e_commercompose.data.Room.AuthModleEntity
-import com.example.e_commercompose.data.Room.IsPassOnBoardingScreen
+import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
 import com.example.eccomerce_app.dto.LoginDto
-import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.dto.AuthDto
 import com.example.eccomerce_app.dto.SignupDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.AuthRepository
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 
-class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : ViewModel() {
+class AuthViewModel(
+    val authRepository:
+    AuthRepository,
+    val dao: AuthDao,
+    val context: Context
+) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
@@ -61,11 +67,11 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
     }
 
     fun getStartedScreen() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             val authData = dao.getAuthData()
             val isPassOnBoard = dao.isPassOnBoarding()
             val isLocation = dao.isPassLocationScreen()
-            Log.d("AuthDataIs", authData.toString())
+            Log.d("AuthDataIs", isPassOnBoard.toString())
             General.authData.emit(authData)
             when (isPassOnBoard) {
                 false -> {
@@ -96,12 +102,15 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         }
     }
 
-    fun setIsPassOnBoardingScreen() {
-        viewModelScope.launch(Dispatchers.IO) {
-            dao.saveIsPassingOnBoarding(IsPassOnBoardingScreen(0, true))
+
+    suspend fun generateTokenNotification(): Pair<String?, String?> {
+        return try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            Pair(token, null)
+        } catch (e: Exception) {
+            Pair(null, "Network should be connecting for some functionality")
         }
     }
-
 
     fun signUpUser(
         email: String,
@@ -109,10 +118,11 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         phone: String,
         password: String,
         nav: NavHostController,
+        token: String,
+        isLoading: MutableState<Boolean>
     ) {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
             _isLoading.emit(true)
-            val token = FirebaseMessaging.getInstance().token.await() ?: ""
             val result = authRepository.signup(
                 SignupDto(
                     Name = name,
@@ -124,12 +134,13 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
             )
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    _isLoading.emit(false)
+                    isLoading.value = false;
                     val authData = result.data as AuthDto
-                    val authDataHolder = AuthModleEntity(
+
+                    val authDataHolder = AuthModelEntity(
                         id = 0,
                         token = authData.token,
-                        RefreshToken = authData.refreshToken
+                        refreshToken = authData.refreshToken
                     )
                     dao.saveAuthData(
                         authDataHolder
@@ -144,7 +155,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                 }
 
                 is NetworkCallHandler.Error -> {
-                    _isLoading.emit(false)
+                    isLoading.value = false;
 
                     val errorResult = (result.data.toString())
                     if (errorResult.contains(General.BASED_URL)) {
@@ -162,10 +173,10 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         username: String,
         password: String,
         nav: NavHostController,
+        token: String,
+        isSendingData: MutableState<Boolean>
     ) {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            _isLoading.emit(true)
-            val token = FirebaseMessaging.getInstance().token.await() ?: ""
 
             val result = authRepository.login(
                 LoginDto(
@@ -176,13 +187,12 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
             )
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    _isLoading.emit(false)
-
+                    isSendingData.value = false
                     val authData = result.data as AuthDto
-                    val authDataHolder = AuthModleEntity(
+                    val authDataHolder = AuthModelEntity(
                         id = 0,
                         token = authData.token,
-                        RefreshToken = authData.refreshToken
+                        refreshToken = authData.refreshToken
                     )
                     dao.saveAuthData(
                         authDataHolder
@@ -199,8 +209,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
                 }
 
                 is NetworkCallHandler.Error -> {
-                    _isLoading.emit(false)
-
+                    isSendingData.value = false
                     val errorResult = (result.data?.replace("\"", ""))
 
                     errorMessage.emit(errorResult)
@@ -235,7 +244,7 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         }
     }
 
-    suspend fun otpVerifing(
+    suspend fun otpVerifying(
         email: String,
         otp: String
     ): String? {
@@ -271,10 +280,10 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 val authData = result.data as AuthDto
-                val authDataHolder = AuthModleEntity(
+                val authDataHolder = AuthModelEntity(
                     id = 0,
                     token = authData.token,
-                    RefreshToken = authData.refreshToken
+                    refreshToken = authData.refreshToken
                 )
                 dao.saveAuthData(
                     authDataHolder
@@ -298,7 +307,8 @@ class AuthViewModel(val authRepository: AuthRepository, val dao: AuthDao) : View
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            dao.nukeTable()
+            dao.nukeAuthTable()
+            dao.nukeIsPassAddressTable()
         }
     }
 }

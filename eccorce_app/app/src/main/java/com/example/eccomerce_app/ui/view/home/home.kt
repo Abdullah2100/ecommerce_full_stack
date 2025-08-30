@@ -63,7 +63,7 @@ import com.example.e_commercompose.ui.component.ProductShape
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.BannerLoading
 import com.example.eccomerce_app.viewModel.ProductViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
@@ -129,6 +129,10 @@ fun HomePage(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermission.launch(input = Manifest.permission.POST_NOTIFICATIONS)
         }
+    }
+
+    LaunchedEffect(Unit) {
+        initial()
     }
 
 

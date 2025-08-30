@@ -17,9 +17,9 @@ object ModelToDto {
 
     fun SubCategoryUpdate.toUpdateSubCategoryDto():UpdateSubCategoryDto{
         return UpdateSubCategoryDto(
-            Name=this.name,
-            Id=this.id,
-            CateogyId=this.cateogyId
+            name=this.name,
+            id=this.id,
+            categoryId=this.cateogyId
         )
     }
 
@@ -57,11 +57,11 @@ object ModelToDto {
         )
     }
 
-    fun SubCategoryUpdate.toSubCategoryUpdateDto(): SubCategoryDto{
-        return SubCategoryDto(
-            Id=this.id,
-            CategoryId = this.cateogyId,
-            Name = this.name,
+    fun SubCategoryUpdate.toSubCategoryUpdateDto(): UpdateSubCategoryDto{
+        return UpdateSubCategoryDto(
+            id=this.id,
+            categoryId = this.cateogyId,
+            name = this.name,
         )
     }
 }

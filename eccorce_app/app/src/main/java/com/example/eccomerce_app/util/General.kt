@@ -12,20 +12,22 @@ import androidx.core.graphics.toColorInt
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
-import com.example.e_commercompose.data.Room.AuthModleEntity
+import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import java.io.File
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Calendar
 
 
 object General {
 
 
-    val authData = MutableStateFlow<AuthModleEntity?>(null)
+    val authData = MutableStateFlow<AuthModelEntity?>(null)
 
     val BASED_URL = Secrets.getBaseUrl()
 
@@ -59,8 +61,6 @@ object General {
 
         }
     }
-
-
 
 
     fun Uri.toCustomFil(context: Context): File? {
@@ -106,7 +106,8 @@ object General {
             false // Return false if there are no items
         } else {
             val lastVisibleItem = visibleItemsInfo.last() // Get the last visible item
-            val viewportHeight =    layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset // Calculate the viewport height
+            val viewportHeight =
+                layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset // Calculate the viewport height
 
             // Check if the last visible item is the last item in the list and fully visible
             // This indicates that the user has scrolled to the bottom

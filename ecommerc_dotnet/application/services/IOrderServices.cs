@@ -1,8 +1,7 @@
 using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.core.interfaces.services;
+namespace ecommerc_dotnet.application.services;
 
 public interface IOrderServices
 {
@@ -14,9 +13,7 @@ public interface IOrderServices
 
     Task<Result<bool>> updateOrderStatus(Guid id, int status);
     
-    Task<Result<List<OrderItemDto>>> getOrderItmes(Guid storeId, int pageNum, int pageSize);
-    
-    Task<Result<int>> updateOrderItmesStatus(Guid userId, UpdateOrderItemStatusDto orderItemsStatusDto );
+ 
    Task<Result<bool>> deleteOrder(Guid id,Guid userId);
     
    //delivery 

@@ -135,7 +135,6 @@ fun AccountPage(
             if (myInfo.value?.storeId != null)
                 AccountCustomBottom("Order For My Store", R.drawable.order_belong_to_store, {
                     orderItemsViewModel.getMyOrderItemBelongToMyStore(
-                        storeId = storeId ?: UUID.randomUUID(),
                         pageNumber = mutableIntStateOf(1),
                         isLoading = mutableStateOf(false)
                     )

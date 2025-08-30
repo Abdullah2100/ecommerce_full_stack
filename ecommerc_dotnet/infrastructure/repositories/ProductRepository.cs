@@ -27,44 +27,52 @@ public class ProductRepository(AppDbContext context) : IProductRepository
 
     public async Task<int> addAsync(Product entity)
     {
-        await context.Products.AddAsync(new Product
+        try
         {
-            Id = entity.Id,
-            Name = entity.Name,
-            Description = entity.Description,
-            SubcategoryId = entity.SubcategoryId,
-            StoreId = entity.StoreId,
-            Price = entity.Price,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = null,
-            Thmbnail = entity.Thmbnail
-        });
-
-        if (entity.ProductVarients is not null)
-            foreach (var x in entity.ProductVarients)
+            await context.Products.AddAsync(new Product
             {
-                await context.ProductVarients.AddAsync(new ProductVarient
-                {
-                    Id = clsUtil.generateGuid(),
-                    Precentage = x.Precentage == 0 ? 1 : (decimal)x.Precentage!,
-                    VarientId = x.VarientId,
-                    ProductId = entity.Id,
-                    Name = x.Name
-                });
-            }
+                Id = entity.Id,
+                Name = entity.Name,
+                Description = entity.Description,
+                SubcategoryId = entity.SubcategoryId,
+                StoreId = entity.StoreId,
+                Price = entity.Price,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = null,
+                Thmbnail = entity.Thmbnail
+            });
 
-        if (entity.ProductImages is not null)
-            foreach (var productImage in entity.ProductImages)
-            {
-                await context.ProductImages.AddAsync(new ProductImage
+            if (entity.ProductVarients is not null)
+                foreach (var x in entity.ProductVarients)
                 {
-                    Id = productImage.Id,
-                    Path = productImage.Path,
-                    ProductId = entity.Id,
-                });
-            }
+                    await context.ProductVarients.AddAsync(new ProductVarient
+                    {
+                        Id = clsUtil.generateGuid(),
+                        Precentage = x.Precentage == 0 ? 1 : (decimal)x.Precentage!,
+                        VarientId = x.VarientId,
+                        ProductId = entity.Id,
+                        Name = x.Name
+                    });
+                }
 
-        return await context.SaveChangesAsync();
+            if (entity.ProductImages is not null)
+                foreach (var productImage in entity.ProductImages)
+                {
+                    await context.ProductImages.AddAsync(new ProductImage
+                    {
+                        Id = productImage.Id,
+                        Path = productImage.Path,
+                        ProductId = entity.Id,
+                    });
+                }
+
+            return await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: fom create new Peoduct "+ex.Message);
+            return 0;
+        }
     }
 
     public async Task<int> updateAsync(Product entity)
@@ -116,7 +124,7 @@ public class ProductRepository(AppDbContext context) : IProductRepository
         await context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
         await context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
         await context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
-        return await context.SaveChangesAsync();
+        return 1;
     }
 
     public async Task<Product?> getProduct(Guid id)

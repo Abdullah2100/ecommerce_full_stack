@@ -27,7 +27,7 @@ namespace ecommerc_dotnet.dto
         public Guid SubcategoryId { get; set; }
         public Guid StoreId { get; set; }
         public decimal Price { get; set; }
-        public List<CreateProductVarientDto>? ProductVarients { get; set; }
+        public List<CreateProductVarientDto>? ProductVarients { get; set; } = null;
         public List<IFormFile> Images { get; set; }
     }
     

@@ -12,18 +12,18 @@ DECLARE
     store_distance    DOUBLE PRECISION;
 BEGIN
     -- Fetch per-km price with error handling
-    SELECT "value" INTO kilo_price
+    SELECT "Value" INTO kilo_price
     FROM "GeneralSettings"
-    WHERE "name" = 'one_kilo_price';
+    WHERE "Name" = 'one_kilo_price';
     
     IF kilo_price IS NULL THEN
         RAISE EXCEPTION 'one_kilo_price not found in GeneralSettings';
     END IF;
 
     -- Get user coordinates with validation
-    SELECT longitude, latitude 
+    SELECT "Longitude", "Latitude" 
     INTO user_long, user_lat
-    FROM "Orders" WHERE id = orderId;
+    FROM "Orders" WHERE "Id" = orderId;
     
     IF user_long IS NULL OR user_lat IS NULL THEN
         RAISE EXCEPTION 'NULL coordinates for order %', orderId;
@@ -32,14 +32,14 @@ BEGIN
     -- Calculate distance per store
     FOR store_coords IN
         SELECT 
-            a.longitude AS store_long,
-            a.latitude AS store_lat
+            a."Longitude" AS store_long,
+            a."Latitude" AS store_lat
         FROM "OrderItems" oi
         JOIN "Address" a 
-          ON a."ownerId" = oi."storeId"
-        WHERE oi."orderId" = orderId
-          AND a.longitude IS NOT NULL
-          AND a.latitude IS NOT NULL
+          ON a."OwnerId" = oi."StoreId"
+        WHERE oi."OrderId" = orderId
+          AND a."Longitude" IS NOT NULL
+          AND a."Latitude" IS NOT NULL
     LOOP
         -- Calculate distance in meters, convert to km
         store_distance := ST_Distance(
@@ -53,9 +53,9 @@ BEGIN
 
     -- Update order with calculated fee
     UPDATE "Orders"
-    SET "distanceFee" = kilo_price * total_distance_km,
-	"distanceToUser"=total_distance_km
-    WHERE id = orderId;
+    SET "DistanceFee" = kilo_price * total_distance_km,
+	"DistanceToUser"=total_distance_km
+    WHERE "Id" = orderId;
 
     RETURN TRUE;
 EXCEPTION 

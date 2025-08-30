@@ -1,11 +1,11 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
+import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -24,7 +24,7 @@ import java.net.UnknownHostException
 import java.util.UUID
 
 class AddressRepository(val client: HttpClient) {
-    suspend fun userAddNewAddress(locationData: CreateAddressDto): NetworkCallHandler {
+     suspend fun userAddNewAddress(locationData: CreateAddressDto): NetworkCallHandler {
         return try {
             val result = client.post(
                 Secrets.getBaseUrl() + "/User/address"
@@ -32,7 +32,7 @@ class AddressRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -43,7 +43,7 @@ class AddressRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.Created -> {
+                HttpStatusCode.Companion.Created -> {
                     NetworkCallHandler.Successful(result.body<AddressDto?>())
                 }
 
@@ -68,7 +68,7 @@ class AddressRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun userUpdateAddress(locationData: UpdateAddressDto): NetworkCallHandler {
+     suspend fun userUpdateAddress(locationData: UpdateAddressDto): NetworkCallHandler {
         return try {
             val result = client.put(
                 Secrets.getBaseUrl() + "/User/address"
@@ -76,7 +76,7 @@ class AddressRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -87,7 +87,7 @@ class AddressRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<AddressDto?>())
                 }
 
@@ -112,7 +112,7 @@ class AddressRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
+     suspend fun deleteUserAddress(addressID: UUID): NetworkCallHandler {
         return try {
             val result = client.delete(
                 Secrets.getBaseUrl() + "/User/address/${addressID}"
@@ -120,14 +120,14 @@ class AddressRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
 
             }
 
             when (result.status) {
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Successful(true)
                 }
 
@@ -160,13 +160,13 @@ class AddressRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Successful(result.body<Boolean>())
                 }
 
@@ -191,20 +191,20 @@ class AddressRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
+     suspend fun getStoreAddress(id: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Store/${id}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<AddressDto>())
                 }
 
@@ -226,6 +226,5 @@ class AddressRepository(val client: HttpClient) {
             return NetworkCallHandler.Error(e.message)
         }
     }
-
 
 }

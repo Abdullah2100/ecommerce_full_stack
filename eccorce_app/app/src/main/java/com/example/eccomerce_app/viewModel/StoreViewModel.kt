@@ -7,10 +7,10 @@ import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.StoreDto
 import com.example.e_commercompose.model.DtoToModel.toStore
 import com.example.e_commercompose.model.StoreModel
-import com.example.eccomerce_app.data.repository.StoreRepository
 import com.example.eccomerce_app.dto.CreateStoreDto
 import com.example.eccomerce_app.dto.StoreStatusDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.StoreRepository
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +74,7 @@ class StoreViewModel(
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
             if (_hub.value != null)
                 _hub.value!!.stop()
+            storeCreateData.emit(null)
         }
         super.onCleared()
     }
@@ -151,7 +152,7 @@ class StoreViewModel(
         smallImage: File,
         longitude: Double,
         latitude: Double,
-        sumAddtionalFun: (id: UUID) -> Unit,
+        sumAdditionalFun: (id: UUID) -> Unit,
     ): String? {
 
         val result = storeRepository.createStore(
@@ -174,7 +175,7 @@ class StoreViewModel(
 
                 val distinctStore = storesHolder.distinctBy { it.id }.toMutableList()
                 _stores.emit(distinctStore)
-                sumAddtionalFun(data.id)
+                sumAdditionalFun(data.id)
                 return null
             }
 

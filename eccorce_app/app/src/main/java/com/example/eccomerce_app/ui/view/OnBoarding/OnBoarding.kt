@@ -14,6 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,15 +33,19 @@ import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.AuthViewModel
+import com.example.eccomerce_app.viewModel.UserViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 
 @Composable
 fun OnBoardingScreen(
     nav: NavController,
-    authViewModel: AuthViewModel
+    userViewModel: UserViewModel
 ) {
     val fontScall = LocalDensity.current.fontScale
-
+    val coroutine = rememberCoroutineScope()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -110,7 +115,9 @@ fun OnBoardingScreen(
 
                     },
                 onClick = {
-                    authViewModel.setIsPassOnBoardingScreen()
+
+                    userViewModel.setIsPassOnBoardingScreen()
+
                     nav.navigate(Screens.AuthGraph) {
                         popUpTo(nav.graph.id) {
                             inclusive = true

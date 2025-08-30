@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
@@ -35,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -43,10 +46,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.eccomerce_app.util.General
-import com.example.e_commercompose.ui.component.CustomAuthBotton
-import com.example.e_commercompose.ui.component.Sizer
+import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.component.TextInputWithTitle
-import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.hotel_mobile.Util.Validation
@@ -69,7 +70,6 @@ fun SignUpPage(
 
 
     val errorMessage = authKoin.errorMessage.collectAsState()
-    val isLoading = authKoin.isLoading.collectAsState()
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -79,16 +79,19 @@ fun SignUpPage(
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
     val confirmPassword = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
+
+    val isLoading = remember { mutableStateOf(false) }
     val isCheckBox = remember { mutableStateOf(false) }
     val isEmailError = remember { mutableStateOf(false) }
     val isNameError = remember { mutableStateOf(false) }
     val isPhoneError = remember { mutableStateOf(false) }
     val isPasswordError = remember { mutableStateOf(false) }
     val isPasswordConfirm = remember { mutableStateOf(false) }
+    val isTermAndServicesError = remember { mutableStateOf(false) }
     val errorMessageValidation = remember { mutableStateOf("") }
 
 
-    fun validateLoginInput(
+    fun validateSignupInput(
         name: String,
         email: String,
         password: String,
@@ -100,61 +103,86 @@ fun SignUpPage(
         isPasswordError.value = false
         isPasswordConfirm.value = false
 
-        if (name.trim().isEmpty()) {
-            errorMessageValidation.value = "name must not be empty"
-            isNameError.value = true
-            return false
+        when {
+
+            name.trim().isEmpty() -> {
+                errorMessageValidation.value = "name must not be empty"
+                isNameError.value = true
+                return false
+            }
+
+            email.trim().isEmpty() -> {
+                errorMessageValidation.value = "email must not be empty"
+                isEmailError.value = true
+                return false
+            }
+
+            !Validation.emailValidation(email) -> {
+                errorMessageValidation.value = "write valid email"
+                isEmailError.value = true
+                return false
+            }
+
+            phone.value.text.trim().isEmpty() -> {
+                errorMessageValidation.value = "phone must not Empty"
+                isPhoneError.value = true
+                return false
+            }
+
+            password.trim().isEmpty() -> {
+                errorMessageValidation.value = ("password must not be empty")
+                isPasswordError.value = true
+                return false
+            }
+
+            !Validation.passwordSmallValidation(password) -> {
+                errorMessageValidation.value = ("password must not contain two small letter")
+                isPasswordError.value = true
+                return false
+            }
+
+            !Validation.passwordNumberValidation(password) -> {
+                errorMessageValidation.value = ("password must not contain two number")
+                isPasswordError.value = true
+                return false
+            }
+
+            !Validation.passwordCapitalValidation(password) -> {
+                errorMessageValidation.value = ("password must not contain two capitalLetter")
+                isPasswordError.value = true
+                return false
+            }
+
+            !Validation.passwordSpicialCharracterValidation(password) -> {
+                errorMessageValidation.value = ("password must not contain two spical character")
+                isPasswordError.value = true
+                return false
+            }
+
+            confirmPassword.trim().isEmpty() -> {
+                errorMessageValidation.value = ("password must not be empty")
+                isPasswordConfirm.value = true
+                return false
+            }
+
+            password != confirmPassword -> {
+                errorMessageValidation.value = ("confirm password not equal to password")
+                isPasswordConfirm.value = true
+                return false
+            }
+
+            !isCheckBox.value -> {
+                errorMessageValidation.value = "Term And Policies is Required"
+                isTermAndServicesError.value = true;
+                // coroutine.launch { snackBarHostState.showSnackbar("You should check the condition box to signup") }
+
+                return false
+            }
+
+
+            else -> return true
         }
 
-        if (email.trim().isEmpty()) {
-            errorMessageValidation.value = "email must not be empty"
-            isEmailError.value = true
-            return false
-        } else if (!Validation.emailValidation(email)) {
-            errorMessageValidation.value = "write valid email"
-            isEmailError.value = true
-            return false
-        } else if (phone.value.text.trim().isEmpty()) {
-            errorMessageValidation.value = "phone must not Empty"
-            isPhoneError.value = true
-            return false
-        } else if (password.trim().isEmpty()) {
-            errorMessageValidation.value = ("password must not be empty")
-            isPasswordError.value = true
-            return false
-        } else if (!Validation.passwordSmallValidation(password)) {
-            errorMessageValidation.value = ("password must not contain two small letter")
-            isPasswordError.value = true
-            return false
-        } else if (!Validation.passwordNumberValidation(password)) {
-            errorMessageValidation.value = ("password must not contain two number")
-            isPasswordError.value = true
-            return false
-        } else if (!Validation.passwordCapitalValidation(password)) {
-            errorMessageValidation.value = ("password must not contain two capitalLetter")
-            isPasswordError.value = true
-            return false
-        } else if (!Validation.passwordSpicialCharracterValidation(password)) {
-            errorMessageValidation.value = ("password must not contain two spical character")
-            isPasswordError.value = true
-            return false
-        } else if (confirmPassword.trim().isEmpty()) {
-            errorMessageValidation.value = ("password must not be empty")
-            isPasswordConfirm.value = true
-            return false
-        } else if (password != confirmPassword) {
-            errorMessageValidation.value = ("confirm password not equal to password")
-            isPasswordConfirm.value = true
-            return false
-        } else if (!isCheckBox.value) {
-
-            coroutine.launch { snackBarHostState.showSnackbar("You should check the condition box to signup") }
-
-            return false
-        }
-
-
-        return true
     }
 
     LaunchedEffect(errorMessage.value) {
@@ -199,9 +227,7 @@ fun SignUpPage(
 
                 )
         },
-
-
-        ) {
+    ) {
 
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -229,90 +255,94 @@ fun SignUpPage(
                     }
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.Start,
-//                        verticalArrangement = Arrangement.Center
             ) {
 
                 TextInputWithTitle(
                     name,
                     title = "Name",
-                    placHolder = "Enter Your name",
+                    placeHolder = "Enter Your name",
+                    errorMessage = errorMessageValidation.value,
                     isHasError = isNameError.value,
-                    erroMessage = errorMessageValidation.value,
-                    focusRequester = focusRequester
                 )
+
                 TextInputWithTitle(
                     email,
                     title = "Email",
-                    placHolder = "Enter Your email",
+                    placeHolder = "Enter Your email",
+                    errorMessage = errorMessageValidation.value,
                     isHasError = isEmailError.value,
-                    erroMessage = errorMessageValidation.value,
-                    focusRequester = focusRequester
                 )
-                TextNumberInputWithTitle(
+                TextInputWithTitle(
                     phone,
-                    placHolder = "Enter Phone",
                     title = "Phone",
+                    placeHolder = "Enter Phone",
+                    errorMessage = errorMessageValidation.value,
                     isHasError = isPhoneError.value,
-                    erroMessage = errorMessageValidation.value
                 )
                 TextSecureInputWithTitle(
                     password,
                     "Password",
                     isPasswordError.value,
-                    errorMessageValidation.value
+                    errorMessageValidation.value,
                 )
                 TextSecureInputWithTitle(
                     confirmPassword,
                     "Confirm Password",
                     isPasswordConfirm.value,
-                    errorMessageValidation.value
+                    errorMessageValidation.value,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
-                Box(
-                    modifier = Modifier.background(Color.Red)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(), horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                )
+                {
+                    Checkbox(
+                        checked = isCheckBox.value,
+                        onCheckedChange = { isCheckBox.value = !isCheckBox.value },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = CustomColor.primaryColor700
+                        ),
+                        modifier = Modifier.padding()
                     )
-                    {
-                        Checkbox(
-                            checked = isCheckBox.value,
-                            onCheckedChange = { isCheckBox.value = !isCheckBox.value },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = CustomColor.primaryColor700
-                            ),
-                            modifier = Modifier.padding()
-                        )
-                        Text(
-                            "Agree With",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Normal,
-                            color = CustomColor.neutralColor950,
-                            fontSize = (16 / fontScall).sp,
-                        )
-                        Text(
-                            "Term & Condition",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Medium,
-                            color = CustomColor.primaryColor700,
-                            fontSize = (16 / fontScall).sp,
-                            modifier = Modifier
-                                .padding(start = 3.dp)
-                                .clickable {
+                    Text(
+                        "Agree With",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        color = if (isTermAndServicesError.value) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
+                        fontSize = (16 / fontScall).sp,
+                    )
+                    Text(
+                        "Term & Condition",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Medium,
+                        color = if (isTermAndServicesError.value) CustomColor.alertColor_1_400 else CustomColor.primaryColor700,
+                        fontSize = (16 / fontScall).sp,
+                        modifier = Modifier
+                            .padding(start = 3.dp)
+                            .clickable {
 
-                                },
-                            textDecoration = TextDecoration.Underline
-                        )
-                    }
+                            },
+                        textDecoration = TextDecoration.Underline
+                    )
                 }
-
+                if (isTermAndServicesError.value)
+                    Text(
+                        errorMessageValidation.value,
+                        color = CustomColor.alertColor_1_400,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = (14 / fontScall).sp,
+                        modifier = Modifier.offset(x = (-15).dp)
+                    )
 //                Sizer(heigh = 10)
 
-                CustomAuthBotton(
+                CustomAuthBottom(
                     isLoading = isLoading.value,
                     validationFun = {
-                        validateLoginInput(
+                        validateSignupInput(
                             email = email.value.text,
                             name = name.value.text,
                             password = password.value.text,
@@ -322,15 +352,37 @@ fun SignUpPage(
                     buttonTitle = "Login",
                     operation = {
                         keyboardController?.hide()
+                        coroutine.launch {
+                            isLoading.value = true;
+//                            val token = async { authKoin.generateTokenNotification() }.await()
+                            val token = Pair(
+                                "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+                                null
+                            )
 
-                        authKoin.signUpUser(
-                            phone = phone.value.text,
-                            email = email.value.text,
-                            password = password.value.text,
-                            name = name.value.text,
-                            nav = nav
-                        )
-                    })
+                            if (token.first != null) {
+                                authKoin.signUpUser(
+                                    phone = phone.value.text,
+                                    email = email.value.text,
+                                    password = password.value.text,
+                                    name = name.value.text,
+                                    nav = nav,
+                                    token = token.first!!,
+                                    isLoading = isLoading
+                                )
+                            } else {
+                                isLoading.value = false
+                                coroutine.launch {
+                                    snackBarHostState.showSnackbar(
+                                        token.second
+                                            ?: "network must be connected to complete operation"
+                                    )
+
+                                }
+                            }
+                        }
+                    }
+                )
 
 
             }

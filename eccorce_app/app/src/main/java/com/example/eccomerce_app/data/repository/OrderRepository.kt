@@ -1,10 +1,10 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.CreateOrderDto
 import com.example.eccomerce_app.dto.OrderDto
+import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -20,16 +20,16 @@ import java.io.IOException
 import java.net.UnknownHostException
 import java.util.UUID
 
-class OrderRepository(val client: HttpClient) {
+class OrderRepository(val client: HttpClient)   {
 
-    suspend fun submitOrder(cartData: CreateOrderDto): NetworkCallHandler {
+     suspend fun submitOrder(cartData: CreateOrderDto): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Order"
             val result = client.post(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 contentType(ContentType.Application.Json)
@@ -38,7 +38,7 @@ class OrderRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.Created -> {
+                HttpStatusCode.Companion.Created -> {
 
                     NetworkCallHandler.Successful(result.body<OrderDto>())
 
@@ -65,27 +65,27 @@ class OrderRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getMyOrders(pageNumber: Int): NetworkCallHandler {
+     suspend fun getMyOrders(pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Order/me/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
 
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
 
                     NetworkCallHandler.Successful(result.body<List<OrderDto>>())
 
                 }
 
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
 
@@ -110,21 +110,21 @@ class OrderRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteOrder(orderId: UUID): NetworkCallHandler {
+     suspend fun deleteOrder(orderId: UUID): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Order/${orderId}"
             val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
 
             }
 
             when (result.status) {
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
 
                     NetworkCallHandler.Successful(true)
 

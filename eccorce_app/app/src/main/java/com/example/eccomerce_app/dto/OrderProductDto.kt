@@ -7,9 +7,9 @@ import java.util.UUID
 @Serializable
 data class OrderProductDto(
     @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
+    val id: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val StoreId: UUID,
-    val Name: String,
-    val Thmbnail: String
+    val storeId: UUID,
+    val name: String,
+    val thmbnail: String?=null
 )

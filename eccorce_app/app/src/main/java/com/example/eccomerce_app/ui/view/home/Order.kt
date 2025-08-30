@@ -38,19 +38,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import coil.compose.SubcomposeAsyncImage
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.eccomerce_app.ui.component.OrderItemCartShape
 import com.example.eccomerce_app.viewModel.OrderViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -164,140 +163,15 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
 
                         ) {
                             order.orderItems.forEach { value ->
-                                Row {
-                                    SubcomposeAsyncImage(
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .height(80.dp)
-                                            .width(80.dp)
-                                            .clip(RoundedCornerShape(8.dp)),
-                                        model = General.handlingImageForCoil(
-                                            value.product.thumbnail,
-                                            context
-                                        ),
-                                        contentDescription = "",
-                                        loading = {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize(),
-                                                contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                            ) {
-                                                CircularProgressIndicator(
-                                                    color = Color.Black,
-                                                    modifier = Modifier.size(53.dp) // Adjust the size here
-                                                )
-                                            }
-                                        },
-                                    )
-
-                                    Sizer(width = 5)
-
-                                    Column {
-                                        Text(
-                                            value.product.name,
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = (16).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Start
-                                        )
-                                        if (value.productVariant.isNotEmpty())
-                                            Sizer(5)
-
-                                        value.productVariant.forEach { variant ->
-
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-
-                                                Text(
-                                                    variant.variantName + " :",
-                                                    fontFamily = General.satoshiFamily,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = (16).sp,
-                                                    color = CustomColor.neutralColor950,
-                                                    textAlign = TextAlign.Center
-                                                )
-                                                Sizer(width = 5)
-                                                when (variant.variantName == "Color") {
-                                                    true -> {
-                                                        val colorValue =
-                                                            General.convertColorToInt(variant.productVariantName)
-
-                                                        if (colorValue != null)
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .height(20.dp)
-                                                                    .width(20.dp)
-                                                                    .background(
-                                                                        colorValue,
-                                                                        RoundedCornerShape(20.dp)
-                                                                    )
-
-                                                                    .clip(RoundedCornerShape(20.dp))
-//                                                    .padding(5.dp)
-                                                            )
-                                                    }
-
-                                                    else -> {
-                                                        Box(
-                                                            modifier = Modifier
-
-                                                                .clip(RoundedCornerShape(20.dp)),
-                                                            contentAlignment = Alignment.Center
-                                                        ) {
-                                                            Text(
-                                                                text = variant.productVariantName,
-                                                                fontFamily = General.satoshiFamily,
-                                                                fontWeight = FontWeight.Normal,
-                                                                fontSize = (16).sp,
-                                                                color = CustomColor.neutralColor800,
-                                                                textAlign = TextAlign.Center
-                                                            )
-                                                        }
-                                                    }
-                                                }
-
-                                            }
-                                        }
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-
-                                            Text(
-                                                "Status  :",
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = (16).sp,
-                                                color = CustomColor.neutralColor950,
-                                                textAlign = TextAlign.Center
-                                            )
-                                            Sizer(width = 5)
-                                            Text(
-                                                text = value.orderItemStatus,
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Normal,
-                                                fontSize = (16).sp,
-                                                color = when (value.orderItemStatus) {
-                                                    "InProgress" -> CustomColor.alertColor_3_500
-                                                    "Excepted" -> CustomColor.alertColor_2_700
-                                                    else -> CustomColor.alertColor_2_700
-                                                },
-                                                textAlign = TextAlign.Center
-                                            )
-
-
-                                        }
-                                    }
-                                }
-
+                                OrderItemCartShape(value,context)
                                 Sizer(5)
 
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
+                                )
+                                {
                                     Text(
                                         "Total Price",
                                         fontFamily = General.satoshiFamily,
@@ -322,7 +196,8 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                     modifier = Modifier
                                         .fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
+                                )
+                                {
                                     Text(
                                         "DeliveryFee Price",
                                         fontFamily = General.satoshiFamily,

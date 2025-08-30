@@ -37,13 +37,14 @@ import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationGro
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.enMapType
+import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
@@ -82,9 +83,11 @@ fun MapHomeScreen(
 
 
     val isLoading = remember { mutableStateOf(false) }
+    val isHasError = remember { mutableStateOf(false) }
     val isOpenSheet = remember { mutableStateOf(false) }
-    val isCanInteractWithMap = (mapType == enMapType.My || mapType == enMapType.MyStore)
     val isHasTitle = (mapType == enMapType.My)
+
+    val errorMessage = remember { mutableStateOf("") }
 
     val addressTitle = remember { mutableStateOf(TextFieldValue(title ?: "")) }
 
@@ -124,6 +127,22 @@ fun MapHomeScreen(
         }
     }
 
+    fun validateUserAddressTitle(): Boolean {
+        isHasError.value = false;
+        errorMessage.value = ""
+        when (addressTitle.value.text.isEmpty()) {
+            true -> {
+                isHasError.value = true;
+                errorMessage.value = "Address Title mustn't be empty"
+                return false
+            }
+
+            else -> {
+                return true;
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         userViewModel.getMyInfo()
     }
@@ -150,11 +169,15 @@ fun MapHomeScreen(
 
                         TextInputWithTitle(
                             value = addressTitle,
-                            placHolder = addressTitle.value.text.ifEmpty { "Write Address Name" },
-                            title = "Address Title"
-                        )
+                            title = "Address Title",
+                            placeHolder = addressTitle.value.text.ifEmpty { "Write Address Name" },
+                            errorMessage = errorMessage.value,
+                            isHasError = isHasError.value,
+
+                            )
                         Sizer(10)
-                        CustomBotton(
+                        CustomAuthBottom(
+
                             operation = {
                                 coroutine.launch {
                                     isLoading.value = true
@@ -191,7 +214,7 @@ fun MapHomeScreen(
                                         return@launch
                                     }
 
-                                    userViewModel.userPassLocation()
+                                    userViewModel.userPassLocation(true)
                                     initial()
                                     nav.navigate(Screens.HomeGraph) {
                                         popUpTo(nav.graph.id) {
@@ -204,7 +227,10 @@ fun MapHomeScreen(
 
                             },
                             buttonTitle = if (id.isNullOrEmpty()) "Add" else "Update",
-                            color = CustomColor.primaryColor700
+                            validationFun = {
+                                validateUserAddressTitle()
+                            },
+                            isLoading = isLoading.value
                         )
                         Sizer(10)
                     }
@@ -254,13 +280,13 @@ fun MapHomeScreen(
                 }
             }
 
-            if (isCanInteractWithMap)
+            if (isHasTitle)
                 CustomBotton(
                     buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
                     color = CustomColor.primaryColor700,
                     isEnable = true,
                     modifier = Modifier
-                        .padding(bottom = it.calculateBottomPadding())
+                        .padding(bottom = it.calculateBottomPadding() + 10.dp)
 
                         .height(50.dp)
                         .fillMaxWidth(0.9f)
@@ -282,7 +308,7 @@ fun MapHomeScreen(
                             }
                         }
                     },
-                    lableSize = 20
+                    labelSize = 20
                 )
 
 

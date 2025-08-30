@@ -41,8 +41,7 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
            .Banner
            .Where(ba => ba.Id == id)
            .ExecuteDeleteAsync();
-       return await context
-           .SaveChangesAsync(); 
+       return 1;
     }
 
     public async Task<Banner?> getBanner(Guid id)

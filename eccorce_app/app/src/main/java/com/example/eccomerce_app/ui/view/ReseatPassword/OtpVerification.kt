@@ -99,7 +99,7 @@ fun OtpVerificationScreen(
                 TextInputWithTitle(
                     otpValue,
                     title = "",
-                    placHolder = "Enter Your Otp",
+                    placeHolder = "Enter Your Otp",
                 )
 
 
@@ -110,7 +110,7 @@ fun OtpVerificationScreen(
                         isSendingData.value = true
                         coroutine.launch {
                             val result = async {
-                                authViewModel.otpVerifing(email, otpValue.value.text)
+                                authViewModel.otpVerifying(email, otpValue.value.text)
                             }.await()
                             isSendingData.value = false
 

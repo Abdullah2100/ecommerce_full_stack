@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -108,6 +109,7 @@ import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.Instant
 import java.util.Calendar
 import java.util.UUID
 import kotlin.collections.forEach
@@ -148,6 +150,7 @@ fun StoreScreen(
     val operationType = remember { mutableStateOf<enOperation?>(null) }
 
     val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
+    val selectedSubCategoryIdHolder = remember { mutableStateOf<UUID?>(null) }
 
     val bannerImage = remember { mutableStateOf<File?>(null) }
 
@@ -156,6 +159,7 @@ fun StoreScreen(
     val errorMessage = remember { mutableStateOf("") }
 
     val page = remember { mutableIntStateOf(1) }
+
 
     val isLoadingMore = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
@@ -168,6 +172,7 @@ fun StoreScreen(
     val isShownDateDialog = remember { mutableStateOf(false) }
     val isPigImage = remember { mutableStateOf<Boolean?>(null) }
     val isSendingData = remember { mutableStateOf(false) }
+
     val reachedBottom = remember { derivedStateOf { lazyState.reachedBottom() } }
 
 
@@ -195,14 +200,11 @@ fun StoreScreen(
         if (isExpandedCategory.value) 180f else 0f
     )
 
-    //text feild
+    //text filed
     val storeName =
         remember { mutableStateOf(TextFieldValue(createdStoreInfoHolder.value?.name ?: "")) }
     val categoryName = remember { mutableStateOf(TextFieldValue("")) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
-
-
-
 
 
     val currentTime = Calendar.getInstance().timeInMillis
@@ -302,7 +304,6 @@ fun StoreScreen(
     }
 
 
-
     fun creationValidation(): Boolean {
         keyboardController?.hide()
         var errorMessage = ""
@@ -310,7 +311,7 @@ fun StoreScreen(
             "You must select the wallpaper image"
         else if (createdStoreInfoHolder.value?.smallImage == null) errorMessage =
             "You must select the small image"
-        else if (createdStoreInfoHolder.value?.name == null) errorMessage =
+        else if (createdStoreInfoHolder.value?.name.isNullOrEmpty()) errorMessage =
             "You must write the store name"
         else if (createdStoreInfoHolder.value?.latitude == null) errorMessage =
             "You must select the store Location"
@@ -329,7 +330,10 @@ fun StoreScreen(
         storeViewModel.getStoreData(storeId = id!!)
         bannerViewModel.getStoreBanner(id)
         subCategoryViewModel.getStoreSubCategories(id, 1)
+        productViewModel.getProducts(mutableStateOf(1), id)
     }
+
+    Log.d("SubCategoryDataIs", "${subcategories.value.toString()}")
     LaunchedEffect(Unit) {
         if (storeId != null) {
             getStoreInfoByStoreId(storeId)
@@ -356,9 +360,12 @@ fun StoreScreen(
 
     }
 
+    PullToRefreshBox(
+        isRefreshing = isRefresh.value,
+        onRefresh = { getStoreInfoByStoreId(storeId!!) }
 
-
-
+    )
+    {
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -390,7 +397,8 @@ fun StoreScreen(
                     ) {
                         Column(
                             modifier = Modifier.fillMaxWidth()
-                        ) {
+                        )
+                        {
                             Text(
                                 "Category",
                                 fontFamily = General.satoshiFamily,
@@ -461,9 +469,9 @@ fun StoreScreen(
 
 
                         TextInputWithTitle(
-                            title = "Name",
                             value = subCategoryName,
-                            placHolder = "Enter Sub Category Name",
+                            title = "Name",
+                            placeHolder = "Enter Sub Category Name",
                         )
 
                         CustomBotton(
@@ -495,7 +503,6 @@ fun StoreScreen(
                                         subCategoryName.value = TextFieldValue("")
                                         if (isUpdated.value) {
                                             isUpdated.value = false
-                                            selectedSubCategoryId.value = UUID.randomUUID()
                                         }
                                     } else {
                                         isSubCategoryCreateError.value = true
@@ -521,20 +528,19 @@ fun StoreScreen(
                                         keyboardController?.hide()
                                         val result = async {
                                             subCategoryViewModel.deleteSubCategory(
-                                                id = selectedSubCategoryId.value!!
+                                                id = selectedSubCategoryIdHolder.value!!
                                             )
                                         }.await()
                                         isSendingData.value = false
                                         isDeleted.value = false
                                         if (result.isNullOrEmpty()) {
                                             isShownSubCategoryBottomSheet.value = false
+                                            selectedSubCategoryIdHolder.value = null
                                             isExpandedCategory.value = false
                                             categoryName.value = TextFieldValue("")
                                             subCategoryName.value = TextFieldValue("")
-                                            if (isUpdated.value) {
-                                                isUpdated.value = false
-                                                selectedSubCategoryId.value = UUID.randomUUID()
-                                            }
+                                            isUpdated.value = false
+                                            selectedSubCategoryId.value = null
                                         } else {
                                             isSubCategoryCreateError.value = true
                                             errorMessage.value = result
@@ -587,7 +593,8 @@ fun StoreScreen(
                 }
 
 
-        }, modifier = Modifier
+        },
+        modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
         topBar = {
@@ -622,7 +629,8 @@ fun StoreScreen(
                 actions = {
                     if ((myStoreId == null) && isFromHome == false) {
                         TextButton(
-                            enabled = !isSendingData.value, onClick = {
+                            enabled = !isSendingData.value,
+                            onClick = {
                                 if (creationValidation()) {
                                     keyboardController?.hide()
                                     isSendingData.value = true
@@ -636,14 +644,11 @@ fun StoreScreen(
                                                 smallImage = createdStoreInfoHolder.value!!.smallImage!!,
                                                 longitude = createdStoreInfoHolder.value!!.longitude!!,
                                                 latitude = createdStoreInfoHolder.value!!.latitude!!,
-                                                sumAddtionalFun = { id ->
+                                                sumAdditionalFun = { id ->
                                                     userViewModel.updateMyStoreId(
                                                         id
                                                     )
-                                                    subCategoryViewModel.getStoreSubCategories(
-                                                        storeId = myInfo.value!!.storeId!!,
-                                                        pageNumber = 1
-                                                    )
+                                                    getStoreInfoByStoreId(id)
                                                 }
                                             )
                                         }.await()
@@ -768,71 +773,70 @@ fun StoreScreen(
                 }
             }
 
-        if (isShownDateDialog.value) DatePickerDialog(
-            modifier = Modifier
-                .padding(horizontal = 40.dp),
+        if (isShownDateDialog.value)
+            DatePickerDialog(
+                modifier = Modifier
+                    .padding(horizontal = 40.dp),
 
-            onDismissRequest = { isShownDateDialog.value = false },
-            confirmButton =
-                {
-                    TextButton(
-                        onClick = {
-                            if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
-                                isShownDateDialog.value = false
-                                coroutine.launch {
-                                    snackBarHostState.showSnackbar("You must select valid date")
-                                }
-                            } else {
-                                isShownDateDialog.value = false
-                                isSendingData.value = true
-                                coroutine.launch {
-                                    val dattime = Calendar.getInstance().apply {
-                                        timeInMillis = datePickerState.selectedDateMillis!!
-                                    }
-                                    val result = async {
-                                        bannerViewModel.createBanner(
-                                            endDate = dattime.toLocalDateTime().toString(),
-                                            image = bannerImage.value!!,
-                                        )
-                                    }.await()
-                                    isSendingData.value = false
-                                    var errorMessage = ""
-                                    errorMessage =
-                                        if (result.isNullOrEmpty()) "banner created successfully"
-                                        else result
-                                    coroutine.launch {
-                                        snackBarHostState.showSnackbar(
-                                            errorMessage
-                                        )
-
-                                    }
-                                }
-
-                            }
-                        }) {
-                        Text(
-                            "ok",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = (18).sp,
-                            color = CustomColor.primaryColor700,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
+                onDismissRequest = {
+                    isShownDateDialog.value = false
                 },
-            dismissButton = { isShownDateDialog.value = false })
-        {
-            DatePicker(state = datePickerState)
-        }
+                confirmButton =
+                    {
+                        TextButton(
+                            onClick = {
+
+                                if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
+                                    isShownDateDialog.value = false
+                                    coroutine.launch {
+                                        snackBarHostState.showSnackbar("You must select valid date")
+                                    }
+                                } else {
+                                    isShownDateDialog.value = false
+                                    isSendingData.value = true
+                                    coroutine.launch {
+                                        val daytime = Calendar.getInstance().apply {
+                                            timeInMillis = datePickerState.selectedDateMillis!!
+                                        }
+                                        val result = async {
+                                            bannerViewModel.createBanner(
+                                                endDate = daytime.toLocalDateTime().toString(),
+                                                image = bannerImage.value!!,
+                                            )
+                                        }.await()
+                                        isSendingData.value = false
+                                        var errorMessage = ""
+                                        errorMessage =
+                                            if (result.isNullOrEmpty()) "banner created successfully"
+                                            else result
+                                        coroutine.launch {
+                                            snackBarHostState.showSnackbar(
+                                                errorMessage
+                                            )
+
+                                        }
+                                    }
+
+                                }
+                            }) {
+                            Text(
+                                "ok",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (18).sp,
+                                color = CustomColor.primaryColor700,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    },
+            )
+            {
+                DatePicker(state = datePickerState)
+            }
 
 
 
-        PullToRefreshBox(
-            isRefreshing = isRefresh.value,
-            onRefresh = { getStoreInfoByStoreId(storeId!!) }
 
-        )
-        {
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
@@ -1182,9 +1186,9 @@ fun StoreScreen(
                             TextInputWithTitle(
                                 value = storeName,
                                 title = "",
-                                placHolder = storeData?.name ?: "Write Your Store Name",
+                                placeHolder = storeData?.name ?: "Write Your Store Name",
                                 isHasError = false,
-                                onChange = { it -> storeViewModel.setStoreCreateData(storeTitle = it) }
+                                onChange = { it -> storeViewModel.setStoreCreateData(storeTitle = it) },
                             )
 
 
@@ -1203,7 +1207,7 @@ fun StoreScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Store Bannel",
+                                    "Store Banner",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = (18).sp,
@@ -1241,7 +1245,7 @@ fun StoreScreen(
 
                 item {
 
-                    when (banners.value == null) {
+                    when (banners.value == null && storeData != null) {
                         true -> {
                             Sizer(10)
 
@@ -1284,7 +1288,7 @@ fun StoreScreen(
                 }
 
                 item {
-
+                    Sizer(10)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1334,9 +1338,12 @@ fun StoreScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.Start
                         ) {
-                            Sizer(10)
+                            Sizer(20)
 
-                            if (!subcategories.value.isNullOrEmpty()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Text(
                                     "Sub Category ",
                                     fontFamily = General.satoshiFamily,
@@ -1345,12 +1352,37 @@ fun StoreScreen(
                                     color = CustomColor.neutralColor950,
                                     textAlign = TextAlign.Center,
                                 )
-                                Sizer(5)
+
+                                Box(
+                                    modifier = Modifier
+                                        .height(40.dp)
+                                        .width(70.dp)
+                                        .background(
+                                            CustomColor.primaryColor500,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            isUpdated.value = false
+                                            isShownSubCategoryBottomSheet.value = true
+
+                                        }, contentAlignment = Alignment.Center
+
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        "",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
                             }
+                            Sizer(5)
                             LazyRow {
                                 when ((subcategories.value == null)) {
                                     true -> {
-                                        items(20) {
+                                        items(20, key = { key -> key }) {
                                             Box(
                                                 modifier = Modifier
                                                     .padding(end = 5.dp)
@@ -1366,6 +1398,7 @@ fun StoreScreen(
                                     }
 
                                     else -> {
+
                                         if (!storeSubCategories.isNullOrEmpty()) {
                                             item {
                                                 Box(
@@ -1406,24 +1439,22 @@ fun StoreScreen(
                                                 }
 
                                             }
-                                            items(storeSubCategories.size) { index ->
+                                            items(
+                                                storeSubCategories,
+                                                key = { category -> category.id }) { subCategroy ->
                                                 Box(
                                                     modifier = Modifier
                                                         .padding(end = 4.dp)
                                                         .height(40.dp)
-                                                        .width(70.dp)
+//                                                        .width(70.dp)
                                                         .background(
-                                                            if (selectedSubCategoryId.value == storeSubCategories.get(
-                                                                    index
-                                                                ).id
+                                                            if (selectedSubCategoryId.value == subCategroy.id
                                                             ) CustomColor.alertColor_3_300 else Color.White,
                                                             RoundedCornerShape(8.dp)
                                                         )
                                                         .border(
                                                             width = 1.dp,
-                                                            color = if (selectedSubCategoryId.value == storeSubCategories.get(
-                                                                    index
-                                                                ).id
+                                                            color = if (selectedSubCategoryId.value == subCategroy.id
                                                             ) Color.White else CustomColor.neutralColor200,
                                                             RoundedCornerShape(8.dp)
 
@@ -1431,11 +1462,11 @@ fun StoreScreen(
                                                         .clip(RoundedCornerShape(8.dp))
                                                         .combinedClickable(onClick = {
                                                             coroutine.launch {
-                                                                if (selectedSubCategoryId.value != subcategories.value!![index].id) {
+                                                                if (selectedSubCategoryId.value != subCategroy.id) {
                                                                     isChangeSubCategory.value = true
 
                                                                     selectedSubCategoryId.value =
-                                                                        storeSubCategories[index].id
+                                                                        subCategroy.id
 
                                                                     isChangeSubCategory.value =
                                                                         false
@@ -1447,28 +1478,33 @@ fun StoreScreen(
                                                             if (isFromHome == false) {
 
                                                                 val name =
-                                                                    categories.value?.firstOrNull { it.id == subcategories.value!![index].categoryId }?.name
+                                                                    categories.value?.firstOrNull { it.id == subCategroy.categoryId }?.name
                                                                         ?: ""
 
+                                                                selectedSubCategoryIdHolder.value =
+                                                                    subCategroy.id
                                                                 categoryName.value =
                                                                     TextFieldValue(name)
                                                                 subCategoryName.value =
-                                                                    TextFieldValue(subcategories.value!![index].name)
+                                                                    TextFieldValue(
+                                                                        subCategroy.name
+                                                                    )
                                                                 isUpdated.value = true
-
                                                                 isShownSubCategoryBottomSheet.value =
                                                                     true
 
                                                             }
-                                                        }), contentAlignment = Alignment.Center
+                                                        })
+                                                        .padding(horizontal = 10.dp),
+                                                    contentAlignment = Alignment.Center
 
                                                 ) {
                                                     Text(
-                                                        storeSubCategories[index].name,
+                                                        subCategroy.name,
                                                         fontFamily = General.satoshiFamily,
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = (18).sp,
-                                                        color = if (selectedSubCategoryId.value == storeSubCategories[index].id
+                                                        color = if (selectedSubCategoryId.value == subCategroy.id
                                                         ) Color.White else CustomColor.neutralColor200,
 
                                                         textAlign = TextAlign.Center,
@@ -1481,33 +1517,6 @@ fun StoreScreen(
                                     }
                                 }
 
-                                if (isFromHome == false) item {
-
-                                    if (!storeSubCategories.isNullOrEmpty()) Sizer(width = 10)
-                                    Box(
-                                        modifier = Modifier
-                                            .height(40.dp)
-                                            .width(70.dp)
-                                            .background(
-                                                CustomColor.primaryColor500,
-                                                RoundedCornerShape(8.dp)
-                                            )
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .clickable {
-                                                isUpdated.value = false
-                                                isShownSubCategoryBottomSheet.value = true
-
-                                            }, contentAlignment = Alignment.Center
-
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Add,
-                                            "",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                }
                             }
 
                             Sizer(10)
@@ -1546,7 +1555,8 @@ fun StoreScreen(
                                             else -> {
                                                 if (productFilterBySubCategory.isNotEmpty()) {
                                                     ProductShape(
-                                                        productFilterBySubCategory,
+                                                        isCanNavigateToStore = false,
+                                                        product=productFilterBySubCategory,
                                                         nav = nav,
                                                         delFun = if (isFromHome == true) null else { it ->
                                                             coroutine.launch {

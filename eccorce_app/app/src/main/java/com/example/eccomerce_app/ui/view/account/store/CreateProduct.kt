@@ -75,10 +75,11 @@ import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.ui.component.CustomBotton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
-import com.example.e_commercompose.viewModel.VariantViewModel
+import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.hotel_mobile.Util.Validation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -190,6 +191,7 @@ fun CreateProductScreen(
                 }
             }
             if (imagesHolder.isNotEmpty()) {
+                imagesHolder.addAll(images.value)
                 images.value = imagesHolder
             }
         }
@@ -501,7 +503,7 @@ fun CreateProductScreen(
                 }
 
             }
-            Sizer(30)
+            Sizer(10)
             Text(
                 "Product Images",
                 fontFamily = General.satoshiFamily,
@@ -510,11 +512,12 @@ fun CreateProductScreen(
                 color = CustomColor.neutralColor950,
                 textAlign = TextAlign.Center,
             )
-            Sizer(15)
+            Sizer(5)
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
-            ) {
+            )
+            {
                 val (cameralRef) = createRefs()
 
                 FlowRow(
@@ -659,105 +662,34 @@ fun CreateProductScreen(
                 }
 
             }
-            Sizer(30)
-            Text(
-                "Name",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
+
+            Sizer(15)
+
             TextInputWithTitle(
                 value = productName,
-                title = "",
-                placHolder = productData?.name ?: "Product Name"
-            )
-
-            Text(
-                "Price",
-                fontFamily = General.satoshiFamily,
+                title = "Name",
+                placeHolder = productData?.name ?: "Product Name",
+                fontTitle = (18).sp,
                 fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
             )
-            Sizer(2)
-            OutlinedTextField(
 
-                maxLines = 6,
-                value = price.value,
-                onValueChange = { price.value = it },
-                placeholder = {
-                    Text(
-                        productData?.price?.toString() ?: "Product Price",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-
-                )
-            Sizer(20)
-            Text(
-                "Description",
-                fontFamily = General.satoshiFamily,
+            TextNumberInputWithTitle(
+                value = price,
+                title = "Price",
+                placeHolder = "Product Price",
+                errorMessage = "",
+                fontTitle = (18).sp,
                 fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
             )
-            Sizer(2)
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = description.value,
-                onValueChange = { description.value = it },
-                placeholder = {
-                    Text(
-                        productData?.description ?: "Product Description",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(290.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            TextInputWithTitle(
+                value = description,
+                title = "Description",
+                placeHolder = "Product Price",
+                errorMessage = "",
+                fontTitle = (18).sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 6
             )
-
-            Sizer(10)
 
             Text(
                 "SubCategory",
@@ -777,7 +709,8 @@ fun CreateProductScreen(
                         RoundedCornerShape(8.dp)
                     )
                     .clip(RoundedCornerShape(8.dp))
-            ) {
+            )
+            {
 
                 Row(
                     modifier = Modifier
@@ -839,256 +772,260 @@ fun CreateProductScreen(
                     }
                 }
             }
-            Sizer(5)
-            Text(
-                "Product Variant",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18).sp,
-                color = CustomColor.neutralColor950,
-                textAlign = TextAlign.Center,
-            )
-            Sizer(2)
-            if (productVariants.value.isNotEmpty())
+            if (productVariants.value.isNotEmpty()) {
                 Sizer(5)
-            FlowRow {
-                productVariants.value.forEachIndexed { index, value ->
-                    ConstraintLayout(
-                        modifier = Modifier.padding(end = 5.dp, bottom = 10.dp)
-                    ) {
-                        val (iconRef) = createRefs()
-                        Column(
-                            modifier = Modifier
-                                .background(
-                                    CustomColor.alertColor_3_300,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(
-                                    end = 25.dp,
-                                    start = 5.dp
-                                )
+                Text(
+                    "Product Variant",
+                    fontFamily = General.satoshiFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = (18).sp,
+                    color = CustomColor.neutralColor950,
+                    textAlign = TextAlign.Center,
+                )
+                Sizer(2)
+                if (productVariants.value.isNotEmpty())
+                    Sizer(5)
+                FlowRow {
+                    productVariants.value.forEachIndexed { index, value ->
+                        ConstraintLayout(
+                            modifier = Modifier.padding(end = 5.dp, bottom = 10.dp)
                         ) {
-                            Text(
-                                variants.value?.firstOrNull { it.id == value.variantId }?.name
-                                    ?: "",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (18).sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                            )
-                            Text(
-                                value.name,
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (18).sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                            val (iconRef) = createRefs()
+                            Column(
+                                modifier = Modifier
+                                    .background(
+                                        CustomColor.alertColor_3_300,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(
+                                        end = 25.dp,
+                                        start = 5.dp
+                                    )
+                            ) {
+                                Text(
+                                    variants.value?.firstOrNull { it.id == value.variantId }?.name
+                                        ?: "",
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (18).sp,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                )
+                                Text(
+                                    value.name,
+                                    fontFamily = General.satoshiFamily,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = (18).sp,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
 
-                        Box(
-                            modifier = Modifier
-                                .height(20.dp)
-                                .width(20.dp)
-                                .background(
-                                    Color.Red,
-                                    RoundedCornerShape(20.dp)
-                                )
-                                .clip(
-                                    RoundedCornerShape(20.dp)
-                                )
-                                .clickable {
-                                    if (productData != null && !productData.productVariants.isNullOrEmpty() &&
-                                        productData.productVariants.toListOfProductVarient()
-                                            .contains(value)
-                                    ) {
-                                        val deletedProductVariant =
-                                            mutableListOf<ProductVarientSelection>()
-                                        deletedProductVariant.add(value)
-                                        deletedProductVariant.addAll(deleteProductVariant.value)
-                                        deleteProductVariant.value = deletedProductVariant
+                            Box(
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .width(20.dp)
+                                    .background(
+                                        Color.Red,
+                                        RoundedCornerShape(20.dp)
+                                    )
+                                    .clip(
+                                        RoundedCornerShape(20.dp)
+                                    )
+                                    .clickable {
+                                        if (productData != null && !productData.productVariants.isNullOrEmpty() &&
+                                            productData.productVariants.toListOfProductVarient()
+                                                .contains(value)
+                                        ) {
+                                            val deletedProductVariant =
+                                                mutableListOf<ProductVarientSelection>()
+                                            deletedProductVariant.add(value)
+                                            deletedProductVariant.addAll(deleteProductVariant.value)
+                                            deleteProductVariant.value = deletedProductVariant
+                                        }
+                                        productVariants.value =
+                                            productVariants.value.filter { it.name != value.name }
                                     }
-                                    productVariants.value =
-                                        productVariants.value.filter { it.name != value.name }
-                                }
-                                .constrainAs(iconRef) {
-                                    top.linkTo(parent.top)
-                                    end.linkTo(parent.end)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Clear, "",
-                                tint = Color.White,
-                                modifier = Modifier.size(13.dp)
-                            )
+                                    .constrainAs(iconRef) {
+                                        top.linkTo(parent.top)
+                                        end.linkTo(parent.end)
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.Clear, "",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
                         }
                     }
                 }
-            }
-            if (productVariants.value.isNotEmpty())
-                Sizer(5)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        1.dp,
-                        CustomColor.neutralColor400,
-                        RoundedCornerShape(8.dp)
-                    )
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-
-                Row(
-                    modifier = Modifier
-                        .height(65.dp)
-                        .fillMaxWidth()
-
-                        .clickable {
-                            isExpandedVariant.value = !isExpandedVariant.value
-                        }
-                        .padding(horizontal = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                )
-                {
-                    Text(
-                        if (selectedVariantId.value == null) "Select Variant"
-                        else variants.value?.firstOrNull { it.id == selectedVariantId.value }?.name
-                            ?: ""
-                    )
-                    Icon(
-                        Icons.Default.KeyboardArrowDown, "",
-                        modifier = Modifier.rotate(rotationVariant.value)
-                    )
-                }
-
+                if (productVariants.value.isNotEmpty())
+                    Sizer(5)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(animatedVariant.value)
                         .border(
                             1.dp,
-                            CustomColor.neutralColor200,
-                            RoundedCornerShape(
-                                topStart = 4.dp,
-                                topEnd = 4.dp,
-                                bottomStart = 8.dp,
-                                bottomEnd = 8.dp
-                            )
-                        ),
+                            CustomColor.neutralColor400,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clip(RoundedCornerShape(8.dp))
+                )
+                {
 
-                    ) {
-                    if (!variants.value.isNullOrEmpty())
-                        variants.value!!.forEachIndexed { index, value ->
-                            Text(
-                                value.name,
-                                modifier = Modifier
-                                    .height(50.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable {
-                                        isExpandedVariant.value = false
-                                        selectedVariantId.value = value.id
-                                    }
-                                    .padding(top = 12.dp, start = 5.dp)
+                    Row(
+                        modifier = Modifier
+                            .height(65.dp)
+                            .fillMaxWidth()
 
-                            )
-                        }
+                            .clickable {
+                                isExpandedVariant.value = !isExpandedVariant.value
+                            }
+                            .padding(horizontal = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    )
+                    {
+                        Text(
+                            if (selectedVariantId.value == null) "Select Variant"
+                            else variants.value?.firstOrNull { it.id == selectedVariantId.value }?.name
+                                ?: ""
+                        )
+                        Icon(
+                            Icons.Default.KeyboardArrowDown, "",
+                            modifier = Modifier.rotate(rotationVariant.value)
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(animatedVariant.value)
+                            .border(
+                                1.dp,
+                                CustomColor.neutralColor200,
+                                RoundedCornerShape(
+                                    topStart = 4.dp,
+                                    topEnd = 4.dp,
+                                    bottomStart = 8.dp,
+                                    bottomEnd = 8.dp
+                                )
+                            ),
+
+                        ) {
+                        if (!variants.value.isNullOrEmpty())
+                            variants.value!!.forEachIndexed { index, value ->
+                                Text(
+                                    value.name,
+                                    modifier = Modifier
+                                        .height(50.dp)
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            isExpandedVariant.value = false
+                                            selectedVariantId.value = value.id
+                                        }
+                                        .padding(top = 12.dp, start = 5.dp)
+
+                                )
+                            }
+                    }
                 }
+                Sizer(5)
+
+
+                OutlinedTextField(
+
+                    maxLines = 6,
+                    value = productVariantName.value,
+                    onValueChange = { productVariantName.value = it },
+                    placeholder = {
+                        Text(
+                            "Variant Name",
+                            color = CustomColor.neutralColor500,
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = (16).sp
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Gray,
+                        focusedBorderColor = Color.Black
+                    ),
+                    textStyle = TextStyle(
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = (16).sp,
+                        color = CustomColor.neutralColor950
+                    ),
+                    trailingIcon = {
+                    },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                )
+                Sizer(5)
+
+                OutlinedTextField(
+
+                    maxLines = 6,
+                    value = productVariantPercentage.value,
+                    onValueChange = { productVariantPercentage.value = it },
+                    placeholder = {
+                        Text(
+                            "Variant Price",
+                            color = CustomColor.neutralColor500,
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = (16).sp
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Gray,
+                        focusedBorderColor = Color.Black
+                    ),
+                    textStyle = TextStyle(
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = (16).sp,
+                        color = CustomColor.neutralColor950
+                    ),
+                    trailingIcon = {
+                    },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                )
+                Sizer(5)
+
+                CustomBotton(
+                    isLoading = false,
+                    operation = {
+                        val selectedVariant = ProductVarientSelection(
+                            name = productVariantName.value.text,
+                            percentage = if (productVariantPercentage.value.text.isEmpty()) 1.0 else productVariantPercentage.value.text.toDouble(),
+                            variantId = selectedVariantId.value!!
+                        )
+
+                        val productVariantHolder = mutableListOf<ProductVarientSelection>()
+                        productVariantHolder.addAll(productVariants.value)
+                        productVariantHolder.add(selectedVariant)
+                        productVariants.value = productVariantHolder
+
+                        productVariantName.value = TextFieldValue("")
+                        productVariantPercentage.value = TextFieldValue("")
+                        selectedVariantId.value = null
+                    },
+                    buttonTitle = "Add ProductVariant",
+                    isEnable = selectedVariantId.value != null && productVariantName.value.text.isNotEmpty(),
+                    color = null
+                )
             }
-            Sizer(5)
 
-
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = productVariantName.value,
-                onValueChange = { productVariantName.value = it },
-                placeholder = {
-                    Text(
-                        "Variant Name",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-            Sizer(5)
-
-            OutlinedTextField(
-
-                maxLines = 6,
-                value = productVariantPercentage.value,
-                onValueChange = { productVariantPercentage.value = it },
-                placeholder = {
-                    Text(
-                        "Variant Price",
-                        color = CustomColor.neutralColor500,
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = (16).sp
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color.Gray,
-                    focusedBorderColor = Color.Black
-                ),
-                textStyle = TextStyle(
-                    fontFamily = General.satoshiFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = (16).sp,
-                    color = CustomColor.neutralColor950
-                ),
-                trailingIcon = {
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-            Sizer(5)
-
-            CustomBotton(
-                isLoading = false,
-                operation = {
-                    val selectedVariant = ProductVarientSelection(
-                        name = productVariantName.value.text,
-                        percentage = if (productVariantPercentage.value.text.isEmpty()) 1.0 else productVariantPercentage.value.text.toDouble(),
-                        variantId = selectedVariantId.value!!
-                    )
-
-                    val productVariantHolder = mutableListOf<ProductVarientSelection>()
-                    productVariantHolder.addAll(productVariants.value)
-                    productVariantHolder.add(selectedVariant)
-                    productVariants.value = productVariantHolder
-
-                    productVariantName.value = TextFieldValue("")
-                    productVariantPercentage.value = TextFieldValue("")
-                    selectedVariantId.value = null
-                },
-                buttonTitle = "Add ProductVariant",
-                isEnable = selectedVariantId.value != null && productVariantName.value.text.isNotEmpty(),
-                color = null
-            )
             Box(modifier = Modifier.height(140.dp))
         }
     }

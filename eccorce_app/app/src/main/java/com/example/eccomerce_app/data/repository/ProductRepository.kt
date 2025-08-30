@@ -1,10 +1,10 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.eccomerce_app.dto.ProductDto
+import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -23,26 +23,26 @@ import java.io.IOException
 import java.net.UnknownHostException
 import java.util.UUID
 
-class ProductRepository(val client: HttpClient) {
+class ProductRepository(val client: HttpClient)  {
 
-    suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
+     suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/all/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
 
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
 
@@ -65,24 +65,27 @@ class ProductRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProductByCategoryId(categoryId: UUID, pageNumber: Int): NetworkCallHandler {
+     suspend fun getProductByCategoryId(
+        categoryId: UUID,
+        pageNumber: Int
+    ): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/category/${categoryId}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
 
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
 
@@ -105,24 +108,24 @@ class ProductRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProduct(storeId: UUID, pageNumber: Int): NetworkCallHandler {
+     suspend fun getProduct(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
 
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
 
@@ -145,7 +148,11 @@ class ProductRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun getProduct(storeId: UUID, subCategory: UUID, pageNumber: Int): NetworkCallHandler {
+     suspend fun getProduct(
+        storeId: UUID,
+        subCategory: UUID,
+        pageNumber: Int
+    ): NetworkCallHandler {
         return try {
             val fullUrl =
                 Secrets.getBaseUrl() + "/Product/${storeId}/${subCategory}/${pageNumber}"
@@ -153,17 +160,17 @@ class ProductRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<List<ProductDto>>())
                 }
 
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Error("No Data Found")
                 }
 
@@ -187,7 +194,7 @@ class ProductRepository(val client: HttpClient) {
     }
 
 
-    suspend fun createProduct(
+     suspend fun createProduct(
         name: String,
         description: String,
         thumbnail: File,
@@ -203,7 +210,7 @@ class ProductRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -214,7 +221,7 @@ class ProductRepository(val client: HttpClient) {
                             append(
                                 key = "thmbnail", // Must match backend expectation
                                 value = thumbnail.readBytes(),
-                                headers = Headers.build {
+                                headers = Headers.Companion.build {
                                     append(
                                         HttpHeaders.ContentType,
                                         "image/${thumbnail.extension}"
@@ -242,7 +249,7 @@ class ProductRepository(val client: HttpClient) {
                                 append(
                                     key = "images", // Must match backend expectation
                                     value = value.readBytes(),
-                                    headers = Headers.build {
+                                    headers = Headers.Companion.build {
                                         append(
                                             HttpHeaders.ContentType,
                                             "image/${value.extension}"
@@ -262,7 +269,7 @@ class ProductRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.Created -> {
+                HttpStatusCode.Companion.Created -> {
                     NetworkCallHandler.Successful(result.body<ProductDto>())
                 }
 
@@ -285,7 +292,7 @@ class ProductRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun updateProduct(
+     suspend fun updateProduct(
         id: UUID,
         name: String?,
         description: String?,
@@ -304,7 +311,7 @@ class ProductRepository(val client: HttpClient) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
                 setBody(
@@ -319,7 +326,7 @@ class ProductRepository(val client: HttpClient) {
                                 append(
                                     key = "thmbnail", // Must match backend expectation
                                     value = thumbnail.readBytes(),
-                                    headers = Headers.build {
+                                    headers = Headers.Companion.build {
                                         append(
                                             HttpHeaders.ContentType,
                                             "image/${thumbnail.extension}"
@@ -378,7 +385,7 @@ class ProductRepository(val client: HttpClient) {
                                     append(
                                         key = "images", // Must match backend expectation
                                         value = value.readBytes(),
-                                        headers = Headers.build {
+                                        headers = Headers.Companion.build {
                                             append(
                                                 HttpHeaders.ContentType,
                                                 "image/${value.extension}"
@@ -398,7 +405,7 @@ class ProductRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.OK -> {
+                HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<ProductDto>())
                 }
 
@@ -421,20 +428,20 @@ class ProductRepository(val client: HttpClient) {
         }
     }
 
-    suspend fun deleteProduct(storeId: UUID, productId: UUID): NetworkCallHandler {
+     suspend fun deleteProduct(storeId: UUID, productId: UUID): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${productId}"
             val result = client.delete(fullUrl) {
                 headers {
                     append(
                         HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.RefreshToken}"
+                        "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
             }
 
             when (result.status) {
-                HttpStatusCode.NoContent -> {
+                HttpStatusCode.Companion.NoContent -> {
                     NetworkCallHandler.Successful(true)
                 }
 

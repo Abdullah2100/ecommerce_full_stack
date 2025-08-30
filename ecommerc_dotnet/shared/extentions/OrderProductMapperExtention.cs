@@ -1,17 +1,17 @@
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.dto.Response;
 using ecommerc_dotnet.module;
 
-namespace ecommerc_dotnet.mapper;
+namespace ecommerc_dotnet.shared.extentions;
 
 public static class OrderProductMapperExtention
 {
-    public static OrderProductDto ToOrderProductDto(this OrderItem orderItem)
+    public static OrderProductDto ToOrderProductDto(this OrderItem orderItem,string url)
     {
         return new OrderProductDto
         {
-            Id = orderItem.Product.Id,
-            Name = orderItem.Product.Name
+            Id = orderItem.ProductId,
+            Name = orderItem.Product.Name,
+            Thmbnail=url+orderItem.Product.Thmbnail
 
         };
     }

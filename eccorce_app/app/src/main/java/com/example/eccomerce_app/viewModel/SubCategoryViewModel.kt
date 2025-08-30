@@ -9,9 +9,9 @@ import com.example.eccomerce_app.dto.SubCategoryDto
 import com.example.e_commercompose.model.DtoToModel.toSubCategory
 import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
-import com.example.eccomerce_app.data.repository.SubCategoryRepository
 import com.example.eccomerce_app.dto.CreateSubCategoryDto
-import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.repository.SubCategoryRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +35,7 @@ class SubCategoryViewModel(val subCategoryRepository: SubCategoryRepository) : V
 
         val result = subCategoryRepository.createSubCategory(
             CreateSubCategoryDto(
-                Name = name, CateogyId = categoryId
+                Name = name, CategoryId = categoryId
             )
         )
         when (result) {
@@ -78,7 +78,7 @@ class SubCategoryViewModel(val subCategoryRepository: SubCategoryRepository) : V
                 val listSubCategory = mutableListOf<SubCategory>()
 
                 if (_SubCategories.value != null) {
-                    listSubCategory.addAll(_SubCategories.value!!.filter { it.id != data.Id })
+                    listSubCategory.addAll(_SubCategories.value!!.filter { it.id != data.id })
                 }
 
                 listSubCategory.add(data.toSubCategory())
