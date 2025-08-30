@@ -11,7 +11,8 @@ using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.infrastructure.services;
 using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.services;
+using ecommerc_dotnet.shared;
+using ecommerc_dotnet.shared.signalr;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using hotel_api.Services.EmailService;
@@ -58,9 +59,6 @@ builder.Services.AddTransient<IOrderServices,OrderServices>();
 builder.Services.AddTransient<IOrderItemServices,OrderItemServices>();
 
 
-
-
-
 // var fireBaseConfig = Path.Combine(
 //     Directory.GetCurrentDirectory(), 
 //     "firebase-adminsdk.json"
@@ -71,6 +69,7 @@ builder.Services.AddTransient<IOrderItemServices,OrderItemServices>();
 // {
 //     Credential = firebaseCredential
 // });
+
 
 builder.Services.AddCors(options =>
 {
@@ -140,6 +139,9 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<EcommerceHub>("/bannerHub");
+app.MapHub<BannerHub>("/bannerHub");
+app.MapHub<OrderHub>("/bannerHub");
+app.MapHub<OrderItemHub>("/bannerHub");
+app.MapHub<StoreHub>("/bannerHub");
 app.ConfigureExceptionHandler();
 app.Run();

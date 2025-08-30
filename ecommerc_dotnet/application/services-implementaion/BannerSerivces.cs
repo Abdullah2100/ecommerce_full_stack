@@ -6,7 +6,8 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
-using ecommerc_dotnet.services;
+using ecommerc_dotnet.shared;
+using ecommerc_dotnet.shared.signalr;
 using hotel_api.util;
 using Microsoft.AspNetCore.SignalR;
 
@@ -15,7 +16,7 @@ namespace ecommerc_dotnet.infrastructure.services;
 public class BannerSerivces(
     IConfig config,
     IWebHostEnvironment host,
-    IHubContext<EcommerceHub> hubContext,
+    IHubContext<BannerHub> hubContext,
     IStoreRepository storeRepository,
     IBannerRepository bannerRepository,
     IUserRepository userRepository)

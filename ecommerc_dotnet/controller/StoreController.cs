@@ -2,7 +2,8 @@ using System.Security.Claims;
 using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.services;
+using ecommerc_dotnet.shared;
+using ecommerc_dotnet.shared.signalr;
 using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,7 @@ namespace ecommerc_dotnet.controller;
 [ApiController]
 [Route("api/Store")]
 public class StoreController(
-    IHubContext<EcommerceHub> hubContext,
+    IHubContext<StoreHub> hubContext,
     IStoreServices storeServices)
     : ControllerBase
 {
@@ -170,11 +171,10 @@ public class StoreController(
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
+        };
     }
 
 
- 
     [HttpGet("all/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -195,12 +195,13 @@ public class StoreController(
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await storeServices.getStores(adminId.Value, page,25);
+
+        var result = await storeServices.getStores(adminId.Value, page, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        };  
+        };
     }
 }

@@ -7,8 +7,9 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
-using ecommerc_dotnet.services;
+using ecommerc_dotnet.shared;
 using ecommerc_dotnet.shared.extentions;
+using ecommerc_dotnet.shared.signalr;
 using hotel_api.util;
 using Microsoft.AspNetCore.SignalR;
 
@@ -18,7 +19,7 @@ public class OrderItemServices(
     IOrderItemRepository orderItemRepository,
     IUserRepository userRepository,
     IConfig config,
-    IHubContext<EcommerceHub> hubContext)
+    IHubContext<OrderItemHub> hubContext)
     :IOrderItemServices 
 {
    
