@@ -16,6 +16,8 @@ public class ProductServices(
     IConfig config,
     IWebHostEnvironment host,
     IProductRepository productRepository,
+    IProductVariantRepository productVariantRepository,
+    IProductImageRepository productImageRepository,
     IUserRepository userRepository,
     ISubCategoryRepository subCategoryRepository)
     : IProductSerivces
@@ -361,7 +363,7 @@ public class ProductServices(
         //delete preview images
         if (productDto.Deletedimages is not null)
         {
-            result = await productRepository.deleteProductImages(productDto.Deletedimages, productDto.Id);
+            result = await productImageRepository.deleteProductImages(productDto.Deletedimages, productDto.Id);
             if (result == 0)
             {
                 return new Result<ProductDto?>
@@ -377,7 +379,7 @@ public class ProductServices(
         //delete preview productvarients
         if (productDto.DeletedProductVarients is not null)
         {
-            result = await productRepository.deleteProductVarient(productDto.DeletedProductVarients, productDto.Id);
+            result = await productVariantRepository.deleteProductVariant(productDto.DeletedProductVarients, productDto.Id);
             if (result == 0)
             {
                 return new Result<ProductDto?>

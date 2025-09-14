@@ -2,11 +2,11 @@ using System.Text;
 using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.application.services_implementaion;
 using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.data;
 using ecommerc_dotnet.di.email;
+using ecommerc_dotnet.infrastructure;
 using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.infrastructure.services;
 using ecommerc_dotnet.midleware;
@@ -39,11 +39,13 @@ builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.AddTransient<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddTransient<IVarientRepository, VarientRepository>();
 builder.Services.AddTransient<IBannerRepository, BannerRepository>();
-builder.Services.AddTransient<IGeneralSettingRepository,GeneralSettingRepository>();
-builder.Services.AddTransient<IDeliveryRepository,DeliveryRepository>();
-builder.Services.AddTransient<IProductRepository,ProductRepository>();
-builder.Services.AddTransient<IOrderRepository,OrderRepository>();
-builder.Services.AddTransient<IOrderItemRepository,OrderItemRepository>();
+builder.Services.AddTransient<IGeneralSettingRepository, GeneralSettingRepository>();
+builder.Services.AddTransient<IDeliveryRepository, DeliveryRepository>();
+builder.Services.AddTransient<IProductRepository, ProductRepository>();
+builder.Services.AddTransient<IProductVariantRepository, ProductVariantRepository>();
+builder.Services.AddTransient<IProductImageRepository, ProductImageRepository>();
+builder.Services.AddTransient<IOrderRepository, OrderRepository>();
+builder.Services.AddTransient<IOrderItemRepository, OrderItemRepository>();
 
 //services
 builder.Services.AddTransient<IUserServices, UserService>();
@@ -54,9 +56,9 @@ builder.Services.AddTransient<IVarientServices, VarientServices>();
 builder.Services.AddTransient<IBannerSerivces, BannerSerivces>();
 builder.Services.AddTransient<IGeneralSettingServices, GeneralSettingServices>();
 builder.Services.AddTransient<IDeliveryServices, DeliveryServices>();
-builder.Services.AddTransient<IProductSerivces,ProductServices>();
-builder.Services.AddTransient<IOrderServices,OrderServices>();
-builder.Services.AddTransient<IOrderItemServices,OrderItemServices>();
+builder.Services.AddTransient<IProductSerivces, ProductServices>();
+builder.Services.AddTransient<IOrderServices, OrderServices>();
+builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
 
 
 // var fireBaseConfig = Path.Combine(
@@ -76,8 +78,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAllOrigins", policy =>
     {
         policy
-.WithOrigins("http://0.0.0.0:3000")
-            .AllowAnyMethod()    // Allows any HTTP methods (GET, POST, etc.)
+            .WithOrigins("http://0.0.0.0:3000")
+            .AllowAnyMethod() // Allows any HTTP methods (GET, POST, etc.)
             .AllowAnyHeader();
     });
 });

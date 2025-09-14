@@ -1,4 +1,4 @@
-using ecommerc_dotnet.context;
+using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.dto;
@@ -9,7 +9,10 @@ using NuGet.DependencyResolver;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class ProductRepository(AppDbContext context) : IProductRepository
+public class ProductRepository(
+    AppDbContext context,
+    IProductImageRepository productImageRepository,
+    IProductVariantRepository productVariantRepository) : IProductRepository
 {
     public async Task<IEnumerable<Product>> getAllAsync(int page, int length)
     {
@@ -29,6 +32,7 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     {
         try
         {
+            var result = true;
             await context.Products.AddAsync(new Product
             {
                 Id = entity.Id,
@@ -43,64 +47,56 @@ public class ProductRepository(AppDbContext context) : IProductRepository
             });
 
             if (entity.ProductVarients is not null)
-                foreach (var x in entity.ProductVarients)
+            {
+                result = await productVariantRepository.addProductVariants(entity.ProductVarients);
+                if (result != false)
                 {
-                    await context.ProductVarients.AddAsync(new ProductVarient
-                    {
-                        Id = clsUtil.generateGuid(),
-                        Precentage = x.Precentage == 0 ? 1 : (decimal)x.Precentage!,
-                        VarientId = x.VarientId,
-                        ProductId = entity.Id,
-                        Name = x.Name
-                    });
+                    Console.WriteLine("could not save product image: ");
+                    return 0;
                 }
+            }
 
             if (entity.ProductImages is not null)
-                foreach (var productImage in entity.ProductImages)
+            {
+                result = await productImageRepository.addProductImage(entity.ProductImages);
+                if (result != false)
                 {
-                    await context.ProductImages.AddAsync(new ProductImage
-                    {
-                        Id = productImage.Id,
-                        Path = productImage.Path,
-                        ProductId = entity.Id,
-                    });
+                    Console.WriteLine("could not save product image: ");
+                    return 0;
                 }
+            }
 
             return await context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error: fom create new Peoduct "+ex.Message);
+            Console.WriteLine("Error: fom create new Peoduct " + ex.Message);
             return 0;
         }
     }
 
     public async Task<int> updateAsync(Product entity)
     {
+        var result = true;
         if (entity.ProductVarients is not null)
-            foreach (var x in entity.ProductVarients)
+        {
+            result = await productVariantRepository.addProductVariants(entity.ProductVarients);
+            if (result != false)
             {
-                await context.ProductVarients.AddAsync(new ProductVarient
-                {
-                    Id = clsUtil.generateGuid(),
-                    Precentage = x.Precentage == 0 ? 1 : (decimal)x.Precentage!,
-                    VarientId = x.VarientId,
-                    ProductId = entity.Id,
-                    Name = x.Name
-                });
+                Console.WriteLine("could not save product image: ");
+                return 0;
             }
+        } 
 
         if (entity.ProductImages is not null)
-            foreach (var productImage in entity.ProductImages)
-            {
-                await context.ProductImages.AddAsync(new ProductImage
-                {
-                    Id = productImage.Id,
-                    Path = productImage.Path,
-                    ProductId = entity.Id,
-                });
+            if (entity.ProductImages is not null)
+            { 
+                result = await productImageRepository.addProductImage(entity.ProductImages);
+                if (result != false) return await context.SaveChangesAsync();
+                Console.WriteLine("could not save product image: ");
+                return 0;
             }
-        
+
         context.Products.Update(new Product
         {
             Id = entity.Id,
@@ -114,15 +110,15 @@ public class ProductRepository(AppDbContext context) : IProductRepository
             Thmbnail = entity.Thmbnail
         });
 
-      
 
         return await context.SaveChangesAsync();
     }
 
     public async Task<int> deleteAsync(Guid id)
     {
-        await context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
+        await productImageRepository.deleteProductImages(id);
         await context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
+        await productVariantRepository.deleteProductVariantByProductId(id);
         await context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
         return 1;
     }
@@ -131,7 +127,7 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro=>pro.store)
+            .Include(pro => pro.store)
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
@@ -143,25 +139,24 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro=>pro.store)
+            .Include(pro => pro.store)
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id && p.StoreId==storeId); 
+            .FirstOrDefaultAsync(p => p.Id == id && p.StoreId == storeId);
     }
 
     public async Task<Product?> getProductByUser(Guid id, Guid userId)
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro=>pro.store)
+            .Include(pro => pro.store)
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id && p.store.UserId==userId); 
-
+            .FirstOrDefaultAsync(p => p.Id == id && p.store.UserId == userId);
     }
 
     public async Task<IEnumerable<Product>> getProducts(
@@ -173,7 +168,7 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro=>pro.store)
+            .Include(pro => pro.store)
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
@@ -192,7 +187,7 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro=>pro.store)
+            .Include(pro => pro.store)
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
@@ -212,7 +207,7 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro=>pro.store)
+            .Include(pro => pro.store)
             .Include(pro => pro.subCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
@@ -228,48 +223,5 @@ public class ProductRepository(AppDbContext context) : IProductRepository
     public async Task<bool> isExist(Guid id)
     {
         return await context.Products.FindAsync(id) != null;
-    }
-
-    public async Task<int> deleteProductVarient(Guid id)
-    {
-        await context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        return await context.SaveChangesAsync();
-    }
-
-    public async Task<int> deleteProductImages(Guid id)
-    {
-        await context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        return await context.SaveChangesAsync();
-    }
-
-    public async Task<int> deleteProductImages(List<string> images, Guid id)
-    {
-        foreach (var image in images)
-        {
-          await context.ProductImages.Where(pi=>pi.Path==image&&pi.ProductId==id).ExecuteDeleteAsync(); 
-        }
-        return await context.SaveChangesAsync();
-    }
-
-    public async Task<int> deleteProductVarient(List<CreateProductVarientDto> productVarients, Guid productId)
-    {
-        productVarients.ForEach((x) =>
-        {
-            context.ProductVarients
-                .Include(pi => pi.VarientId)
-                .Where(pv =>
-                    pv.ProductId == productId && pv.VarientId == x.VarientId && pv.Name == x.Name)
-                .ExecuteDelete();
-        });
-        return await context.SaveChangesAsync();
-    }
-
-    public async Task<List<string>> getProductImages(Guid id)
-    {
-        return await context.ProductImages
-            .AsNoTracking()
-            .Where(pi => pi.ProductId == id)
-            .Select(pi => pi.Path)
-            .ToListAsync();
     }
 }

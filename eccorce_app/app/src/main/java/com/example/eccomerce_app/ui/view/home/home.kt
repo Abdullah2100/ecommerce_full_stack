@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,9 +32,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,6 +45,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,6 +74,8 @@ import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
 import com.example.eccomerce_app.viewModel.OrderViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.collections.isNullOrEmpty
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,7 +93,8 @@ fun HomePage(
 ) {
     val configuration = LocalConfiguration.current
     val lazyState = rememberLazyListState()
-
+    val state = rememberPullToRefreshState()
+    val scope = rememberCoroutineScope()
 
     val myInfo = userViewModel.userInfo.collectAsState()
     val banner = bannerViewModel.bannersRadom.collectAsState()
@@ -115,14 +123,23 @@ fun HomePage(
     )
 
 
-    fun initial() {
-        userViewModel.getMyInfo()
-        generalSettingViewModel.getGeneral(1)
-        categoryViewModel.getCategories(1)
-        bannerViewModel.getStoresBanner()
-        variantViewModel.getVariants(1)
-        productViewModel.getProducts(mutableIntStateOf(1))
-        orderViewModel.getMyOrders(mutableIntStateOf(1))
+    fun initialDataLoad(showRefreshIndicator: Boolean = false) {
+        if (showRefreshIndicator)
+            isRefresh.value = true
+
+        scope.launch {
+                userViewModel.getMyInfo()
+                generalSettingViewModel.getGeneral(1)
+                categoryViewModel.getCategories(1)
+                bannerViewModel.getStoresBanner()
+                variantViewModel.getVariants(1)
+                productViewModel.getProducts(mutableIntStateOf(1)) // Pass the reset page
+                orderViewModel.getMyOrders(mutableIntStateOf(1)) // Ensure page is managed here too if paginated
+                if (showRefreshIndicator) {
+                    delay(1000)
+                    isRefresh.value = false
+                }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -132,12 +149,12 @@ fun HomePage(
     }
 
     LaunchedEffect(Unit) {
-        initial()
+        initialDataLoad()
     }
 
 
     LaunchedEffect(reachedBottom.value) {
-        if (!products.value.isNullOrEmpty() && reachedBottom.value) {
+        if (!products.value.isNullOrEmpty() && reachedBottom.value && products.value!!.size > 23) {
             Log.d("scrollReachToBottom", "true")
             productViewModel.getProducts(
                 page,
@@ -147,22 +164,32 @@ fun HomePage(
 
     }
 
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) { scaffoldState ->
-        scaffoldState.calculateTopPadding()
-        scaffoldState.calculateBottomPadding()
+    PullToRefreshBox(
+        isRefreshing = isRefresh.value,
+        onRefresh = {
+            initialDataLoad(true)
+        },
+        state = state,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefresh.value,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                state = state
+            )
+        },
+    ) {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) { scaffoldState ->
+            scaffoldState.calculateTopPadding()
+            scaffoldState.calculateBottomPadding()
 
 
-        PullToRefreshBox(
-            isRefreshing = isRefresh.value,
-            onRefresh = {
-                initial()
-                isRefresh.value = false
-            }
-        ) {
+
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier

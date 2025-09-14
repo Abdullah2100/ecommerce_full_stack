@@ -747,8 +747,8 @@ fun CreateProductScreen(
                             1.dp,
                             CustomColor.neutralColor200,
                             RoundedCornerShape(
-                                topStart = 4.dp,
-                                topEnd = 4.dp,
+                                topStart = 0.dp,
+                                topEnd = 0.dp,
                                 bottomStart = 8.dp,
                                 bottomEnd = 8.dp
                             )

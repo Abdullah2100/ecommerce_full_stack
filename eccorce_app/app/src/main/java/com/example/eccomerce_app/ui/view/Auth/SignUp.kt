@@ -51,6 +51,7 @@ import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.hotel_mobile.Util.Validation
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 
@@ -294,7 +295,8 @@ fun SignUpPage(
                 )
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .offset(y = (-10).dp),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 )
@@ -354,11 +356,11 @@ fun SignUpPage(
                         keyboardController?.hide()
                         coroutine.launch {
                             isLoading.value = true;
-//                            val token = async { authKoin.generateTokenNotification() }.await()
-                            val token = Pair(
-                                "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-                                null
-                            )
+                            val token = async { authKoin.generateTokenNotification() }.await()
+//                             Pair(
+//                                "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+//                                null
+//                            )
 
                             if (token.first != null) {
                                 authKoin.signUpUser(

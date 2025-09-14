@@ -1,4 +1,155 @@
-drop function fun_calculate_distance_between_user_and_stores;
+CREATE EXTENSION postgis;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+insert into "GeneralSettings"("Id","Name","Value","CreatedAt") 
+VALUES(uuid_generate_v4(),'one_kilo_price',150,CURRENT_TIMESTAMP);
+
+CREATE OR REPLACE FUNCTION calculate_order_item_price(OrderItemId UUID,product_price NUMERIC )
+RETURNS NUMERIC AS $$
+DECLARE
+    order_product_varient      RECORD;
+    precentage_holder  ;
+    price   NUMERIC := product_price;
+BEGIN
+    
+
+     FOR order_product_varient IN
+        SELECT 
+             "ProductVarientId"
+        FROM "OrdersProductsVarients"
+         
+    LOOP
+        SELECT "Precentage" FROM "ProductVarients" INTO precentage_holder;
+   
+       price := price*precentage_holder;
+    END LOOP;
+
+    RETURN price;
+ 
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION Calculate_distance_from_store_to_order_location(orderId UUID,storeId UUID)
+RETURNS Int AS $$
+DECLARE
+    total_distance_km DOUBLE PRECISION := 0.0;
+    user_long         NUMERIC;
+    user_lat          NUMERIC;
+    store_long         NUMERIC;
+    store_lat          NUMERIC;
+    distance_to_user_from_store_lat          NUMERIC;
+    kilo_price        NUMERIC;
+    store_coords      RECORD;
+    store_distance    DOUBLE PRECISION;
+BEGIN
+    -- Fetch per-km price with error handling
+    SELECT "Value" INTO kilo_price
+    FROM "GeneralSettings"
+    WHERE "Name" = 'one_kilo_price';
+    
+    IF kilo_price IS NULL THEN
+        RAISE EXCEPTION 'one_kilo_price not found in GeneralSettings';
+    END IF;
+
+    -- Get user coordinates with validation
+    SELECT "Longitude", "Latitude" 
+    INTO user_long, user_lat
+    FROM "Orders" WHERE "Id" = orderId;
+
+    
+    SELECT "Longitude", "Latitude" 
+    INTO store_long, store_lat
+    FROM "Address" WHERE "OwnerId" = store_id;
+
+    
+    store_distance := ST_Distance(
+        ST_SetSRID(ST_MakePoint(user_long, user_lat), 4326)::GEOGRAPHY,
+        ST_SetSRID(ST_MakePoint(store_long, store_lat), 4326)::GEOGRAPHY
+    ) / 1000.0;
+
+
+    total_distance_km := total_distance_km + GREATEST(1, CEIL(store_distance));
+
+    RETURN total_distance_km::INT;
+ 
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION fun_remove_user_orderItem(userId UUID, OrderItemId UUID)
+RETURNS BOOLEAN 
+AS $$
+DECLARE
+ order_id      UUID;
+ store_id     UUID;
+ order_item_price  NUMERIC:=0;
+ order_items_count  Int;
+ order_items_store_count  Int;
+
+ order_itmes_price  NUMERIC;
+ distance_to_user_from_store   INT :=0;
+
+ order_distance     Int;
+ order_distance_fee     Int;
+ order_fee          NUMERIC;
+ is_block_user          BOOLEAN;
+
+
+BEGIN
+
+    SELECT IsBlocked INTO is_block_user WHERE "Id" = userId;
+    IF IsBlocked THEN 
+        RAISE EXCEPTION 'user is Blocked';
+        RETURN FALSE;
+    END IF;
+
+    SELECT "OrderId","StoreId","Price" FROM "OrderItems" INTO order_id,store_id,order_item_price WHERE "Id" = OrderItemId;
+
+    IF order_item_record."Status"!=0 THEN 
+        RAISE EXCEPTION 'order is not in progress';
+        RETURN FALSE;
+    END IF;
+    
+     -- this to  get the order items 
+    SELECT count(*) FROM "OrderItems" INTO order_items_count WHERE "OrderId" = order_id;
+
+ 
+    IF  order_items_count = 1 THEN 
+      DELETE FROM "Orders" WHERE "Id" = order_id;
+      RETURN true;
+    END IF;
+
+    -- #this to save the origin distance order and fee 
+    SELECT "DistanceToUser","DistanceToUser","DistanceFee","TotalPrice" 
+			FROM "Orders" INTO order_distance,order_distance,order_distance_fee,order_fee 
+			WHERE "OrderId" = order_id;
+			
+
+    SELECT count(*) 
+			FROM "OrderItems" INTO order_items_store_count 
+			WHERE "OrderId" = order_id AND "StoreId" = store_id;
+
+    IF order_items_store_count=1 THEN
+        SELECT * FROM Calculate_distance_from_store_to_order_location(order_id,store_id) INTO   distance_to_user_from_store ;    
+    END IF;
+    
+    -- # this to calculate the total price for order item with the product varients 
+    order_itmes_price := calculate_order_item_price(OrderItemId, order_item_price);
+    
+	DELETE FROM "OrderItems" WHERE "Id" = OrderItemId;
+    UPDATE "Orders" SET  
+           "DistanceToUser" = order_distance-distance_to_user_from_store,
+           "DistanceFee" = DistanceFee-((order_distance_fee/order_distance)*distance_to_user_from_store),
+           "TotalPrice"= order_fee - order_itmes_price;
+    RETURN TRUE;
+
+EXCEPTION 
+    WHEN OTHERS THEN
+        RAISE WARNING 'this error from remove user orderItems %: %', orderId, SQLERRM;
+        RETURN FALSE;
+END;
+$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION fun_calculate_distance_between_user_and_stores(orderId UUID)
@@ -29,9 +180,8 @@ BEGIN
         RAISE EXCEPTION 'NULL coordinates for order %', orderId;
     END IF;
 
-    -- Calculate distance per store
-    FOR store_coords IN
-        SELECT 
+     FOR store_coords IN
+        (SELECT 
             a."Longitude" AS store_long,
             a."Latitude" AS store_lat
         FROM "OrderItems" oi
@@ -39,7 +189,7 @@ BEGIN
           ON a."OwnerId" = oi."StoreId"
         WHERE oi."OrderId" = orderId
           AND a."Longitude" IS NOT NULL
-          AND a."Latitude" IS NOT NULL
+          AND a."Latitude" IS NOT NULL)
     LOOP
         -- Calculate distance in meters, convert to km
         store_distance := ST_Distance(
@@ -64,6 +214,9 @@ EXCEPTION
         RETURN FALSE;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
 
 CREATE OR REPLACE FUNCTION get_delivery_fee_info(
  deleiveryId UUID)

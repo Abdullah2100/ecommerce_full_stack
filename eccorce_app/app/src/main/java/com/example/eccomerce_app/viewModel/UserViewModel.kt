@@ -16,6 +16,7 @@ import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
 import com.example.eccomerce_app.dto.UserDto
 import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.Room.Model.IsPassCondition
 import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
 import com.example.eccomerce_app.data.repository.AddressRepository
 import com.example.eccomerce_app.data.repository.UserRepository
@@ -42,7 +43,9 @@ class UserViewModel(
 
     fun setIsPassOnBoardingScreen() {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = dao.savePassingOnBoarding(IsPassOnBoardingScreen(0, true))
+            var isPassOnBoarding = IsPassOnBoardingScreen()
+            isPassOnBoarding.condition=true;
+            val result = dao.savePassingOnBoarding(isPassOnBoarding)
             Log.d("insertNewPassingOnBoarding", result.toString())
 
 
@@ -50,7 +53,9 @@ class UserViewModel(
     }
 
     suspend fun userPassLocation(status: Boolean? = false) {
-        dao.savePassingLocation(IsPassLocationScreen(0, true))
+        var isPassLocation = IsPassLocationScreen()
+        isPassLocation.condition=status ?:false;
+        dao.savePassingLocation(isPassLocation)
     }
 
 

@@ -81,7 +81,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
     Log.d("loadingState", isLoadingMore.value.toString())
     LaunchedEffect(reachedBottom.value) {
 
-        if (!orders.value.isNullOrEmpty() && reachedBottom.value) {
+        if (!orders.value.isNullOrEmpty() && reachedBottom.value && orders.value!!.size > 23) {
             orderViewModel.getMyOrders(
                 page,
                 isLoadingMore
@@ -163,7 +163,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
 
                         ) {
                             order.orderItems.forEach { value ->
-                                OrderItemCartShape(value,context)
+                                OrderItemCartShape(value, context)
                                 Sizer(5)
 
                                 Row(

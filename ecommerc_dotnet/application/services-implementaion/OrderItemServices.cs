@@ -30,7 +30,7 @@ public class OrderItemServices(
     {
         User? user = await userRepository.getUser(userId);
 
-        var isValidate = user.isValidateFunc(isAdmin:null,isStore:true);
+        var isValidate = user.isValidateFunc(isAdmin:false,isStore:true);
         if (isValidate is not null)
         {
             return new Result<List<OrderItemDto>>(

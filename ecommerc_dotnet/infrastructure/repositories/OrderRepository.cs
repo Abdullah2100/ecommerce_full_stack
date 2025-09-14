@@ -1,4 +1,3 @@
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.module;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,7 @@ using Npgsql;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class OrderRepository(AppDbContext context) : IOrderRepository
+public class OrderRepository(AppDbContext context,IProductVariantRepository productVariantRepository) : IOrderRepository
 {
     public async Task<IEnumerable<Order>> getOrders(
         Guid userId,
@@ -104,19 +103,22 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
         {
             var product = await context.Products.FindAsync(item.ProductId);
             decimal varientPrice = 1;
-
-            item.ProductsVarientId?.ForEach(pvi =>
+            //itrate throw every productvarientid
+            for (var i = 0; i < item.ProductsVarientId?.Count; i++)
             {
-                var productVairntPrice = context.ProductVarients
-                    .FirstOrDefault(pv => pv.ProductId == product!.Id && pv.Id == pvi);
-                if (productVairntPrice is null)
+                //query to get the product variant
+                var productVariantPrice = await productVariantRepository.getProductVarient( product!.Id ,item.ProductsVarientId[i]);
+                if (productVariantPrice is null)
                 {
                     isAmbiguous = true;
-                    return;
+                    break;
                 }
 
-                varientPrice = varientPrice * productVairntPrice.Precentage;
-            });
+                varientPrice = varientPrice * productVariantPrice.Precentage;
+            }
+
+            ;
+
             if (isAmbiguous == true)
             {
                 break;
@@ -142,7 +144,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
 
     public async Task<IEnumerable<Order>> getOrderNoBelongToAnyDelivery(int pageNum, int pageSize)
     {
-        var orders= await context.Orders
+        var orders = await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
@@ -159,7 +161,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
                 .Where(oi => oi.OrderId == order.Id)
-                .ToListAsync(); 
+                .ToListAsync();
         }
 
         return orders;
@@ -184,7 +186,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
                 .Where(oi => oi.OrderId == order.Id)
-                .ToListAsync(); 
+                .ToListAsync();
         }
 
         return orders;
@@ -205,7 +207,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
 
     public async Task<IEnumerable<Order>> getAllAsync(int page, int length)
     {
-        var orders= await context.Orders
+        var orders = await context.Orders
             .Include(o => o.User)
             .Include(o => o.Items)
             .AsSplitQuery()
@@ -221,7 +223,7 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
                 .Where(oi => oi.OrderId == order.Id)
-                .ToListAsync(); 
+                .ToListAsync();
         }
 
         return orders;
@@ -319,58 +321,5 @@ public class OrderRepository(AppDbContext context) : IOrderRepository
     {
         await context.Orders.Where(o => o.Id == id).ExecuteDeleteAsync();
         return await context.SaveChangesAsync();
-    }
-
-    //orderitmes
-
-    public async Task<int> updateOrderItemStatus(Guid id, enOrderItemStatus status)
-    {
-        OrderItem? orderItem = await context.OrderItems.FindAsync(id);
-        if (orderItem is null) return 0;
-        orderItem.Status = status;
-        return await context.SaveChangesAsync();
-    }
-
-
-    public async Task<IEnumerable<OrderItem>> getOrderItems(
-        Guid storeId,
-        int pageNum,
-        int pageSize
-    )
-    {
-        return await context.OrderItems
-            .Include(oi => oi.Product)
-            .Include(oi => oi.OrderProductsVarients)
-            .Include(oi => oi.Store)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Where(o => o.StoreId == storeId)
-            .Skip((pageNum - 1) * pageSize)
-            .Take(pageSize)
-            .OrderDescending()
-            .ToListAsync();
-    }
-
-    public async Task<OrderItem?> getOrderItem(Guid id, Guid storeId)
-    {
-        return await context.OrderItems
-            .Include(oi => oi.Product)
-            .Include(oi => oi.OrderProductsVarients)
-            .Include(oi => oi.Store)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Id == id && o.StoreId == storeId);
-    }
-
-    public async Task<OrderItem?> getOrderItem(Guid id)
-    {
-        return await context.OrderItems
-            .Include(oi => oi.Product)
-            .Include(oi => oi.OrderProductsVarients)
-            .Include(oi => oi.Store)
-            .Include(oi => oi.Order)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Id == id);
     }
 }

@@ -1,4 +1,3 @@
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.module;
 using Microsoft.EntityFrameworkCore;

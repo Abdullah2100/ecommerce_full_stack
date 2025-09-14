@@ -103,7 +103,7 @@ fun OrderForMyStoreScreen(
 
 
     LaunchedEffect(reachedBottom.value) {
-        if (!orderData.value.isNullOrEmpty() && reachedBottom.value) {
+        if (!orderData.value.isNullOrEmpty() && reachedBottom.value && orderData.value!!.size>23) {
             Log.d("scrollReachToBottom", "true")
             orderItemsViewModel.getMyOrderItemBelongToMyStore(
                 page,

@@ -2,7 +2,7 @@ using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.module;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.context;
+namespace ecommerc_dotnet.infrastructure;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
@@ -38,11 +38,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.Entity<User>(
             user =>
             {
-
                 user.HasIndex(u => new { email = u.Email, phone = u.Phone }).IsUnique();
 
                 user.HasMany(ca => ca.Categories)
@@ -94,16 +92,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(ban => ban.StoreId)
                 .HasPrincipalKey(sto => sto.Id)
                 .OnDelete(DeleteBehavior.Restrict);
-
         });
 
-        modelBuilder.Entity<SubCategory>(sub =>
-        {
-        });
+        modelBuilder.Entity<SubCategory>(sub => { });
 
-        modelBuilder.Entity<Banner>(ba =>
-        {
-        });
+        modelBuilder.Entity<Banner>(ba => { });
 
         modelBuilder.Entity<Product>(pr =>
         {
@@ -112,7 +105,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasForeignKey(p => p.ProductId)
                 .HasPrincipalKey(pro => pro.Id)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             pr.HasOne<SubCategory>(pro => pro.subCategory)
                 .WithMany(sub => sub.Products)
                 .HasForeignKey(pro => pro.SubcategoryId)
@@ -156,7 +149,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<OrderItem>(oIt =>
         {
-
             oIt.HasOne(orIt => orIt.Store)
                 .WithMany(st => st.OddrderItems)
                 .HasForeignKey(orIt => orIt.StoreId)
@@ -174,8 +166,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithMany(or => or.OrderProductsVarients)
                 .HasForeignKey(or => or.ProductVarientId)
                 .HasPrincipalKey(or => or.Id);
-
-
         });
 
         base.OnModelCreating(modelBuilder);

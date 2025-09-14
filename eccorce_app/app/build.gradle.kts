@@ -1,4 +1,11 @@
 import org.gradle.kotlin.dsl.implementation
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
 
 plugins {
     alias(libs.plugins.android.application)
@@ -11,7 +18,7 @@ plugins {
 
 android {
     namespace = "com.example.e_commercompose"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "28.0.13004108"
 
     defaultConfig {
@@ -27,7 +34,11 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
+        val mapboxToken = localProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""
+        // Inject into the generated strings.xml resource as 'mapbox_access_token'
+        resValue("string", "mapbox_access_token", mapboxToken)
     }
+
 
     buildTypes {
         release {
@@ -42,17 +53,19 @@ android {
 
 
     compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
+
     buildFeatures {
         compose = true
-
     }
+
+    buildToolsVersion = "36.0.0"
 }
 
 dependencies {
@@ -65,6 +78,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -115,14 +129,14 @@ dependencies {
     //splashScreen
     implementation(libs.androidx.core.splashscreen)
 
-    //desugra
+    //desugar
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
 
     //location
     implementation(libs.play.services.location)
 
-    //corrutine task
+    //coroutine task
     implementation(libs.kotlinx.coroutines.play.services)
 
 
@@ -145,6 +159,9 @@ dependencies {
 
     //mapbox
     implementation ("com.mapbox.extension:maps-compose:0.1.0")
-    implementation ("com.mapbox.maps:android:11.14.1")
+    implementation("com.mapbox.maps:android-ndk27:11.15.0")
+    implementation("com.mapbox.navigationcore:android-ndk27:3.11.7")
+//    implementation("com.google.maps.android:maps-compose-utils:6.7.1")
+//    implementation("com.google.maps.android:maps-compose-widgets:6.9.0")
 
 }

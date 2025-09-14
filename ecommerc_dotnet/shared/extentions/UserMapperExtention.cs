@@ -57,7 +57,7 @@ public static class UserMapperExtention
                     return new Result<AuthDto?>
                     (
                         data: null,
-                        message: "user is Blocked",
+                        message: "store is Blocked",
                         isSeccessful: false,
                         statusCode: 400
                     );
@@ -86,7 +86,7 @@ public static class UserMapperExtention
 
     public static Result<AuthDto?>? isValidateFunc(
         this User? user, 
-        bool? isAdmin = true, 
+        bool isAdmin = true, 
         bool isStore = false)
     {
         if (user is null)
@@ -104,10 +104,6 @@ public static class UserMapperExtention
         //validate user if it is admin or user according to isAdmin feild 
         switch (isAdmin)
         {
-            case null:
-            {
-                return isStore ? isHasStore(user) : null;
-            }
             case false:
             {
                 if (user.IsBlocked)

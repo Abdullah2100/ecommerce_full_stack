@@ -29,7 +29,7 @@ public class SubCategoryServices(
         User? user = await userRepository
             .getUser(userId);
 
-        var isValide = user.isValidateFunc(isStore: true);
+        var isValide = user.isValidateFunc(isAdmin:false,isStore:true);
 
         if (isValide is not null)
         {

@@ -1,3 +1,4 @@
 /build
 google-services.json
-../gradle.properties
+../local.properties
+../app/src

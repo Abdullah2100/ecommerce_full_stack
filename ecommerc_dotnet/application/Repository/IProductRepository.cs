@@ -17,13 +17,4 @@ public interface IProductRepository:IRepository<Product>
     
     Task<bool> isExist(Guid id);
     
-  
-    Task<int>deleteProductVarient(Guid id);
-    Task<int>deleteProductImages( Guid id);
-    Task<int>deleteProductImages(List<string>images, Guid id);
-    Task<int>deleteProductVarient(List<CreateProductVarientDto> productVarients, Guid productId);
-    
-    
-    Task<List<string>> getProductImages(Guid id);
-
 }

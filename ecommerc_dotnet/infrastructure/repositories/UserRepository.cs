@@ -1,5 +1,4 @@
 using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.context;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.module;

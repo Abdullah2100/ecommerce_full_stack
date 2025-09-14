@@ -73,7 +73,7 @@ fun ProductCategoryScreen(
 
 
     LaunchedEffect(reachedBottom.value) {
-        if (!productsByCategory.isNullOrEmpty() && reachedBottom.value) {
+        if (!productsByCategory.isNullOrEmpty() && reachedBottom.value && productsByCategory.size>23) {
             productViewModel.getProductsByCategoryID(
                 page,
                 categoryId,

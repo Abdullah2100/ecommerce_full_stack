@@ -39,6 +39,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -224,17 +225,18 @@ fun LoginScreen(
 
                                 delay(10)
 
-                                val token = Pair(
-                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-                                    null
-                                )
-                                //async { authKoin.generateTokenNotification() }.await()
-                                if (token.first != null) {
+                                val token =  async { authKoin.generateTokenNotification() }.await()
+
+//                                Pair(
+//                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+//                                    null
+//                                )
+                                if (!token.first.isNullOrEmpty()) {
                                     authKoin.loginUser(
                                         userNameOrEmail.value.text,
                                         password = password.value.text,
                                         nav = nav,
-                                        token = token.first,
+                                        token = token.first!!,
                                         isSendingData = isSendingData
                                     )
 
