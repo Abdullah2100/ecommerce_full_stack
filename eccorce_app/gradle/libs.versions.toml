@@ -13,11 +13,13 @@ lifecycleRuntimeKtx = "2.9.3"
 activityCompose = "1.10.1"
 composeBom = "2025.08.01"
 lifecycleViewmodelKtx = "2.9.3"
-mapDisplay = "1.25.11"
+mapsCompose = "6.11.0"
+mapsUtilsKtx = "5.2.0"
+mapsNav = "7.0.0"
 playServicesLocation = "21.3.0"
 room = "2.7.2"
 signalr = "10.0.0-preview.4.25258.110"
-sqlcipher= "4.5.4"
+sqlcipher = "4.5.4"
 sqlight = "2.5.2"
 koin = "4.1.1"
 kspVersion = "2.2.10-2.0.2"
@@ -29,9 +31,10 @@ coroutines = "1.10.1"
 nav_version = "2.9.3"
 constrain-compose = "1.1.1"
 coilCompose = "2.4.0"
-gms="4.4.3"
+gms = "4.4.3"
 uiGraphics = "1.9.0"
-
+ui = "1.9.1"
+gradleSecret = "2.0.1"
 
 
 [libraries]
@@ -63,58 +66,62 @@ coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilCompose" }
 
 
 #room
-room-runtime = { group = "androidx.room",name="room-runtime", version.ref = "room" }
-room-compiler = { group = "androidx.room",name="room-compiler", version.ref = "room" }
-room-ktx = { group = "androidx.room",name="room-ktx", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 #signalr
 signalr = { module = "com.microsoft.signalr:signalr", version.ref = "signalr" }
 
 
-sqlcipher = {module = "net.zetetic:android-database-sqlcipher" , version.ref = "sqlcipher"}
-sql-light= {group = "androidx.sqlite" , name = "sqlite" , version.ref = "sqlight"}
+sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "sqlcipher" }
+sql-light = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlight" }
 
 #koin
-koin-android = {group="io.insert-koin",name="koin-android",version.ref="koin"}
-koin-core = {group="io.insert-koin",name="koin-core",version.ref="koin"}
-koin-nav = {group="io.insert-koin",name="koin-androidx-navigation",version.ref="koin"}
-koin-compose = {group="io.insert-koin",name="koin-androidx-compose",version.ref="koin"}
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
+koin-nav = { group = "io.insert-koin", name = "koin-androidx-navigation", version.ref = "koin" }
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 
 
 
 #coroutines
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx",name="kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
 
 #kotlin services
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 
 #ktor
-ktor-client-core = { group = "io.ktor",name="ktor-client-core", version.ref = "ktor" }
-ktor-client-android = { group = "io.ktor",name="ktor-client-android", version.ref = "ktor" }
-ktor-client-content-negotiation = { group = "io.ktor",name="ktor-client-content-negotiation", version.ref = "ktor" }
-ktor-serialization-kotlinx-json = { group = "io.ktor",name="ktor-serialization-kotlinx-json", version.ref = "ktor" }
-ktor-loggin = {group="io.ktor",name = "ktor-client-logging-jvm",version.ref="ktor"}
-ktor-auth ={group="io.ktor",name="ktor-client-auth",version.ref="ktor"}
-ktor-cio = {group="io.ktor",name="ktor-client-cio",version.ref = "ktor"}
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-loggin = { group = "io.ktor", name = "ktor-client-logging-jvm", version.ref = "ktor" }
+ktor-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref = "ktor" }
+ktor-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 
 #serialization
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx",name="kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 
 #navigation
-compose-navigation ={group="androidx.navigation",name="navigation-compose",version.ref="nav_version"}
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "nav_version" }
 
 
 #constrin layout
-compose-constrin = {group = "androidx.constraintlayout",name = "constraintlayout-compose",version.ref="constrain-compose"}
+compose-constrin = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constrain-compose" }
 
 #location
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
+maps-navigation = { module = "com.google.android.libraries.navigation:navigation", version.ref = "mapsNav" }
 
 #lifecycle
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelKtx" }
 androidx-lifecycle-compose-runntime = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleViewmodelKtx" }
+ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 
 #map
 
@@ -123,7 +130,8 @@ androidx-lifecycle-compose-runntime = { module = "androidx.lifecycle:lifecycle-r
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialize-plugin={id="org.jetbrains.kotlin.plugin.serialization", version.ref ="serialize-kotlin"}
+kotlin-serialize-plugin = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialize-kotlin" }
 
 ksp-android = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
-google-gms={id = "com.google.gms.google-services", version.ref ="gms"}
+google-gms = { id = "com.google.gms.google-services", version.ref = "gms" }
+map-secret = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "gradleSecret" }

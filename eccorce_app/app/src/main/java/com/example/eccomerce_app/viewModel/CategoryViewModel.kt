@@ -15,10 +15,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CategoryViewModel(val categoryRepository: CategoryRepository) : ViewModel() {
-    private val _categories = MutableStateFlow<MutableList<Category>?>(null)
+     val _categories = MutableStateFlow<MutableList<Category>?>(null)
     val categories = _categories.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

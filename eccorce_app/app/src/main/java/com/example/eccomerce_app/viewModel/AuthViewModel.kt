@@ -32,13 +32,13 @@ class AuthViewModel(
     val context: Context
 ) : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(false)
+     val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
     val errorMessage = MutableStateFlow<String?>(null)
 
 
-    private val _currentScreen = MutableStateFlow<Int?>(null)
+     val _currentScreen = MutableStateFlow<Int?>(null)
     val currentScreen = _currentScreen.asStateFlow()
 
     suspend fun clearErrorMessage() {

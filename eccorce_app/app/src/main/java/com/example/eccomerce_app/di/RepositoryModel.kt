@@ -5,6 +5,7 @@ import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.data.repository.BannerRepository
 import com.example.eccomerce_app.data.repository.CategoryRepository
 import com.example.eccomerce_app.data.repository.GeneralSettingRepository
+import com.example.eccomerce_app.data.repository.MapRepository
 import com.example.eccomerce_app.data.repository.OrderItemRepository
 import com.example.eccomerce_app.data.repository.OrderRepository
 import com.example.eccomerce_app.data.repository.ProductRepository
@@ -27,4 +28,5 @@ val repositoryModel = module {
     single { SubCategoryRepository(get()) }
     single { UserRepository(get()) }
     single { VariantRepository(get()) }
+    single { MapRepository(get()) }
 }

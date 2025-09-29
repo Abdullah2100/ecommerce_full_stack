@@ -26,16 +26,16 @@ class StoreViewModel(
     val webSocket: HubConnection?
 ) : ViewModel() {
 
-    private val _hub = MutableStateFlow<HubConnection?>(null)
+     val _hub = MutableStateFlow<HubConnection?>(null)
 
     val storeCreateData = MutableStateFlow<CreateStoreDto?>(null)
 
 
-    private val _stores = MutableStateFlow<List<StoreModel>?>(null)
+     val _stores = MutableStateFlow<List<StoreModel>?>(null)
     val stores = _stores.asStateFlow()
 
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

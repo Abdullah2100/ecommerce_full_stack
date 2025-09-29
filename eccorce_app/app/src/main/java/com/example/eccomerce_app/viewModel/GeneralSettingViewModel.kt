@@ -18,10 +18,10 @@ class GeneralSettingViewModel(
     val generalSettingRepository: GeneralSettingRepository
 ) : ViewModel() {
 
-    private val _generalSetting = MutableStateFlow<List<GeneralSetting>?>(null)
+     val _generalSetting = MutableStateFlow<List<GeneralSetting>?>(null)
     val generalSetting = _generalSetting.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

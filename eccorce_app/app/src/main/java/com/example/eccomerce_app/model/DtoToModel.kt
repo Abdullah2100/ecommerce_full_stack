@@ -14,6 +14,7 @@ import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderProductDto
 import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderVarientDto
+import com.example.eccomerce_app.util.Secrets
 import kotlin.text.replace
 
 object DtoToModel {
@@ -31,7 +32,7 @@ object DtoToModel {
         return Category(
             id= this.id,
             name =this.name,
-            image=this.image.replace("0.0.0.0","192.168.1.45")
+            image=this.image.replace("0.0.0.0","${Secrets.imageUrl}")
         )
     }
     fun SubCategoryDto.toSubCategory(): SubCategory{
@@ -49,8 +50,8 @@ object DtoToModel {
             id = this.id,
             name = this.name,
             userId = this.userId,
-            pigImage = this.wallpaperImage.replace("0.0.0.0", "192.168.1.45"),
-            smallImage = this.smallImage.replace("0.0.0.0", "192.168.1.45"),
+            pigImage = this.wallpaperImage.replace("0.0.0.0", "${Secrets.imageUrl}"),
+            smallImage = this.smallImage.replace("0.0.0.0", "${Secrets.imageUrl}"),
             latitude = this.latitude,
             longitude = this.longitude
         )
@@ -62,7 +63,7 @@ object DtoToModel {
             name = this.name,
             phone = this.phone,
             email = this.email,
-            thumbnail=if(!this.thumbnail.isEmpty())this.thumbnail.replace("0.0.0.0","192.168.1.45") else "",
+            thumbnail=if(!this.thumbnail.isEmpty())this.thumbnail.replace("0.0.0.0","${Secrets.imageUrl}") else "",
             address = this.address?.map { it.toAddress() }?.toList(),
             storeId = this.storeId
         )
@@ -72,7 +73,7 @@ object DtoToModel {
     fun BannerDto.toBanner():BannerModel{
         return BannerModel(
             id=this.id,
-            image=if(this.image.isNotEmpty())this.image.replace("0.0.0.0","192.168.1.45") else "",
+            image=if(this.image.isNotEmpty())this.image.replace("0.0.0.0","${Secrets.imageUrl}") else "",
             storeId = this.storeId
         )
     }
@@ -98,7 +99,7 @@ object DtoToModel {
             id = this.id,
             name = this.name,
             description = this.description,
-            thumbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("0.0.0.0","192.168.1.45") else "",
+            thumbnail = if(this.thmbnail.isNotEmpty())this.thmbnail.replace("0.0.0.0","${Secrets.imageUrl}") else "",
             subcategoryId = this.subcategoryId,
             storeId = this.storeId,
             price = this.price,
@@ -106,7 +107,7 @@ object DtoToModel {
             productVariants = this.productVarients?.map {
                 it.map { it.toProductVarient() }
             },
-            productImages = this.productImages.map { it->if(it.isNotEmpty())it.replace("0.0.0.0","192.168.1.45") else "" }
+            productImages = this.productImages.map { it->if(it.isNotEmpty())it.replace("0.0.0.0","${Secrets.imageUrl}") else "" }
         )
     }
 
@@ -121,7 +122,7 @@ object DtoToModel {
         return OrderProduct(
             id= this.id,
             name = this.name,
-            thumbnail = if(this.thmbnail!=null&&this.thmbnail.isNotEmpty())this.thmbnail.replace("0.0.0.0","192.168.1.45") else ""
+            thumbnail = if(this.thmbnail!=null&&this.thmbnail.isNotEmpty())this.thmbnail.replace("0.0.0.0","${Secrets.imageUrl}") else ""
         )
     }
 

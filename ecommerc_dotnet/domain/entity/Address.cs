@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Drawing;
-using NetTopologySuite.Geometries;
 
-namespace ecommerc_dotnet.module;
+namespace ecommerc_dotnet.domain.entity;
 
 public class Address
 {

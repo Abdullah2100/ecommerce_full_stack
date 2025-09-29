@@ -1,3 +1,4 @@
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.module;
 

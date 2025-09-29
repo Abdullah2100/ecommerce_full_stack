@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">ShopZen</string>
-    <string name="mapbox_access_token">MAPBOX_DOWNLOADS_TOKEN</string>
+    <string name="google_map_token">GOOGLE_MAP_KEY</string>
 </resources>

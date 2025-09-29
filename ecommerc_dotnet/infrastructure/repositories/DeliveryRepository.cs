@@ -1,5 +1,6 @@
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.module;
 using hotel_api.util;

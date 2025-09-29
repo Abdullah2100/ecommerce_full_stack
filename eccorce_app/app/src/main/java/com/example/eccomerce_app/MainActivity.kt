@@ -36,7 +36,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
-import com.example.e_commercompose.ui.NavController
+import com.example.eccomerce_app.ui.NavController
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.e_commercompose.model.ButtonNavItem
 import com.example.eccomerce_app.ui.Screens

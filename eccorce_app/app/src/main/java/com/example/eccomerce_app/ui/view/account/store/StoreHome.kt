@@ -2,6 +2,7 @@ package com.example.e_commercompose.ui.view.account.store
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -106,10 +107,10 @@ import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
-import java.time.Instant
 import java.util.Calendar
 import java.util.UUID
 import kotlin.collections.forEach
@@ -211,6 +212,29 @@ fun StoreScreen(
 
 
     val locationClient = LocationServices.getFusedLocationProviderClient(context)
+
+    fun handlingLocation(type: enMapType, location: Location): LatLng? {
+        return when (type) {
+            enMapType.MyStore -> {
+                Log.d("NavigationToMapHome","fromMyStore")
+                LatLng(
+                    location.latitude,
+                    location.longitude
+                )
+            }
+            enMapType.Store -> {
+                Log.d("NavigationToMapHome","fromStore")
+
+                if (storeData == null) null
+                else LatLng(storeData.latitude, storeData.longitude)
+
+            }
+
+            else ->
+                return null;
+        }
+    }
+
     val requestPermissionThenNavigate = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
@@ -233,21 +257,26 @@ fun StoreScreen(
                         addOnSuccessListener { location ->
 
                             location?.toString()
-                            if (location != null)
+                            if (location != null) {
+                                val type =
+                                    when ((myStoreId == storeId || myStoreId == null) && isFromHome == false) {
+                                        true -> enMapType.MyStore
+                                        else -> enMapType.Store
+                                    }
+                                val locationHolder = handlingLocation(type, location)
+
                                 nav.navigate(
                                     Screens.MapScreen(
-
-                                        lognit = location.longitude,
-                                        latitt = location.latitude,
+                                        lognit =locationHolder?.longitude,
+                                        latitt = locationHolder?.latitude,
+                                        additionLat = if (type == enMapType.Store) location.latitude else null,
+                                        additionLong = if (type == enMapType.Store) location.longitude else null,
                                         isFromLogin = false,
                                         title = null,
-                                        mapType = when ((myStoreId == storeId || myStoreId == null) && isFromHome == false) {
-                                            true -> enMapType.MyStore
-                                            else -> enMapType.Store
-                                        },
+                                        mapType = type,
                                     )
                                 )
-                            else
+                            } else
                                 coroutine.launch {
                                     snackBarHostState.showSnackbar("you should enable location services")
                                 }
@@ -342,7 +371,7 @@ fun StoreScreen(
     }
 
     LaunchedEffect(reachedBottom.value) {
-        if (!products.value.isNullOrEmpty() && reachedBottom.value && products.value!!.size>23) {
+        if (!products.value.isNullOrEmpty() && reachedBottom.value && products.value!!.size > 23) {
             when (selectedSubCategoryId.value == null) {
                 true -> {
                     productViewModel.getProducts(
@@ -412,75 +441,77 @@ fun StoreScreen(
                                 )
                                 Sizer(10)
 
-                               Column(
-                                   modifier = Modifier
-                                       .fillMaxWidth()
-                                       .border(
-                                           1.dp, CustomColor.neutralColor400,
-                                           RoundedCornerShape(8.dp)
-                                       )
-                                       .clip(RoundedCornerShape(8.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            1.dp, CustomColor.neutralColor400,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clip(RoundedCornerShape(8.dp))
 //
-                               )
-                               {
-                                   Row(
-                                       modifier = Modifier
-                                           .height(65.dp)
-                                           .fillMaxWidth()
-                                           .clickable {
-                                               isExpandedCategory.value = !isExpandedCategory.value
-                                           }
-                                           .clip(RoundedCornerShape(8.dp))
-                                           .padding(horizontal = 5.dp)
-                                          ,
-                                       horizontalArrangement = Arrangement.SpaceBetween,
-                                       verticalAlignment = Alignment.CenterVertically)
-                                   {
+                                )
+                                {
+                                    Row(
+                                        modifier = Modifier
+                                            .height(65.dp)
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                isExpandedCategory.value = !isExpandedCategory.value
+                                            }
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 5.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically)
+                                    {
 
-                                       Text(
-                                           categoryName.value.text.ifEmpty { "Select Category Name" }
-                                       )
-                                       Icon(
-                                           Icons.Default.KeyboardArrowDown,
-                                           "",
-                                           modifier = Modifier.rotate(rotation.value)
-                                       )
-                                   }
+                                        Text(
+                                            categoryName.value.text.ifEmpty { "Select Category Name" }
+                                        )
+                                        Icon(
+                                            Icons.Default.KeyboardArrowDown,
+                                            "",
+                                            modifier = Modifier.rotate(rotation.value)
+                                        )
+                                    }
 
-                                   Column(
-                                       modifier = Modifier
+                                    Column(
+                                        modifier = Modifier
 //                                           .padding(bottom = 19.dp)
-                                           .fillMaxWidth()
-                                           .height(animated.value)
-                                           .border(
-                                               1.dp, CustomColor.neutralColor200, RoundedCornerShape(
-                                                   topStart = 0.dp,
-                                                   topEnd = 0.dp,
-                                                   bottomStart = 8.dp,
-                                                   bottomEnd = 8.dp
-                                               )
-                                           ),
+                                            .fillMaxWidth()
+                                            .height(animated.value)
+                                            .border(
+                                                1.dp,
+                                                CustomColor.neutralColor200,
+                                                RoundedCornerShape(
+                                                    topStart = 0.dp,
+                                                    topEnd = 0.dp,
+                                                    bottomStart = 8.dp,
+                                                    bottomEnd = 8.dp
+                                                )
+                                            ),
 
-                                       )
-                                   {
+                                        )
+                                    {
 
-                                       categories.value?.forEach { option: Category ->
-                                           Text(
-                                               option.name,
-                                               modifier = Modifier
-                                                   .height(50.dp)
-                                                   .fillMaxWidth()
-                                                   .clip(RoundedCornerShape(8.dp))
-                                                   .clickable {
-                                                       isExpandedCategory.value = false
-                                                       categoryName.value = TextFieldValue(option.name)
-                                                   }
-                                                   .padding(top = 12.dp, start = 5.dp)
+                                        categories.value?.forEach { option: Category ->
+                                            Text(
+                                                option.name,
+                                                modifier = Modifier
+                                                    .height(50.dp)
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .clickable {
+                                                        isExpandedCategory.value = false
+                                                        categoryName.value =
+                                                            TextFieldValue(option.name)
+                                                    }
+                                                    .padding(top = 12.dp, start = 5.dp)
 
-                                           )
-                                       }
-                                   }
-                               }
+                                            )
+                                        }
+                                    }
+                                }
                                 Sizer(10)
 
                             }

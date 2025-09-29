@@ -85,6 +85,8 @@ object Screens {
         val id:String?=null,
         val lognit: Double?=null,
         val latitt: Double?=null,
+        val additionLong: Double? = null,
+        val additionLat: Double? = null,
         val mapType: enMapType,
         val isFromLogin: Boolean
     )

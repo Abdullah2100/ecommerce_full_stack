@@ -3,6 +3,7 @@ using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.core.Result;
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;

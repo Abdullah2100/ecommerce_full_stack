@@ -18,10 +18,10 @@ import kotlinx.coroutines.launch
 class VariantViewModel(val variantRepository: VariantRepository) : ViewModel() {
 
 
-    private val _variants = MutableStateFlow<MutableList<VarirntModel>?>(null)
+     val _variants = MutableStateFlow<MutableList<VarirntModel>?>(null)
     val variants = _variants.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

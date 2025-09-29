@@ -13,6 +13,7 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
@@ -63,6 +64,15 @@ object General {
     }
 
 
+    fun convertColorToInt(value: String): Color? {
+        return try {
+            Color("#${value}".toColorInt())
+        } catch (ex: Exception) {
+            null
+        }
+    }
+
+
     fun Uri.toCustomFil(context: Context): File? {
         var file: File? = null
 
@@ -90,15 +100,6 @@ object General {
         val zid = if (tz == null) ZoneId.systemDefault() else tz.toZoneId()
         return LocalDateTime.ofInstant(this.toInstant(), zid)
     }
-
-    fun convertColorToInt(value: String): Color? {
-        return try {
-            Color("#${value}".toColorInt())
-        } catch (ex: Exception) {
-            null
-        }
-    }
-
 
     fun LazyListState.reachedBottom(): Boolean {
         val visibleItemsInfo = layoutInfo.visibleItemsInfo // Get the visible items

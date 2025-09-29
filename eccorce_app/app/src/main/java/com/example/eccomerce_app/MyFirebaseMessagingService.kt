@@ -26,7 +26,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun showNotification(title: String?, body: String?) {
+     fun showNotification(title: String?, body: String?) {
         val channelId = "default_channel"
         val channelName = "Default Channel"
 

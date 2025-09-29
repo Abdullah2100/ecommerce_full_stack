@@ -9,12 +9,12 @@ import com.example.eccomerce_app.util.General
 import org.koin.dsl.module
 
 fun provideDataBase(application: Context): AuthDataBase {
-    return Room.databaseBuilder(
-        application,
-        AuthDataBase::class.java,
-        "table_post"
-    )
-        .openHelperFactory(General.encryptionFactory(Secrets.getBaseUrl()))
+    return Room
+        .databaseBuilder(
+            application,
+            AuthDataBase::class.java,
+            "table_post")
+        .openHelperFactory(General.encryptionFactory(Secrets.getUrl()))
         .build()
 }
 

@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui
+package com.example.eccomerce_app.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -38,10 +38,10 @@ import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
-import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
+import com.example.eccomerce_app.viewModel.MapViewModel
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
 import com.example.eccomerce_app.viewModel.OrderViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
@@ -62,6 +62,7 @@ fun NavController(
     generalSettingViewModel: GeneralSettingViewModel = koinViewModel(),
     orderViewModel: OrderViewModel = koinViewModel(),
     orderItemViewModel: OrderItemsViewModel = koinViewModel(),
+    mapViewModel: MapViewModel = koinViewModel(),
     currentScreen: Int,
 ) {
 
@@ -99,6 +100,8 @@ fun NavController(
             MapHomeScreen(
                 longitude = data.lognit,
                 latitude = data.latitt,
+                additionLong = data.additionLong,
+                additionLat = data.additionLat,
                 title = data.title,
                 id = data.id,
                 isFomLogin = data.isFromLogin,
@@ -111,7 +114,8 @@ fun NavController(
                 bannerViewModel = bannerViewModel,
                 productViewModel = productViewModel,
                 variantViewModel = variantViewModel,
-                categoryViewModel = categoryViewModel
+                categoryViewModel = categoryViewModel,
+                mapViewModel = mapViewModel
             )
 
         }
@@ -506,7 +510,7 @@ fun NavController(
                     bannerViewModel = bannerViewModel,
                     subCategoryViewModel = subCategoryViewModel,
                     productViewModel = productViewModel,
-                    isCanNavigateToStore=store.isCanNavigateToStore
+                    isCanNavigateToStore = store.isCanNavigateToStore
                 )
 
             }

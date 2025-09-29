@@ -33,10 +33,10 @@ class UserViewModel(
     val userRepository: UserRepository,
     val addressRepository: AddressRepository
 ) : ViewModel() {
-    private val _userInfo = MutableStateFlow<UserModel?>(null)
+     val _userInfo = MutableStateFlow<UserModel?>(null)
     val userInfo = _userInfo.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

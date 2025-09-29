@@ -25,12 +25,12 @@ class OrderItemsViewModel(
     val webSocket: HubConnection?
 
 ) : ViewModel() {
-    private val _hub = MutableStateFlow<HubConnection?>(null)
+     val _hub = MutableStateFlow<HubConnection?>(null)
 
-    private val _orderItemForMyStore = MutableStateFlow<List<OrderItem>?>(null)
+     val _orderItemForMyStore = MutableStateFlow<List<OrderItem>?>(null)
     val orderItemForMyStore = _orderItemForMyStore.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

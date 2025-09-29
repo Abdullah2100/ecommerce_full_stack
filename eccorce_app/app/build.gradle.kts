@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.ksp.android)
     alias(libs.plugins.kotlin.serialize.plugin)
     alias(libs.plugins.google.gms)
+    alias(libs.plugins.map.secret)
 }
 
 android {
@@ -34,9 +35,9 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
-        val mapboxToken = localProperties.getProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""
-        // Inject into the generated strings.xml resource as 'mapbox_access_token'
-        resValue("string", "mapbox_access_token", mapboxToken)
+        val mapboxToken = localProperties.getProperty("GOOGLE_MAP_KEY") ?: ""
+        // Inject into the generated strings.xml resource as 'google_map_token'
+        resValue("string", "google_map_token", mapboxToken)
     }
 
 
@@ -53,16 +54,17 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
         isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     buildToolsVersion = "36.0.0"
@@ -79,6 +81,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.ui.graphics)
+    implementation(libs.ui)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -157,11 +160,21 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.compose.runntime)
 
-    //mapbox
-    implementation ("com.mapbox.extension:maps-compose:0.1.0")
-    implementation("com.mapbox.maps:android-ndk27:11.15.0")
-    implementation("com.mapbox.navigationcore:android-ndk27:3.11.7")
-//    implementation("com.google.maps.android:maps-compose-utils:6.7.1")
-//    implementation("com.google.maps.android:maps-compose-widgets:6.9.0")
+    //google map
+    implementation(libs.maps.utils.ktx)
+    implementation(libs.maps.compose)
+    implementation("com.google.android.gms:play-services-maps:19.1.0")
+
+    implementation(libs.maps.navigation) {
+        exclude(group = "com.google.android.gms", module = "play-services-maps")
+    }
+    configurations.all {
+        exclude(group = "com.google.android.gms", module = "play-services-maps")
+    }
+//
+//
+//    implementation("com.mapbox.maps:android:10.15.0")
+//    implementation("com.mapbox.navigation:android:2.14.0")
+
 
 }

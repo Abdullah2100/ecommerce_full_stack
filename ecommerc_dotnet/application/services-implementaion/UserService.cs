@@ -1,8 +1,10 @@
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.Repository;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
 using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.di.email;
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
@@ -22,6 +24,7 @@ public class UserService(
     IReseatePasswordRepository passwordRepository)
     : IUserServices
 {
+    
     public async Task<Result<AuthDto?>> signup(SignupDto signupDto)
     {
         if (signupDto.Role != 0 && signupDto.Role != 1)
@@ -753,6 +756,7 @@ public class UserService(
                 Otp = otp
             }
         );
+        
         if (result == 0)
         {
             return new Result<bool>
@@ -764,7 +768,8 @@ public class UserService(
             );
         }
 
-        bool emailSendResult = await email.sendingEmail(forgetPasswordDto.Email, otp);
+        var SendMessageSerivce = new SendMessageSerivcies(email);
+        bool emailSendResult = await SendMessageSerivce.sendMessage(message:otp, otp);
 
         if (!emailSendResult)
         {

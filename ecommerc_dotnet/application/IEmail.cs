@@ -1,6 +1,10 @@
 namespace ecommerc_dotnet.di.email;
 
-public interface IEmail
+public interface IMessageSerivice
 {
-   public Task<bool>sendingEmail(string receivedEmail,string otp);
+    Task<bool> sendingMessage(string message, string from);
+}
+
+public interface IEmail : IMessageSerivice
+{
 }

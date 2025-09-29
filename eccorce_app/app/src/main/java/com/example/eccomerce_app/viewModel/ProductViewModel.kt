@@ -29,13 +29,13 @@ class ProductViewModel(
 ) : ViewModel() {
 
 
-    private val _hub = MutableStateFlow<HubConnection?>(null)
+     val _hub = MutableStateFlow<HubConnection?>(null)
 
-    private val _products = MutableStateFlow<List<ProductModel>?>(null)
+     val _products = MutableStateFlow<List<ProductModel>?>(null)
     val products = _products.asStateFlow()
 
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

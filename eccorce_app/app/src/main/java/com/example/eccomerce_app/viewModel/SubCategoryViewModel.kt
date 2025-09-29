@@ -23,10 +23,10 @@ import java.util.UUID
 
 class SubCategoryViewModel(val subCategoryRepository: SubCategoryRepository) : ViewModel() {
 
-    private val _SubCategories = MutableStateFlow<List<SubCategory>?>(null)
+     val _SubCategories = MutableStateFlow<List<SubCategory>?>(null)
     val subCategories = _SubCategories.asStateFlow()
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

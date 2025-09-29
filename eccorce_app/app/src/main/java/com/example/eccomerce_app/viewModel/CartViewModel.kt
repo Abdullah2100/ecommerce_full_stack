@@ -21,7 +21,7 @@ import kotlin.math.sqrt
 class CartViewModel() : ViewModel() {
 
 
-    private val _isLoading = MutableStateFlow(false)
+     val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
 
@@ -34,11 +34,11 @@ class CartViewModel() : ViewModel() {
             emptyList()
         )
     )
-    private val _distance = MutableStateFlow(0.0)
+     val _distance = MutableStateFlow(0.0)
     val distance = _distance.asStateFlow()
 
 
-    private val _coroutineException = CoroutineExceptionHandler { _, message ->
+     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 

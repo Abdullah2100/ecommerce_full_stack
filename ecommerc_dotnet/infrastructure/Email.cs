@@ -10,34 +10,33 @@ namespace hotel_api.Services.EmailService;
 
 public class Email(IConfig config) : IEmail
 {
-    public async Task<bool>sendingEmail( string receivedEmail, string otp)
+    public async Task<bool> sendingMessage(string message, string to)
     {
         try
         {
             var serverUrl = config.getKey("smtp_data:url");
             var userName = config.getKey("smtp_data:username");
             var password = config.getKey("smtp_data:password");
-            var port =config.getKey("smtp_data:port");
-            
+            var port = config.getKey("smtp_data:port");
+
             var client = new SmtpClient(serverUrl, Convert.ToInt32((port)))
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(userName, password)
-
             };
             await client.SendMailAsync(
                 new MailMessage(
                     userName
-                    ,receivedEmail,
+                    , to,
                     "Otp Valdiation",
-                    otp)
-                );
+                    message)
+            );
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("this error from sending otp to user "+ex.Message);
+            Console.WriteLine("this error from sending otp to user " + ex.Message);
             return false;
         }
     }
