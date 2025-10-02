@@ -49,7 +49,6 @@ To run this project locally, you will need:
 
       * **PostgreSQL Connection String**
       * **JWT Secret Key**
-      * **MinIO Connection Details**
 
 3.  **Apply Database Migrations:**
 
@@ -94,7 +93,6 @@ The API is fully documented via **Swagger/OpenAPI** and can be accessed at: `htt
 | **Geospatial** | **NetTopologySuite** | Handling geographical data types and operations. |
 | **Auth** | **JWT Bearer Authentication** | Secure token-based authentication. |
 | **Real-time** | **Microsoft.AspNetCore.SignalR** | Real-time communication for updates. |
-| **Storage** | **MinIO** | Object storage client for assets. |
 | **Documentation** | **Swashbuckle.AspNetCore** | Generates the Swagger/OpenAPI documentation. |
 | **External** | **FirebaseAdmin** | Integration with Firebase services. |
 
