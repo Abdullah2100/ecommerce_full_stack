@@ -1,5 +1,12 @@
 import org.gradle.kotlin.dsl.implementation
+import java.util.Properties
 
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -26,6 +33,8 @@ android {
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
+        val mapboxToken = localProperties.getProperty("GOOGLE_MAP_KEY") ?: ""
+        resValue("string", "google_map_token", mapboxToken)
     }
 
     buildTypes {
@@ -134,8 +143,8 @@ dependencies {
 
     //firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.messaging.ktx)
     implementation(libs.firebase.messaging.directboot)
+    implementation(libs.firebase.messaging.ktx)
 
 
 
@@ -144,5 +153,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose.runntime)
 
     //googleMap
+    implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)
+    implementation("com.google.android.gms:play-services-maps:19.1.0")
+
+    implementation(libs.maps.navigation) {
+        exclude(group = "com.google.android.gms", module = "play-services-maps")
+    }
+    configurations.all {
+        exclude(group = "com.google.android.gms", module = "play-services-maps")
+    }
 }

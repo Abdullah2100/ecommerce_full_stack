@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ShopZen Delivery Man</string>
+    <string name="google_map_token">GOOGLE_MAP_KEY</string>
 </resources>

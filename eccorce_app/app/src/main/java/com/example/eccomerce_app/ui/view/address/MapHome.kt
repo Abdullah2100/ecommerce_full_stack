@@ -1,11 +1,18 @@
 package com.example.eccomerce_app.ui.view.address
 
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,6 +24,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,6 +41,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.component.CustomAuthBottom
@@ -51,21 +60,29 @@ import com.example.eccomerce_app.viewModel.UserViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.UUID
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.viewModel.MapViewModel
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Gap
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -97,6 +114,8 @@ fun MapHomeScreen(
 
     val directions = mapViewModel.googlePlaceInfo.collectAsState()
 
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
     val sheetState = rememberModalBottomSheetState()
 
     val coroutine = rememberCoroutineScope()
@@ -113,16 +132,23 @@ fun MapHomeScreen(
 
     val addressTitle = remember { mutableStateOf(TextFieldValue(title ?: "")) }
 
+    val additionLatLng = remember {
+        mutableStateOf(
+            if (additionLat == null) LatLng(0.0, 0.0)
+            else LatLng(additionLat, additionLong!!)
+        )
+    }
     val additionLocation = rememberUpdatedMarkerState(
-        position = if (additionLat == null) LatLng(0.0, 0.0)
-        else LatLng(additionLat, additionLong!!)
+        position = additionLatLng.value
     )
+
     val mainLocation = rememberUpdatedMarkerState(
         position = LatLng(
             latitude ?: 15.347509735207755,
             longitude ?: 44.20684900134802
         )
     )
+
     val marker = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             mainLocation.position, 15f
@@ -131,12 +157,6 @@ fun MapHomeScreen(
 
 
     val snackBarHostState = remember { SnackbarHostState() }
-
-
-    Log.d(
-        "LocationClick",
-        "${mainLocation.position.toString()} ${additionLocation.position.toString()}"
-    )
 
     fun initial() {
         userViewModel.getMyInfo()
@@ -187,12 +207,67 @@ fun MapHomeScreen(
         val newCameraPosition = CameraPosition.fromLatLngZoom(
             additionLocation.position,
             20f
-        ) // New position and zoom level
+        )
 
         coroutine.launch {
             marker.animate(update = CameraUpdateFactory.newCameraPosition(newCameraPosition))
         }
     }
+
+
+    //to request the update in location
+    val locationRequest = remember {
+        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100L) // Desired interval: 500ms
+            .setMinUpdateIntervalMillis(100L) // Fastest acceptable interval: 100ms
+            .setMinUpdateDistanceMeters(1f)
+            .setWaitForAccurateLocation(false)
+            .build()
+    }
+
+    //to track the update in user location
+    val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            for (location in locationResult.locations) {
+                Log.d(
+                    "ChangeLocation",
+                    "${location.latitude.toString()} ${location.longitude.toString()}"
+                )
+                additionLatLng.value = LatLng(
+                    location.latitude,
+                    location.longitude
+                )
+            }
+        }
+    }
+
+    val requestPermissionThenNavigate = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            val arePermissionsGranted = permissions.values.reduce { acc, next -> acc && next }
+
+            if (arePermissionsGranted) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return@rememberLauncherForActivityResult
+                }
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+
+            } else {
+                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
 
 
     LaunchedEffect(Unit) {
@@ -207,14 +282,32 @@ fun MapHomeScreen(
     }
 
 
-    LaunchedEffect(Unit) {
+    /*LaunchedEffect(Unit) {
         userViewModel.getMyInfo()
+    }*/
+
+    LaunchedEffect(Unit) {
+        requestPermissionThenNavigate.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            )
+        )
+    }
+
+    DisposableEffect(Unit)
+    {
+        onDispose {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
     }
 
 
 
-
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
         },
@@ -327,63 +420,73 @@ fun MapHomeScreen(
         ConstraintLayout {
             val (bottomRef) = createRefs()
 
-            Box(
+
+            LazyColumn(
                 modifier = Modifier
                     .padding(
                         top = paddingValue.calculateTopPadding(),
                         bottom = paddingValue.calculateBottomPadding()
                     )
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                    .background(Color.White)
+                    .fillMaxSize()
             ) {
+                item {
 
-                GoogleMap(
-                    modifier = Modifier.matchParentSize(),
-                    cameraPositionState = marker,
-                    onMapClick = { latLng ->
-                        handleMapClick(latLng)
-                    })
-                {
-                    if (isHasNavigationMap == false)
-                        Marker(
-                            state = MarkerState(position = mainLocation.position),
-                            title = title,
-                        )
-                    else {
-                        Marker(
-                            state = MarkerState(position = additionLocation.position),
-                            title = "My Place",
-                        )
+                    GoogleMap(
+                        modifier = Modifier.fillParentMaxSize(),
+                        cameraPositionState = marker,
+                        onMapClick = { latLng ->
+                            handleMapClick(latLng)
+                        },
+                        properties = MapProperties(isMyLocationEnabled = false)
+                    )
+                    {
+                        if (isHasNavigationMap == false)
+                            Marker(
+                                state = MarkerState(position = mainLocation.position),
+                                title = title,
+                            )
+                        else {
 
-                        MarkerComposable(
-                            state = MarkerState(position = mainLocation.position),
 
-                            title = title,
-                            onClick = {
-                                true
+                            Marker(
+                                state = MarkerState(position = additionLocation.position),
+                                title = "My Place",
+                            )
+
+//                        if(mapType==enMapType.Store)
+                            MarkerComposable(
+                                state = MarkerState(position = mainLocation.position),
+
+                                title = title,
+                                onClick = {
+                                    true
+                                }
+                            ) {
+                                Image(
+                                    imageVector = ImageVector
+                                        .vectorResource(id = R.drawable.store_icon),
+                                    contentDescription = "",
+                                    modifier = Modifier.size(20.dp)
+                                )
+
                             }
-                        ) {
-                            Image(
-                                imageVector = ImageVector
-                                    .vectorResource(id = R.drawable.store_icon),
-                                contentDescription = "",
-                                modifier = Modifier.size(20.dp)
-                            )
-
                         }
-                    }
-                    if (!directions.value.isNullOrEmpty())
-                        Polyline(
-                            directions.value!!,
-                            color = Color.Red,
-                            pattern = listOf(
-                                Dash(15f), Gap(2f)
+
+                        if (!directions.value.isNullOrEmpty())
+                            Polyline(
+                                directions.value!!,
+                                color = Color.Red,
+                                pattern = listOf(
+                                    Dash(15f), Gap(2f)
+                                )
                             )
-                        )
+                    }
+
+
                 }
-
-
             }
+
 
 
             if (isHasTitle) CustomBotton(

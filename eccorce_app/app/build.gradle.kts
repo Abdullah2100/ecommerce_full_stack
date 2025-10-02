@@ -14,7 +14,6 @@ plugins {
     alias(libs.plugins.ksp.android)
     alias(libs.plugins.kotlin.serialize.plugin)
     alias(libs.plugins.google.gms)
-    alias(libs.plugins.map.secret)
 }
 
 android {
@@ -36,7 +35,6 @@ android {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
         val mapboxToken = localProperties.getProperty("GOOGLE_MAP_KEY") ?: ""
-        // Inject into the generated strings.xml resource as 'google_map_token'
         resValue("string", "google_map_token", mapboxToken)
     }
 

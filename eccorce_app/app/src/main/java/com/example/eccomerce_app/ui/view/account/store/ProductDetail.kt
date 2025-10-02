@@ -124,7 +124,7 @@ fun ProductDetail(
     }
 
 
-    val images = remember { mutableStateOf<List<String>?>(productData?.productImages) }
+    val images = remember { mutableStateOf(productData?.productImages) }
 
 
     if (productData?.thumbnail != null) {
@@ -312,51 +312,53 @@ fun ProductDetail(
                             verticalAlignment = Alignment.CenterVertically,
 
                             ) {
-                            if(!images.value.isNullOrEmpty())
-                            items(items = images.value as List<String> ,key={ image->image}) { image ->
+                            if (!images.value.isNullOrEmpty())
+                                items(
+                                    items = images.value as List<String>,
+                                    key = { image -> image }) { image ->
 
-                                Box(
-                                    modifier = Modifier
-                                        .padding(end = 5.dp)
-                                        .border(
-                                            1.dp,
-                                            if (image == selectedImage.value)
-                                                CustomColor.primaryColor700 else CustomColor.neutralColor200,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                ) {
-                                    SubcomposeAsyncImage(
-                                        contentScale = ContentScale.Crop,
+                                    Box(
                                         modifier = Modifier
-                                            .height(50.dp)
-                                            .width(50.dp)
-                                            .clip(
+                                            .padding(end = 5.dp)
+                                            .border(
+                                                1.dp,
+                                                if (image == selectedImage.value)
+                                                    CustomColor.primaryColor700 else CustomColor.neutralColor200,
                                                 RoundedCornerShape(8.dp)
                                             )
-                                            .clickable {
-                                                if (image != selectedImage.value)
-                                                    selectedImage.value = image
-                                            },
-                                        model = General.handlingImageForCoil(
-                                            image,
-                                            context
-                                        ),
-                                        contentDescription = "",
-                                        loading = {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize(),
-                                                contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                            ) {
-                                                CircularProgressIndicator(
-                                                    color = Color.Black,
-                                                    modifier = Modifier.size(25.dp) // Adjust the size here
+                                    ) {
+                                        SubcomposeAsyncImage(
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .height(50.dp)
+                                                .width(50.dp)
+                                                .clip(
+                                                    RoundedCornerShape(8.dp)
                                                 )
-                                            }
-                                        },
-                                    )
+                                                .clickable {
+                                                    if (image != selectedImage.value)
+                                                        selectedImage.value = image
+                                                },
+                                            model = General.handlingImageForCoil(
+                                                image,
+                                                context
+                                            ),
+                                            contentDescription = "",
+                                            loading = {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize(),
+                                                    contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                                ) {
+                                                    CircularProgressIndicator(
+                                                        color = Color.Black,
+                                                        modifier = Modifier.size(25.dp) // Adjust the size here
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
                                 }
-                            }
                         }
 
                     }
