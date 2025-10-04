@@ -13,12 +13,12 @@ public static class DeliveryMapperExtention
       {
          Id = delivery.Id,
          UserId = delivery.UserId,
-         UpdatedaAt = delivery.UpdatedAt,
+         UpdatedAt = delivery.UpdatedAt,
          Address = delivery?.Address?.toDeliveryDto(),
          Analys = null,
          Thumbnail = string.IsNullOrEmpty(delivery?.Thumbnail) ? null : url + delivery.Thumbnail,
          User = delivery?.User.toDeliveryInfoDto(url),
-         IsAvaliable = delivery?.IsAvaliable ?? false
+         IsAvailable = delivery?.IsAvaliable ?? false
       };
    }
 }

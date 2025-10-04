@@ -1,8 +1,7 @@
 package com.example.e_commerc_delivery_man.model
 
 import com.example.e_commerc_delivery_man.dto.response.AddressResponseDto
-import com.example.e_commerc_delivery_man.dto.response.DeliveryAnalysDto
-import com.example.e_commerc_delivery_man.dto.response.DeliveryInfoDto
+import com.example.e_commerc_delivery_man.dto.response.DeliveryResponseDto
 import com.example.e_commerc_delivery_man.dto.response.UserDto
 import com.example.e_commercompose.dto.response.VarientResponseDto
 import com.example.e_commercompose.model.VarientModel
@@ -32,23 +31,15 @@ object DtoToModel {
             thumbnail=if(this.thumbnail.isNullOrEmpty())"" else this.thumbnail.replace("localhost","10.0.2.2"),
         )
     }
-    fun DeliveryAnalysDto.toDeliveryAnalys(): DeliveryAnalys{
-        return DeliveryAnalys(
-            dayFee = this.dayFee,
-            weekFee= this.weekFee,
-            monthFee=this.monthFee,
-            dayOrder = this.dayOrder,
-            weekOrder=this.weekOrder
-        )
-    }
-    fun DeliveryInfoDto.toDeliveryInfo(): DeliveryInfo{
-        return DeliveryInfo(
+
+
+    fun DeliveryResponseDto.toDeliveryInfo(): Delivery{
+        return Delivery(
             id = this.id,
             userId = this.userId,
-            isAvaliable = this.isAvaliable,
+            isAvailable = this.isAvailable,
             thumbnail=if(this.thumbnail.isNullOrEmpty())"" else this.thumbnail.replace("localhost","10.0.2.2"),
             address= this.address.toAddress(),
-            analys = this.analys.toDeliveryAnalys(),
             user = this.user.toUser()
 
             )

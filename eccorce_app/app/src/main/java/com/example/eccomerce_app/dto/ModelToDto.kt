@@ -8,8 +8,10 @@ import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.eccomerce_app.dto.CreateOrderDto
 import com.example.eccomerce_app.dto.CreateOrderItemDto
 import com.example.eccomerce_app.dto.CreateProductVarientDto
+import com.example.eccomerce_app.dto.DeliveryDto
 import com.example.eccomerce_app.dto.SubCategoryDto
 import com.example.eccomerce_app.dto.UpdateSubCategoryDto
+import com.example.eccomerce_app.model.Delivery
 
 object ModelToDto {
 
@@ -64,4 +66,5 @@ object ModelToDto {
             name = this.name,
         )
     }
+
 }

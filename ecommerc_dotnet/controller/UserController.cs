@@ -27,6 +27,7 @@ public class UserController(IUserServices userServices) : ControllerBase
             _ => StatusCode(result.StatusCode, result.Message)
         };
     }
+    
 
 
     [AllowAnonymous]

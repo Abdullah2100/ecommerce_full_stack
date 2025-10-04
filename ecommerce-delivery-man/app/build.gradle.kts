@@ -17,13 +17,13 @@ plugins {
 }
 android {
     namespace = "com.example.e_commerc_delivery_man"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "28.0.13004108"
 
     defaultConfig {
         applicationId = "com.example.e_commerc_delivery_man"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         multiDexEnabled = true
@@ -144,7 +144,7 @@ dependencies {
     //firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.directboot)
-    implementation(libs.firebase.messaging.ktx)
+//    implementation(libs.firebase.messaging.ktx)
 
 
 

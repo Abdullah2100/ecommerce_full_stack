@@ -4,7 +4,6 @@ import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.dto.request.AddressRequestDto
 import com.example.e_commerc_delivery_man.dto.request.AddressRequestUpdateDto
 import com.example.e_commerc_delivery_man.dto.response.AddressResponseDto
-import com.example.e_commerc_delivery_man.dto.response.DeliveryInfoDto
 import com.example.e_commerc_delivery_man.dto.response.UserDto
 import com.example.e_commerc_delivery_man.model.MyInfoUpdate
 import com.example.e_commerc_delivery_man.util.Secrets

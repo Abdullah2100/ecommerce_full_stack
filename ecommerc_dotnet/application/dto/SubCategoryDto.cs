@@ -14,7 +14,6 @@ public class SubCategoryDto
 
 public class CreateSubCategoryDto
 {
-    [StringLength(maximumLength: 50, MinimumLength = 4, ErrorMessage = "name must not  be empty")]
     [Required]
     public string Name { get; set; } = String.Empty;
     [Required]

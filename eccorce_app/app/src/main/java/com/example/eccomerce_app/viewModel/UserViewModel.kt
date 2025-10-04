@@ -16,7 +16,6 @@ import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
 import com.example.eccomerce_app.dto.UserDto
 import com.example.eccomerce_app.data.NetworkCallHandler
-import com.example.eccomerce_app.data.Room.Model.IsPassCondition
 import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
 import com.example.eccomerce_app.data.repository.AddressRepository
 import com.example.eccomerce_app.data.repository.UserRepository
@@ -33,10 +32,10 @@ class UserViewModel(
     val userRepository: UserRepository,
     val addressRepository: AddressRepository
 ) : ViewModel() {
-     val _userInfo = MutableStateFlow<UserModel?>(null)
+    val _userInfo = MutableStateFlow<UserModel?>(null)
     val userInfo = _userInfo.asStateFlow()
 
-     val _coroutineException = CoroutineExceptionHandler { _, message ->
+    val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
@@ -44,7 +43,7 @@ class UserViewModel(
     fun setIsPassOnBoardingScreen() {
         viewModelScope.launch(Dispatchers.IO) {
             var isPassOnBoarding = IsPassOnBoardingScreen()
-            isPassOnBoarding.condition=true;
+            isPassOnBoarding.condition = true;
             val result = dao.savePassingOnBoarding(isPassOnBoarding)
             Log.d("insertNewPassingOnBoarding", result.toString())
 
@@ -54,15 +53,17 @@ class UserViewModel(
 
     suspend fun userPassLocation(status: Boolean? = false) {
         var isPassLocation = IsPassLocationScreen()
-        isPassLocation.condition=status ?:false;
+        isPassLocation.condition = status ?: false;
         dao.savePassingLocation(isPassLocation)
     }
 
 
     fun updateMyStoreId(id: UUID) {
         viewModelScope.launch {
-            val copyMyInfo = _userInfo.value!!.copy(storeId = id);
-            _userInfo.emit(copyMyInfo)
+            if (_userInfo.value != null) {
+                val copyMyInfo = _userInfo.value!!.copy(storeId = id);
+                _userInfo.emit(copyMyInfo)
+            }
         }
     }
 

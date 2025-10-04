@@ -78,7 +78,7 @@ public class UserService(
             );
         }
 
-        if (await userRepository.isExist(0))
+        if (signupDto.Role==0&&await userRepository.isExist(0))
         {
             return new Result<AuthDto?>
             (

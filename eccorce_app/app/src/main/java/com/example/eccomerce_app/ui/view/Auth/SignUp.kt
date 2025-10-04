@@ -32,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -50,6 +49,7 @@ import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Util.Validation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -64,7 +64,6 @@ fun SignUpPage(
     val keyboardController = LocalSoftwareKeyboardController.current
     val fontScall = LocalDensity.current.fontScale
 
-    val focusRequester = FocusRequester()
 
     val coroutine = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -175,7 +174,6 @@ fun SignUpPage(
             !isCheckBox.value -> {
                 errorMessageValidation.value = "Term And Policies is Required"
                 isTermAndServicesError.value = true;
-                // coroutine.launch { snackBarHostState.showSnackbar("You should check the condition box to signup") }
 
                 return false
             }
@@ -337,7 +335,8 @@ fun SignUpPage(
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = (14 / fontScall).sp,
-                        modifier = Modifier.offset(x = (-15).dp)
+                        modifier = Modifier
+                            .offset(x = (13).dp, y = (-12).dp)
                     )
 //                Sizer(heigh = 10)
 
@@ -351,7 +350,7 @@ fun SignUpPage(
                             confirmPassword = confirmPassword.value.text
                         )
                     },
-                    buttonTitle = "Login",
+                    buttonTitle = "Signup",
                     operation = {
                         keyboardController?.hide()
                         coroutine.launch {
@@ -363,15 +362,22 @@ fun SignUpPage(
 //                            )
 
                             if (token.first != null) {
-                                authKoin.signUpUser(
+                                val result = authKoin.signUpUser(
                                     phone = phone.value.text,
                                     email = email.value.text,
                                     password = password.value.text,
                                     name = name.value.text,
-                                    nav = nav,
                                     token = token.first!!,
                                     isLoading = isLoading
                                 )
+                                if (result.isNullOrEmpty())
+                                    nav.navigate(Screens.LocationGraph) {
+                                        popUpTo(nav.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                else
+                                    snackBarHostState.showSnackbar(result)
                             } else {
                                 isLoading.value = false
                                 coroutine.launch {

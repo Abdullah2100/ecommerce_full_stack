@@ -8,6 +8,7 @@ import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.DeliveryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
 import com.example.eccomerce_app.viewModel.MapViewModel
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
@@ -29,4 +30,5 @@ val viewModelModel = module {
     single { OrderViewModel(get(), get()) }
     single { OrderItemsViewModel(get(), get()) }
     single { MapViewModel(get()) }
+    single { DeliveryViewModel(get()) }
 }

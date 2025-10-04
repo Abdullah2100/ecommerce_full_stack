@@ -32,13 +32,13 @@ class AuthViewModel(
     val context: Context
 ) : ViewModel() {
 
-     val _isLoading = MutableStateFlow(false)
+    val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
     val errorMessage = MutableStateFlow<String?>(null)
 
 
-     val _currentScreen = MutableStateFlow<Int?>(null)
+    val _currentScreen = MutableStateFlow<Int?>(null)
     val currentScreen = _currentScreen.asStateFlow()
 
     suspend fun clearErrorMessage() {
@@ -47,7 +47,7 @@ class AuthViewModel(
 
     val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.emit(false)
             when (message.message?.contains("java.net.ConnectException")) {
                 true -> {
@@ -112,112 +112,98 @@ class AuthViewModel(
         }
     }
 
-    fun signUpUser(
+    suspend fun signUpUser(
         email: String,
         name: String,
         phone: String,
         password: String,
-        nav: NavHostController,
         token: String,
         isLoading: MutableState<Boolean>
-    ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            _isLoading.emit(true)
-            val result = authRepository.signup(
-                SignupDto(
-                    Name = name,
-                    Password = password,
-                    Phone = phone,
-                    Email = email,
-                    DeviceToken = token
-                )
+    ): String? {
+        _isLoading.emit(true)
+        val result = authRepository.signup(
+            SignupDto(
+                Name = name,
+                Password = password,
+                Phone = phone,
+                Email = email,
+                DeviceToken = token
             )
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    isLoading.value = false;
-                    val authData = result.data as AuthDto
+        )
 
-                    val authDataHolder = AuthModelEntity(
-                        id = 0,
-                        token = authData.token,
-                        refreshToken = authData.refreshToken
-                    )
-                    dao.saveAuthData(
-                        authDataHolder
-                    )
+        return when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                isLoading.value = false;
+                val authData = result.data as AuthDto
 
-                    General.authData.emit(authDataHolder)
-                    nav.navigate(Screens.LocationGraph) {
-                        popUpTo(nav.graph.id) {
-                            inclusive = true
-                        }
-                    }
-                }
+                val authDataHolder = AuthModelEntity(
+                    id = 0,
+                    token = authData.token,
+                    refreshToken = authData.refreshToken
+                )
+                dao.saveAuthData(
+                    authDataHolder
+                )
 
-                is NetworkCallHandler.Error -> {
-                    isLoading.value = false;
-
-                    val errorResult = (result.data.toString())
-                    if (errorResult.contains(General.BASED_URL)) {
-                        errorResult.replace(General.BASED_URL, " Server ")
-                    }
-                    errorMessage.emit(errorResult)
-                }
+                General.authData.emit(authDataHolder)
+                null;
 
             }
 
+            is NetworkCallHandler.Error -> {
+                isLoading.value = false;
+
+                val errorResult = (result.data.toString())
+                if (errorResult.contains(General.BASED_URL)) {
+                    errorResult.replace(General.BASED_URL, " Server ")
+                }
+                errorResult
+            }
+
         }
+
     }
 
-    fun loginUser(
+    suspend fun loginUser(
         username: String,
         password: String,
-        nav: NavHostController,
         token: String,
         isSendingData: MutableState<Boolean>
-    ) {
-        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+    ): String? {
 
-            val result = authRepository.login(
-                LoginDto(
-                    Username = username,
-                    Password = password,
-                    DeviceToken = token
-                )
+        val result = authRepository.login(
+            LoginDto(
+                Username = username,
+                Password = password,
+                DeviceToken = token
             )
-            when (result) {
-                is NetworkCallHandler.Successful<*> -> {
-                    isSendingData.value = false
-                    val authData = result.data as AuthDto
-                    val authDataHolder = AuthModelEntity(
-                        id = 0,
-                        token = authData.token,
-                        refreshToken = authData.refreshToken
-                    )
-                    dao.saveAuthData(
-                        authDataHolder
-                    )
-                    General.authData.emit(authDataHolder)
-                    viewModelScope.launch(Dispatchers.Main) {
-                        nav.navigate(Screens.LocationGraph) {
-                            popUpTo(nav.graph.id) {
-                                inclusive = true
-                            }
-                        }
-                    }
-
-                }
-
-                is NetworkCallHandler.Error -> {
-                    isSendingData.value = false
-                    val errorResult = (result.data?.replace("\"", ""))
-
-                    errorMessage.emit(errorResult)
-                }
-
+        )
+        return when (result) {
+            is NetworkCallHandler.Successful<*> -> {
+                isSendingData.value = false
+                val authData = result.data as AuthDto
+                val authDataHolder = AuthModelEntity(
+                    id = 0,
+                    token = authData.token,
+                    refreshToken = authData.refreshToken
+                )
+                dao.saveAuthData(
+                    authDataHolder
+                )
+                General.authData.emit(authDataHolder)
+                null
             }
-        }
 
+            is NetworkCallHandler.Error -> {
+                isSendingData.value = false
+                val errorResult = (result.data?.replace("\"", ""))
+
+                errorMessage.emit(errorResult)
+                errorResult
+            }
+
+
+        }
     }
 
 

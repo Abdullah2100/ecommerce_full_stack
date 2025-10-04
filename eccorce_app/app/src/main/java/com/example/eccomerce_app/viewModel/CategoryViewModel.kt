@@ -47,6 +47,8 @@ class CategoryViewModel(val categoryRepository: CategoryRepository) : ViewModel(
                             mutableCategories
                         )
                     }
+                    if(_categories.value.isNullOrEmpty())
+                        _categories.emit(mutableListOf<Category>())
 
                 }
 

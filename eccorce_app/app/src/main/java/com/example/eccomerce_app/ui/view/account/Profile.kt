@@ -1,5 +1,9 @@
 package com.example.eccomerce_app.ui.view.account
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,6 +44,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
@@ -73,6 +81,7 @@ fun ProfileScreen(
     userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
+    val clipboardManager = LocalClipboard.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -82,6 +91,7 @@ fun ProfileScreen(
     val myInfo = userViewModel.userInfo.collectAsState()
 
 
+    val userId = remember { mutableStateOf(TextFieldValue(myInfo.value?.id.toString())) }
     val fullName = remember { mutableStateOf(TextFieldValue("")) }
     val email = remember { mutableStateOf(TextFieldValue("")) }
     val phone = remember { mutableStateOf(TextFieldValue("")) }
@@ -95,13 +105,21 @@ fun ProfileScreen(
 
     val onImageSelection = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
+    )
+    { uri ->
         if (uri != null) {
             val fileHolder = uri.toCustomFil(context = context)
             if (fileHolder != null) {
                 file.value = fileHolder
             }
         }
+    }
+
+    fun copyUserId(){
+        coroutine.launch {
+            clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText   (userId.value.text, userId.value.text)))
+        }
+        //clipboardManager.setPrimaryClip()
     }
 
     fun validateLoginInput(
@@ -287,7 +305,8 @@ fun ProfileScreen(
                             shape = RoundedCornerShape(60.dp)
                         ),
                     contentAlignment = Alignment.Center
-                ) {
+                )
+                {
                     when (file.value == null) {
                         true -> {
                             when (myInfo.value?.thumbnail.isNullOrEmpty()) {
@@ -368,7 +387,8 @@ fun ProfileScreen(
                         }
 
 
-                ) {
+                )
+                {
 
                     IconButton(
                         onClick = {
@@ -396,6 +416,27 @@ fun ProfileScreen(
             }
 
 
+            TextInputWithTitle(
+                value = userId,
+                title = "User Id",
+                placeHolder = myInfo.value?.name ?: "",
+                errorMessage = "",
+                isEnable = false,
+                trailIcon = {
+                    if(myInfo.value!=null)
+                    IconButton(
+                        onClick = {
+                            copyUserId()
+                        }
+                    ) {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.copy)
+                            ,"",
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+            )
 
             TextInputWithTitle(
                 value = fullName,

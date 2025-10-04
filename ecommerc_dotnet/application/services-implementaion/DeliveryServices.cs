@@ -1,4 +1,5 @@
 using ecommerc_dotnet.application.Repository;
+using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.core.interfaces.Repository;
 using ecommerc_dotnet.core.interfaces.services;
@@ -8,6 +9,7 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.module;
+using ecommerc_dotnet.shared.extentions;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -105,34 +107,31 @@ public class DeliveryServices(
     }
 
     public async Task<Result<DeliveryDto?>> createDelivery(
-        Guid adminId,
+        Guid userId,
         CreateDeliveryDto deliveryDto
     )
     {
         User? user = await userRepository
-            .getUser(adminId);
-        if (user is null)
+            .getUser(userId);
+
+
+        var admin = user.isValidateFunc(isAdmin: true);
+        var store = user.isValidateFunc(isAdmin:false,isStore:true);
+       
+        
+        if (admin is not null && user.Role==0||store!=null)
         {
             return new Result<DeliveryDto?>
             (
                 data: null,
-                message: "user not found",
+                message: admin?.Message ?? store.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode:admin?.StatusCode?? store.StatusCode
             );
         }
 
-        if (user.Role != 0)
-        {
-            return new Result<DeliveryDto?>
-            (
-                data: null,
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
-
+        
+        
         if (await deliveryRepository.isExistByUserId(deliveryDto.UserId))
         {
             return new Result<DeliveryDto?>
@@ -144,6 +143,7 @@ public class DeliveryServices(
             );
         }
 
+        
         string? deliveryThumnail = null;
         if (deliveryDto.Thumbnail is not null)
         {
@@ -152,17 +152,7 @@ public class DeliveryServices(
                     deliveryDto.Thumbnail,
                     EnImageType.DELIVERY, host);
         }
-
-        if (deliveryThumnail is null)
-        {
-            return new Result<DeliveryDto?>
-            (
-                data: null,
-                message: "error while saving image",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
+        
 
 
         var addressId = clsUtil.generateGuid();
@@ -170,8 +160,6 @@ public class DeliveryServices(
         Address address = new Address
         {
             Id = addressId,
-            Longitude = deliveryDto.Longitude,
-            Latitude = deliveryDto.Latitude,
             Title = "my Place",
             CreatedAt = DateTime.Now,
             OwnerId = id
@@ -179,12 +167,12 @@ public class DeliveryServices(
 
         Delivery delivery = new Delivery
         {
-            DeviceToken = deliveryDto.DeviceToken,
             Id = id,
             CreatedAt = DateTime.Now,
             UserId = deliveryDto.UserId,
             Thumbnail = deliveryThumnail,
-            Address = address
+            Address = address,
+            BelongTo = user?.Store?.Id??userId
         };
         int result = await deliveryRepository.addAsync(delivery);
 
@@ -198,6 +186,8 @@ public class DeliveryServices(
                 statusCode: 400
             );
         }
+
+        delivery = await deliveryRepository.getDelivery(id);
 
         return new Result<DeliveryDto?>
         (

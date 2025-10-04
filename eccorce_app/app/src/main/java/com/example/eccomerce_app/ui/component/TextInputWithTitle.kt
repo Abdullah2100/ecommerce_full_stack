@@ -5,6 +5,7 @@ import com.example.e_commercompose.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -52,11 +53,13 @@ fun TextInputWithTitle(
     fontTitle: TextUnit? = null,
     fontWeight: FontWeight? = null,
     maxLines: Int?=null,
+    trailIcon:@Composable (() -> Unit)?=null,
 
     ) {
 
     val modifierWithFocus =
         Modifier.fillMaxWidth()
+            .padding(0.dp)
 
 
     val fontScall = LocalDensity.current.fontScale
@@ -119,6 +122,10 @@ fun TextInputWithTitle(
                         contentDescription = "",
                         tint = CustomColor.alertColor_1_400
                     )
+                }
+                else if (trailIcon!=null)
+                {
+                    trailIcon()
                 }
             },
             keyboardOptions = keyboardOptions,
@@ -205,6 +212,7 @@ fun TextNumberInputWithTitle(
                         tint = CustomColor.alertColor_1_400
                     )
                 }
+
             },
 
             keyboardOptions = keyboardOptions,

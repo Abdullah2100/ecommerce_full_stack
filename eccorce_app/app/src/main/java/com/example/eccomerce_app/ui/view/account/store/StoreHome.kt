@@ -116,6 +116,7 @@ import java.util.UUID
 import kotlin.collections.forEach
 
 enum class enOperation { STORE }
+enum class enStoreOpeation { Create, Update }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,6 +150,7 @@ fun StoreScreen(
 
 
     val operationType = remember { mutableStateOf<enOperation?>(null) }
+    val storeOperation = remember { mutableStateOf<enStoreOpeation?>(null) }
 
     val selectedSubCategoryId = remember { mutableStateOf<UUID?>(null) }
     val selectedSubCategoryIdHolder = remember { mutableStateOf<UUID?>(null) }
@@ -202,8 +204,13 @@ fun StoreScreen(
     )
 
     //text filed
-    val storeName =
-        remember { mutableStateOf(TextFieldValue(createdStoreInfoHolder.value?.name ?: "")) }
+    val storeName = remember {
+        mutableStateOf(
+            TextFieldValue(
+                createdStoreInfoHolder.value?.name ?: ""
+            )
+        )
+    }
     val categoryName = remember { mutableStateOf(TextFieldValue("")) }
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
 
@@ -216,14 +223,15 @@ fun StoreScreen(
     fun handlingLocation(type: enMapType, location: Location): LatLng? {
         return when (type) {
             enMapType.MyStore -> {
-                Log.d("NavigationToMapHome","fromMyStore")
+                Log.d("NavigationToMapHome", "fromMyStore")
                 LatLng(
                     location.latitude,
                     location.longitude
                 )
             }
+
             enMapType.Store -> {
-                Log.d("NavigationToMapHome","fromStore")
+                Log.d("NavigationToMapHome", "fromStore")
 
                 if (storeData == null) null
                 else LatLng(storeData.latitude, storeData.longitude)
@@ -267,7 +275,7 @@ fun StoreScreen(
 
                                 nav.navigate(
                                     Screens.MapScreen(
-                                        lognit =locationHolder?.longitude,
+                                        lognit = locationHolder?.longitude,
                                         latitt = locationHolder?.latitude,
                                         additionLat = if (type == enMapType.Store) location.latitude else null,
                                         additionLong = if (type == enMapType.Store) location.longitude else null,
@@ -316,13 +324,15 @@ fun StoreScreen(
                         when (isPigImage.value) {
                             true -> {
                                 storeViewModel.setStoreCreateData(
-                                    wallpaperImage = fileHolder
+                                    wallpaperImage = fileHolder,
+                                    updateStoreOperation = storeOperation
                                 )
                             }
 
                             else -> {
                                 storeViewModel.setStoreCreateData(
-                                    smallImage = fileHolder
+                                    smallImage = fileHolder,
+                                    updateStoreOperation = storeOperation
                                 )
                             }
                         }
@@ -363,7 +373,10 @@ fun StoreScreen(
         productViewModel.getProducts(mutableStateOf(1), id)
     }
 
-    Log.d("SubCategoryDataIs", "${subcategories.value.toString()}")
+    fun changeStoreOperation(storeOperationStore: enStoreOpeation?) {
+        storeOperation.value = storeOperationStore
+    }
+
     LaunchedEffect(Unit) {
         if (storeId != null) {
             getStoreInfoByStoreId(storeId)
@@ -390,168 +403,210 @@ fun StoreScreen(
 
     }
 
-    PullToRefreshBox(
-        isRefreshing = isRefresh.value,
-        onRefresh = { getStoreInfoByStoreId(storeId!!) }
-
-    )
-    {
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackBarHostState,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
-                )
-            },
-
-            bottomBar = {
+    LaunchedEffect(Unit) {
+        changeStoreOperation(
+            if (isFromHome == false && myStoreId == null)
+                enStoreOpeation.Create
+            else null
+        )
+    }
 
 
-                if (isShownSubCategoryBottomSheet.value)
-                    ModalBottomSheet(
-                        onDismissRequest = {
 
-                            isShownSubCategoryBottomSheet.value = false
-                            isExpandedCategory.value = false
-                            categoryName.value = TextFieldValue("")
-                            subCategoryName.value = TextFieldValue("")
 
-                        },
-                        sheetState = sheetState,
-                        containerColor = Color.White
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackBarHostState,
+                modifier = Modifier.clip(RoundedCornerShape(8.dp))
+            )
+        },
+
+        bottomBar = {
+
+
+            if (isShownSubCategoryBottomSheet.value)
+                ModalBottomSheet(
+                    onDismissRequest = {
+
+                        isShownSubCategoryBottomSheet.value = false
+                        isExpandedCategory.value = false
+                        categoryName.value = TextFieldValue("")
+                        subCategoryName.value = TextFieldValue("")
+
+                    },
+                    sheetState = sheetState,
+                    containerColor = Color.White
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .fillMaxWidth()
                     ) {
-
                         Column(
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp)
-                                .fillMaxWidth()
-                        ) {
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        {
+                            Text(
+                                "Category",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.End
+
+                            )
+                            Sizer(10)
+
                             Column(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(
+                                        1.dp, CustomColor.neutralColor400,
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .clip(RoundedCornerShape(8.dp))
+//
                             )
                             {
-                                Text(
-                                    "Category",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = (16).sp,
-                                    color = CustomColor.neutralColor950,
-                                    textAlign = TextAlign.End
+                                Row(
+                                    modifier = Modifier
+                                        .height(65.dp)
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            isExpandedCategory.value = !isExpandedCategory.value
+                                        }
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .padding(horizontal = 5.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically)
+                                {
 
-                                )
-                                Sizer(10)
+                                    Text(
+                                        categoryName.value.text.ifEmpty { "Select Category Name" }
+                                    )
+                                    Icon(
+                                        Icons.Default.KeyboardArrowDown,
+                                        "",
+                                        modifier = Modifier.rotate(rotation.value)
+                                    )
+                                }
 
                                 Column(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .border(
-                                            1.dp, CustomColor.neutralColor400,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .clip(RoundedCornerShape(8.dp))
-//
-                                )
-                                {
-                                    Row(
-                                        modifier = Modifier
-                                            .height(65.dp)
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                isExpandedCategory.value = !isExpandedCategory.value
-                                            }
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .padding(horizontal = 5.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically)
-                                    {
-
-                                        Text(
-                                            categoryName.value.text.ifEmpty { "Select Category Name" }
-                                        )
-                                        Icon(
-                                            Icons.Default.KeyboardArrowDown,
-                                            "",
-                                            modifier = Modifier.rotate(rotation.value)
-                                        )
-                                    }
-
-                                    Column(
-                                        modifier = Modifier
 //                                           .padding(bottom = 19.dp)
-                                            .fillMaxWidth()
-                                            .height(animated.value)
-                                            .border(
-                                                1.dp,
-                                                CustomColor.neutralColor200,
-                                                RoundedCornerShape(
-                                                    topStart = 0.dp,
-                                                    topEnd = 0.dp,
-                                                    bottomStart = 8.dp,
-                                                    bottomEnd = 8.dp
-                                                )
-                                            ),
+                                        .fillMaxWidth()
+                                        .height(animated.value)
+                                        .border(
+                                            1.dp,
+                                            CustomColor.neutralColor200,
+                                            RoundedCornerShape(
+                                                topStart = 0.dp,
+                                                topEnd = 0.dp,
+                                                bottomStart = 8.dp,
+                                                bottomEnd = 8.dp
+                                            )
+                                        ),
+
+                                    )
+                                {
+
+                                    categories.value?.forEach { option: Category ->
+                                        Text(
+                                            option.name,
+                                            modifier = Modifier
+                                                .height(50.dp)
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .clickable {
+                                                    isExpandedCategory.value = false
+                                                    categoryName.value =
+                                                        TextFieldValue(option.name)
+                                                }
+                                                .padding(top = 12.dp, start = 5.dp)
 
                                         )
-                                    {
-
-                                        categories.value?.forEach { option: Category ->
-                                            Text(
-                                                option.name,
-                                                modifier = Modifier
-                                                    .height(50.dp)
-                                                    .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .clickable {
-                                                        isExpandedCategory.value = false
-                                                        categoryName.value =
-                                                            TextFieldValue(option.name)
-                                                    }
-                                                    .padding(top = 12.dp, start = 5.dp)
-
-                                            )
-                                        }
                                     }
                                 }
-                                Sizer(10)
-
                             }
+                            Sizer(10)
+
+                        }
 
 
-                            TextInputWithTitle(
-                                value = subCategoryName,
-                                title = "Name",
-                                placeHolder = "Enter Sub Category Name",
-                            )
+                        TextInputWithTitle(
+                            value = subCategoryName,
+                            title = "Name",
+                            placeHolder = "Enter Sub Category Name",
+                        )
 
+                        CustomBotton(
+                            operation = {
+                                coroutine.launch {
+                                    keyboardController?.hide()
+                                    isSendingData.value = true
+
+                                    val result = async {
+                                        if (isUpdated.value) subCategoryViewModel.updateSubCategory(
+                                            SubCategoryUpdate(
+                                                name = subCategoryName.value.text,
+                                                cateogyId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id,
+                                                id = selectedSubCategoryId.value!!
+                                            )
+                                        )
+                                        else subCategoryViewModel.createSubCategory(
+                                            name = subCategoryName.value.text,
+                                            categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
+                                        )
+                                    }.await()
+                                    isSendingData.value = false
+
+                                    if (result.isNullOrEmpty()) {
+                                        isShownSubCategoryBottomSheet.value = false
+                                        isExpandedCategory.value = false
+                                        categoryName.value = TextFieldValue("")
+                                        subCategoryName.value = TextFieldValue("")
+                                        if (isUpdated.value) {
+                                            isUpdated.value = false
+                                        }
+                                    } else {
+                                        isSubCategoryCreateError.value = true
+                                        errorMessage.value = result
+                                    }
+
+                                }
+                            },
+                            buttonTitle = if (isUpdated.value) "Update" else "Create",
+                            color = null,
+                            isEnable = !isDeleted.value && (subCategoryName.value.text.isNotEmpty() &&
+                                    categoryName.value.text.isNotEmpty())
+                        )
+
+                        if (isUpdated.value) {
+                            Sizer(10)
                             CustomBotton(
+                                isLoading = isDeleted.value && isSendingData.value,
                                 operation = {
                                     coroutine.launch {
-                                        keyboardController?.hide()
                                         isSendingData.value = true
-
+                                        isDeleted.value = true
+                                        keyboardController?.hide()
                                         val result = async {
-                                            if (isUpdated.value) subCategoryViewModel.updateSubCategory(
-                                                SubCategoryUpdate(
-                                                    name = subCategoryName.value.text,
-                                                    cateogyId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id,
-                                                    id = selectedSubCategoryId.value!!
-                                                )
-                                            )
-                                            else subCategoryViewModel.createSubCategory(
-                                                name = subCategoryName.value.text,
-                                                categoryId = categories.value!!.firstOrNull() { it.name == categoryName.value.text }!!.id
+                                            subCategoryViewModel.deleteSubCategory(
+                                                id = selectedSubCategoryIdHolder.value!!
                                             )
                                         }.await()
                                         isSendingData.value = false
-
+                                        isDeleted.value = false
                                         if (result.isNullOrEmpty()) {
                                             isShownSubCategoryBottomSheet.value = false
+                                            selectedSubCategoryIdHolder.value = null
                                             isExpandedCategory.value = false
                                             categoryName.value = TextFieldValue("")
                                             subCategoryName.value = TextFieldValue("")
-                                            if (isUpdated.value) {
-                                                isUpdated.value = false
-                                            }
+                                            isUpdated.value = false
+                                            selectedSubCategoryId.value = null
                                         } else {
                                             isSubCategoryCreateError.value = true
                                             errorMessage.value = result
@@ -559,190 +614,100 @@ fun StoreScreen(
 
                                     }
                                 },
-                                buttonTitle = if (isUpdated.value) "Update" else "Create",
-                                color = null,
-                                isEnable = !isDeleted.value && (subCategoryName.value.text.isNotEmpty() &&
-                                        categoryName.value.text.isNotEmpty())
+                                buttonTitle = "Deleted",
+                                color = CustomColor.alertColor_1_600,
+                                isEnable = isSendingData.value == false
                             )
+                        }
+                        if (isSubCategoryCreateError.value) {
+                            AlertDialog(
+                                containerColor = Color.White, onDismissRequest = {
+                                    isSubCategoryCreateError.value = false
+                                },
 
-                            if (isUpdated.value) {
-                                Sizer(10)
-                                CustomBotton(
-                                    isLoading = isDeleted.value && isSendingData.value,
-                                    operation = {
-                                        coroutine.launch {
-                                            isSendingData.value = true
-                                            isDeleted.value = true
-                                            keyboardController?.hide()
-                                            val result = async {
-                                                subCategoryViewModel.deleteSubCategory(
-                                                    id = selectedSubCategoryIdHolder.value!!
-                                                )
-                                            }.await()
-                                            isSendingData.value = false
-                                            isDeleted.value = false
-                                            if (result.isNullOrEmpty()) {
-                                                isShownSubCategoryBottomSheet.value = false
-                                                selectedSubCategoryIdHolder.value = null
-                                                isExpandedCategory.value = false
-                                                categoryName.value = TextFieldValue("")
-                                                subCategoryName.value = TextFieldValue("")
-                                                isUpdated.value = false
-                                                selectedSubCategoryId.value = null
-                                            } else {
-                                                isSubCategoryCreateError.value = true
-                                                errorMessage.value = result
-                                            }
+                                text = {
 
-                                        }
-                                    },
-                                    buttonTitle = "Deleted",
-                                    color = CustomColor.alertColor_1_600,
-                                    isEnable = isSendingData.value == false
-                                )
-                            }
-                            if (isSubCategoryCreateError.value) {
-                                AlertDialog(
-                                    containerColor = Color.White, onDismissRequest = {
+                                    Text(
+                                        errorMessage.value,
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.End
+
+                                    )
+                                }, confirmButton = {
+
+                                }, dismissButton = {
+                                    TextButton(onClick = {
                                         isSubCategoryCreateError.value = false
-                                    },
-
-                                    text = {
+                                    }) {
 
                                         Text(
-                                            errorMessage.value,
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = (16).sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.End
-
-                                        )
-                                    }, confirmButton = {
-
-                                    }, dismissButton = {
-                                        TextButton(onClick = {
-                                            isSubCategoryCreateError.value = false
-                                        }) {
-
-                                            Text(
-                                                "cencle",
-                                                fontFamily = General.satoshiFamily,
-                                                fontWeight = FontWeight.Normal,
-                                                fontSize = (16).sp,
-                                                color = CustomColor.neutralColor700,
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
-                                    })
-                            }
-
-                        }
-                    }
-
-
-            },
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    modifier = Modifier.padding(end = 15.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White
-                    ),
-                    title = {
-                        Text(
-                            "Store",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = (24).sp,
-                            color = CustomColor.neutralColor950,
-                            textAlign = TextAlign.Center
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                nav.popBackStack()
-                            }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                "",
-                                modifier = Modifier.size(30.dp),
-                                tint = CustomColor.neutralColor950
-                            )
-                        }
-                    },
-                    actions = {
-                        if ((myStoreId == null) && isFromHome == false) {
-                            TextButton(
-                                enabled = !isSendingData.value,
-                                onClick = {
-                                    if (creationValidation()) {
-                                        keyboardController?.hide()
-                                        isSendingData.value = true
-                                        operationType.value = enOperation.STORE
-                                        coroutine.launch {
-                                            val result = async {
-                                                storeViewModel.createStore(
-                                                    name = createdStoreInfoHolder.value?.name
-                                                        ?: storeName.value.text,
-                                                    wallpaperImage = createdStoreInfoHolder.value!!.wallpaperImage!!,
-                                                    smallImage = createdStoreInfoHolder.value!!.smallImage!!,
-                                                    longitude = createdStoreInfoHolder.value!!.longitude!!,
-                                                    latitude = createdStoreInfoHolder.value!!.latitude!!,
-                                                    sumAdditionalFun = { id ->
-                                                        userViewModel.updateMyStoreId(
-                                                            id
-                                                        )
-                                                        getStoreInfoByStoreId(id)
-                                                    }
-                                                )
-                                            }.await()
-                                            isSendingData.value = false
-                                            operationType.value = null
-
-                                            if (result != null) {
-                                                snackBarHostState.showSnackbar(result)
-                                            } else {
-                                                storeName.value = TextFieldValue("")
-
-                                            }
-                                        }
-                                    }
-                                }) {
-                                when (isSendingData.value && operationType.value == enOperation.STORE) {
-                                    true -> {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp), strokeWidth = 2.dp
-                                        )
-                                    }
-
-                                    else -> {
-                                        Text(
-                                            "Create",
+                                            "cencle",
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Normal,
                                             fontSize = (16).sp,
-                                            color = CustomColor.primaryColor700,
+                                            color = CustomColor.neutralColor700,
                                             textAlign = TextAlign.Center
                                         )
                                     }
-                                }
-                            }
-                        } else if ((isFromHome == false
-                                    && myStoreId != null && myStoreId == storeId) && (storeName.value.text.isNotEmpty() ||
-                                    createdStoreInfoHolder.value?.wallpaperImage != null ||
-                                    createdStoreInfoHolder.value?.smallImage != null ||
-                                    createdStoreInfoHolder.value?.latitude != null)
-                        ) {
-                            TextButton(
-                                enabled = !isSendingData.value, onClick = {
-                                    keyboardController?.hide()
-                                    coroutine.launch {
-                                        val result = async {
+                                })
+                        }
 
+                    }
+                }
+
+
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.padding(end = 15.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                ),
+                title = {
+                    Text(
+                        "Store",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (24).sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            nav.popBackStack()
+                        }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            "",
+                            modifier = Modifier.size(30.dp),
+                            tint = CustomColor.neutralColor950
+                        )
+                    }
+                },
+                actions = {
+                    if (isFromHome == false && storeOperation.value != null) {
+                        TextButton(
+                            enabled = !isSendingData.value,
+                            onClick = {
+
+                                if (myStoreId == null && !creationValidation()) {
+                                    return@TextButton
+                                }
+
+                                keyboardController?.hide()
+                                isSendingData.value = true
+                                operationType.value = enOperation.STORE
+                                coroutine.launch {
+                                    val result = async {
+                                        if (storeOperation.value == enStoreOpeation.Update)
                                             storeViewModel.updateStore(
                                                 name = storeName.value.text,
                                                 wallpaperImage = createdStoreInfoHolder.value?.wallpaperImage,
@@ -750,41 +715,80 @@ fun StoreScreen(
                                                 longitude = createdStoreInfoHolder.value?.longitude,
                                                 latitude = createdStoreInfoHolder.value?.latitude,
                                             )
-                                        }.await()
+                                        else
+                                            storeViewModel.createStore(
+                                                name = createdStoreInfoHolder.value?.name
+                                                    ?: storeName.value.text,
+                                                wallpaperImage = createdStoreInfoHolder.value!!.wallpaperImage!!,
+                                                smallImage = createdStoreInfoHolder.value!!.smallImage!!,
+                                                longitude = createdStoreInfoHolder.value!!.longitude!!,
+                                                latitude = createdStoreInfoHolder.value!!.latitude!!,
+                                                sumAdditionalFun = { id ->
+                                                    userViewModel.updateMyStoreId(
+                                                        id
+                                                    )
+                                                    getStoreInfoByStoreId(id)
+                                                }
+                                            )
+                                    }.await()
+                                    changeStoreOperation( null)
 
-                                        if (result != null) {
-                                            snackBarHostState.showSnackbar(result)
-                                        } else {
-                                            storeName.value = TextFieldValue("")
-                                        }
-                                    }
-                                }) {
-                                when (isSendingData.value && operationType.value == enOperation.STORE) {
-                                    true -> {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp), strokeWidth = 2.dp
-                                        )
-                                    }
+                                    isSendingData.value = false
+                                    operationType.value = null
 
-                                    else -> {
-                                        Text(
-                                            "Update",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Normal,
-                                            fontSize = (16).sp,
-                                            color = CustomColor.primaryColor700,
-                                            textAlign = TextAlign.Center
-                                        )
+                                    if (result != null) {
+                                        snackBarHostState.showSnackbar(result)
+                                    } else {
+                                        storeName.value = TextFieldValue("")
+
                                     }
+                                }
+
+
+                            }) {
+                            when (isSendingData.value && operationType.value == enOperation.STORE) {
+                                true -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp), strokeWidth = 2.dp
+                                    )
+                                }
+
+                                else -> {
+                                    Text(
+                                        if (storeOperation.value == enStoreOpeation.Update) "Update" else "Create",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.primaryColor700,
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
                             }
                         }
-                    },
-                    scrollBehavior = scrollBehavior
-                )
-            },
-            floatingActionButton = {
-                if (isFromHome == false && storeData != null)
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        },
+        floatingActionButton = {
+            if (isFromHome == false && storeData != null)
+
+                Column {
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .padding(bottom = 3.dp)
+                            .size(50.dp),
+                        onClick = {
+                            nav.navigate(Screens.DeliveriesList)
+                        },
+                        containerColor = CustomColor.primaryColor500
+                    ) {
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.delivery_icon),
+                            "", tint = Color.White,
+                            modifier = Modifier.size(35.dp)
+                        )
+                    }
                     FloatingActionButton(
                         onClick = {
                             nav.navigate(Screens.CreateProduct(storeId.toString(), null))
@@ -796,94 +800,101 @@ fun StoreScreen(
                             "", tint = Color.White
                         )
                     }
+
+                }
+        }
+
+    ) {
+        it.calculateTopPadding()
+        it.calculateBottomPadding()
+
+
+        if (isSendingData.value && operationType.value == null)
+            Dialog(
+                onDismissRequest = {})
+            {
+                Box(
+                    modifier = Modifier
+                        .height(90.dp)
+                        .width(90.dp)
+                        .background(
+                            Color.White, RoundedCornerShape(15.dp)
+                        ), contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = CustomColor.primaryColor700, modifier = Modifier.size(40.dp)
+                    )
+                }
             }
 
-        ) {
-            it.calculateTopPadding()
-            it.calculateBottomPadding()
+        if (isShownDateDialog.value)
+            DatePickerDialog(
+                modifier = Modifier
+                    .padding(horizontal = 40.dp),
 
+                onDismissRequest = {
+                    isShownDateDialog.value = false
+                },
+                confirmButton =
+                    {
+                        TextButton(
+                            onClick = {
 
-            if (isSendingData.value && operationType.value == null)
-                Dialog(
-                    onDismissRequest = {})
-                {
-                    Box(
-                        modifier = Modifier
-                            .height(90.dp)
-                            .width(90.dp)
-                            .background(
-                                Color.White, RoundedCornerShape(15.dp)
-                            ), contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = CustomColor.primaryColor700, modifier = Modifier.size(40.dp)
-                        )
-                    }
-                }
-
-            if (isShownDateDialog.value)
-                DatePickerDialog(
-                    modifier = Modifier
-                        .padding(horizontal = 40.dp),
-
-                    onDismissRequest = {
-                        isShownDateDialog.value = false
-                    },
-                    confirmButton =
-                        {
-                            TextButton(
-                                onClick = {
-
-                                    if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
-                                        isShownDateDialog.value = false
-                                        coroutine.launch {
-                                            snackBarHostState.showSnackbar("You must select valid date")
-                                        }
-                                    } else {
-                                        isShownDateDialog.value = false
-                                        isSendingData.value = true
-                                        coroutine.launch {
-                                            val daytime = Calendar.getInstance().apply {
-                                                timeInMillis = datePickerState.selectedDateMillis!!
-                                            }
-                                            val result = async {
-                                                bannerViewModel.createBanner(
-                                                    endDate = daytime.toLocalDateTime().toString(),
-                                                    image = bannerImage.value!!,
-                                                )
-                                            }.await()
-                                            isSendingData.value = false
-                                            var errorMessage = ""
-                                            errorMessage =
-                                                if (result.isNullOrEmpty()) "banner created successfully"
-                                                else result
-                                            coroutine.launch {
-                                                snackBarHostState.showSnackbar(
-                                                    errorMessage
-                                                )
-
-                                            }
-                                        }
-
+                                if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
+                                    isShownDateDialog.value = false
+                                    coroutine.launch {
+                                        snackBarHostState.showSnackbar("You must select valid date")
                                     }
-                                }) {
-                                Text(
-                                    "ok",
-                                    fontFamily = General.satoshiFamily,
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = (18).sp,
-                                    color = CustomColor.primaryColor700,
-                                    textAlign = TextAlign.Center,
-                                )
-                            }
-                        },
-                )
-                {
-                    DatePicker(state = datePickerState)
-                }
+                                } else {
+                                    isShownDateDialog.value = false
+                                    isSendingData.value = true
+                                    coroutine.launch {
+                                        val daytime = Calendar.getInstance().apply {
+                                            timeInMillis = datePickerState.selectedDateMillis!!
+                                        }
+                                        val result = async {
+                                            bannerViewModel.createBanner(
+                                                endDate = daytime.toLocalDateTime().toString(),
+                                                image = bannerImage.value!!,
+                                            )
+                                        }.await()
+                                        isSendingData.value = false
+                                        var errorMessage = ""
+                                        errorMessage =
+                                            if (result.isNullOrEmpty()) "banner created successfully"
+                                            else result
+                                        coroutine.launch {
+                                            snackBarHostState.showSnackbar(
+                                                errorMessage
+                                            )
+
+                                        }
+                                    }
+
+                                }
+                            }) {
+                            Text(
+                                "ok",
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (18).sp,
+                                color = CustomColor.primaryColor700,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    },
+            )
+            {
+                DatePicker(state = datePickerState)
+            }
 
 
+        PullToRefreshBox(
+            isRefreshing = isRefresh.value,
+            onRefresh = { getStoreInfoByStoreId(storeId!!) }
 
+        )
+        {
 
             LazyColumn(
                 state = lazyState,
@@ -1236,7 +1247,13 @@ fun StoreScreen(
                                 title = "",
                                 placeHolder = storeData?.name ?: "Write Your Store Name",
                                 isHasError = false,
-                                onChange = { it -> storeViewModel.setStoreCreateData(storeTitle = it) },
+                                onChange = { it ->
+                                    storeViewModel
+                                        .setStoreCreateData(
+                                            storeTitle = it,
+                                            updateStoreOperation = storeOperation
+                                        )
+                                },
                             )
 
 
@@ -1644,6 +1661,9 @@ fun StoreScreen(
                         }
 
                     }
+                }
+                item{
+                    Sizer(50)
                 }
                 if (!isLoadingMore.value)
                     item {

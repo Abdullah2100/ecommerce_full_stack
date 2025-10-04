@@ -27,14 +27,15 @@ fun CustomAuthBottom(
     isLoading: Boolean,
     operation: () -> Unit,
     validationFun: () -> Boolean,
-    buttonTitle: String
+    buttonTitle: String,
+    isHasBottomPadding: Boolean=true
 ) {
     val fontScall = LocalDensity.current.fontScale
 
     Button(
         enabled = isLoading == false,
         modifier = Modifier
-            .padding(bottom = 50.dp)
+            .padding(bottom =if(isHasBottomPadding) 50.dp else 0.dp)
             .height(50.dp)
             .fillMaxWidth(),
         onClick = {

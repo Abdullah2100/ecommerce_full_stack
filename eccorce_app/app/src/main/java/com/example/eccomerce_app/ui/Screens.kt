@@ -64,6 +64,9 @@ object Screens {
         val isFromHome: Boolean? = true
     )
 
+    @Serializable
+    object DeliveriesList
+
 
     @Serializable
     data class CreateProduct(

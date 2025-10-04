@@ -1,12 +1,14 @@
 package com.example.eccomerce_app.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.StoreDto
 import com.example.e_commercompose.model.DtoToModel.toStore
 import com.example.e_commercompose.model.StoreModel
+import com.example.e_commercompose.ui.view.account.store.enStoreOpeation
 import com.example.eccomerce_app.dto.CreateStoreDto
 import com.example.eccomerce_app.dto.StoreStatusDto
 import com.example.eccomerce_app.data.NetworkCallHandler
@@ -26,16 +28,16 @@ class StoreViewModel(
     val webSocket: HubConnection?
 ) : ViewModel() {
 
-     val _hub = MutableStateFlow<HubConnection?>(null)
+    val _hub = MutableStateFlow<HubConnection?>(null)
 
     val storeCreateData = MutableStateFlow<CreateStoreDto?>(null)
 
 
-     val _stores = MutableStateFlow<List<StoreModel>?>(null)
+    val _stores = MutableStateFlow<List<StoreModel>?>(null)
     val stores = _stores.asStateFlow()
 
 
-     val _coroutineException = CoroutineExceptionHandler { _, message ->
+    val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
@@ -117,7 +119,8 @@ class StoreViewModel(
         latitude: Double? = null,
         wallpaperImage: File? = null,
         smallImage: File? = null,
-        storeTitle: String? = null
+        storeTitle: String? = null,
+        updateStoreOperation: MutableState<enStoreOpeation?>? =null
     ) {
         var myStoreData: CreateStoreDto? = null
         if (storeCreateData.value == null)
@@ -143,6 +146,8 @@ class StoreViewModel(
         viewModelScope.launch {
             storeCreateData.emit(myStoreData)
         }
+        if (updateStoreOperation != null)
+            updateStoreOperation.value = enStoreOpeation.Update
     }
 
 

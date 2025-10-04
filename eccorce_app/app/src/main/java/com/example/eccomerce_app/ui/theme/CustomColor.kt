@@ -11,7 +11,7 @@ object CustomColor {
     val primaryColor400 = Color(0xFF6A70FF)
     val primaryColor500 = Color(0xFF6A70FF)
     val primaryColor600 = Color(0xFF4F48FF)
-    val primaryColor700 = Color(0xFF523BEA)
+    val primaryColor700 = Color(0xFF522FD3)
     val primaryColor800 = Color(0xFF2C1AB9)
     val primaryColor900 = Color(0xFFEBEFFF)
     val primaryColor950 = Color(0xFFF9F9FA)

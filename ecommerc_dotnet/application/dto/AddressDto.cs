@@ -5,8 +5,8 @@ namespace ecommerc_dotnet.dto
     public class AddressDto
     {
         public Guid Id { get; set; }
-        public decimal Longitude { get; set; }
-        public decimal Latitude { get; set; }
+        public decimal? Longitude { get; set; } = null;
+        public decimal? Latitude { get; set; } = null;
         public string Title { get; set; }
         public bool IsCurrent { get; set; } = false;
     }
@@ -36,9 +36,9 @@ namespace ecommerc_dotnet.dto
     
     
     public class DeliveryAddressDto
-    { 
-        public decimal Longitude { get; set; }
-        public decimal Latitude { get; set; }
+    {
+        public decimal? Longitude { get; set; } = null;
+        public decimal? Latitude { get; set; } = null;
     }
     
     

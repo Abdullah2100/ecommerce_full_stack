@@ -6,8 +6,8 @@ namespace ecommerc_dotnet.dto
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public bool IsAvaliable { get; set; } = true;
-        public DateTime? UpdatedaAt { get; set; } = null;
+        public bool IsAvailable { get; set; } = true;
+        public DateTime? UpdatedAt { get; set; } = null;
         public string? Thumbnail { get; set; }
         public DeliveryAddressDto? Address { get; set; } = null;
         public DeliveryAnalysDto? Analys { get; set; } = null;
@@ -27,15 +27,6 @@ namespace ecommerc_dotnet.dto
     public class CreateDeliveryDto
     {
         [Required] public Guid UserId { get; set; }
-        [Required] public string DeviceToken { get; set; }
-        [Required] public IFormFile? Thumbnail { get; set; }
-
-        [MinLength(2, ErrorMessage = "Longitude must not be empty")]
-        [Required]
-        public decimal Longitude { get; set; }
-
-        [MinLength(2, ErrorMessage = "Latitude must not be empty")]
-        [Required]
-        public decimal Latitude { get; set; }
+        public IFormFile? Thumbnail { get; set; } = null;
     }
 }

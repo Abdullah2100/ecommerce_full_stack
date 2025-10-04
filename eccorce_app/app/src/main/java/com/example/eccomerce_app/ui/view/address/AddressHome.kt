@@ -194,7 +194,6 @@ fun AddressHomeScreen(
             )
             Sizer(50)
             CustomBotton(
-                //isLoading = isLoading.value,
                 operation = {
                     requestPermission.launch(
                         arrayOf(

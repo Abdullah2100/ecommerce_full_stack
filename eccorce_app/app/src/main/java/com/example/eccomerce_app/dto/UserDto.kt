@@ -14,5 +14,5 @@ data class UserDto(
     val thumbnail:String,
     val address: List<AddressDto>?=null,
     @Serializable(with = UUIDKserialize::class)
-    val storeId: UUID?,
+    val storeId: UUID?=null,
 )

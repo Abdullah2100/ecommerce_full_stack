@@ -1,6 +1,6 @@
 CREATE EXTENSION postgis;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
+   
 insert into "GeneralSettings"("Id","Name","Value","CreatedAt") 
 VALUES(uuid_generate_v4(),'one_kilo_price',150,CURRENT_TIMESTAMP);
 
@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION calculate_order_item_price(OrderItemId UUID,product_p
 RETURNS NUMERIC AS $$
 DECLARE
     order_product_varient      RECORD;
-    precentage_holder  ;
+    precentage_holder NUMERIC  ;
     price   NUMERIC := product_price;
 BEGIN
     
@@ -239,13 +239,13 @@ DECLARE
 BEGIN
 
    FOR orders IN
-	   (SELECT "Orders"."distanceFee" as fee,
-	           "Orders"."createdAt" as createdDate
+	   (SELECT "Orders"."DistanceFee" as fee,
+	           "Orders"."CreatedAt" as createdDate
 	   FROM "Orders" 
-       WHERE "Orders".id=deleiveryId
-	   AND "Orders".status>=5
-	   AND ("Orders"."createdAt"<=now()::DATE OR 
-	   "Orders"."createdAt"<=monthDate)
+       WHERE "Orders"."Id"=deleiveryId
+	   AND "Orders"."Status">=5
+	   AND ("Orders"."CreatedAt"<=now()::DATE OR 
+	   "Orders"."CreatedAt"<=monthDate)
 	   )
    LOOP 
     IF orders.createdDate=now()::DATE THEN 

@@ -1,7 +1,6 @@
 package com.example.eccomerce_app.ui
 
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,6 +33,7 @@ import com.example.eccomerce_app.ui.view.ReseatPassword.GenerateOtpScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.OtpVerificationScreen
 import com.example.eccomerce_app.ui.view.ReseatPassword.ReseatPasswordScreen
 import com.example.eccomerce_app.ui.view.account.OrderForMyStoreScreen
+import com.example.eccomerce_app.ui.view.account.store.delivery.DeliveriesListScreen
 import com.example.eccomerce_app.ui.view.home.CategoryScreen
 import com.example.eccomerce_app.ui.view.address.MapHomeScreen
 import com.example.eccomerce_app.viewModel.ProductViewModel
@@ -42,6 +42,7 @@ import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.DeliveryViewModel
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
 import com.example.eccomerce_app.viewModel.MapViewModel
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
@@ -65,6 +66,7 @@ fun NavController(
     orderViewModel: OrderViewModel = koinViewModel(),
     orderItemViewModel: OrderItemsViewModel = koinViewModel(),
     mapViewModel: MapViewModel = koinViewModel(),
+    deliveryViewModel: DeliveryViewModel = koinViewModel(),
     currentScreen: Int,
 ) {
 
@@ -79,10 +81,10 @@ fun NavController(
 
         composable<Screens.MapScreen>(
             enterTransition = {
-            return@composable slideIntoContainer(
-                AnimatedContentTransitionScope.SlideDirection.Start, tween(200)
-            ) + fadeIn(tween(200))
-        },
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(200)
+                ) + fadeIn(tween(200))
+            },
 
             popEnterTransition = {
                 return@composable slideIntoContainer(
@@ -140,14 +142,15 @@ fun NavController(
 
         navigation<Screens.LocationGraph>(
             startDestination = Screens.LocationHome
-        ) {
+        )
+        {
 
             composable<Screens.LocationHome>(
                 enterTransition = {
-                return@composable slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                )
-            },
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                },
 
                 popEnterTransition = {
                     return@composable slideIntoContainer(
@@ -165,10 +168,10 @@ fun NavController(
 
             composable<Screens.PickCurrentAddress>(
                 enterTransition = {
-                return@composable slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                )
-            },
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
 
                 popEnterTransition = {
                     return@composable slideIntoContainer(
@@ -249,10 +252,10 @@ fun NavController(
 
             composable<Screens.Login>(
                 enterTransition = {
-                return@composable slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                )
-            },
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                },
 
                 popEnterTransition = {
                     return@composable slideIntoContainer(
@@ -407,6 +410,22 @@ fun NavController(
                 )
             }
 
+            composable<Screens.DeliveriesList>(
+
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                }, exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }) { navRef ->
+                DeliveriesListScreen(
+                    nav = nav,
+                    deliveryViewModel = deliveryViewModel
+                )
+            }
             composable<Screens.CreateProduct>(
 
                 enterTransition = {

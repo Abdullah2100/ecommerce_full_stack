@@ -26,7 +26,7 @@ data class StoreStatusDto(
 )
 
 data class CreateStoreDto(
-    val name: String?=null,
+    val name: String?="سوق سعيد",
     val wallpaperImage: File?=null,
     val smallImage: File?=null,
     val longitude: Double?=null,

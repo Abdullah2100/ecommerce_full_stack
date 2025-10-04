@@ -50,19 +50,19 @@ public class DeliveryController(
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
-        Guid? adminId = null;
+        Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            adminId = outId;
+            userId = outId;
         }
 
-        if (adminId is null)
+        if (userId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
         var result = await deliveryServices.createDelivery(
-            adminId.Value,
+            userId.Value,
             delivery);
 
         return result.IsSeccessful switch

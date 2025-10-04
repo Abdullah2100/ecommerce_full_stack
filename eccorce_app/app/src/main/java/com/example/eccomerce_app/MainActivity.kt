@@ -132,8 +132,9 @@ class MainActivity : ComponentActivity() {
                                                 colors = NavigationBarItemDefaults.colors(
                                                     selectedIconColor = CustomColor.primaryColor700,
                                                     unselectedIconColor = CustomColor.neutralColor600,
-                                                    selectedTextColor = CustomColor.primaryColor700,
-                                                    unselectedTextColor = CustomColor.neutralColor600,
+                                                    selectedTextColor = CustomColor.primaryColor800,
+                                                    unselectedTextColor = CustomColor.neutralColor900,
+
                                                 ),
 
                                                 selected = isSelectedItem,

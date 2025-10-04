@@ -61,7 +61,7 @@ fun LoginScreen(
     val isEmailError = remember { mutableStateOf(false) }
     val isPasswordError = remember { mutableStateOf(false) }
 
-    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("ali@gmail.com")) }
+    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("salime@gmail.com")) }
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
 //    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("")) }
@@ -225,20 +225,27 @@ fun LoginScreen(
 
                                 delay(10)
 
-                                val token =  async { authKoin.generateTokenNotification() }.await()
+                                val token =// async { authKoin.generateTokenNotification() }.await()
 
-//                                Pair(
-//                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-//                                    null
-//                                )
+                                Pair(
+                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+                                    null
+                                )
                                 if (!token.first.isNullOrEmpty()) {
-                                    authKoin.loginUser(
+                                    val result = authKoin.loginUser(
                                         userNameOrEmail.value.text,
                                         password = password.value.text,
-                                        nav = nav,
                                         token = token.first!!,
                                         isSendingData = isSendingData
                                     )
+                                    if (result.isNullOrEmpty())
+                                        nav.navigate(Screens.LocationGraph) {
+                                            popUpTo(nav.graph.id) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    else
+                                        snackBarHostState.showSnackbar(result)
 
                                 } else {
                                     isSendingData.value = false

@@ -10,9 +10,7 @@ import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.data.Room.AuthDao
 import com.example.e_commerc_delivery_man.data.repository.HomeRepository
-import com.example.e_commerc_delivery_man.dto.response.DeliveryInfoDto
 import com.example.e_commerc_delivery_man.dto.response.OrderItemStatusChangeDto
-import com.example.e_commerc_delivery_man.model.DeliveryInfo
 import com.example.e_commerc_delivery_man.model.DtoToModel.toDeliveryInfo
 import com.example.e_commerc_delivery_man.model.DtoToModel.toOrder
 import com.example.e_commerc_delivery_man.model.DtoToModel.toVarient
@@ -40,6 +38,8 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.e_commerc_delivery_man.dto.response.DeliveryResponseDto
+import com.example.e_commerc_delivery_man.model.Delivery
 
 class HomeViewModel(
     val homeRepository: HomeRepository,
@@ -54,7 +54,7 @@ class HomeViewModel(
     val isLoading = _isLoading.asStateFlow()
 
 
-    private var _myInfo = MutableStateFlow<DeliveryInfo?>(null)
+    private var _myInfo = MutableStateFlow<Delivery?>(null)
     var myInfo = _myInfo.asStateFlow()
 
 
@@ -219,7 +219,7 @@ class HomeViewModel(
             var result = homeRepository.getMyInfo();
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
-                    var data = result.data as DeliveryInfoDto
+                    var data = result.data as DeliveryResponseDto
                     _myInfo.emit(data.toDeliveryInfo())
 
                 }
@@ -250,7 +250,7 @@ class HomeViewModel(
         when (result) {
             is NetworkCallHandler.Successful<*> -> {
                 var data = result.data as Boolean
-                val updatedInfo = _myInfo.value?.copy(isAvaliable = status)
+                val updatedInfo = _myInfo.value?.copy(isAvailable = status)
                 _myInfo.emit(updatedInfo)
                 return null;
             }

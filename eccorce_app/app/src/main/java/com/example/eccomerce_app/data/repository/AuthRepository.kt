@@ -50,18 +50,18 @@ class AuthRepository(val client: HttpClient)  {
     }
 
      suspend fun signup(data: SignupDto): NetworkCallHandler {
-        return try {
+         try {
             val fullUrl = Secrets.getBaseUrl() + "/User/signup"
             val result = client.post(fullUrl) {
                 setBody(data)
                 contentType(ContentType.Application.Json)
             }
 
-            if (result.status == HttpStatusCode.Companion.Created) {
-                NetworkCallHandler.Successful(result.body<AuthDto>())
-            } else {
-                NetworkCallHandler.Error(result.body())
-            }
+             return if (result.status == HttpStatusCode.Companion.Created) {
+                 NetworkCallHandler.Successful(result.body<AuthDto>())
+             } else {
+                 NetworkCallHandler.Error(result.body())
+             }
 
         } catch (e: UnknownHostException) {
 
