@@ -85,8 +85,8 @@ public static class UserMapperExtention
     }
 
     public static Result<AuthDto?>? isValidateFunc(
-        this User? user, 
-        bool isAdmin = true, 
+        this User? user,
+        bool isAdmin = true,
         bool isStore = false)
     {
         if (user is null)
@@ -99,7 +99,7 @@ public static class UserMapperExtention
                 statusCode: 404
             );
         }
-        
+
 
         //validate user if it is admin or user according to isAdmin feild 
         switch (isAdmin)
@@ -132,9 +132,18 @@ public static class UserMapperExtention
                         statusCode: 400
                     );
                 }
+
                 //check if admin has store
                 return isStore ? isHasStore(user) : null;
             }
         }
+    }
+
+    public static bool isUpdateAnyFeild(this UpdateUserInfoDto dto)
+    {
+        return dto.Thumbnail != null ||
+               !(string.IsNullOrEmpty(dto.NewPassword) && string.IsNullOrEmpty(dto.Password)) ||
+               !string.IsNullOrEmpty(dto.Phone) ||
+               !string.IsNullOrEmpty(dto.Name);
     }
 }

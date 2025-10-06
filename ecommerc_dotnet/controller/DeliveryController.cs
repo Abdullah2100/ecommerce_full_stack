@@ -102,6 +102,36 @@ public class DeliveryController(
         
     }
 
+    
+    [HttpPut()]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> updateDeliveryInfo([FromForm] UpdateDeliveryDto delivery)
+    {
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? deliveryId = null;
+        if (Guid.TryParse(id?.Value, out Guid outId))
+        {
+            deliveryId = outId;
+        }
+
+        if (deliveryId is null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+        var result = await deliveryServices.updateDelivery(delivery,deliveryId.Value);
+
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
+        
+    }
+
 
     [HttpGet("all/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

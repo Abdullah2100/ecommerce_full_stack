@@ -1,7 +1,7 @@
 package com.example.e_commerc_delivery_man.data.repository
 
-import com.example.e_commerc_delivery_man.Dto.AuthResultDto
-import com.example.e_commerc_delivery_man.dto.request.LoginDto
+import com.example.e_commerc_delivery_man.dto.AuthDto
+import com.example.e_commerc_delivery_man.dto.AuthResultDto
 import com.example.e_commerc_delivery_man.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
@@ -16,7 +16,7 @@ import java.net.UnknownHostException
 
 class AuthRepository(val client:HttpClient) {
 
-    suspend fun login(loginData:LoginDto): NetworkCallHandler {
+    suspend fun login(loginData:AuthDto): NetworkCallHandler {
         return try {
             val full_url =Secrets.getBaseUrl()+"/Delivery/login";
             val result = client.post(full_url){

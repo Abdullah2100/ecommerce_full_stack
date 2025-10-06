@@ -5,7 +5,7 @@ public class Result<T>
     public Result(
         bool isSeccessful,
         string message,
-        T data,
+        T? data,
         int statusCode
     )
     {
@@ -17,6 +17,6 @@ public class Result<T>
 
     public bool IsSeccessful { get; set; }
     public string Message { get; set; }
-    public T Data { get; set; }
+    public T? Data { get; set; }
     public int StatusCode { get; set; }
 }

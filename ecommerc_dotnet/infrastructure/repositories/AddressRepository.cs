@@ -23,8 +23,16 @@ public class AddressRepository(AppDbContext context) : IAddressRepository
 
     public async Task<int> updateAsync(Address entity)
     {
-        context.Address.Update(entity);
-        return await context.SaveChangesAsync();
+        try
+        {
+            context.Address.Update(entity);
+            return await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("error from update address"+ex.Message);
+            return 0;
+        }
     }
 
     public async Task<int> deleteAsync(Guid id)

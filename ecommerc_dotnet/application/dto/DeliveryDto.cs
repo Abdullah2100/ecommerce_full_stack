@@ -29,4 +29,20 @@ namespace ecommerc_dotnet.dto
         [Required] public Guid UserId { get; set; }
         public IFormFile? Thumbnail { get; set; } = null;
     }
+    
+    public class UpdateDeliveryDto
+    {
+        public IFormFile? Thumbnail { get; set; } = null;
+        public decimal? Longitude { get; set; } = null;
+        public decimal? Latitude { get; set; } = null;
+
+        [StringLength(maximumLength: 50 , ErrorMessage = "Enter Valide Name")]
+        public string? Name { get; set; } = null;
+        
+        [StringLength(maximumLength: 13, ErrorMessage = "Enter Valide Name")]
+        public string? Phone { get; set; } = null;
+        public IFormFile? UserThumbnail { get; set; } = null;
+        public string? Password { get; set; } = null;
+        public string? NewPassword { get; set; } = null;
+    }
 }

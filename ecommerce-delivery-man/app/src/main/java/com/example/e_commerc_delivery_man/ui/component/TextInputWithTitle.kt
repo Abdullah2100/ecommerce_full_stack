@@ -18,8 +18,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -87,19 +85,14 @@ fun TextInputWithNoTitle(
 fun TextInputWithTitle(
     value: MutableState<TextFieldValue>,
     title: String,
-    placHolder: String,
+    placeHolder: String,
     isHasError: Boolean = false,
-    erroMessage: String? = null,
+    errorMessage: String? = null,
     isEnable: Boolean? = true,
-    focusRequester: FocusRequester? = null
 ) {
 
-    var modifierWithFocus =
-//        if (focusRequester == null)
-            Modifier.fillMaxWidth()
-//        else Modifier
-//            .fillMaxWidth()
-//            .focusRequester(focusRequester)
+    val modifierWithFocus =
+        Modifier.fillMaxWidth()
     val fontScall = LocalDensity.current.fontScale
     Column {
         if (title.trim().isNotEmpty())
@@ -118,7 +111,7 @@ fun TextInputWithTitle(
             onValueChange = { value.value = it },
             placeholder = {
                 Text(
-                    placHolder,
+                    placeHolder,
                     color = CustomColor.neutralColor500,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Normal,
@@ -132,9 +125,9 @@ fun TextInputWithTitle(
                 focusedBorderColor = if (!isHasError) Color.Black else CustomColor.alertColor_1_400
             ),
             supportingText = {
-                if (isHasError && erroMessage != null)
+                if (isHasError && errorMessage != null)
                     Text(
-                        erroMessage,
+                        errorMessage,
                         color = CustomColor.alertColor_1_400,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Medium,

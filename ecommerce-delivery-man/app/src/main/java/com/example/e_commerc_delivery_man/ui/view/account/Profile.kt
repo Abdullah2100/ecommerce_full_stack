@@ -1,5 +1,6 @@
 package com.example.e_commerc_delivery_man.ui.view.account
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +28,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -56,27 +54,26 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.Util.General.toCustomFil
-import com.example.e_commerc_delivery_man.model.MyInfoUpdate
 import com.example.e_commerc_delivery_man.ui.component.TextInputWithTitle
 import com.example.e_commerc_delivery_man.ui.component.TextNumberInputWithTitle
 import com.example.e_commerc_delivery_man.ui.component.TextSecureInputWithTitle
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
+import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 import com.example.hotel_mobile.Util.Validation
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 
 
+@SuppressLint("RememberInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val myInfo = homeViewModel.myInfo.collectAsState();
+    val myInfo = userViewModel.myInfo.collectAsState();
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -89,7 +86,6 @@ fun ProfileScreen(
     val currotine = rememberCoroutineScope()
 
     val file = remember { mutableStateOf<File?>(null) }
-    val focusRequester = FocusRequester()
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -394,18 +390,16 @@ fun ProfileScreen(
             TextInputWithTitle(
                 value = fullName,
                 title = "Full Name",
-                placHolder = myInfo.value?.user?.name ?: "",
-                erroMessage = "",
-                focusRequester = focusRequester
+                placeHolder = myInfo.value?.user?.name ?: "",
+                errorMessage = "",
             )
 
             TextInputWithTitle(
                 value = email,
                 title = "Email",
-                placHolder = myInfo.value?.user?.email ?: "",
-                erroMessage = "",
+                placeHolder = myInfo.value?.user?.email ?: "",
+                errorMessage = "",
                 isEnable = false,
-                focusRequester = focusRequester
             )
 
             TextNumberInputWithTitle(

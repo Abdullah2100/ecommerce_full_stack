@@ -9,7 +9,9 @@ using Npgsql;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class DeliveryRepository(AppDbContext context) : IDeliveryRepository
+public class DeliveryRepository(
+    AppDbContext context
+    ) : IDeliveryRepository
 {
     public async Task<IEnumerable<Delivery>> getAllAsync(int page, int length)
     {
@@ -27,7 +29,7 @@ public class DeliveryRepository(AppDbContext context) : IDeliveryRepository
 
         return deliveries;
     }
-    
+
 
     public async Task<int> addAsync(Delivery entity)
     {
@@ -40,33 +42,32 @@ public class DeliveryRepository(AppDbContext context) : IDeliveryRepository
             CreatedAt = DateTime.Now,
             UserId = entity.UserId,
             Thumbnail = entity.Thumbnail,
+            BelongTo = entity.BelongTo
         });
 
 
-        return await context.SaveChangesAsync(); 
+        return await context.SaveChangesAsync();
     }
 
     public async Task<int> updateAsync(Delivery entity)
     {
-        
-         context.Address.Update(new Address
+        try
         {
-            Id = entity.Address!.Id,
-            Longitude = entity.Address!.Longitude,
-            Latitude = entity.Address!.Latitude,
-            Title = "my Place",
-            CreatedAt = DateTime.Now,
-            OwnerId = entity.UserId
-        }); 
-         context.Deliveries.Update(new Delivery
-         {
-             DeviceToken = entity.DeviceToken,
-             Id = entity.Id,
-             CreatedAt = DateTime.Now,
-             UserId = entity.UserId,
-             Thumbnail = entity.Thumbnail,
-         });
-         return await context.SaveChangesAsync();
+            context.Deliveries.Update(new Delivery
+            {
+                DeviceToken = entity.DeviceToken,
+                Id = entity.Id,
+                CreatedAt = DateTime.Now,
+                UserId = entity.UserId,
+                Thumbnail = entity.Thumbnail,
+            });
+            return await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return 0;
+        }
     }
 
     public async Task<int> deleteAsync(Guid id)
@@ -74,24 +75,32 @@ public class DeliveryRepository(AppDbContext context) : IDeliveryRepository
         Delivery? entity = await context.Deliveries.FindAsync(id);
         if (entity is null) return 0;
         entity.IsBlocked = !entity.IsBlocked;
-        return  await context.SaveChangesAsync();
-
+        return await context.SaveChangesAsync();
     }
 
     public async Task<Delivery?> getDelivery(Guid id)
     {
-        return (await context
+        var delivery =(await context
             .Deliveries
             .Include(de => de.User)
+            .AsNoTracking()
             .FirstOrDefaultAsync(de => de.Id == id));
+        if (delivery is null) return null;
+        delivery.Address = await context.Address.FirstOrDefaultAsync(ad => ad.OwnerId == delivery.Id);
+        return delivery;
     }
 
     public async Task<Delivery?> getDeliveryByUserId(Guid userId)
     {
-        return (await context
+        var delivery= (await context
             .Deliveries
+            .AsNoTracking()
             .Include(de => de.User)
             .FirstOrDefaultAsync(de => de.UserId == userId));
+        
+        if (delivery is null) return null;
+        delivery.Address = await context.Address.FirstOrDefaultAsync(ad => ad.OwnerId == delivery.Id);
+        return delivery; 
     }
 
     public async Task<DeliveryAnalysDto> getDeliveryAnalys(Guid id)
@@ -122,16 +131,14 @@ public class DeliveryRepository(AppDbContext context) : IDeliveryRepository
 
             return info;
         }
-
     }
 
- 
 
     public async Task<bool> isExistByUserId(Guid userId)
     {
         return await context
             .Deliveries
             .AsNoTracking()
-            .AnyAsync(de=>de.UserId == userId);
+            .AnyAsync(de => de.UserId == userId);
     }
 }

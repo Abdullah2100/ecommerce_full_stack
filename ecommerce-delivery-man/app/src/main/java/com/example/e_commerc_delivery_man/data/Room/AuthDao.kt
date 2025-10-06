@@ -7,7 +7,7 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AuthDao {
+interface IAuthDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveAuthData(authData : AuthModleEntity)
 
@@ -20,6 +20,8 @@ interface AuthDao {
 
     @Query("SELECT * FROM DeliveryAuthT WHERE id = 0")
      fun   readChunksLive(): Flow<AuthModleEntity?>;
+
+
 
 
 }

@@ -55,7 +55,7 @@ import androidx.navigation.NavHostController
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
+import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.example.e_commerc_delivery_man.Util.General.reachedBottom
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.model.Address
@@ -71,47 +71,47 @@ import java.util.UUID
 @Composable
 fun OrdersScreen(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    orderViewModel: OrderViewModel
 ) {
-    var context = LocalContext.current
-    var config = LocalConfiguration.current
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
-    var orders = homeViewModel.orders.collectAsState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutine = rememberCoroutineScope()
+    val lazyState = rememberLazyListState()
 
+    val orders = orderViewModel.orders.collectAsState()
+
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val isSendingData = remember { mutableStateOf(false) }
-
-    val deletedId = remember { mutableStateOf<UUID?>(null) }
-    val currutine = rememberCoroutineScope()
-
-
-    val lazyState = rememberLazyListState()
+    val isLoadingMore = remember { mutableStateOf(false) }
+    val isRefresh = remember { mutableStateOf(false) }
     val reachedBottom = remember {
         derivedStateOf {
             lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
         }
     }
-    var page = remember { mutableStateOf(1) }
-    val isLoadingMore = remember { mutableStateOf(false) }
 
-    val isRefresh = remember { mutableStateOf(false) }
 
-    Log.d("loadingState", isLoadingMore.value.toString())
+    val deletedId = remember { mutableStateOf<UUID?>(null) }
 
+
+    val page = remember { mutableStateOf(1) }
 
     val address = remember { mutableStateOf<Address?>(null) }
 
+
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    val requestPermssion = rememberLauncherForActivityResult(
+    val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(), onResult = { permission ->
             val arePermissionsGranted = permission.values.reduce { acc, next ->
                 acc && next
             }
             if (arePermissionsGranted) {
-                currutine.launch(Dispatchers.Main) {
+                coroutine.launch(Dispatchers.Main) {
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
@@ -127,13 +127,13 @@ fun OrdersScreen(
                         }
 
                     } catch (e: SecurityException) {
-                        var error = "Permission exception: ${e.message}"
+                        val error = "Permission exception: ${e.message}"
                     }
 
                 }
             } else {
-                currutine.launch {
-                    snackbarHostState.showSnackbar("لا بد من تفعيل صلاحية الموقع لاكمال العملية")
+                coroutine.launch {
+                    snackBarHostState.showSnackbar("لا بد من تفعيل صلاحية الموقع لاكمال العملية")
                 }
             }
         })
@@ -142,12 +142,12 @@ fun OrdersScreen(
 
     LaunchedEffect(reachedBottom.value) {
 
-//        if(!orders.value.isNullOrEmpty() && reachedBottom.value){
-//            homeViewModel.getMyOrder(
-//                page,
-//                isLoadingMore
-//            )
-//        }
+        if (!orders.value.isNullOrEmpty() && reachedBottom.value) {
+            orderViewModel.getOrders(
+                page,
+                isLoadingMore
+            )
+        }
 
     }
 
@@ -155,7 +155,7 @@ fun OrdersScreen(
     Scaffold(
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -183,16 +183,6 @@ fun OrdersScreen(
 
                 )
         },
-        floatingActionButton = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 65.dp)
-                    .offset(x = 16.dp),
-            ) {
-
-            }
-        }
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -215,7 +205,10 @@ fun OrdersScreen(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { {} }
+            onRefresh = { {} },
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
         ) {
             LazyColumn(
                 state = lazyState,
@@ -361,7 +354,7 @@ fun OrdersScreen(
                                 }
 
                                 IconButton({
-                                    requestPermssion.launch(
+                                    requestPermission.launch(
                                         arrayOf(
                                             Manifest.permission.ACCESS_FINE_LOCATION,
                                             Manifest.permission.ACCESS_COARSE_LOCATION
@@ -393,14 +386,14 @@ fun OrdersScreen(
                                         buttonTitle = "Except Order",
                                         operation = {
                                             deletedId.value = order.id
-                                            currutine.launch {
+                                            coroutine.launch {
                                                 isSendingData.value = true;
                                                 val result = async {
-                                                    homeViewModel.takeOrder(order.id)
+                                                    orderViewModel.takeOrder(order.id)
                                                 }.await()
                                                 isSendingData.value = false
                                                 if (!result.isNullOrEmpty()) {
-                                                    snackbarHostState
+                                                   snackBarHostState
                                                         .showSnackbar(result)
                                                 }
                                             }

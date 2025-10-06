@@ -1,6 +1,7 @@
 package com.example.e_commerc_delivery_man.ui.view.home
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,13 +25,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,12 +38,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -75,12 +70,11 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.Util.General.reachedBottom
 import com.example.e_commerc_delivery_man.model.Address
-import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.CustomBotton
+import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -88,60 +82,58 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyOrdersScreen(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    orderViewModel: OrderViewModel
 ) {
-    var context = LocalContext.current
-    var config = LocalConfiguration.current
+    val context = LocalContext.current
+    val config = LocalConfiguration.current
     val screenWidth = config.screenWidthDp
 
 
-    var orders = homeViewModel.myOrders.collectAsState()
-    var varient = homeViewModel.varients.collectAsState()
+    val orders = orderViewModel.myOrders.collectAsState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutine = rememberCoroutineScope()
+    val lazyState = rememberLazyListState()
+
 
 
     val isSendingData = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
     val isExpanded = remember { mutableStateOf(false) }
-
-
-    var roatation = animateFloatAsState(
-        if (isExpanded.value) 180f else 0f
-    )
-
-    val deletedId = remember { mutableStateOf<UUID?>(null) }
-    val currutine = rememberCoroutineScope()
-
-
-    val lazyState = rememberLazyListState()
+    val isLoadingMore = remember { mutableStateOf(false) }
     val reachedBottom = remember {
         derivedStateOf {
             lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
         }
     }
-    var page = remember { mutableStateOf(1) }
-    val isLoadingMore = remember { mutableStateOf(false) }
+
+    val rotation = animateFloatAsState(
+        if (isExpanded.value) 180f else 0f
+    )
+
+    val deletedId = remember { mutableStateOf<UUID?>(null) }
 
 
-    Log.d("loadingState", isLoadingMore.value.toString())
+    val page = remember { mutableStateOf(1) }
 
 
     val address = remember { mutableStateOf<Address?>(null) }
 
+    val snackBarHostState = remember { SnackbarHostState() }
+
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    val requestPermssion = rememberLauncherForActivityResult(
+    val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(), onResult = { permission ->
             val arePermissionsGranted = permission.values.reduce { acc, next ->
                 acc && next
             }
             if (arePermissionsGranted) {
-                currutine.launch(Dispatchers.Main) {
+                coroutine.launch(Dispatchers.Main) {
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
@@ -157,13 +149,13 @@ fun MyOrdersScreen(
                         }
 
                     } catch (e: SecurityException) {
-                        var error = "Permission exception: ${e.message}"
+                        val error = "Permission exception: ${e.message}"
                     }
 
                 }
             } else {
-                currutine.launch {
-                    snackbarHostState.showSnackbar("لا بد من تفعيل صلاحية الموقع لاكمال العملية")
+                coroutine.launch {
+                    snackBarHostState.showSnackbar("لا بد من تفعيل صلاحية الموقع لاكمال العملية")
                 }
             }
         })
@@ -172,12 +164,12 @@ fun MyOrdersScreen(
 
     LaunchedEffect(reachedBottom.value) {
 
-//        if(!orders.value.isNullOrEmpty() && reachedBottom.value){
-//            homeViewModel.getMyOrder(
-//                page,
-//                isLoadingMore
-//            )
-//        }
+        if(!orders.value.isNullOrEmpty() && reachedBottom.value){
+            orderViewModel.getMyOrders(
+                page,
+                isLoadingMore
+            )
+        }
 
     }
 
@@ -185,7 +177,7 @@ fun MyOrdersScreen(
     Scaffold(
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
                     .clip(RoundedCornerShape(8.dp))
@@ -245,7 +237,10 @@ fun MyOrdersScreen(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { {} }
+            onRefresh = { {} },
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
         ) {
             LazyColumn(
                 state = lazyState,
@@ -391,7 +386,7 @@ fun MyOrdersScreen(
                                 }
 
                                 IconButton({
-                                    requestPermssion.launch(
+                                    requestPermission.launch(
                                         arrayOf(
                                             Manifest.permission.ACCESS_FINE_LOCATION,
                                             Manifest.permission.ACCESS_COARSE_LOCATION
@@ -536,21 +531,23 @@ fun MyOrdersScreen(
                                                         Row(
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
-Text("Status : ",
+                                                            Text(
+                                                                "Status : ",
                                                                 fontFamily = General.satoshiFamily,
                                                                 fontWeight = FontWeight.Normal,
                                                                 fontSize = (16).sp,
                                                                 color = CustomColor.neutralColor950,
                                                                 textAlign = TextAlign.Center
                                                             )
-                                                            Text(orderItems.orderItemStatus,
+                                                            Text(
+                                                                orderItems.orderItemStatus,
                                                                 fontFamily = General.satoshiFamily,
                                                                 fontWeight = FontWeight.Normal,
                                                                 fontSize = (16).sp,
                                                                 color = CustomColor.neutralColor800,
                                                                 textAlign = TextAlign.Center
                                                             )
-                                                           }
+                                                        }
 
 
                                                     }
@@ -558,37 +555,37 @@ Text("Status : ",
                                                 }
 
                                                 Sizer(5)
-                                             Row(
-                                                 modifier= Modifier.fillMaxWidth(),
-                                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                                 verticalAlignment = Alignment.CenterVertically
-                                             ){
-                                                 Text(
-                                                     "store Location",
-                                                     fontFamily = General.satoshiFamily,
-                                                     fontWeight = FontWeight.Bold,
-                                                     fontSize = (24).sp,
-                                                     color = CustomColor.neutralColor950,
-                                                     textAlign = TextAlign.Center,
-                                                     maxLines = 1,
-                                                     overflow = TextOverflow.Ellipsis
-                                                 )
-                                                 IconButton({
-                                                     requestPermssion.launch(
-                                                         arrayOf(
-                                                             Manifest.permission.ACCESS_FINE_LOCATION,
-                                                             Manifest.permission.ACCESS_COARSE_LOCATION
-                                                         )
-                                                     )
-                                                 }) {
-                                                     Icon(
-                                                         ImageVector.vectorResource(R.drawable.location_address_list),
-                                                         "",
-                                                         tint = CustomColor.primaryColor500
-                                                     )
-                                                 }
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        "store Location",
+                                                        fontFamily = General.satoshiFamily,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = (24).sp,
+                                                        color = CustomColor.neutralColor950,
+                                                        textAlign = TextAlign.Center,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                    IconButton({
+                                                        requestPermission.launch(
+                                                            arrayOf(
+                                                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                                                Manifest.permission.ACCESS_COARSE_LOCATION
+                                                            )
+                                                        )
+                                                    }) {
+                                                        Icon(
+                                                            ImageVector.vectorResource(R.drawable.location_address_list),
+                                                            "",
+                                                            tint = CustomColor.primaryColor500
+                                                        )
+                                                    }
 
-                                             }
+                                                }
                                             }
 
 
@@ -619,11 +616,9 @@ Text("Status : ",
                                 Sizer(width = 5)
                                 Icon(
                                     Icons.Default.KeyboardArrowDown, "",
-                                    modifier = Modifier.rotate(roatation.value)
+                                    modifier = Modifier.rotate(rotation.value)
                                 )
                             }
-
-
                             Box(
                                 Modifier
                                     .padding(top = 10.dp)
@@ -631,19 +626,19 @@ Text("Status : ",
                             ) {
                                 CustomBotton(
 
-                                    buttonTitle = "Cencle Order",
+                                    buttonTitle = "Cancel Order",
                                     operation = {
                                         deletedId.value = order.id
-                                        currutine.launch {
-                                                isSendingData.value = true;
-                                                val result = async {
-                                                    homeViewModel.cencleOrder(order.id)
-                                                }.await()
-                                                isSendingData.value = false
-                                                if (!result.isNullOrEmpty()) {
-                                                    snackbarHostState
-                                                        .showSnackbar(result)
-                                                }
+                                        coroutine.launch {
+                                            isSendingData.value = true;
+                                            val result = async {
+                                                orderViewModel.cancelOrder(order.id)
+                                            }.await()
+                                            isSendingData.value = false
+                                            if (!result.isNullOrEmpty()) {
+                                                snackBarHostState
+                                                    .showSnackbar(result)
+                                            }
                                         }
 
                                     },
@@ -651,8 +646,6 @@ Text("Status : ",
 //                                        isLoading = isSendingData.value && deletedId.value == order.id
                                 )
                             }
-
-
                         }
                     }
                 }

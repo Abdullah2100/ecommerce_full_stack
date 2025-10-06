@@ -78,26 +78,28 @@ fun CustomAuthBotton(
 
 @Composable
 fun CustomBotton(
-    isLoading: Boolean=false,
+    isLoading: Boolean = false,
     operation: () -> Unit,
     buttonTitle: String,
-    color: Color?=null,
-    isEnable: Boolean?=true,
-    lableSize:Int?=16
-){
+    color: Color? = null,
+    isEnable: Boolean? = true,
+    labelSize: Int? = 16,
+    modifier: Modifier?=null
+) {
 
+    val modifer = if (modifier == null) Modifier
+        .height(50.dp)
+        .fillMaxWidth() else modifier
     Button(
         enabled = isEnable!!,
-        modifier = Modifier
-            .height(50.dp)
-            .fillMaxWidth(),
+        modifier = modifer,
         onClick = {
 
-                operation()
+            operation()
         },
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor =color?: CustomColor.primaryColor700
+            containerColor = color ?: CustomColor.primaryColor700
         ),
 
         ) {
@@ -116,7 +118,7 @@ fun CustomBotton(
                     buttonTitle,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = (lableSize!!).sp,
+                    fontSize = (labelSize!!).sp,
                     textAlign = TextAlign.Center
                 )
             }
@@ -126,8 +128,6 @@ fun CustomBotton(
     }
 
 }
-
-
 @Composable
 fun CustomTitleBotton(
     operation: () -> Unit,

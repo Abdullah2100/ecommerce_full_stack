@@ -97,6 +97,10 @@ dependencies {
     implementation(libs.ktor.auth)
     implementation(libs.ktor.cio)
 
+    //material icon
+    implementation(libs.androidx.material.icons.extended)
+
+
     // Kotlinx Serialization JSON
     implementation(libs.kotlinx.serialization.json)
 

@@ -1,5 +1,6 @@
 package com.example.e_commerc_delivery_man.ui
 
+import com.example.e_commerc_delivery_man.model.enMapType
 import kotlinx.serialization.Serializable
 
 object Screens {
@@ -41,42 +42,38 @@ object Screens {
     object Profile
 
 
-    @Serializable
-    data class Store(
-        var store_id: String? = null,
-        var isFromHome: Boolean? = true
-    )
 
 
-    @Serializable
-    data class CreateProduct(
-        var store_id: String,
-        var product_id: String?=null
-    )
-
-    @Serializable
-    data class ProductDetails(
-        var product_Id: String,
-        var isFromHome: Boolean
-    )
 
     @Serializable
     object MyOrder
 
 
-    @Serializable
-    object Checkout
+
 
     @Serializable
     object Address
 
     @Serializable
-    object Map
+    data class Map(
+        val title:String?=null,
+        val id:String?=null,
+        val lognit: Double?=null,
+        val latitt: Double?=null,
+        val additionLong: Double? = null,
+        val additionLat: Double? = null,
+        val mapType: enMapType,
+        val isFromLogin: Boolean
+    )
+
+
+
+    @Serializable
+    object LocationHome
 
     @Serializable
     object Orders
 
-    @Serializable
-    object OrderForMyStore
+
 
 }

@@ -13,5 +13,4 @@ data class OrderItem(
     val product: OrderProduct,
     val productVarient:List<OrderVarient>,
     val orderItemStatus: String
-
 )

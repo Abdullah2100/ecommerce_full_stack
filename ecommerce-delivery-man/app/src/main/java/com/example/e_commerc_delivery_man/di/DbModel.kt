@@ -24,4 +24,5 @@ fun provideDataBase(application: Context): AuthDataBase {
 val dataBaseModule= module {
     single { provideDataBase(application =get()) }
     single { get<AuthDataBase>().authDao() }
+    single { get<AuthDataBase>().locationDao() }
 }

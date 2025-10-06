@@ -18,11 +18,10 @@ import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,31 +33,36 @@ import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.component.TextInputWithTitle
 import com.example.e_commerc_delivery_man.ui.component.TextSecureInputWithTitle
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     nav: NavHostController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel
 ) {
     val fontScall = LocalDensity.current.fontScale
-
     val keyboardController = LocalSoftwareKeyboardController.current
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("ali@gmail.com")) }
+    val coroutine = rememberCoroutineScope()
+
+
+    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("salime@gmail.com")) }
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
     val isEmailError = remember { mutableStateOf<Boolean>(false) }
     val isPasswordError = remember { mutableStateOf<Boolean>(false) }
-    val erroMessage = remember { mutableStateOf("") }
+    val isSendingData = remember { mutableStateOf(false) }
 
-    val isSendingData = authViewModel.isLoading.collectAsState()
-    val errorMessage = authViewModel.errorMesssage.collectAsState()
-    val coroutine = rememberCoroutineScope()
+    val errorMessage = remember { mutableStateOf("") }
+
+    val snackBarHostState = remember { SnackbarHostState() }
 
 
-    val focusRequester = FocusRequester()
+//    val focusRequester = FocusRequester()
 
     fun validateLoginInput(
         username: String,
@@ -69,11 +73,11 @@ fun LoginScreen(
         isPasswordError.value = false;
 
         if (username.trim().isEmpty()) {
-            erroMessage.value = "email must not be empty"
+            errorMessage.value = "email must not be empty"
             isEmailError.value = true;
             return false;
         } else if (password.trim().isEmpty()) {
-            erroMessage.value = ("password must not be empty")
+            errorMessage.value = ("password must not be empty")
             isPasswordError.value = true
             return false;
         }
@@ -82,17 +86,23 @@ fun LoginScreen(
     }
 
 
-    LaunchedEffect(errorMessage.value) {
-        if (errorMessage.value != null)
-            coroutine.launch {
-                snackbarHostState.showSnackbar(errorMessage.value.toString())
-                authViewModel.clearErrorMessage()
-            }
-    }
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackBarHostState)
+        },
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Login",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        color = CustomColor.neutralColor950,
+                        fontSize = (34 / fontScall).sp
+                    )
+                }
+            )
         }
     ) {
 
@@ -104,38 +114,32 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxHeight(0.9f)
                 .fillMaxWidth()
-                .padding(top = it.calculateTopPadding()+50.dp)
-                .padding(horizontal = 10.dp)
-            ,horizontalAlignment = Alignment.Start,
-        ) {
+                .padding(top = it.calculateTopPadding() + 50.dp)
+                .padding(horizontal = 10.dp),
+            horizontalAlignment = Alignment.Start,
+        )
+        {
 
-            Text(
-                "Login",
-                fontFamily = General.satoshiFamily,
-                fontWeight = FontWeight.Bold,
-                color = CustomColor.neutralColor950,
-                fontSize = (34 / fontScall).sp
-            )
 
-            Sizer(heigh = 50)
             TextInputWithTitle(
                 userNameOrEmail,
                 title = "Email",
-                placHolder = "Enter Your email",
+                placeHolder = "Enter Your email",
                 isHasError = isEmailError.value,
-                erroMessage = erroMessage.value,
-                focusRequester = focusRequester
+                errorMessage = errorMessage.value,
             )
+
             TextSecureInputWithTitle(
                 password,
                 "Password",
                 isPasswordError.value,
-                erroMessage.value
+                errorMessage.value
             )
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
-            ) {
+            )
+            {
                 Text(
                     "Forget Password",
                     fontFamily = General.satoshiFamily,
@@ -158,15 +162,35 @@ fun LoginScreen(
 
                     if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
                         coroutine.launch {
-                            snackbarHostState.showSnackbar("User name Or Password is Blanck")
+                            snackBarHostState.showSnackbar("User name Or Password is Blanck")
                         }
                     } else {
+                        val token =// async { authKoin.generateTokenNotification() }.await()
 
-                        authViewModel.loginUser(
-                            userNameOrEmail.value.text,
-                            password = password.value.text,
-                            nav = nav
-                        )
+                            Pair(
+                                "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+                                null
+                            )
+                        if (!token.first.isNullOrEmpty())
+                            coroutine.launch {
+                                isSendingData.value = true;
+                                val result = async {
+                                    authViewModel.loginUser(
+                                        userNameOrEmail.value.text,
+                                        password = password.value.text,
+                                        token = token.first
+                                    )
+                                }.await()
+                                isSendingData.value = false
+                                if (result == null) {
+                                    userViewModel.getMyInfo()
+                                    nav.navigate(Screens.LocationHome) {
+                                        popUpTo(nav.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                } else snackBarHostState.showSnackbar(result)
+                            }
 
 
                     }
@@ -185,9 +209,7 @@ fun LoginScreen(
         }
 
 
-
     }
-
 
 
 }

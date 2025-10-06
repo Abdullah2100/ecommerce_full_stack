@@ -1,13 +1,7 @@
 package com.example.e_commerc_delivery_man.di
 
 import android.util.Log
-import androidx.room.Room
-import com.example.e_commerc_delivery_man.data.Room.AuthDao
-import com.example.e_commerc_delivery_man.data.Room.AuthDataBase
-import com.example.e_commerc_delivery_man.data.repository.AuthRepository
-import com.example.e_commerc_delivery_man.util.Secrets
-import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.data.Room.IAuthDao
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import io.ktor.client.HttpClient
@@ -26,7 +20,7 @@ import org.koin.dsl.module
 
 
 
-fun provideHttpClient(authDao:AuthDao): HttpClient {
+fun provideHttpClient(authDao:IAuthDao): HttpClient {
     return HttpClient(Android) {
 
         engine {

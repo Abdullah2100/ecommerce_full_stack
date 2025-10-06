@@ -119,4 +119,7 @@ object General {
         }
     }
 
+    fun String.removeTheSingle():String{
+        return this.replace("\'","");
+    }
 }

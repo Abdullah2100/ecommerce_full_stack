@@ -10,66 +10,130 @@ import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
+import com.example.e_commerc_delivery_man.ui.view.Address.MapHomeScreen
 import com.example.e_commerc_delivery_man.ui.view.Auth.LoginScreen
-import com.example.e_commerc_delivery_man.ui.view.Address.MapScreen
 import com.example.e_commerc_delivery_man.ui.view.account.AccountPage
 import com.example.e_commerc_delivery_man.ui.view.account.ProfileScreen
 import com.example.e_commerc_delivery_man.ui.view.home.MyOrdersScreen
 import com.example.e_commerc_delivery_man.ui.view.home.HomePage
 import com.example.e_commerc_delivery_man.ui.view.home.OrdersScreen
-import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
+import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
+import com.example.e_commerc_delivery_man.viewModel.UserViewModel
+import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
+import com.example.eccomerce_app.viewModel.MapViewModel
 
 
 @Composable
 fun NavController(
     nav: NavHostController,
-    authViewModle: AuthViewModel = koinViewModel(),
-    homeViewModle: HomeViewModel = koinViewModel(),
+    authViewModel: AuthViewModel = koinViewModel(),
+    orderViewModel: OrderViewModel = koinViewModel(),
+    userViewModel: UserViewModel = koinViewModel(),
+    mapViewModel: MapViewModel = koinViewModel(),
     currentScreen: Int,
 ) {
 
     Log.d("currentScreen", currentScreen.toString())
     NavHost(
         startDestination = when (currentScreen) {
-            0 ->  Screens.Login
+            0 -> Screens.Login
+            1 -> Screens.LocationHome
             else -> Screens.HomeGraph
         },
         navController = nav
     ) {
 
 
+        composable<Screens.Login>(
+            enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            },
 
-
-
-            composable<Screens.Login>(
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                },
-
-                popEnterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                }
-            ) {
-                LoginScreen(
-                    nav = nav,
-                    authViewModel = authViewModle
+            popEnterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            },
+            exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
                 )
             }
+        ) {
+            LoginScreen(
+                nav = nav,
+                authViewModel = authViewModel,
+                userViewModel = userViewModel
+            )
+        }
+
+
+
+        composable<Screens.Map>(
+
+            enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            },
+            exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }
+        ) {result->
+            val data = result.toRoute<Screens.Map>()
+
+            MapHomeScreen(
+                nav = nav,
+                userViewModel = userViewModel,
+                longitude = data.lognit,
+                latitude = data.latitt,
+                additionLat = data.additionLat,
+                additionLong = data.additionLong,
+                title = data.title,
+                id = data.id,
+                mapType = data.mapType,
+                isFomLogin = data.isFromLogin,
+                mapViewModel = mapViewModel
+
+            )
+
+        }
+
+        composable<Screens.LocationHome>(
+            enterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            },
+
+            popEnterTransition = {
+                return@composable slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                )
+            }, exitTransition = {
+                return@composable slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                )
+            }) {
+            AddressHomeScreen(
+                nav = nav,
+                userViewModel = userViewModel
+            )
+        }
+
 
 
 
         navigation<Screens.HomeGraph>(
             startDestination = Screens.Home
         ) {
+
+
 
             composable<Screens.Home>(
                 enterTransition = {
@@ -85,7 +149,7 @@ fun NavController(
             ) {
                 HomePage(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    userViewModel = userViewModel
                 )
             }
 
@@ -106,7 +170,8 @@ fun NavController(
             ) {
                 AccountPage(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    userModelView = userViewModel,
+                    authViewModel = authViewModel
                 )
             }
 
@@ -125,12 +190,12 @@ fun NavController(
             ) {
                 ProfileScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    userViewModel = userViewModel
                 )
             }
 
 
-          composable<Screens.MyOrder>(
+            composable<Screens.MyOrder>(
 
                 enterTransition = {
                     return@composable slideIntoContainer(
@@ -145,30 +210,12 @@ fun NavController(
             ) { navRef ->
                 MyOrdersScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle,
+                    orderViewModel = orderViewModel,
                 )
 
             }
 
-           composable<Screens.Map>(
 
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
-            ) {
-                MapScreen(
-                    nav = nav,
-                    homeViewModel = homeViewModle
-                )
-
-            }
 
             composable<Screens.Orders>(
 
@@ -185,11 +232,10 @@ fun NavController(
             ) {
                 OrdersScreen(
                     nav = nav,
-                    homeViewModel = homeViewModle
+                    orderViewModel = orderViewModel
                 )
 
             }
-
 
 
         }

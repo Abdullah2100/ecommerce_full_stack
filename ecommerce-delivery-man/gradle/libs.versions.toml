@@ -14,6 +14,7 @@ activityCompose = "1.11.0"
 composeBom = "2025.09.01"
 lifecycleViewmodelKtx = "2.9.4"
 mapsCompose = "6.12.0"
+materialIconsExtended = "1.7.8"
 playServicesLocation = "21.3.0"
 room = "2.8.1"
 signalr = "10.0.0-rc.1.25451.107"
@@ -38,6 +39,7 @@ mapsNav = "7.0.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

@@ -13,14 +13,18 @@ using ecommerc_dotnet.shared.extentions;
 using hotel_api.Services;
 using hotel_api.util;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
 public class DeliveryServices(
+    IAddressRepository addressRepository,
     IUserRepository userRepository,
     IDeliveryRepository deliveryRepository,
     IConfig config,
-    IWebHostEnvironment host)
+    IWebHostEnvironment host,
+    IUserServices userServices
+)
     : IDeliveryServices
 {
     public async Task<Result<AuthDto?>> login(LoginDto loginDto)
@@ -38,14 +42,17 @@ public class DeliveryServices(
             .getUser(
                 loginDto.Username,
                 clsUtil.hashingText(loginDto.Password));
-        if (user is null)
+
+        var isValide = user.isValidateFunc(isAdmin: false);
+
+        if (isValide is not null)
         {
             return new Result<AuthDto?>
             (
                 data: null,
-                message: "user not found",
+                message: isValide.Message,
                 isSeccessful: false,
-                statusCode: 404
+                statusCode: isValide.StatusCode
             );
         }
 
@@ -88,12 +95,12 @@ public class DeliveryServices(
 
         string? token = null, refreshToken = null;
         token = AuthinticationUtil.generateToken(
-            userId: delivery.UserId,
+            userId: delivery.Id,
             email: delivery.User.Email,
             config);
 
         refreshToken = AuthinticationUtil.generateToken(
-            userId: delivery.UserId,
+            userId: delivery.Id,
             email: delivery.User.Email,
             config,
             EnTokenMode.RefreshToken);
@@ -116,22 +123,21 @@ public class DeliveryServices(
 
 
         var admin = user.isValidateFunc(isAdmin: true);
-        var store = user.isValidateFunc(isAdmin:false,isStore:true);
-       
-        
-        if (admin is not null && user.Role==0||store!=null)
+        var store = user.isValidateFunc(isAdmin: false, isStore: true);
+
+
+        if (admin is not null && user.Role == 0 || store != null)
         {
             return new Result<DeliveryDto?>
             (
                 data: null,
                 message: admin?.Message ?? store.Message,
                 isSeccessful: false,
-                statusCode:admin?.StatusCode?? store.StatusCode
+                statusCode: admin?.StatusCode ?? store.StatusCode
             );
         }
 
-        
-        
+
         if (await deliveryRepository.isExistByUserId(deliveryDto.UserId))
         {
             return new Result<DeliveryDto?>
@@ -143,7 +149,7 @@ public class DeliveryServices(
             );
         }
 
-        
+
         string? deliveryThumnail = null;
         if (deliveryDto.Thumbnail is not null)
         {
@@ -152,7 +158,6 @@ public class DeliveryServices(
                     deliveryDto.Thumbnail,
                     EnImageType.DELIVERY, host);
         }
-        
 
 
         var addressId = clsUtil.generateGuid();
@@ -172,7 +177,7 @@ public class DeliveryServices(
             UserId = deliveryDto.UserId,
             Thumbnail = deliveryThumnail,
             Address = address,
-            BelongTo = user?.Store?.Id??userId
+            BelongTo = user?.Store?.Id ?? userId
         };
         int result = await deliveryRepository.addAsync(delivery);
 
@@ -247,10 +252,11 @@ public class DeliveryServices(
         );
     }
 
-    public async Task<Result<DeliveryDto?>> getDelivery(Guid userId)
+    public async Task<Result<DeliveryDto?>> getDelivery(Guid id)
     {
         Delivery? delivery = await deliveryRepository
-            .getDeliveryByUserId(userId);
+            .getDelivery(id);
+        
         if (delivery is null)
         {
             return new Result<DeliveryDto?>
@@ -281,7 +287,7 @@ public class DeliveryServices(
             data: deliveryDto,
             message: "",
             isSeccessful: true,
-            statusCode: 201
+            statusCode: 200
         );
     }
 
@@ -326,6 +332,118 @@ public class DeliveryServices(
             message: "",
             isSeccessful: true,
             statusCode: 201
+        );
+    }
+
+    public async Task<Result<DeliveryDto>> updateDelivery(UpdateDeliveryDto deliveryDto, Guid id)
+    {
+        Delivery? delivery = await deliveryRepository
+            .getDelivery(id);
+
+        var isValidated = delivery.isValidated();
+
+        if (isValidated is not null)
+        {
+            return new Result<DeliveryDto>
+            (
+                data: null,
+                message: isValidated.Message,
+                isSeccessful: false,
+                statusCode: isValidated.StatusCode
+            );
+        }
+
+        bool isPassOperation = false;
+
+        if (deliveryDto.Longitude is not null && deliveryDto.Latitude is not null)
+        {
+            var addressHolder = delivery.Address;
+            addressHolder.Longitude = deliveryDto.Longitude;
+            addressHolder.Latitude = deliveryDto.Latitude;
+            addressHolder.IsCurrent = true;
+            isPassOperation = (await addressRepository.updateAsync(addressHolder)) > 0;
+        }
+
+        if (!isPassOperation)
+        {
+            return new Result<DeliveryDto>
+            (
+                data: null,
+                message: "could not update delivery address",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        var userUpdateData = new UpdateUserInfoDto
+        {
+            Name = deliveryDto.Name,
+            Phone = deliveryDto.Phone,
+            Thumbnail = deliveryDto.Thumbnail,
+            Password = deliveryDto.Password,
+            NewPassword = deliveryDto.NewPassword,
+        };
+
+        if (userUpdateData.isUpdateAnyFeild() is true)
+        {
+            var result = await userServices.updateUser(userUpdateData, delivery!.UserId);
+
+            if (result is not null)
+            {
+                return new Result<DeliveryDto>
+                (
+                    data: null,
+                    message: result.Message,
+                    isSeccessful: false,
+                    statusCode: result.StatusCode
+                );
+            }
+        }
+
+
+        if (deliveryDto.Thumbnail is not null)
+        {
+            var previuse = delivery.Thumbnail;
+            if (previuse is not null)
+                clsUtil.deleteFile(filePath: previuse, host);
+
+            string? newThumbNail = null;
+            newThumbNail = await clsUtil.saveFile(file: deliveryDto.Thumbnail, type: EnImageType.DELIVERY, host);
+            delivery.Thumbnail = newThumbNail;
+
+            isPassOperation = (await deliveryRepository.updateAsync(delivery)) > 0;
+            if (!isPassOperation)
+            {
+                return new Result<DeliveryDto>
+                (
+                    data: null,
+                    message: "could not update delivery info",
+                    isSeccessful: false,
+                    statusCode: 404
+                );
+            }
+        }
+
+
+        delivery = await deliveryRepository.getDelivery(delivery.Id);
+        
+        if (delivery is null)
+        {
+            return new Result<DeliveryDto>
+            (
+                data: null,
+                message: "Delivery not found",
+                isSeccessful: false,
+                statusCode: 404
+            );
+        }
+
+        return new Result<DeliveryDto>
+        (
+            data: delivery?.toDto(config.getKey("url_file")),
+            message: "",
+            isSeccessful: true,
+            statusCode: 200
         );
     }
 }

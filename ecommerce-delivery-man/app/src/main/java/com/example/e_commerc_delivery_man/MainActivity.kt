@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
             val authViewModle: AuthViewModel = koinViewModel();
             val currentScreen = authViewModle.currentScreen.collectAsState()
 
-            var buttonNavItemHolder = listOf<ButtonNavItem>(
+            val buttonNavItemHolder = listOf<ButtonNavItem>(
                 ButtonNavItem(name ="Home", imageId = Icons.Outlined.Home,0 ),
                 ButtonNavItem(name ="Orders", imageId = ImageVector.vectorResource(R.drawable.order),1 ),
                 ButtonNavItem(name ="MyOrder", imageId = ImageVector.vectorResource(R.drawable.shopping),2 ),

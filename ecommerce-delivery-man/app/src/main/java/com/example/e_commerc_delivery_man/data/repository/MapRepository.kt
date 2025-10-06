@@ -1,5 +1,11 @@
 package com.example.eccomerce_app.data.repository
 
+import com.example.eccomerce_app.dto.GooglePlacesInfo
+import com.example.hotel_mobile.Modle.NetworkCallHandler
+import com.google.android.gms.maps.model.LatLng
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import java.io.IOException
 import java.net.UnknownHostException

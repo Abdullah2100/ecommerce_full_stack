@@ -1,14 +1,12 @@
 package com.example.e_commerc_delivery_man.ui.view.account
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,21 +26,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.model.enMapType
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.AccountCustomBottom
 import com.example.e_commerc_delivery_man.ui.component.LogoutBotton
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
+import com.example.e_commerc_delivery_man.viewModel.AuthViewModel
+import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountPage(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    userModelView: UserViewModel,
+    authViewModel: AuthViewModel
 ) {
 
-    var myInfo = homeViewModel.myInfo.collectAsState()
+    val myInfo = userModelView.myInfo.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -100,7 +101,17 @@ fun AccountPage(
                 nav.navigate(Screens.Profile)
             })
             AccountCustomBottom("Locations", R.drawable.location_address_list, {
-                nav.navigate(Screens.Address)
+                if (myInfo.value != null)
+                    nav.navigate(
+                        Screens.Map(
+                            id = null,
+                            title = "my Place",
+                            lognit = myInfo.value!!.address.longitude,
+                            latitt = myInfo.value!!.address.latitude,
+                            isFromLogin = false,
+                            mapType = enMapType.My
+                        )
+                    )
             })
 //           AccountCustomBottom("My Order", R.drawable.order, {})
             AccountCustomBottom("Payment Me", R.drawable.credit_card, {})
@@ -109,7 +120,7 @@ fun AccountPage(
 
 
             LogoutBotton("Logout", R.drawable.logout, {
-                homeViewModel.logout()
+                authViewModel.logout()
                 nav.navigate(Screens.Login)
                 {
                     popUpTo(nav.graph.id) {

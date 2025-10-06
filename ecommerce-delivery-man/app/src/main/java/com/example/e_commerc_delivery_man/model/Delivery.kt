@@ -1,8 +1,5 @@
 package com.example.e_commerc_delivery_man.model
 
-import com.example.e_commerc_delivery_man.dto.response.AddressResponseDto
-import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
-import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class Delivery(
@@ -11,5 +8,16 @@ data class Delivery(
     val isAvailable: Boolean,
     val thumbnail: String? = null,
     val address: Address,
-    val user: UserModel
+    val user: UserModel,
+    val analys: DeliveryAnalyse?=null
 )
+data class DeliveryAnalyse(
+    val dayFee: Double? = null,
+    val weekFee: Double? = null,
+    val monthFee: Double? = null,
+    val dayOrder: Int? = null,
+    val weekOrder: Int? = null
+)
+
+
+

@@ -1,30 +1,22 @@
 package com.example.e_commerc_delivery_man.ui.view.home
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -32,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,67 +39,63 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.navigation.NavHostController
-import androidx.room.util.TableInfo
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.viewModel.HomeViewModel
 import com.example.e_commerc_delivery_man.Util.General.reachedBottom
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.ui.component.MonayAnalys
 import com.example.e_commerc_delivery_man.ui.component.OrdersAnalys
 import com.example.e_commerc_delivery_man.ui.component.VerticalLine
+import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("ConfigurationScreenWidthHeight", "SuspiciousIndentation")
 @Composable
 fun HomePage(
     nav: NavHostController,
-    homeViewModel: HomeViewModel
+    userViewModel: UserViewModel
 ) {
-    val config =LocalConfiguration.current
-    val sceenHeight = config.screenHeightDp
-    val sceenWidth = config.screenWidthDp
-    val requestPermssion = rememberLauncherForActivityResult(
+    val context = LocalContext.current
+
+    val coroutine = rememberCoroutineScope()
+    val lazyState = rememberLazyListState()
+
+    val myInfo = userViewModel.myInfo.collectAsState()
+
+
+
+    val isRefresh = remember { mutableStateOf(false) }
+
+
+    val snackBarHostState = remember { SnackbarHostState() }
+
+
+    val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { permission ->
-
-
+            if (!permission) {
+                finishAffinity(context as Activity)  // Close all activities
+                exitProcess(0)
+            }
         }
     )
 
-    val isLoadingMore = remember { mutableStateOf(false) }
-    val isRefresh = remember { mutableStateOf(false) }
-    remember { mutableStateOf(false) }
-
-    val myInfo = homeViewModel.myInfo.collectAsState()
-
-
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutine = rememberCoroutineScope()
-
-
-    val lazyState = rememberLazyListState()
-    remember {
-        derivedStateOf {
-            lazyState.reachedBottom() // Custom extension function to check if the user has reached the bottom
-        }
-    }
-    remember { mutableStateOf(1) }
-
-
     LaunchedEffect(Unit) {
-        homeViewModel.getMyInfo()
+        userViewModel.getMyInfo()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermssion.launch(input = android.Manifest.permission.POST_NOTIFICATIONS)
+            requestPermission.launch(input = android.Manifest.permission.POST_NOTIFICATIONS)
         }
 
     }
@@ -119,9 +108,52 @@ fun HomePage(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
+        topBar = {
+            TopAppBar(
+                actions = {
+                    Switch(
+                        myInfo.value?.isAvailable == true,
+                        onCheckedChange = {
+                            if (myInfo.value != null) {
+                                coroutine.launch {
 
+                                    val result = async {
+                                        userViewModel.updateDeliveryStatus(!myInfo.value!!.isAvailable)
+                                    }.await()
+                                    if (!result.isNullOrEmpty()) {
+                                        snackBarHostState.showSnackbar(result)
+                                    }
+                                }
+                            }
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedBorderColor = Color.Transparent,
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = CustomColor.primaryColor700,
+                            disabledCheckedBorderColor = Color.Transparent,
+                        )
+
+                    )
+                },
+                navigationIcon = {
+                    Image(
+                        ImageVector.vectorResource(R.drawable.app_icon), "",
+                        modifier = Modifier.size(50.dp)
+                    )
+                },
+
+                title = {
+                    Text(
+                        "Delivery Man",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (30).sp,
+                        color = CustomColor.primaryColor700,
+                        textAlign = TextAlign.Start
+                    )
+                }
+            )
         }
     ) {
         it.calculateTopPadding()
@@ -130,7 +162,7 @@ fun HomePage(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { homeViewModel.getMyInfo(true) }
+            onRefresh = { userViewModel.getMyInfo(true) }
         ) {
             LazyColumn(
                 state = lazyState,
@@ -141,56 +173,6 @@ fun HomePage(
                     .padding(top = 50.dp)
 
             ) {
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row {
-                            Image(
-                                ImageVector.vectorResource(R.drawable.app_icon), "",
-                                modifier = Modifier.size(50.dp)
-                            )
-                            Text(
-                                "DelivaryMan",
-                                fontFamily = General.satoshiFamily,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = (40).sp,
-                                color = CustomColor.primaryColor700,
-                                textAlign = TextAlign.Start
-                            )
-                        }
-
-                        Switch(
-                            myInfo.value?.isAvaliable == true,
-                            onCheckedChange = {
-                                if (myInfo.value != null) {
-                                    coroutine.launch {
-
-                                        var result = async {
-
-                                            homeViewModel.updateMyInfo(!myInfo.value!!.isAvaliable)
-                                        }.await()
-                                        if (!result.isNullOrEmpty()) {
-                                            snackbarHostState.showSnackbar(result)
-                                        }
-                                    }
-                                }
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedBorderColor = Color.Transparent,
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = CustomColor.primaryColor700,
-                                disabledCheckedBorderColor = Color.Transparent,
-                            )
-
-                        )
-                    }
-
-
-                }
 
 
                 item {
@@ -252,21 +234,23 @@ fun HomePage(
                                 )
                             }
                         }
-                       Sizer(30)
+                        Sizer(30)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             MonayAnalys(
-                                myInfo.value?.analys?.dayFee?:
-                                50000.0,"Today")
-                            VerticalLine( width = 1, color = Color.White)
-                            MonayAnalys(myInfo.value?.analys?.weekFee?:
-                            53333333333.0,"Week")
-                            VerticalLine( width = 1, color = Color.White)
-                            MonayAnalys(myInfo.value?.analys?.monthFee?:
-                            12355456789.0,"Month")
+                                myInfo.value?.analys?.dayFee ?: 50000.0, "Today"
+                            )
+                            VerticalLine(width = 1, color = Color.White)
+                            MonayAnalys(
+                                myInfo.value?.analys?.weekFee ?: 53333333333.0, "Week"
+                            )
+                            VerticalLine(width = 1, color = Color.White)
+                            MonayAnalys(
+                                myInfo.value?.analys?.monthFee ?: 12355456789.0, "Month"
+                            )
 
 
                         }
@@ -286,7 +270,7 @@ fun HomePage(
                         textAlign = TextAlign.Start
                     )
                     Sizer(10)
-                    Row (
+                    Row(
                         modifier = Modifier
 //                            .height(240.dp)
                             .fillMaxWidth(),
@@ -294,12 +278,14 @@ fun HomePage(
                         horizontalArrangement = Arrangement.SpaceBetween
 
                     ) {
-                   OrdersAnalys(myInfo.value?.analys?.dayOrder?:0,
-                       "Todays",
-                       "Ordes"
-                       )
+                        OrdersAnalys(
+                            myInfo.value?.analys?.dayOrder ?: 0,
+                            "Todays",
+                            "Ordes"
+                        )
 
-                        OrdersAnalys(myInfo.value?.analys?.weekOrder?:0,
+                        OrdersAnalys(
+                            myInfo.value?.analys?.weekOrder ?: 0,
                             "This Week",
                             "Ordes"
                         )
