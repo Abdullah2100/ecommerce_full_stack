@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.e_commercompose.R
@@ -102,7 +102,7 @@ fun GenerateOtpScreen(
 
 
 
-                CustomBotton(
+                CustomButton(
                     isLoading = isSendingData.value,
                     operation = {
                         keyboardController?.hide()

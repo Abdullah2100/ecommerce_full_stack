@@ -58,6 +58,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -94,7 +95,7 @@ import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.enMapType
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.BannerBage
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.ui.component.Sizer
@@ -105,6 +106,7 @@ import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
 import com.example.eccomerce_app.viewModel.BannerViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
+import com.example.eccomerce_app.viewModel.DeliveryViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -128,6 +130,7 @@ fun StoreScreen(
     categoryViewModel: CategoryViewModel,
     subCategoryViewModel: SubCategoryViewModel,
     storeViewModel: StoreViewModel,
+    deliveryViewModel: DeliveryViewModel,
     productViewModel: ProductViewModel,
     userViewModel: UserViewModel
 ) {
@@ -541,7 +544,7 @@ fun StoreScreen(
                             placeHolder = "Enter Sub Category Name",
                         )
 
-                        CustomBotton(
+                        CustomButton(
                             operation = {
                                 coroutine.launch {
                                     keyboardController?.hide()
@@ -585,7 +588,7 @@ fun StoreScreen(
 
                         if (isUpdated.value) {
                             Sizer(10)
-                            CustomBotton(
+                            CustomButton(
                                 isLoading = isDeleted.value && isSendingData.value,
                                 operation = {
                                     coroutine.launch {
@@ -779,6 +782,7 @@ fun StoreScreen(
                             .padding(bottom = 3.dp)
                             .size(50.dp),
                         onClick = {
+                            deliveryViewModel.getDeliveryBelongToStore(mutableIntStateOf(1))
                             nav.navigate(Screens.DeliveriesList)
                         },
                         containerColor = CustomColor.primaryColor500

@@ -28,7 +28,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
@@ -103,7 +103,7 @@ fun OtpVerificationScreen(
                 )
 
 
-                CustomBotton(
+                CustomButton(
                     isLoading = isSendingData.value,
                     operation = {
                         keyboardController?.hide()

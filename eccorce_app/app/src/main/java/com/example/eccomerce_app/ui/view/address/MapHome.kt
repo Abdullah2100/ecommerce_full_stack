@@ -45,7 +45,7 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.component.CustomAuthBottom
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
@@ -74,7 +74,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Gap
-import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -82,7 +81,6 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -489,11 +487,11 @@ fun MapHomeScreen(
 
 
 
-            if (isHasTitle) CustomBotton(
+            if (isHasTitle) CustomButton(
                 buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
                 color = CustomColor.primaryColor700,
                 isEnable = true,
-                modifier = Modifier
+                customModifier = Modifier
                     .padding(bottom = paddingValue.calculateBottomPadding() + 10.dp)
 
                     .height(50.dp)

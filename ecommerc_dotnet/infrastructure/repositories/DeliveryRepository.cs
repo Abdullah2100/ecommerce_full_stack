@@ -103,6 +103,25 @@ public class DeliveryRepository(
         return delivery; 
     }
 
+    public async Task<List<Delivery>?> getDeliveryByBelongTo(Guid belongToId,int page, int size)
+    {
+        List<Delivery> deliveries = await context
+            .Deliveries
+            .Include(de => de.User)
+            .AsNoTracking()
+            .Take(page)
+            .Skip((page - 1) * size)
+            .ToListAsync();
+        foreach (var delivery in deliveries)
+        {
+            delivery.Address = (await context.Address
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ad => ad.Id == delivery.Id));
+        }
+
+        return deliveries;
+    }
+
     public async Task<DeliveryAnalysDto> getDeliveryAnalys(Guid id)
     {
         using (var cmd = context.Database.GetDbConnection().CreateCommand())

@@ -72,7 +72,7 @@ import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.toCustomFil
 import com.example.e_commercompose.dto.ModelToDto.toListOfProductVarient
 import com.example.e_commercompose.model.ProductVarientSelection
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
@@ -274,7 +274,7 @@ fun CreateProductScreen(
                 containerColor = Color.White,
                 modifier = Modifier.padding(horizontal = 15.dp)
             ) {
-                CustomBotton(
+                CustomButton(
                     isLoading = isSendingData.value,
                     operation = {
 
@@ -1002,7 +1002,7 @@ fun CreateProductScreen(
                 )
                 Sizer(5)
 
-                CustomBotton(
+                CustomButton(
                     isLoading = false,
                     operation = {
                         val selectedVariant = ProductVarientSelection(

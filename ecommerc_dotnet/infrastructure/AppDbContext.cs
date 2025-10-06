@@ -107,12 +107,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .HasPrincipalKey(pro => pro.Id)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            pr.HasOne<SubCategory>(pro => pro.subCategory)
+            pr.HasOne<SubCategory>(pro => pro.SubCategory)
                 .WithMany(sub => sub.Products)
                 .HasForeignKey(pro => pro.SubcategoryId)
                 .HasPrincipalKey(sub => sub.Id)
                 .OnDelete(DeleteBehavior.Restrict);
-            pr.HasOne(pro => pro.store)
+            pr.HasOne(pro => pro.Store)
                 .WithMany(st => st.Products)
                 .HasForeignKey(pro => pro.StoreId)
                 .HasPrincipalKey(str => str.Id)

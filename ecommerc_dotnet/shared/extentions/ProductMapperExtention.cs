@@ -17,7 +17,7 @@ public static class ProductMapperExtention
             Description = product.Description,
             Price = product.Price,
             Thmbnail = string.IsNullOrEmpty(product.Thmbnail) ? "" : url+ product.Thmbnail,
-            CategoryId = product.subCategory.CategoryId,
+            CategoryId = product.SubCategory.CategoryId,
             ProductImages =product.ProductImages.Select(pi=>url+pi.Path).ToList(),
             ProductVarients = product.ProductVarients
                 .GroupBy(pv => pv.VarientId, (key, g)
@@ -37,13 +37,13 @@ public static class ProductMapperExtention
             Description = product.Description,
             Price = product.Price,
             Thmbnail = string.IsNullOrEmpty(product.Thmbnail) ? "" : url+ product.Thmbnail,
-            StoreName = product.store.Name,
+            StoreName = product.Store.Name,
             ProductImages =product.ProductImages.Select(pi=>url+pi.Path).ToList(),
             ProductVarients = product.ProductVarients
                 .GroupBy(pv => pv.VarientId, (key, g)
                     => g.Select(pvH=>pvH.toAdminProductVarientDto()).ToList()
                 ).ToList(),
-            Subcategory =  product.subCategory.Name,
+            Subcategory =  product.SubCategory.Name,
         };
     }
 

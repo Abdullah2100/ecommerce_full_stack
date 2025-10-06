@@ -26,6 +26,6 @@ public class Product
     public ICollection<ProductVarient>? ProductVarients { get; set; } = null;
     public ICollection<ProductImage>? ProductImages { get; set; } = null;
     
-   public SubCategory subCategory { get; set; }
-   public Store store { get; set; }
+   public SubCategory SubCategory { get; set; }
+   public Store Store { get; set; }
 }

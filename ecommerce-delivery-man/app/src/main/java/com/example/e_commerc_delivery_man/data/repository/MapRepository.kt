@@ -15,9 +15,22 @@ class MapRepository(val client: HttpClient) {
     suspend fun getDistanceBetweenTwoPoint(
         origin: LatLng,
         destination: LatLng,
-        key: String
+        key: String,
+        wayPoint: List<LatLng>? = null
     ): NetworkCallHandler {
-        val url = "https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$key"
+        // Prepare waypoints parameter string if wayPoint list is provided
+        val waypointsParam = wayPoint?.takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "|") { "${it.latitude},${it.longitude}" }
+
+        // Build URL with waypoints if available
+        val url = buildString {
+            append("https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}")
+            append("&destination=${destination.latitude},${destination.longitude}")
+            if (waypointsParam != null) {
+                append("&waypoints=$waypointsParam")
+            }
+            append("&key=$key")
+        }
 
         return try {
             val result = client.get(url)
@@ -25,25 +38,16 @@ class MapRepository(val client: HttpClient) {
                 HttpStatusCode.Companion.OK -> {
                     NetworkCallHandler.Successful(result.body<GooglePlacesInfo>())
                 }
-
                 else -> {
-                    NetworkCallHandler.Error(
-                        result.body<String>()
-                    )
+                    NetworkCallHandler.Error(result.body<String>())
                 }
             }
-
         } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
+            NetworkCallHandler.Error(e.message)
         } catch (e: IOException) {
-
-            return NetworkCallHandler.Error(e.message)
-
+            NetworkCallHandler.Error(e.message)
         } catch (e: Exception) {
-
-            return NetworkCallHandler.Error(e.message)
+            NetworkCallHandler.Error(e.message)
         }
     }
 

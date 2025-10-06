@@ -17,9 +17,15 @@ class MapViewModel(private val mapRepository: MapRepository) : ViewModel() {
 
     private val _googlePlaceInfo = MutableStateFlow<List<LatLng>?>(null)
     val googlePlaceInfo = _googlePlaceInfo.asStateFlow()
-    fun findPointBetweenTwoDestination(origin: LatLng, destination: LatLng, key: String) {
+    fun findPointBetweenTwoDestination(
+        origin: LatLng,
+        destination: LatLng,
+        key: String,
+        wayPoint: List<LatLng>? = null
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = mapRepository.getDistanceBetweenTwoPoint(origin, destination, key)
+            val result =
+                mapRepository.getDistanceBetweenTwoPoint(origin, destination, key, wayPoint)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val info = result.data as? GooglePlacesInfo

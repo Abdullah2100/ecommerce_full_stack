@@ -60,7 +60,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.VariantViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
@@ -162,7 +162,7 @@ fun CartScreen(
                             .background(Color.White)
                             .padding(horizontal = 15.dp)
                     ) {
-                        CustomBotton(
+                        CustomButton(
                             buttonTitle = "Go to Checkout", operation = {
                                 coroutine.launch {
                                     cartViewModel.calculateOrderDistanceToUser(

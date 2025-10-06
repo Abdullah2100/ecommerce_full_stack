@@ -77,22 +77,22 @@ fun CustomAuthBottom(
 
 
 @Composable
-fun CustomBotton(
+fun CustomButton(
     isLoading: Boolean = false,
     operation: () -> Unit,
     buttonTitle: String,
     color: Color? = null,
     isEnable: Boolean? = true,
     labelSize: Int? = 16,
-    modifier: Modifier?=null
+    customModifier: Modifier?=null
 ) {
 
-    val modifer = if (modifier == null) Modifier
+    val modifier = if (customModifier == null) Modifier
         .height(50.dp)
-        .fillMaxWidth() else modifier
+        .fillMaxWidth() else customModifier
     Button(
         enabled = isEnable!!,
-        modifier = modifer,
+        modifier = modifier,
         onClick = {
 
             operation()
@@ -131,7 +131,7 @@ fun CustomBotton(
 
 
 @Composable
-fun CustomTitleBotton(
+fun CustomTitleButton(
     operation: () -> Unit,
     buttonTitle: String,
     color: Color?

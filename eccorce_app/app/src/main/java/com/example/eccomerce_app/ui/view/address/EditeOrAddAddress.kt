@@ -61,7 +61,7 @@ import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.Address
 import com.example.e_commercompose.model.enMapType
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.UserViewModel
@@ -197,7 +197,7 @@ fun EditOrAddLocationScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp)
                 ) {
-                    CustomBotton(
+                    CustomButton(
                         operation = {
                             requestPermissionThenNavigate.launch(
                                 arrayOf(

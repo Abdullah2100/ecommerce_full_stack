@@ -55,6 +55,7 @@ import com.example.e_commerc_delivery_man.model.enMapType
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.CustomBotton
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
+import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 import com.example.eccomerce_app.viewModel.MapViewModel
 import com.google.android.gms.location.LocationCallback
@@ -71,6 +72,7 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import kotlinx.coroutines.flow.firstOrNull
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -79,6 +81,7 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 fun MapHomeScreen(
     nav: NavHostController,
     userViewModel: UserViewModel,
+    orderViewModel: OrderViewModel,
     mapViewModel: MapViewModel,
     title: String? = null,
     id: String? = null,
@@ -88,12 +91,12 @@ fun MapHomeScreen(
     additionLat: Double? = null,
     mapType: enMapType = enMapType.My,
     isFomLogin: Boolean = true,
-
     ) {
 
     val context = LocalContext.current
 
     val directions = mapViewModel.googlePlaceInfo.collectAsState()
+    val orders = orderViewModel.orders.collectAsState()
 
     val isPassLocation = userViewModel.isPassLocation.collectAsState()
 
@@ -246,6 +249,12 @@ fun MapHomeScreen(
 
 
         }
+
+    }
+    fun getStoresLocationBelongToOrder():List<LatLng>?{
+        val storeLocations = orders.value?.firstOrNull { it.id.toString()==id }
+        if(storeLocations ==null) return null;
+        return storeLocations.orderItems.map { LatLng(it.address!!.latitude,it.address!!.longitude) }
 
     }
 

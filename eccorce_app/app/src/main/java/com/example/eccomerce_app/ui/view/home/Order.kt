@@ -51,7 +51,7 @@ import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.reachedBottom
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.eccomerce_app.ui.component.OrderItemCartShape
 import com.example.eccomerce_app.viewModel.OrderViewModel
 import kotlinx.coroutines.async
@@ -247,7 +247,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
 
                                 Sizer(5)
 
-                                CustomBotton(
+                                CustomButton(
 
                                     buttonTitle = "Cancel Order",
                                     operation = {

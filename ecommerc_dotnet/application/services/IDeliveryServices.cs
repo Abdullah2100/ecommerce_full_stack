@@ -1,5 +1,6 @@
 using ecommerc_dotnet.core.Result;
 using ecommerc_dotnet.dto;
+using ecommerc_dotnet.infrastructure.services;
 
 namespace ecommerc_dotnet.application.services;
 
@@ -12,7 +13,10 @@ public interface IDeliveryServices
     
     Task<Result<DeliveryDto?>> getDelivery(Guid id);
     
-    Task<Result<List<DeliveryDto>>> getDeliveries(Guid adminId, int pageNumber, int pageSize);
+    Task<Result<List<DeliveryDto>>> getDeliveries(
+        Guid belongToId, 
+        int pageNumber, 
+        int pageSize);
     Task<Result<DeliveryDto>> updateDelivery(UpdateDeliveryDto deliveryDto,Guid id);
     
 }

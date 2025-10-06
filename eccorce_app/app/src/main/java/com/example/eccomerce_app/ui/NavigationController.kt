@@ -406,7 +406,8 @@ fun NavController(
                     subCategoryViewModel = subCategoryViewModel,
                     storeViewModel = storeViewModel,
                     productViewModel = productViewModel,
-                    userViewModel = userViewModel
+                    userViewModel = userViewModel,
+                    deliveryViewModel = deliveryViewModel
                 )
             }
 

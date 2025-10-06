@@ -28,10 +28,10 @@ import java.net.UnknownHostException
 import java.util.UUID
 
 class DeliveryRepository(val client: HttpClient) {
-    suspend fun getDeliveriesBelongToStore(storeId: UUID): NetworkCallHandler {
+    suspend fun getDeliveriesBelongToStore(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
-                Secrets.getBaseUrl() + "/User/deliveries"
+                Secrets.getBaseUrl() + "/Delivery/all/${pageNumber}"
             ) {
                 headers {
                     append(

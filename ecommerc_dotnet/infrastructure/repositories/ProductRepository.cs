@@ -18,7 +18,7 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
@@ -27,6 +27,8 @@ public class ProductRepository(
             .OrderDescending()
             .ToListAsync();
     }
+
+    
 
     public async Task<int> addAsync(Product entity)
     {
@@ -45,7 +47,7 @@ public class ProductRepository(
                 UpdatedAt = null,
                 Thmbnail = entity.Thmbnail
             });
-
+            result =   await context.SaveChangesAsync() >0;
             if (entity.ProductVarients is not null)
             {
                 result = await productVariantRepository.addProductVariants(entity.ProductVarients);
@@ -59,14 +61,14 @@ public class ProductRepository(
             if (entity.ProductImages is not null)
             {
                 result = await productImageRepository.addProductImage(entity.ProductImages);
-                if (result != false)
+                if (!result)
                 {
                     Console.WriteLine("could not save product image: ");
                     return 0;
                 }
             }
 
-            return await context.SaveChangesAsync();
+            return result==true? 1: 0;
         }
         catch (Exception ex)
         {
@@ -127,8 +129,8 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.store)
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.Store)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
@@ -139,8 +141,8 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.store)
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.Store)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
@@ -151,12 +153,12 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.store)
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.Store)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id && p.store.UserId == userId);
+            .FirstOrDefaultAsync(p => p.Id == id && p.Store.UserId == userId);
     }
 
     public async Task<IEnumerable<Product>> getProducts(
@@ -168,8 +170,8 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.store)
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.Store)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
@@ -187,8 +189,8 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.store)
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.Store)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
@@ -207,12 +209,12 @@ public class ProductRepository(
     {
         return await context.Products
             .AsNoTracking()
-            .Include(pro => pro.store)
-            .Include(pro => pro.subCategory)
+            .Include(pro => pro.Store)
+            .Include(pro => pro.SubCategory)
             .Include(pro => pro.ProductImages)
             .Include(pro => pro.ProductVarients)
             .AsSplitQuery()
-            .Where(p => p.subCategory.CategoryId == categoryId)
+            .Where(p => p.SubCategory.CategoryId == categoryId)
             .Skip((pageNum - 1) * pageSize)
             .Take(pageSize)
             .OrderDescending()

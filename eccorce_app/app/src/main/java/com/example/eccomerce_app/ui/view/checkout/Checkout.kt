@@ -56,7 +56,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.CartViewModel
 import com.example.e_commercompose.R
 import com.example.e_commercompose.model.PaymentMethodModel
-import com.example.e_commercompose.ui.component.CustomBotton
+import com.example.e_commercompose.ui.component.CustomButton
 import com.example.eccomerce_app.viewModel.GeneralSettingViewModel
 import com.example.eccomerce_app.viewModel.OrderViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
@@ -148,7 +148,7 @@ fun CheckoutScreen(
                         .padding(horizontal = 10.dp)
                         .padding()
                 ) {
-                    CustomBotton(
+                    CustomButton(
                         isEnable = !isSendingData.value,
                         operation = {
                             coroutine.launch {

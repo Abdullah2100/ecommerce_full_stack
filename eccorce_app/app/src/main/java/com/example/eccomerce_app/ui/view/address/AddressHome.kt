@@ -46,8 +46,8 @@ import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.enMapType
 import com.example.eccomerce_app.ui.Screens
-import com.example.e_commercompose.ui.component.CustomBotton
-import com.example.e_commercompose.ui.component.CustomTitleBotton
+import com.example.e_commercompose.ui.component.CustomButton
+import com.example.e_commercompose.ui.component.CustomTitleButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
@@ -193,7 +193,7 @@ fun AddressHomeScreen(
                 textAlign = TextAlign.Center
             )
             Sizer(50)
-            CustomBotton(
+            CustomButton(
                 operation = {
                     requestPermission.launch(
                         arrayOf(
@@ -206,7 +206,7 @@ fun AddressHomeScreen(
                 color = CustomColor.primaryColor700
             )
             Sizer(20)
-            CustomTitleBotton(
+            CustomTitleButton(
                 operation = {
                     userViewModel.getMyInfo()
                     nav.navigate(Screens.PickCurrentAddress)

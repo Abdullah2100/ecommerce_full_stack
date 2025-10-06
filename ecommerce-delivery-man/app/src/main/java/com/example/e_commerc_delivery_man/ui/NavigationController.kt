@@ -98,8 +98,8 @@ fun NavController(
                 id = data.id,
                 mapType = data.mapType,
                 isFomLogin = data.isFromLogin,
-                mapViewModel = mapViewModel
-
+                mapViewModel = mapViewModel,
+                orderViewModel = orderViewModel
             )
 
         }

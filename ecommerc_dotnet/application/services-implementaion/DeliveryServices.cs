@@ -17,6 +17,12 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace ecommerc_dotnet.infrastructure.services;
 
+public enum enBelongToType
+{
+    ADMIN,
+    STORE
+};
+
 public class DeliveryServices(
     IAddressRepository addressRepository,
     IUserRepository userRepository,
@@ -256,7 +262,7 @@ public class DeliveryServices(
     {
         Delivery? delivery = await deliveryRepository
             .getDelivery(id);
-        
+
         if (delivery is null)
         {
             return new Result<DeliveryDto?>
@@ -291,47 +297,89 @@ public class DeliveryServices(
         );
     }
 
-    public async Task<Result<List<DeliveryDto>>> getDeliveries(Guid adminId, int pageNumber, int pageSize)
+
+    public async Task<Result<List<DeliveryDto>>> getDeliveries(
+        Guid belongToId,
+        int pageNumber,
+        int pageSize
+    )
     {
         User? user = await userRepository
-            .getUser(adminId);
-        if (user is null)
+            .getUser(belongToId);
+
+        enBelongToType belongType = enBelongToType.ADMIN;
+
+        switch (user.Role==0)
         {
-            return new Result<List<DeliveryDto>>
-            (
-                data: new List<DeliveryDto>(),
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
+            case true:
+            {
+                belongType = enBelongToType.ADMIN;
+            }
+                break;
+            default:
+            {
+                belongType = enBelongToType.STORE;
+            }
+                break;
+        }
+        
+        Guid id = Guid.NewGuid();
+        switch (belongType)
+        {
+            case enBelongToType.STORE:
+            {
+                var isValidated = user.isValidateFunc(isStore: true);
+                if (isValidated is not null)
+                {
+                    return new Result<List<DeliveryDto>>
+                    (
+                        data: new List<DeliveryDto>(),
+                        message: isValidated.Message,
+                        isSeccessful: false,
+                        statusCode: isValidated.StatusCode
+                    );
+                }
+
+                id = user.Store.Id;
+            }
+                break;
+            case enBelongToType.ADMIN:
+            {
+                var isValidated = user.isValidateFunc();
+                if (isValidated is not null)
+                {
+                    return new Result<List<DeliveryDto>>
+                    (
+                        data: new List<DeliveryDto>(),
+                        message: isValidated.Message,
+                        isSeccessful: false,
+                        statusCode: isValidated.StatusCode
+                    );
+                }
+
+                id = user.Id;
+            }
+                break;
         }
 
-        if (user.Role != 0)
-        {
-            return new Result<List<DeliveryDto>>
-            (
-                data: new List<DeliveryDto>(),
-                message: "not authorized user",
-                isSeccessful: false,
-                statusCode: 400
-            );
-        }
 
-        List<DeliveryDto> deliveryDtos = (await deliveryRepository
-                .getAllAsync(pageNumber, pageSize))
-            .Select((de) => de.toDto(config.getKey("url_file")))
-            .ToList();
-        foreach (var deliveryDto in deliveryDtos)
-        {
-            deliveryDto.Analys = await deliveryRepository.getDeliveryAnalys(deliveryDto.Id);
-        }
+        List<DeliveryDto>? deliveryDto = (await deliveryRepository
+                .getDeliveryByBelongTo(id, pageNumber, pageSize))
+            ?.Select((de) => de.toDto(config.getKey("url_file")))
+            ?.ToList();
+        
+        if (deliveryDto is not null)
+            foreach (var delivery in deliveryDto)
+            {
+                delivery.Analys = await deliveryRepository.getDeliveryAnalys(delivery.Id);
+            }
 
         return new Result<List<DeliveryDto>>
         (
-            data: deliveryDtos,
+            data: deliveryDto,
             message: "",
             isSeccessful: true,
-            statusCode: 201
+            statusCode: 200
         );
     }
 
@@ -426,7 +474,7 @@ public class DeliveryServices(
 
 
         delivery = await deliveryRepository.getDelivery(delivery.Id);
-        
+
         if (delivery is null)
         {
             return new Result<DeliveryDto>

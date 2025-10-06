@@ -1,32 +1,17 @@
 package com.example.eccomerce_app.viewModel
 
-import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.MutableIntState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.example.e_commercompose.model.DtoToModel.toDeliveryInfo
-import com.example.eccomerce_app.util.General
-import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
-import com.example.eccomerce_app.dto.LoginDto
-import com.example.eccomerce_app.ui.Screens
-import com.example.eccomerce_app.dto.AuthDto
-import com.example.eccomerce_app.dto.SignupDto
 import com.example.eccomerce_app.data.NetworkCallHandler
-import com.example.eccomerce_app.data.repository.AuthRepository
 import com.example.eccomerce_app.data.repository.DeliveryRepository
 import com.example.eccomerce_app.dto.DeliveryDto
 import com.example.eccomerce_app.model.Delivery
-import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 
@@ -55,6 +40,36 @@ class DeliveryViewModel(
             is NetworkCallHandler.Error -> {
                 return result.data
             }
+        }
+    }
+
+    fun getDeliveryBelongToStore(pageNumber: MutableIntState){
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = deliveryRepository.getDeliveriesBelongToStore(pageNumber.intValue)
+            when (result) {
+                is NetworkCallHandler.Successful<*> -> {
+                    val data = result.data as? List<DeliveryDto>
+                    val newDeliveriesList = mutableListOf<Delivery>()
+
+                    if (data != null) {
+                        pageNumber.intValue=pageNumber.intValue+1;
+                        newDeliveriesList.addAll(data.map { it.toDeliveryInfo() })
+                    }
+                    if (deliveries.value != null)
+                        newDeliveriesList.addAll(deliveries.value!!)
+
+                    val distinctDelivery = newDeliveriesList.distinctBy { it.id }
+
+                    deliveries.emit(newDeliveriesList)
+
+                    null;
+                }
+
+                is NetworkCallHandler.Error -> {
+                    Log.d("Error","This Error from getting delivery Belong to my Store ${result.data}")
+                }
+                }
         }
     }
 }

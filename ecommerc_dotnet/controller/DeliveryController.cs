@@ -77,7 +77,7 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getDeivery()
+    public async Task<IActionResult> getDelivery()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
@@ -92,6 +92,7 @@ public class DeliveryController(
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
+
         var result = await deliveryServices.getDelivery(userId.Value);
 
         return result.IsSeccessful switch
@@ -99,10 +100,9 @@ public class DeliveryController(
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
         };
-        
     }
 
-    
+
     [HttpPut()]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -122,14 +122,14 @@ public class DeliveryController(
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await deliveryServices.updateDelivery(delivery,deliveryId.Value);
+
+        var result = await deliveryServices.updateDelivery(delivery, deliveryId.Value);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
         };
-        
     }
 
 
@@ -142,24 +142,24 @@ public class DeliveryController(
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
-        Guid? adminId = null;
+        Guid? belongToId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
         {
-            adminId = outId;
+            belongToId = outId;
         }
 
-        if (adminId is null)
+        if (belongToId is null)
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await deliveryServices.getDeliveries(adminId.Value,pageNumber,25);
+
+        var result = await deliveryServices.getDeliveries(belongToId.Value, pageNumber, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
         };
-        
     }
 
 
@@ -184,13 +184,13 @@ public class DeliveryController(
         }
 
 
-        var result = await deliveryServices.updateDeliveryStatus(userId.Value,status);
+        var result = await deliveryServices.updateDeliveryStatus(userId.Value, status);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
+        };
     }
 
 
@@ -223,13 +223,13 @@ public class DeliveryController(
         }
 
         var result = await orderServices
-            .getOrdersNotBelongToDeliveries(deliveryId.Value,pageNumber,25);
+            .getOrdersNotBelongToDeliveries(deliveryId.Value, pageNumber, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        };   
+        };
     }
 
 
@@ -262,13 +262,13 @@ public class DeliveryController(
         }
 
         var result = await orderServices.getOrdersbyDeliveryId(
-            deliveryId.Value,pageNumber,25);
+            deliveryId.Value, pageNumber, 25);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        };   
+        };
     }
 
 
@@ -293,13 +293,13 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await orderServices.submitOrderToDelivery(orderId,deliveryId.Value);
+        var result = await orderServices.submitOrderToDelivery(orderId, deliveryId.Value);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        };  
+        };
     }
 
 
@@ -323,12 +323,13 @@ public class DeliveryController(
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await orderServices.cancelOrderFromDelivery(orderId,deliveryId.Value);
+
+        var result = await orderServices.cancelOrderFromDelivery(orderId, deliveryId.Value);
 
         return result.IsSeccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
-        }; 
+        };
     }
 }

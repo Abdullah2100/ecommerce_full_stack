@@ -63,7 +63,7 @@ object Screens {
         val additionLong: Double? = null,
         val additionLat: Double? = null,
         val mapType: enMapType,
-        val isFromLogin: Boolean
+        val isFromLogin: Boolean,
     )
 
 
