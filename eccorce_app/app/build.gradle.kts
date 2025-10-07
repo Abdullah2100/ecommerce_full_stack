@@ -88,6 +88,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //material icon
+    implementation(libs.androidx.material.icons.extended)
+
 
     //koin
     implementation(libs.koin.android)

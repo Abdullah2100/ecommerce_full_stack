@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -24,12 +25,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,10 +63,15 @@ import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.example.e_commerc_delivery_man.Util.General.reachedBottom
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.model.Address
+import com.example.e_commerc_delivery_man.model.enMapType
+import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.CustomBotton
+import com.example.e_commerc_delivery_man.ui.component.OrderComponent
+import com.example.eccomerce_app.model.Order
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
@@ -79,11 +88,15 @@ fun OrdersScreen(
 
     val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
+    val state = rememberPullToRefreshState()
 
     val orders = orderViewModel.orders.collectAsState()
 
 
     val snackBarHostState = remember { SnackbarHostState() }
+
+    val selectedId = remember { mutableStateOf(UUID.randomUUID()) }
+
 
     val isSendingData = remember { mutableStateOf(false) }
     val isLoadingMore = remember { mutableStateOf(false) }
@@ -115,14 +128,20 @@ fun OrdersScreen(
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
+                        val selectedOrderData = orders.value?.firstOrNull() { it.id==selectedId }
                         data?.let { location ->
-
-                            val longint = location.longitude ?: 5.5000
-                            val latit = location.latitude ?: 5.5000
-                            address.value = Address(longint, latit)
-                        }
-                        if (address.value == null) {
-                            address.value = Address(5.5, 5.3)
+                            nav.navigate(
+                                Screens.Map(
+                                    lognit = selectedOrderData?.longitude,
+                                    latitt = selectedOrderData?.latitude,
+                                    title = selectedOrderData?.name,
+                                    additionLat = location.latitude ,
+                                    additionLong =  location.longitude ,
+                                    isFromLogin = false,
+                                    mapType = enMapType.TrackOrder,
+                                    id = selectedId.value.toString()
+                                )
+                            )
 
                         }
 
@@ -142,13 +161,17 @@ fun OrdersScreen(
 
     LaunchedEffect(reachedBottom.value) {
 
-        if (!orders.value.isNullOrEmpty() && reachedBottom.value) {
+        if (!orders.value.isNullOrEmpty() && reachedBottom.value && orders.value!!.size>23) {
             orderViewModel.getOrders(
                 page,
                 isLoadingMore
             )
         }
 
+    }
+
+    LaunchedEffect(Unit) {
+        orderViewModel.getOrders(mutableStateOf(1))
     }
 
 
@@ -205,10 +228,33 @@ fun OrdersScreen(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { {} },
+            onRefresh = {
+                coroutine.launch {
+                    if (!isRefresh.value) isRefresh.value = true
+                    page.value = 1;
+                    orderViewModel.getOrders(page)
+                    if (isRefresh.value) {
+                        delay(2000)
+                        isRefresh.value = false
+                    }
+
+                }
+            },
             modifier = Modifier
-                .fillMaxSize()
                 .background(Color.White)
+                .fillMaxSize(),
+            state = state,
+            indicator = {
+                Indicator(
+                    modifier = Modifier
+                        .padding(top = 15.dp)
+                        .align(Alignment.TopCenter),
+                    isRefreshing = isRefresh.value,
+                    containerColor = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    state = state
+                )
+            },
         ) {
             LazyColumn(
                 state = lazyState,
@@ -218,198 +264,18 @@ fun OrdersScreen(
                     .background(Color.Gray.copy(alpha = 0.01f)),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    orders.value?.forEach { order ->
-                        Log.d("imageUrl", order.toString())
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 5.dp)
-                                .shadow(8.dp)
-                                .background(
-                                    Color.White,
-                                    RoundedCornerShape(8.dp)
-                                )
-
-                                .padding(horizontal = 5.dp, vertical = 10.dp)
-
-                        ) {
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        order.name,
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 25.sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center
-                                    )
-
-                                    Text(
-                                        order.userPhone,
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = 16.sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center
-
-                                    )
-
-                                    Row {
-                                        Text(
-                                            "OrderItems :",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.orderItems.size}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-
-                                    Row {
-                                        Text(
-                                            "Total Price : ",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.totalPrice}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-                                    Row {
-                                        Text(
-                                            "DeliveryFee : ",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.deliveryFee}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-                                    Row {
-                                        Text(
-                                            "realPayed : ",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.realPrice}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-
-                                }
-
-                                IconButton({
-                                    requestPermission.launch(
-                                        arrayOf(
-                                            Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION
-                                        )
-                                    )
-                                }) {
-                                    Icon(
-                                        ImageVector.vectorResource(R.drawable.location),
-                                        "",
-                                        tint = CustomColor.primaryColor500
-                                    )
-                                }
-                            }
-
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-
-                                Box(
-                                    Modifier
-                                        .width(((screenWidth) - 20).dp)
-                                ) {
-                                    CustomBotton(
-
-                                        buttonTitle = "Except Order",
-                                        operation = {
-                                            deletedId.value = order.id
-                                            coroutine.launch {
-                                                isSendingData.value = true;
-                                                val result = async {
-                                                    orderViewModel.takeOrder(order.id)
-                                                }.await()
-                                                isSendingData.value = false
-                                                if (!result.isNullOrEmpty()) {
-                                                   snackBarHostState
-                                                        .showSnackbar(result)
-                                                }
-                                            }
-
-                                        },
-                                        color = CustomColor.alertColor_2_500,
-//                                        isLoading = isSendingData.value && deletedId.value == order.id
-                                    )
-                                }
-
-                            }
-
-                        }
-                    }
+                items(items = orders.value as List<Order>, key = { it -> it.id }) { order ->
+                    OrderComponent(
+                        order = order,
+                        isCancel = true,
+                        screenWidth = screenWidth,
+                        isSendingData = isSendingData,
+                        requestPermission = requestPermission,
+                        snackBarHostState = snackBarHostState,
+                        orderViewModel = orderViewModel,
+                        selectedId = selectedId
+                    )
                 }
-
                 if (isLoadingMore.value) {
                     item {
                         Box(

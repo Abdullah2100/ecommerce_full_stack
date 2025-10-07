@@ -204,9 +204,8 @@ object DtoToModel {
 
     fun GeneralSettingDto.toGeneralSetting(): GeneralSetting {
         return GeneralSetting(
-            id = this.Id,
-            name = this.Name,
-            value = this.Value
+            name = this.name,
+            value = this.value
         )
     }
 

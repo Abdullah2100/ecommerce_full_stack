@@ -69,7 +69,7 @@ class OrderRepository(val client: HttpClient) {
     //varient
     suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
         try {
-            var result = client.get(
+            val result = client.get(
                 Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
             ) {
                 headers {
@@ -105,7 +105,7 @@ class OrderRepository(val client: HttpClient) {
     //orders
     suspend fun getOrders(pageNumber: Int): NetworkCallHandler {
         try {
-            var result = client.get(
+            val result = client.get(
                 Secrets.getBaseUrl() + "/Delivery/${pageNumber}"
             ) {
                 headers {
@@ -137,7 +137,7 @@ class OrderRepository(val client: HttpClient) {
 
     suspend fun getOrdersBelongToMe(pageNumber: Int): NetworkCallHandler {
         try {
-            var result = client.get(
+            val result = client.get(
                 Secrets.getBaseUrl() + "/Delivery/me/${pageNumber}"
             ) {
                 headers {
@@ -169,7 +169,7 @@ class OrderRepository(val client: HttpClient) {
 
     suspend fun takeOrder(orderId: UUID): NetworkCallHandler {
         try {
-            var result = client.patch(
+            val result = client.patch(
                 Secrets.getBaseUrl() + "/Delivery/${orderId}"
             ) {
                 headers {
@@ -200,9 +200,9 @@ class OrderRepository(val client: HttpClient) {
     }
 
 
-    suspend fun cencleOrder(orderId: UUID): NetworkCallHandler {
+    suspend fun cancelOrder(orderId: UUID): NetworkCallHandler {
         try {
-            var result = client.delete(
+            val result = client.delete(
                 Secrets.getBaseUrl() + "/Delivery/${orderId}"
             ) {
                 headers {

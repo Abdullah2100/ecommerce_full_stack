@@ -40,6 +40,12 @@ namespace ecommerc_dotnet.dto
         public decimal? Longitude { get; set; } = null;
         public decimal? Latitude { get; set; } = null;
     }
-    
+
+    public class AddressWithTitleDto
+    {
+        public decimal? Longitude { get; set; } = null;
+        public decimal? Latitude { get; set; } = null;
+        public string Title { get; set; } = string.Empty;
+    }
     
 }

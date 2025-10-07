@@ -18,26 +18,23 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -49,7 +46,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.dto.AddressDto
 import com.example.e_commerc_delivery_man.model.Address
 import com.example.e_commerc_delivery_man.model.enMapType
 import com.example.e_commerc_delivery_man.ui.Screens
@@ -63,6 +59,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Gap
 import com.google.maps.android.compose.GoogleMap
@@ -72,7 +69,6 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import kotlinx.coroutines.flow.firstOrNull
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -91,32 +87,26 @@ fun MapHomeScreen(
     additionLat: Double? = null,
     mapType: enMapType = enMapType.My,
     isFomLogin: Boolean = true,
-    ) {
+) {
 
     val context = LocalContext.current
 
     val directions = mapViewModel.googlePlaceInfo.collectAsState()
     val orders = orderViewModel.orders.collectAsState()
-
-    val isPassLocation = userViewModel.isPassLocation.collectAsState()
+    val myOrders = orderViewModel.myOrders.collectAsState()
+    val currentOrder = (myOrders.value ?: orders.value)?.firstOrNull { it.id.toString() == id };
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    val sheetState = rememberModalBottomSheetState()
 
     val coroutine = rememberCoroutineScope()
 
 
     val isLoading = remember { mutableStateOf(false) }
-    val isHasError = remember { mutableStateOf(false) }
     val isOpenSheet = remember { mutableStateOf(false) }
     val isHasTitle = (mapType == enMapType.My)
     val isHasNavigationMap = !isHasTitle
 
-
-    val errorMessage = remember { mutableStateOf("") }
-
-    val addressTitle = remember { mutableStateOf(TextFieldValue(title ?: "")) }
 
     val additionLatLng = remember {
         mutableStateOf(
@@ -148,6 +138,7 @@ fun MapHomeScreen(
     }
 
     fun handleMapClick(point: LatLng) {
+        Log.d("currentPressLocation", point.toString())
         when (mapType) {
             enMapType.My -> {
                 marker.position = CameraPosition.fromLatLngZoom(point, 15f)
@@ -162,12 +153,11 @@ fun MapHomeScreen(
 
 
     val locationRequest = remember {
-        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100L) // Desired interval: 500ms
+        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000L) // Desired interval: 500ms
             .setMinUpdateIntervalMillis(100L) // Fastest acceptable interval: 100ms
             .setMinUpdateDistanceMeters(1f).setWaitForAccurateLocation(false).build()
     }
 
-    //to track the update in user location
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             for (location in locationResult.locations) {
@@ -203,6 +193,11 @@ fun MapHomeScreen(
                 Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
             }
         })
+
+    fun storeColorGenerator(index: Int): Color {
+        val colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Magenta) // define colors
+        return colors[index % colors.size] // different color for others based on index
+    }
 
     fun updateDeliveryAddress() {
         val updateAddressData = Address(
@@ -251,13 +246,17 @@ fun MapHomeScreen(
         }
 
     }
-    fun getStoresLocationBelongToOrder():List<LatLng>?{
-        val storeLocations = orders.value?.firstOrNull { it.id.toString()==id }
-        if(storeLocations ==null) return null;
-        return storeLocations.orderItems.map { LatLng(it.address!!.latitude,it.address!!.longitude) }
 
+    fun updateCameraToUser() {
+        val newCameraPosition = CameraPosition.fromLatLngZoom(
+            additionLocation.position,
+            20f
+        )
+
+        coroutine.launch {
+            marker.animate(update = CameraUpdateFactory.newCameraPosition(newCameraPosition))
+        }
     }
-
     LaunchedEffect(Unit) {
         if (isHasNavigationMap) {
             Log.d("fromNavigationState", "True")
@@ -298,13 +297,38 @@ fun MapHomeScreen(
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
         },
+        floatingActionButton = {
+            if (isHasNavigationMap)
+                FloatingActionButton(
+                    modifier = Modifier
+                        .height(50.dp)
+                        .width(50.dp),
+                    onClick = {
+                        updateCameraToUser()
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    containerColor = Color.White
+                ) {
+                    Image(
+                        imageVector = ImageVector
+                            .vectorResource(id = R.drawable.current_location),
+                        contentDescription = "",
+                        modifier = Modifier.size(25.dp)
+                    )
+                }
+        },
+
 
         floatingActionButtonPosition = FabPosition.Start,
     ) { paddingValue ->
         paddingValue.calculateTopPadding()
         paddingValue.calculateBottomPadding()
 
-        ConstraintLayout {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+        ) {
             val (bottomRef) = createRefs()
 
 
@@ -316,7 +340,8 @@ fun MapHomeScreen(
                     )
                     .background(Color.White)
                     .fillMaxSize()
-            ) {
+            )
+            {
                 item {
 
                     GoogleMap(
@@ -339,17 +364,49 @@ fun MapHomeScreen(
                                 title = "My Place",
                             )
 
-//                        if(mapType==enMapType.Store)
+                            currentOrder?.orderItems?.forEachIndexed { indexOrderItem, data ->
+                                data.address?.forEachIndexed { index, addressData ->
+                                    MarkerComposable(
+                                        state = MarkerState(
+                                            position =
+                                                rememberUpdatedMarkerState(
+                                                    position =
+                                                        LatLng(
+                                                            addressData.latitude,
+                                                            addressData.longitude
+                                                        )
+                                                )
+                                                    .position
+                                        ),
+                                        title = "${addressData.title} | ${data.product.name} : ${data.quanity}",
+                                        onClick = { false }) {
+                                        Image(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.store_icon),
+                                            contentDescription = "",
+                                            modifier = Modifier.size(40.dp),
+                                            colorFilter = ColorFilter.tint(
+                                                storeColorGenerator(
+                                                    indexOrderItem
+                                                )
+                                            )
+                                        )
+
+                                    }
+                                    Marker(
+                                        state = MarkerState(position = additionLocation.position),
+                                        title = "${addressData.title} | ${data.product.name} : ${data.quanity}",
+                                    )
+                                }
+                            }
+
                             MarkerComposable(
                                 state = MarkerState(position = mainLocation.position),
-
-                                title = title, onClick = {
-                                    true
-                                }) {
+                                title = currentOrder?.name ?: "Order Owner",
+                            ) {
                                 Image(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.store_icon),
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.user_current_icon),
                                     contentDescription = "",
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(40.dp)
                                 )
 
                             }

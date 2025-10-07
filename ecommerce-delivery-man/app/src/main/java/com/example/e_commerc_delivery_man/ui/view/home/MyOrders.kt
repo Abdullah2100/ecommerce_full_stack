@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,16 +36,20 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -73,11 +78,16 @@ import com.example.e_commerc_delivery_man.ui.theme.CustomColor
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.Util.General.reachedBottom
 import com.example.e_commerc_delivery_man.model.Address
+import com.example.e_commerc_delivery_man.model.enMapType
+import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.CustomBotton
+import com.example.e_commerc_delivery_man.ui.component.OrderComponent
 import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
+import com.example.eccomerce_app.model.Order
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
@@ -98,12 +108,13 @@ fun MyOrdersScreen(
 
     val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
+    val state = rememberPullToRefreshState()
 
 
+    val selectedId = remember { mutableStateOf(UUID.randomUUID()) }
 
     val isSendingData = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
-    val isExpanded = remember { mutableStateOf(false) }
     val isLoadingMore = remember { mutableStateOf(false) }
     val reachedBottom = remember {
         derivedStateOf {
@@ -111,17 +122,10 @@ fun MyOrdersScreen(
         }
     }
 
-    val rotation = animateFloatAsState(
-        if (isExpanded.value) 180f else 0f
-    )
-
-    val deletedId = remember { mutableStateOf<UUID?>(null) }
 
 
-    val page = remember { mutableStateOf(1) }
+    val page = remember { mutableIntStateOf(1) }
 
-
-    val address = remember { mutableStateOf<Address?>(null) }
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -137,16 +141,23 @@ fun MyOrdersScreen(
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
+                        val selectedOrderData = orders.value?.firstOrNull() { it.id==selectedId }
                         data?.let { location ->
+                            nav.navigate(
+                                Screens.Map(
+                                    lognit = selectedOrderData?.longitude,
+                                    latitt = selectedOrderData?.latitude,
+                                    title = selectedOrderData?.name,
+                                    additionLat = location.latitude ,
+                                    additionLong =  location.longitude ,
+                                    isFromLogin = false,
+                                    mapType = enMapType.TrackOrder,
+                                    id=selectedId.value.toString()
+                                )
+                            )
 
-                            val longint = location.longitude ?: 5.5000
-                            val latit = location.latitude ?: 5.5000
-                            address.value = Address(longint, latit)
                         }
-                        if (address.value == null) {
-                            address.value = Address(5.5, 5.3)
 
-                        }
 
                     } catch (e: SecurityException) {
                         val error = "Permission exception: ${e.message}"
@@ -164,7 +175,7 @@ fun MyOrdersScreen(
 
     LaunchedEffect(reachedBottom.value) {
 
-        if(!orders.value.isNullOrEmpty() && reachedBottom.value){
+        if (!orders.value.isNullOrEmpty() && reachedBottom.value && orders.value!!.size > 23) {
             orderViewModel.getMyOrders(
                 page,
                 isLoadingMore
@@ -237,10 +248,33 @@ fun MyOrdersScreen(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { {} },
+            onRefresh = {
+                coroutine.launch {
+                    if (!isRefresh.value) isRefresh.value = true
+                    page.value = 1;
+                    orderViewModel.getMyOrders(page)
+                    if (isRefresh.value) {
+                        delay(2000)
+                        isRefresh.value = false
+                    }
+
+                }
+            },
             modifier = Modifier
-                .fillMaxSize()
                 .background(Color.White)
+                .fillMaxSize(),
+            state = state,
+            indicator = {
+                Indicator(
+                    modifier = Modifier
+                        .padding(top = 15.dp)
+                        .align(Alignment.TopCenter),
+                    isRefreshing = isRefresh.value,
+                    containerColor = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    state = state
+                )
+            },
         ) {
             LazyColumn(
                 state = lazyState,
@@ -250,405 +284,19 @@ fun MyOrdersScreen(
                     .background(Color.Gray.copy(alpha = 0.01f)),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item {
-                    orders.value?.forEach { order ->
-                        Log.d("imageUrl", order.toString())
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 15.dp, vertical = 5.dp)
-                                .shadow(8.dp)
-                                .background(
-                                    Color.White,
-                                    RoundedCornerShape(8.dp)
-                                )
-
-                                .padding(horizontal = 5.dp, vertical = 10.dp)
-
-                        ) {
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        order.name,
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 25.sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center
-                                    )
-
-                                    Text(
-                                        order.userPhone,
-                                        fontFamily = General.satoshiFamily,
-                                        fontWeight = FontWeight.Normal,
-                                        fontSize = 16.sp,
-                                        color = CustomColor.neutralColor950,
-                                        textAlign = TextAlign.Center
-
-                                    )
-
-                                    Row {
-                                        Text(
-                                            "OrderItems :",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.orderItems.size}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-
-                                    Row {
-                                        Text(
-                                            "Total Price : ",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.totalPrice}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-                                    Row {
-                                        Text(
-                                            "DeliveryFee : ",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.deliveryFee}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-                                    Row {
-                                        Text(
-                                            "realPayed : ",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-
-                                        Text(
-                                            "${order.realPrice}",
-                                            fontFamily = General.satoshiFamily,
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp,
-                                            color = CustomColor.neutralColor950,
-                                            textAlign = TextAlign.Center
-
-                                        )
-                                    }
-
-
-                                }
-
-                                IconButton({
-                                    requestPermission.launch(
-                                        arrayOf(
-                                            Manifest.permission.ACCESS_FINE_LOCATION,
-                                            Manifest.permission.ACCESS_COARSE_LOCATION
-                                        )
-                                    )
-                                }) {
-                                    Icon(
-                                        ImageVector.vectorResource(R.drawable.location),
-                                        "",
-                                        tint = CustomColor.primaryColor500
-                                    )
-                                }
-                            }
-
-                            AnimatedVisibility(
-                                visible = isExpanded.value,
-                                enter = expandVertically(
-                                    expandFrom = Alignment.Top,
-                                    animationSpec = tween()
-                                ) + fadeIn(),
-                                exit = shrinkVertically(
-                                    shrinkTowards = Alignment.Top,
-                                    animationSpec = tween()
-                                ) + fadeOut()
-
-                            ) {
-
-                                order.orderItems
-                                    .groupBy { it.product.storeId }
-                                    .values
-                                    .forEach { it ->
-                                        it.forEach { orderItems ->
-                                            Column {
-                                                Row(modifier = Modifier.padding(top = 10.dp)) {
-                                                    SubcomposeAsyncImage(
-                                                        contentScale = ContentScale.Crop,
-                                                        modifier = Modifier
-                                                            .height(80.dp)
-                                                            .width(80.dp)
-                                                            .clip(RoundedCornerShape(8.dp)),
-                                                        model = General.handlingImageForCoil(
-                                                            orderItems.product.thmbnail,
-                                                            context
-                                                        ),
-                                                        contentDescription = "",
-                                                        loading = {
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .fillMaxSize(),
-                                                                contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                                            ) {
-                                                                CircularProgressIndicator(
-                                                                    color = Color.Black,
-                                                                    modifier = Modifier.size(53.dp) // Adjust the size here
-                                                                )
-                                                            }
-                                                        },
-                                                    )
-
-                                                    Sizer(width = 10)
-                                                    Column(
-                                                    ) {
-                                                        Text(
-                                                            orderItems.product.name,
-                                                            fontFamily = General.satoshiFamily,
-                                                            fontWeight = FontWeight.Medium,
-                                                            fontSize = (16).sp,
-                                                            color = CustomColor.neutralColor950,
-                                                            textAlign = TextAlign.Center,
-                                                            maxLines = 1,
-                                                            overflow = TextOverflow.Ellipsis
-                                                        )
-                                                        Sizer(width = 5)
-                                                        orderItems.productVarient.forEach { value ->
-
-                                                            Row(
-                                                                verticalAlignment = Alignment.CenterVertically
-                                                            ) {
-
-                                                                Text(
-                                                                    (value.varient_name
-                                                                        ?: "") + ": ",
-                                                                    fontFamily = General.satoshiFamily,
-                                                                    fontWeight = FontWeight.Normal,
-                                                                    fontSize = (16).sp,
-                                                                    color = CustomColor.neutralColor950,
-                                                                    textAlign = TextAlign.Center
-                                                                )
-                                                                when (value.varient_name == "Color") {
-                                                                    true -> {
-                                                                        val colorValue =
-                                                                            General.convertColorToInt(
-                                                                                value.product_varient_name
-                                                                            )
-
-                                                                        if (colorValue != null)
-                                                                            Box(
-                                                                                modifier = Modifier
-                                                                                    .height(20.dp)
-                                                                                    .width(20.dp)
-                                                                                    .background(
-                                                                                        colorValue,
-                                                                                        RoundedCornerShape(
-                                                                                            20.dp
-                                                                                        )
-                                                                                    )
-
-                                                                                    .clip(
-                                                                                        RoundedCornerShape(
-                                                                                            20.dp
-                                                                                        )
-                                                                                    )
-                                                                                //                                                    .padding(5.dp)
-                                                                            )
-                                                                    }
-
-                                                                    else -> {
-                                                                        Box(
-                                                                            modifier = Modifier
-
-                                                                                .clip(
-                                                                                    RoundedCornerShape(
-                                                                                        20.dp
-                                                                                    )
-                                                                                ),
-                                                                            contentAlignment = Alignment.Center
-                                                                        ) {
-                                                                            Text(
-                                                                                text = value.product_varient_name,
-                                                                                fontFamily = General.satoshiFamily,
-                                                                                fontWeight = FontWeight.Normal,
-                                                                                fontSize = (16).sp,
-                                                                                color = CustomColor.neutralColor800,
-                                                                                textAlign = TextAlign.Center
-                                                                            )
-                                                                        }
-                                                                    }
-                                                                }
-
-                                                            }
-                                                        }
-                                                        Row(
-                                                            verticalAlignment = Alignment.CenterVertically
-                                                        ) {
-                                                            Text(
-                                                                "Status : ",
-                                                                fontFamily = General.satoshiFamily,
-                                                                fontWeight = FontWeight.Normal,
-                                                                fontSize = (16).sp,
-                                                                color = CustomColor.neutralColor950,
-                                                                textAlign = TextAlign.Center
-                                                            )
-                                                            Text(
-                                                                orderItems.orderItemStatus,
-                                                                fontFamily = General.satoshiFamily,
-                                                                fontWeight = FontWeight.Normal,
-                                                                fontSize = (16).sp,
-                                                                color = CustomColor.neutralColor800,
-                                                                textAlign = TextAlign.Center
-                                                            )
-                                                        }
-
-
-                                                    }
-
-                                                }
-
-                                                Sizer(5)
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        "store Location",
-                                                        fontFamily = General.satoshiFamily,
-                                                        fontWeight = FontWeight.Bold,
-                                                        fontSize = (24).sp,
-                                                        color = CustomColor.neutralColor950,
-                                                        textAlign = TextAlign.Center,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis
-                                                    )
-                                                    IconButton({
-                                                        requestPermission.launch(
-                                                            arrayOf(
-                                                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                                                Manifest.permission.ACCESS_COARSE_LOCATION
-                                                            )
-                                                        )
-                                                    }) {
-                                                        Icon(
-                                                            ImageVector.vectorResource(R.drawable.location_address_list),
-                                                            "",
-                                                            tint = CustomColor.primaryColor500
-                                                        )
-                                                    }
-
-                                                }
-                                            }
-
-
-                                        }
-//                                        Box(
-//                                            modifier = Modifier
-//                                                .padding(top = 5.dp)
-//                                                .height(1.dp)
-//                                                .fillMaxWidth()
-//                                                .background(CustomColor.neutralColor200)
-//                                        )
-                                    }
-
-
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .padding(top = 20.dp, bottom = 20.dp)
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        isExpanded.value = !isExpanded.value
-                                    },
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Show Items")
-                                Sizer(width = 5)
-                                Icon(
-                                    Icons.Default.KeyboardArrowDown, "",
-                                    modifier = Modifier.rotate(rotation.value)
-                                )
-                            }
-                            Box(
-                                Modifier
-                                    .padding(top = 10.dp)
-                                    .width(((screenWidth) - 20).dp)
-                            ) {
-                                CustomBotton(
-
-                                    buttonTitle = "Cancel Order",
-                                    operation = {
-                                        deletedId.value = order.id
-                                        coroutine.launch {
-                                            isSendingData.value = true;
-                                            val result = async {
-                                                orderViewModel.cancelOrder(order.id)
-                                            }.await()
-                                            isSendingData.value = false
-                                            if (!result.isNullOrEmpty()) {
-                                                snackBarHostState
-                                                    .showSnackbar(result)
-                                            }
-                                        }
-
-                                    },
-                                    color = CustomColor.alertColor_1_600,
-//                                        isLoading = isSendingData.value && deletedId.value == order.id
-                                )
-                            }
-                        }
+                if (!orders.value.isNullOrEmpty())
+                    items(items = orders.value as List<Order>, key = { it -> it.id }) { order ->
+                        OrderComponent(
+                            order = order,
+                            isCancel = true,
+                            screenWidth = screenWidth,
+                            isSendingData = isSendingData,
+                            requestPermission = requestPermission,
+                            snackBarHostState = snackBarHostState,
+                            orderViewModel = orderViewModel,
+                            selectedId = selectedId
+                        )
                     }
-                }
 
                 if (isLoadingMore.value) {
                     item {

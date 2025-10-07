@@ -287,7 +287,8 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 15.dp)
-            ) {
+            )
+            {
                 val (imageRef, cameralRef) = createRefs()
                 Box(
                     modifier = Modifier

@@ -93,10 +93,7 @@ fun CustomButton(
     Button(
         enabled = isEnable!!,
         modifier = modifier,
-        onClick = {
-
-            operation()
-        },
+        onClick = {  operation()  },
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = color ?: CustomColor.primaryColor700
@@ -109,7 +106,6 @@ fun CustomButton(
                     color = Color.White,
                     modifier = Modifier.size(30.dp)
                 )
-
             }
 
             else -> {

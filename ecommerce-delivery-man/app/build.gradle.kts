@@ -159,7 +159,7 @@ dependencies {
     //googleMap
     implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)
-    implementation("com.google.android.gms:play-services-maps:19.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.2.0")
 
     implementation(libs.maps.navigation) {
         exclude(group = "com.google.android.gms", module = "play-services-maps")

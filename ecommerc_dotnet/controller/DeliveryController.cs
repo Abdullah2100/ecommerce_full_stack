@@ -42,9 +42,7 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> createDelivery
-    (
-        [FromForm] CreateDeliveryDto delivery
-    )
+    ([FromForm] CreateDeliveryDto delivery)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
         Claim? id = AuthinticationUtil.GetPayloadFromToken("id",

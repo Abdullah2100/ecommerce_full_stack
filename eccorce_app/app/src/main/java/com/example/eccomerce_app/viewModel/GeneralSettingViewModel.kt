@@ -43,7 +43,7 @@ class GeneralSettingViewModel(
 
                     if (mutableGeneralSetting.isNotEmpty()) {
                         _generalSetting.emit(
-                            mutableGeneralSetting.distinctBy { it.id }.toList()
+                            mutableGeneralSetting.distinctBy { it.name }.toList()
                         )
                     }
 

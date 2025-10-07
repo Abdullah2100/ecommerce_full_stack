@@ -61,7 +61,7 @@ class DeliveryViewModel(
 
                     val distinctDelivery = newDeliveriesList.distinctBy { it.id }
 
-                    deliveries.emit(newDeliveriesList)
+                    deliveries.emit(distinctDelivery)
 
                     null;
                 }

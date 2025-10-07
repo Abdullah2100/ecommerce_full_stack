@@ -14,7 +14,7 @@ data class Order(
     val userPhone: String,
     var name: String,
     val totalPrice: Double,
-    val realPrice: Double,
+    val realPrice: Double?=null,
     val deliveryFee: Double,
     val orderItems:List<OrderItem>
 )

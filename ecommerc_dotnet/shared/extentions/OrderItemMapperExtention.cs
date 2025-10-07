@@ -16,6 +16,14 @@ public static class OrderItemMapperExtention
             Price = item.Price,
             Product = item.ToOrderProductDto(url),
             Quanity = item?.Quanity ?? 0,
+            Address = item.Store.Addresses.Select(ad=>
+                new AddressWithTitleDto() 
+                {
+                    Longitude = ad?.Longitude,
+                    Latitude = ad?.Latitude,
+                    Title = ad?.Title??"",
+                }
+                ).ToList(),
             ProductVarient = item
                 ?.OrderProductsVarients
                 ?.Select(ost => ost.toOrderVarientDto())

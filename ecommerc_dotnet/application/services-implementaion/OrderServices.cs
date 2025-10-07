@@ -84,25 +84,16 @@ public class OrderServices(
     {
         User? user = await userRepository.getUser(userId);
 
-        if (user is null)
-        {
-            return new Result<OrderDto?>
-            (
-                data: null,
-                message: "user not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+        var isValidated = user.isValidateFunc(isAdmin: false); 
 
-        if (user.IsBlocked)
+        if (isValidated is not null)
         {
             return new Result<OrderDto?>
             (
                 data: null,
-                message: "user is blocked from creating order",
+                message: isValidated.Message,
                 isSeccessful: false,
-                statusCode: 400
+                statusCode:isValidated.StatusCode 
             );
         }
 

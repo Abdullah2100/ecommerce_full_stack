@@ -101,8 +101,8 @@ object DtoToModel {
             quanity = this.quanity,
             price = this.price,
             product = this.product.toOrderProduct(),
-            address = this.address?.toAddress(),
-            productVarient = this.productVarient.map { it.toOrderVarient() },
+            address = this.address?.map { it.toAddressWithTitle() },
+            productVarient = this.productVarient?.map { it.toOrderVarient() },
             orderItemStatus = this.orderItemStatus
         )
     }
@@ -120,7 +120,6 @@ object DtoToModel {
             orderItems = this.orderItems.map { it.toOrderItem() },
             status = this.status,
             userPhone = this.userPhone,
-            realPrice = this.totalPrice
         )
     }
 

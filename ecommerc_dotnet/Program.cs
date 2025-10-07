@@ -112,7 +112,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Database
 var connectionUrl = configuration["ConnectionStrings:connection_url"];
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionUrl, o => o.UseNetTopologySuite()));
+    options.UseNpgsql(connectionUrl));
 
 
 var app = builder.Build();

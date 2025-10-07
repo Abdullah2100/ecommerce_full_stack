@@ -407,7 +407,6 @@ fun NavController(
                     storeViewModel = storeViewModel,
                     productViewModel = productViewModel,
                     userViewModel = userViewModel,
-                    deliveryViewModel = deliveryViewModel
                 )
             }
 

@@ -45,8 +45,8 @@ class DeliveryRepository(val client: HttpClient) {
             }
 
             when (result.status) {
-                HttpStatusCode.Companion.Created -> {
-                    NetworkCallHandler.Successful(result.body<AddressDto?>())
+                HttpStatusCode.Companion.OK -> {
+                    NetworkCallHandler.Successful(result.body<List<DeliveryDto>?>())
                 }
 
                 else -> {

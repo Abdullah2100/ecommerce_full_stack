@@ -205,7 +205,6 @@ class OrderViewModel(
         pageNumber: MutableState<Int>,
         isLoading: MutableState<Boolean>? = null
     ) {
-        if (_myOrders.value != null && pageNumber.value == 1) return;
         if (isLoading != null) isLoading.value = true
         viewModelScope.launch(Dispatchers.Default + _coroutineException) {
             if (isLoading != null)
@@ -272,7 +271,7 @@ class OrderViewModel(
     suspend fun cancelOrder(
         orderId: UUID,
     ): String? {
-        val result = orderRepository.cencleOrder(orderId)
+        val result = orderRepository.cancelOrder(orderId)
         when (result) {
 
             is NetworkCallHandler.Successful<*> -> {

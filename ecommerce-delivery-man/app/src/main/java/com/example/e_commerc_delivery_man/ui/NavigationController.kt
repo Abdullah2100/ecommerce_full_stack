@@ -3,6 +3,8 @@ package com.example.e_commerc_delivery_man.ui
 import android.util.Log
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
@@ -73,18 +75,17 @@ fun NavController(
 
 
         composable<Screens.Map>(
-
             enterTransition = {
                 return@composable slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(250)
                 )
             },
             exitTransition = {
                 return@composable slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(250)
                 )
             }
-        ) {result->
+        ) { result ->
             val data = result.toRoute<Screens.Map>()
 
             MapHomeScreen(
@@ -134,7 +135,6 @@ fun NavController(
         ) {
 
 
-
             composable<Screens.Home>(
                 enterTransition = {
                     return@composable slideIntoContainer(
@@ -157,11 +157,7 @@ fun NavController(
 
 
             composable<Screens.Account>(
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
+                enterTransition = { return@composable fadeIn(tween(200)) },
                 exitTransition = {
                     return@composable slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
@@ -177,16 +173,8 @@ fun NavController(
 
 
             composable<Screens.Profile>(
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
+                enterTransition = { return@composable fadeIn(tween(200)) },
+                exitTransition = { return@composable fadeOut(tween(200)) }
             ) {
                 ProfileScreen(
                     nav = nav,
@@ -197,16 +185,8 @@ fun NavController(
 
             composable<Screens.MyOrder>(
 
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
+                enterTransition = { return@composable fadeIn(tween(200)) },
+                exitTransition = { return@composable fadeOut(tween(200)) }
             ) { navRef ->
                 MyOrdersScreen(
                     nav = nav,
@@ -218,17 +198,8 @@ fun NavController(
 
 
             composable<Screens.Orders>(
-
-                enterTransition = {
-                    return@composable slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
-                    )
-                },
-                exitTransition = {
-                    return@composable slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
-                    )
-                }
+                enterTransition = { return@composable fadeIn(tween(200)) },
+                exitTransition = { return@composable fadeOut(tween(200)) }
             ) {
                 OrdersScreen(
                     nav = nav,

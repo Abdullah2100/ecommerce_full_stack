@@ -6,8 +6,7 @@ import java.util.UUID
 
 @Serializable()
 data class GeneralSettingDto(
-    @Serializable(with = UUIDKserialize::class)
-    val Id: UUID,
-    val Name: String,
-    val Value: Double
+
+    val name: String,
+    val value: Double
 )

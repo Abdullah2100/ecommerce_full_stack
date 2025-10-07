@@ -25,9 +25,9 @@ public class Store
     
     public ICollection<Address>? Addresses { get; set; } =null;
     public ICollection<SubCategory>? SubCategories { get; set; } =null;
-    public ICollection<Banner>? Banners { get; set; }
-    public ICollection<Product>? Products { get; set; }
-    public ICollection<OrderItem>OddrderItems{ get; set; }
+    public ICollection<Banner>? Banners { get; set; } = null;
+    public ICollection<Product>? Products { get; set; } = null;
+    public ICollection<OrderItem>? OddrderItems { get; set; } = null;
 
     public User user {get; set;}
 }

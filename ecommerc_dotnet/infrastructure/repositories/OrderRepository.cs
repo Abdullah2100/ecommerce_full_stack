@@ -10,7 +10,8 @@ using Npgsql;
 
 namespace ecommerc_dotnet.infrastructure.repositories;
 
-public class OrderRepository(AppDbContext context,IProductVariantRepository productVariantRepository) : IOrderRepository
+public class OrderRepository(AppDbContext context, IProductVariantRepository productVariantRepository)
+    : IOrderRepository
 {
     public async Task<IEnumerable<Order>> getOrders(
         Guid userId,
@@ -107,7 +108,8 @@ public class OrderRepository(AppDbContext context,IProductVariantRepository prod
             for (var i = 0; i < item.ProductsVarientId?.Count; i++)
             {
                 //query to get the product variant
-                var productVariantPrice = await productVariantRepository.getProductVarient( product!.Id ,item.ProductsVarientId[i]);
+                var productVariantPrice =
+                    await productVariantRepository.getProductVarient(product!.Id, item.ProductsVarientId[i]);
                 if (productVariantPrice is null)
                 {
                     isAmbiguous = true;
@@ -144,52 +146,118 @@ public class OrderRepository(AppDbContext context,IProductVariantRepository prod
 
     public async Task<IEnumerable<Order>> getOrderNoBelongToAnyDelivery(int pageNum, int pageSize)
     {
-        var orders = await context.Orders
-            .Include(o => o.User)
-            .Include(o => o.Items)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Where(o => o.DeleveryId == null)
-            .Skip((pageNum - 1) * pageSize)
-            .Take(pageSize)
-            .OrderDescending()
-            .ToListAsync();
+        var orders =
+            await context.Orders
+                .Include(o => o.Items)
+                .Include(o => o.User)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .Where(o => o.DeleveryId == null)
+                .Skip((pageNum - 1) * pageSize)
+                .Take(pageSize)
+                .OrderDescending()
+                .ToListAsync();
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
+                .Include(it => it.OrderProductsVarients)
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
                 .Where(oi => oi.OrderId == order.Id)
+                .Select(it => new OrderItem
+                {
+                    Id = it.Id,
+                    OrderId = it.OrderId,
+                    ProductId = it.ProductId,
+                    Price = it.Price,
+                    Quanity = it.Quanity,
+                    StoreId = it.StoreId,
+                    Order = it.Order,
+                    Store = new Store
+                    {
+                        Id = it.Store.Id,
+                        Name = it.Store.Name,
+                        WallpaperImage = "",
+                        SmallImage = "",
+                        IsBlock = it.Store.IsBlock,
+                        UserId = it.Store.UserId,
+                        Addresses = context
+                            .Address
+                            .AsNoTracking()
+                            .Where(ad => ad.OwnerId == it.Store.Id)
+                            .ToList()
+                    },
+                    Product = it.Product,
+                    OrderProductsVarients = it.OrderProductsVarients,
+                    Status = it.Status
+                })
                 .ToListAsync();
         }
+
 
         return orders;
     }
 
     public async Task<IEnumerable<Order>> getOrderBelongToDelivery(Guid deliveryId, int pageNum, int pageSize)
     {
-        var orders = await context.Orders
-            .Include(o => o.User)
-            .Include(o => o.Items)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Where(o => o.DeleveryId == deliveryId)
-            .Skip((pageNum - 1) * pageSize)
-            .Take(pageSize)
-            .OrderDescending()
-            .ToListAsync();
-        foreach (var order in orders)
+        try
         {
-            order.Items = await context.OrderItems
-                .Include(oi => oi.Product)
-                .Include(oi => oi.Store)
+            var orders = await context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Items)
                 .AsSplitQuery()
-                .Where(oi => oi.OrderId == order.Id)
+                .AsNoTracking()
+                .Where(o => o.DeleveryId == deliveryId)
+                .Skip((pageNum - 1) * pageSize)
+                .Take(pageSize)
+                .OrderDescending()
                 .ToListAsync();
-        }
+            foreach (var order in orders)
+            {
+                order.Items = await context.OrderItems
+                    .Include(oi => oi.Product)
+                    .Include(oi => oi.Store)
+                    .AsSplitQuery()
+                    .Where(oi => oi.OrderId == order.Id)
+                    .Select(it => new OrderItem
+                    {
+                        Id = it.Id,
+                        OrderId = it.OrderId,
+                        ProductId = it.ProductId,
+                        Price = it.Price,
+                        Quanity = it.Quanity,
+                        StoreId = it.StoreId,
+                        Order = it.Order,
+                        Store = new Store
+                        {
+                            Id = it.Store.Id,
+                            Name = it.Store.Name,
+                            WallpaperImage = "",
+                            SmallImage = "",
+                            IsBlock = it.Store.IsBlock,
+                            UserId = it.Store.UserId,
+                            Addresses = context
+                                .Address
+                                .AsNoTracking()
+                                .Where(ad => ad.OwnerId == it.Store.Id)
+                                .ToList()
+                        },
+                        Product = it.Product,
+                        OrderProductsVarients = it.OrderProductsVarients,
+                        Status = it.Status
+                    })
+                    .ToListAsync();
+            }
 
-        return orders;
+            return orders;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("this error from getting order belong to delivery "+ex.Message);
+            return null;
+        }
+       
     }
 
     public async Task<int> removeOrderFromDelivery(Guid id, Guid deliveryId)
@@ -223,6 +291,33 @@ public class OrderRepository(AppDbContext context,IProductVariantRepository prod
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
                 .Where(oi => oi.OrderId == order.Id)
+                .Select(it => new OrderItem
+                {
+                    Id = it.Id,
+                    OrderId = it.OrderId,
+                    ProductId = it.ProductId,
+                    Price = it.Price,
+                    Quanity = it.Quanity,
+                    StoreId = it.StoreId,
+                    Order = it.Order,
+                    Store = new Store
+                    {
+                        Id = it.Store.Id,
+                        Name = it.Store.Name,
+                        WallpaperImage = "",
+                        SmallImage = "",
+                        IsBlock = it.Store.IsBlock,
+                        UserId = it.Store.UserId,
+                        Addresses = context
+                            .Address
+                            .AsNoTracking()
+                            .Where(ad => ad.OwnerId == it.Store.Id)
+                            .ToList()
+                    },
+                    Product = it.Product,
+                    OrderProductsVarients = it.OrderProductsVarients,
+                    Status = it.Status
+                })
                 .ToListAsync();
         }
 

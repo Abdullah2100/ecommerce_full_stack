@@ -130,7 +130,6 @@ fun StoreScreen(
     categoryViewModel: CategoryViewModel,
     subCategoryViewModel: SubCategoryViewModel,
     storeViewModel: StoreViewModel,
-    deliveryViewModel: DeliveryViewModel,
     productViewModel: ProductViewModel,
     userViewModel: UserViewModel
 ) {
@@ -782,7 +781,6 @@ fun StoreScreen(
                             .padding(bottom = 3.dp)
                             .size(50.dp),
                         onClick = {
-                            deliveryViewModel.getDeliveryBelongToStore(mutableIntStateOf(1))
                             nav.navigate(Screens.DeliveriesList)
                         },
                         containerColor = CustomColor.primaryColor500

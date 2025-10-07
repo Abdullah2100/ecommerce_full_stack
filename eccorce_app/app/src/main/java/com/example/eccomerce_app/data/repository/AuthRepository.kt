@@ -152,7 +152,7 @@ class AuthRepository(val client: HttpClient)  {
             }
 
             if (result.status == HttpStatusCode.Companion.OK) {
-                NetworkCallHandler.Successful(result.body<Auth>())
+                NetworkCallHandler.Successful(result.body<AuthDto>())
             } else {
                 NetworkCallHandler.Error(result.body<String>())
             }

@@ -14,7 +14,6 @@ data class OrderDto(
     var name: String,
     val status:Int,
     val totalPrice: Double,
-    val realPrice: Double,
     val deliveryFee: Double,
     val orderItems:List<OrderItemResponseDto>
 )
