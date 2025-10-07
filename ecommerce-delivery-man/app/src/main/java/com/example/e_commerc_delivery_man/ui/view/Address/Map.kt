@@ -195,8 +195,12 @@ fun MapHomeScreen(
         })
 
     fun storeColorGenerator(index: Int): Color {
-        val colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Magenta) // define colors
-        return colors[index % colors.size] // different color for others based on index
+        val color = Color(
+            red = (255 - index).coerceIn(0, 255),
+            green = (255 - index).coerceIn(0, 255),
+            blue = (255 - index).coerceIn(0, 255)
+        )
+        return color
     }
 
     fun updateDeliveryAddress() {
@@ -364,6 +368,7 @@ fun MapHomeScreen(
                                 title = "My Place",
                             )
 
+                            //this to display the store address that available at the map to let the delivery deside where to get the order from
                             currentOrder?.orderItems?.forEachIndexed { indexOrderItem, data ->
                                 data.address?.forEachIndexed { index, addressData ->
                                     MarkerComposable(
