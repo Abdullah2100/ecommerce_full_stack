@@ -1,5 +1,5 @@
-using ecommerc_dotnet.dto.Response;
-using ecommerc_dotnet.module;
+using ecommerc_dotnet.Presentation.dto.Response;
+using ecommerc_dotnet.domain.entity;
 
 namespace ecommerc_dotnet.mapper;
 

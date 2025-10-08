@@ -1,7 +1,6 @@
 using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.data;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.module;
+using ecommerc_dotnet.Presentation.dto;
+using ecommerc_dotnet.domain.entity;
 
 namespace ecommerc_dotnet.mapper;
 

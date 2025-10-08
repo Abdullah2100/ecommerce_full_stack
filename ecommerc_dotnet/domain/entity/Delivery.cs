@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.module;
+using ecommerc_dotnet.core.entity;
 
-namespace ecommerc_dotnet.core.entity;
+namespace ecommerc_dotnet.domain.entity;
 
 public class Delivery
 {

@@ -1,5 +1,5 @@
 using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.dto.Request;
+using ecommerc_dotnet.Presentation.dto.Request;
 
 namespace ecommerc_dotnet.shared.extentions;
 

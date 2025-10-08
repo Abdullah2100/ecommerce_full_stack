@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ecommerc_dotnet.module;
+namespace ecommerc_dotnet.domain.entity;
 
 public class OrderProductsVarient
 {

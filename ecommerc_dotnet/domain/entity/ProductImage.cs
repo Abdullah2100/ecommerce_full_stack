@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using ecommerc_dotnet.core.entity;
 
-namespace ecommerc_dotnet.module;
+namespace ecommerc_dotnet.domain.entity;
 
 public class ProductImage
 {

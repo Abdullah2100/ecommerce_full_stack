@@ -1,5 +1,5 @@
 using System.Net;
-using ecommerc_dotnet.dto;
+using ecommerc_dotnet.Presentation.dto;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace ecommerc_dotnet.midleware;

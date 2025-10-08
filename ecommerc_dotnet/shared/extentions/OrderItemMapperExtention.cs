@@ -1,8 +1,9 @@
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.dto;
-using ecommerc_dotnet.module;
-using ecommerc_dotnet.shared.extentions;
+using ecommerc_dotnet.mapper;
+using ecommerc_dotnet.Presentation.dto;
 
-namespace ecommerc_dotnet.mapper;
+namespace ecommerc_dotnet.shared.extentions;
 
 public static class OrderItemMapperExtention
 {

@@ -1,4 +1,4 @@
-namespace ecommerc_dotnet.core.Result;
+namespace ecommerc_dotnet.application.Result;
 
 public class Result<T>
 {
