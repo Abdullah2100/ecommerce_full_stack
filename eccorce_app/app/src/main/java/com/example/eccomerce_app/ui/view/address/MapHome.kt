@@ -76,6 +76,7 @@ import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Gap
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerState
@@ -156,6 +157,13 @@ fun MapHomeScreen(
 
     val snackBarHostState = remember { SnackbarHostState() }
 
+    Log.d(
+        "thisMMapInfo", """
+        this the main location ${longitude} ${latitude}
+        this the addtional location ${additionLong} ${additionLat}
+    """.trimIndent()
+    )
+
     fun initial() {
         userViewModel.getMyInfo()
         generalSettingViewModel.getGeneral(1)
@@ -176,7 +184,19 @@ fun MapHomeScreen(
 
             enMapType.MyStore -> {
                 coroutine.launch {
-                    storeViewModel.setStoreCreateData(point.longitude, point.latitude)
+                    isLoading.value = true
+                    //storeViewModel.setStoreCreateData(point.longitude, point.latitude)
+                    //
+                    val result = storeViewModel.updateStore(
+                        longitude = point.longitude,
+                        latitude = point.latitude
+                    )
+                    isLoading.value = false
+
+                    if (result != null) {
+                        snackBarHostState.showSnackbar(result)
+                        return@launch
+                    }
                     nav.popBackStack()
                 }
             }
@@ -230,10 +250,10 @@ fun MapHomeScreen(
                     "ChangeLocation",
                     "${location.latitude.toString()} ${location.longitude.toString()}"
                 )
-                additionLatLng.value = LatLng(
-                    location.latitude,
-                    location.longitude
-                )
+//                additionLatLng.value = LatLng(
+//                    location.latitude,
+//                    location.longitude
+//                )
             }
         }
     }
@@ -254,11 +274,12 @@ fun MapHomeScreen(
                 ) {
                     return@rememberLauncherForActivityResult
                 }
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper()
-                )
+                if (isHasNavigationMap)
+                    fusedLocationClient.requestLocationUpdates(
+                        locationRequest,
+                        locationCallback,
+                        Looper.getMainLooper()
+                    )
 
             } else {
                 Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
@@ -296,7 +317,8 @@ fun MapHomeScreen(
     DisposableEffect(Unit)
     {
         onDispose {
-            fusedLocationClient.removeLocationUpdates(locationCallback)
+            if (isHasNavigationMap)
+                fusedLocationClient.removeLocationUpdates(locationCallback)
         }
     }
 
@@ -436,7 +458,12 @@ fun MapHomeScreen(
                         onMapClick = { latLng ->
                             handleMapClick(latLng)
                         },
-                        properties = MapProperties(isMyLocationEnabled = false)
+                        uiSettings = MapUiSettings(
+                            myLocationButtonEnabled = true,
+                            indoorLevelPickerEnabled = true,
+
+                            ),
+                        properties = MapProperties(isMyLocationEnabled = if (isHasNavigationMap) true else false)
                     )
                     {
                         if (isHasNavigationMap == false)
@@ -452,26 +479,26 @@ fun MapHomeScreen(
                                 title = "My Place",
                             )
 
-//                        if(mapType==enMapType.Store)
-                            MarkerComposable(
-                                state = MarkerState(position = mainLocation.position),
+                            if (mapType == enMapType.Store)
+                                MarkerComposable(
+                                    state = MarkerState(position = mainLocation.position),
 
-                                title = title,
-                                onClick = {
-                                    true
+                                    title = title,
+                                    onClick = {
+                                        true
+                                    }
+                                ) {
+                                    Image(
+                                        imageVector = ImageVector
+                                            .vectorResource(id = R.drawable.store_icon),
+                                        contentDescription = "",
+                                        modifier = Modifier.size(20.dp)
+                                    )
+
                                 }
-                            ) {
-                                Image(
-                                    imageVector = ImageVector
-                                        .vectorResource(id = R.drawable.store_icon),
-                                    contentDescription = "",
-                                    modifier = Modifier.size(20.dp)
-                                )
-
-                            }
                         }
 
-                        if (!directions.value.isNullOrEmpty())
+                        if (!directions.value.isNullOrEmpty() && isHasNavigationMap)
                             Polyline(
                                 directions.value!!,
                                 color = Color.Red,
@@ -486,37 +513,36 @@ fun MapHomeScreen(
             }
 
 
+            /*   if (isHasTitle) CustomButton(
+                   buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
+                   color = CustomColor.primaryColor700,
+                   isEnable = true,
+                   customModifier = Modifier
+                       .padding(bottom = paddingValue.calculateBottomPadding() + 10.dp)
 
-            if (isHasTitle) CustomButton(
-                buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
-                color = CustomColor.primaryColor700,
-                isEnable = true,
-                customModifier = Modifier
-                    .padding(bottom = paddingValue.calculateBottomPadding() + 10.dp)
+                       .height(50.dp)
+                       .fillMaxWidth(0.9f)
+                       .constrainAs(bottomRef) {
+                           bottom.linkTo(parent.bottom)
+                           start.linkTo(parent.start)
+                           end.linkTo(parent.end)
+                       },
 
-                    .height(50.dp)
-                    .fillMaxWidth(0.9f)
-                    .constrainAs(bottomRef) {
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
+                   isLoading = false,
+                   operation = {
+                       when (isHasTitle) {
+                           true -> {
+                               isOpenSheet.value = true
+                           }
 
-                isLoading = false,
-                operation = {
-                    when (isHasTitle) {
-                        true -> {
-                            isOpenSheet.value = true
-                        }
+                           else -> {
 
-                        else -> {
-
-                        }
-                    }
-                },
-                labelSize = 20
-            )
-
+                           }
+                       }
+                   },
+                   labelSize = 20
+               )
+   */
         }
     }
 

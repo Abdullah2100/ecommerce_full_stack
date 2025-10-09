@@ -281,11 +281,14 @@ public class ProductServices(
             CreatedAt = DateTime.Now,
             UpdatedAt = null,
             Thmbnail = savedThumbnail,
-            ProductImages = images,
-            ProductVarients = productVarients
+            //ProductImages = images,
+            // ProductVarients = productVarients
         };
 
         unitOfWork.ProductRepository.add(product);
+        unitOfWork.ProductImageRepository.addProductImage(images);
+        if (productVarients is not null)
+            unitOfWork.ProductVariantRepository.addProductVariants(productVarients);
         int result = await unitOfWork.saveChanges();
 
         if (result == 0)
@@ -360,18 +363,8 @@ public class ProductServices(
         //delete preview images
         if (productDto.Deletedimages is not null)
         {
-            result = await unitOfWork.ProductImageRepository.deleteProductImages(productDto.Deletedimages,
+              unitOfWork.ProductImageRepository.deleteProductImages(productDto.Deletedimages,
                 productDto.Id);
-            if (result == 0)
-            {
-                return new Result<ProductDto?>
-                (
-                    data: null,
-                    message: "unable to delete product images that store deleted",
-                    isSeccessful: false,
-                    statusCode: 400
-                );
-            }
 
             fileServices.deleteFile(productDto.Deletedimages);
         }
@@ -379,18 +372,9 @@ public class ProductServices(
         //delete preview productvarients
         if (productDto.DeletedProductVarients is not null)
         {
-            result = await unitOfWork.ProductVariantRepository.deleteProductVariant(productDto.DeletedProductVarients,
+             unitOfWork.ProductVariantRepository.deleteProductVariant(productDto.DeletedProductVarients,
                 productDto.Id);
-            if (result == 0)
-            {
-                return new Result<ProductDto?>
-                (
-                    data: null,
-                    message: "unable to delete productvarients that store deleted",
-                    isSeccessful: false,
-                    statusCode: 400
-                );
-            }
+            
         }
 
         string? savedThumbnail = null;

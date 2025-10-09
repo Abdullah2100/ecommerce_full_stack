@@ -30,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,6 +38,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +70,7 @@ import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -81,8 +85,9 @@ fun EditOrAddLocationScreen(
 
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     val coroutine = rememberCoroutineScope()
+    val state = rememberPullToRefreshState()
+
 
     val snackBarHostState = remember { SnackbarHostState() }
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -212,13 +217,39 @@ fun EditOrAddLocationScreen(
             }
 
         }
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    ) { paddingValue ->
+        paddingValue.calculateTopPadding()
+        paddingValue.calculateBottomPadding()
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { userViewModel.getMyInfo() }
-        ) {
+            onRefresh = {
+                coroutine.launch {
+                    if (!isRefresh.value) isRefresh.value = true
+                    userViewModel.getMyInfo()
+                    if (isRefresh.value) {
+                        delay(1000)
+                        isRefresh.value = false
+                    }
+
+                }
+            },
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxSize(),
+            state = state,
+            indicator = {
+                Indicator(
+                    modifier = Modifier
+                        .padding(top = paddingValue.calculateTopPadding())
+                        .align(Alignment.TopCenter),
+                    isRefreshing = isRefresh.value,
+                    containerColor = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    state = state
+                )
+            },
+
+            ) {
             when (userInfo.value?.address.isNullOrEmpty()) {
                 true -> {
                     Column(

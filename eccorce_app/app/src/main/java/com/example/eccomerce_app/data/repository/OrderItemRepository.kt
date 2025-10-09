@@ -22,7 +22,7 @@ import java.util.UUID
 class OrderItemRepository(val client: HttpClient)  {
      suspend fun getMyOrderItemForStoreId( pageNumber: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Order/orderItems/${pageNumber}"
+            val fullUrl = Secrets.getBaseUrl() + "/orderItems/${pageNumber}"
             val result = client.get(fullUrl) {
                 headers {
                     append(
@@ -67,7 +67,7 @@ class OrderItemRepository(val client: HttpClient)  {
 
      suspend fun updateOrderItemStatus(id: UUID, status: Int): NetworkCallHandler {
         return try {
-            val fullUrl = Secrets.getBaseUrl() + "/Order/orderItems/statsu"
+            val fullUrl = Secrets.getBaseUrl() + "/orderItems/statsu"
             val result = client.put(fullUrl) {
                 contentType(ContentType.Application.Json)
                 headers {

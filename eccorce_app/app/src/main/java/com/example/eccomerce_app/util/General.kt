@@ -13,7 +13,6 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commercompose.R
 import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
@@ -21,7 +20,6 @@ import java.io.File
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.Calendar
 
 
@@ -99,6 +97,22 @@ object General {
         val tz = this.getTimeZone()
         val zid = if (tz == null) ZoneId.systemDefault() else tz.toZoneId()
         return LocalDateTime.ofInstant(this.toInstant(), zid)
+    }
+
+    fun Long.toCalender(): Calendar {
+        val calendar = Calendar.getInstance()
+
+        val instant = Instant.ofEpochMilli(this)
+        val zonedDateTime = instant.atZone(ZoneId.systemDefault())
+        calendar.set(
+            zonedDateTime.year,
+            zonedDateTime.month.value-1,
+            zonedDateTime.dayOfMonth,
+            Calendar.HOUR,
+            Calendar.MINUTE,
+            Calendar.SECOND
+        )
+return  calendar
     }
 
     fun LazyListState.reachedBottom(): Boolean {

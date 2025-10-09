@@ -1,7 +1,6 @@
 package com.example.e_commercompose.ui.component
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.e_commercompose.ui.theme.CustomColor
 
@@ -69,9 +65,9 @@ fun LocationLoadingShape(width: Int) {
 fun CategoryLoadingShape() {
 
     val config = LocalConfiguration.current
-    val screanWidth = config.screenWidthDp.dp
+    val screenWidth = config.screenWidthDp.dp
 
-    val items = ((screanWidth - 30.dp) / 75)
+    val items = ((screenWidth - 30.dp) / 75)
 
 
 

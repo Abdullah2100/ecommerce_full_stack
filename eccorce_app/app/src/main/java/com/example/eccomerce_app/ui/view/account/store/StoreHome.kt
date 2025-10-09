@@ -58,7 +58,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -86,14 +85,9 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
-import com.example.eccomerce_app.util.General
-import com.example.eccomerce_app.util.General.reachedBottom
-import com.example.eccomerce_app.util.General.toCustomFil
-import com.example.eccomerce_app.util.General.toLocalDateTime
 import com.example.e_commercompose.model.Category
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.e_commercompose.model.enMapType
-import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.BannerBage
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.ProductLoading
@@ -101,12 +95,17 @@ import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
+import com.example.eccomerce_app.ui.Screens
+import com.example.eccomerce_app.util.General
+import com.example.eccomerce_app.util.General.reachedBottom
+import com.example.eccomerce_app.util.General.toCalender
+import com.example.eccomerce_app.util.General.toCustomFil
+import com.example.eccomerce_app.util.General.toLocalDateTime
+import com.example.eccomerce_app.viewModel.BannerViewModel
+import com.example.eccomerce_app.viewModel.CategoryViewModel
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.StoreViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
-import com.example.eccomerce_app.viewModel.BannerViewModel
-import com.example.eccomerce_app.viewModel.CategoryViewModel
-import com.example.eccomerce_app.viewModel.DeliveryViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -115,7 +114,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
-import kotlin.collections.forEach
 
 enum class enOperation { STORE }
 enum class enStoreOpeation { Create, Update }
@@ -217,32 +215,21 @@ fun StoreScreen(
     val subCategoryName = remember { mutableStateOf(TextFieldValue("")) }
 
 
-    val currentTime = Calendar.getInstance().timeInMillis
-
+    val calendar = Calendar.getInstance();
+//    calendar.add(Calendar.HOUR,-3)
+    val newTimeInMillis = calendar.timeInMillis
 
     val locationClient = LocationServices.getFusedLocationProviderClient(context)
 
     fun handlingLocation(type: enMapType, location: Location): LatLng? {
-        return when (type) {
-            enMapType.MyStore -> {
-                Log.d("NavigationToMapHome", "fromMyStore")
-                LatLng(
-                    location.latitude,
-                    location.longitude
-                )
-            }
+              return   if (storeData == null) null
+                else   LatLng(storeData.latitude, storeData.longitude)
 
-            enMapType.Store -> {
-                Log.d("NavigationToMapHome", "fromStore")
+//            }
 
-                if (storeData == null) null
-                else LatLng(storeData.latitude, storeData.longitude)
-
-            }
-
-            else ->
-                return null;
-        }
+//            else ->
+//                return null;
+//        }
     }
 
     val requestPermissionThenNavigate = rememberLauncherForActivityResult(
@@ -733,7 +720,7 @@ fun StoreScreen(
                                                 }
                                             )
                                     }.await()
-                                    changeStoreOperation( null)
+                                    changeStoreOperation(null)
 
                                     isSendingData.value = false
                                     operationType.value = null
@@ -841,8 +828,17 @@ fun StoreScreen(
                     {
                         TextButton(
                             onClick = {
+                                Log.d(
+                                    "thisTheSelectedBannerDate", """
+    this the selected date millisecond ${datePickerState.selectedDateMillis!!.toCalender().timeInMillis}
+     this the current Time${newTimeInMillis}
+     this the date ${datePickerState.selectedDateMillis?.toCalender()?.toLocalDateTime()}
+     this the current date ${calendar.toLocalDateTime()}
+                                 """.trimIndent()
+                                )
 
-                                if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < currentTime) {
+
+                                if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < newTimeInMillis) {
                                     isShownDateDialog.value = false
                                     coroutine.launch {
                                         snackBarHostState.showSnackbar("You must select valid date")
@@ -1328,6 +1324,7 @@ fun StoreScreen(
 
                         else -> {
                             if (!storeBanners.isNullOrEmpty()) BannerBage(
+
                                 storeBanners,
                                 true,
                                 deleteBanner = if (isFromHome == true) null else { it ->
@@ -1346,7 +1343,8 @@ fun StoreScreen(
                                         }
                                         snackBarHostState.showSnackbar(errorMessage)
                                     }
-                                })
+                                },
+                                isShowTitle = false)
 
                         }
                     }
@@ -1390,8 +1388,6 @@ fun StoreScreen(
                             )
                         }
                     }
-//                        }
-//                    }
                 }
 
                 item {
@@ -1664,7 +1660,7 @@ fun StoreScreen(
 
                     }
                 }
-                item{
+                item {
                     Sizer(50)
                 }
                 if (!isLoadingMore.value)

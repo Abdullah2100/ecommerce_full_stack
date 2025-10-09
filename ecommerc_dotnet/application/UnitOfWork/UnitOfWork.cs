@@ -1,4 +1,5 @@
 using ecommerc_dotnet.application.Repository;
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.domain.Interface;
 using ecommerc_dotnet.infrastructure;
 using ecommerc_dotnet.infrastructure.repositories;
@@ -29,13 +30,16 @@ public class UnitOfWork : IUnitOfWork
         SubCategoryRepository = new SubCategoryRepository( _context );
         UserRepository = new UserRepository( _context );
         VarientRepository =  new VarientRepository( _context );
-        
+        OrderProductVariantRepository = new OrderProductVariantRepository(context);
+
     }
     
     public void Dispose()
     {
         _context.Dispose();
     }
+
+    public IOrderProductVariant OrderProductVariantRepository { get; }
 
     public async Task<int> saveChanges()
     {

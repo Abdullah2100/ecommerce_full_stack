@@ -122,8 +122,6 @@ public class OrderServices(
 
         unitOfWork.OrderRepository.add(order);
 
-        //order.Items = 
-        List<OrderItem> orderItems = new List<OrderItem>();
         foreach (var item in orderDto.Items)
         {
             var orderItemId = clsUtil.generateGuid();
@@ -135,6 +133,7 @@ public class OrderServices(
                     ProductVarientId = x
                 })
                 .ToList();
+
             OrderItem orderItem = new OrderItem
             {
                 Id = orderItemId,
@@ -145,13 +144,13 @@ public class OrderServices(
                 Price = item.Price,
                 OrderProductsVarients = orderProductsVarients
             };
-            orderItems.Add(orderItem);
+            unitOfWork.OrderItemRepository.add(orderItem);
+            unitOfWork.OrderProductVariantRepository.add(orderProductsVarients);
         }
 
-        order.Items = orderItems;
 
-        unitOfWork.OrderRepository.add(order);
         int result = await unitOfWork.saveChanges();
+        
 
         if (result == 0)
         {
@@ -159,6 +158,19 @@ public class OrderServices(
             (
                 data: null,
                 message: "error while create order",
+                isSeccessful: false,
+                statusCode: 400
+            );
+        }
+
+        var isSavedDistance = await unitOfWork.OrderRepository.isSavedDistanceToOrder(order.Id);
+        
+        if (isSavedDistance == false)
+        {
+            return new Result<OrderDto?>
+            (
+                data: null,
+                message: "could not calculate  distance distance to user ",
                 isSeccessful: false,
                 statusCode: 400
             );

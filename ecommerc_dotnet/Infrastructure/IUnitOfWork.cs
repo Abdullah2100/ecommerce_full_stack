@@ -20,6 +20,7 @@ public interface IUnitOfWork:IDisposable
     public ISubCategoryRepository SubCategoryRepository { get; }
     public IUserRepository UserRepository { get; }
     public IVarientRepository VarientRepository { get; }
+    public IOrderProductVariant OrderProductVariantRepository { get; } 
 
     public Task<int> saveChanges();
 }

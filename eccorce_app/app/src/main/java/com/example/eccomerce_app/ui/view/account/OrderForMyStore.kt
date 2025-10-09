@@ -3,6 +3,7 @@ package com.example.eccomerce_app.ui.view.account
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +25,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,8 +62,10 @@ import com.example.eccomerce_app.ui.component.OrderItemForMyStoreShape
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
+import androidx.compose.ui.draw.shadow
 
 
 @SuppressLint("ConfigurationScreenWidthHeight")
@@ -79,7 +85,8 @@ fun OrderForMyStoreScreen(
 
 
     val lazyState = rememberLazyListState()
-    val coroutineScop = rememberCoroutineScope()
+    val coroutine = rememberCoroutineScope()
+    val state = rememberPullToRefreshState()
 
 
     val page = remember { mutableIntStateOf(1) }
@@ -99,7 +106,7 @@ fun OrderForMyStoreScreen(
 
 
     LaunchedEffect(reachedBottom.value) {
-        if (!orderData.value.isNullOrEmpty() && reachedBottom.value && orderData.value!!.size>23) {
+        if (!orderData.value.isNullOrEmpty() && reachedBottom.value && orderData.value!!.size > 23) {
             Log.d("scrollReachToBottom", "true")
             orderItemsViewModel.getMyOrderItemBelongToMyStore(
                 page,
@@ -109,71 +116,98 @@ fun OrderForMyStoreScreen(
 
     }
 
-    PullToRefreshBox(
-        isRefreshing = isRefresh.value,
-        onRefresh = {
-            orderItemsViewModel.getMyOrderItemBelongToMyStore(
-
-                mutableIntStateOf(1),
-                null
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackBarHostState,
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.padding(end = 15.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                ),
+                title = {
+                    Text(
+                        "Order Belong To My Store",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = (24).sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            nav.popBackStack()
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            "",
+                            modifier = Modifier.size(30.dp),
+                            tint = CustomColor.neutralColor950
+                        )
+                    }
+                },
             )
         },
     )
-    {
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackBarHostState,
-                    modifier = Modifier
-                        .padding(bottom = 10.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+    { paddingValue ->
+        paddingValue.calculateTopPadding()
+        paddingValue.calculateBottomPadding()
+
+        PullToRefreshBox(
+
+            isRefreshing = isRefresh.value,
+            onRefresh = {
+                coroutine.launch {
+                    if (!isRefresh.value) isRefresh.value = true
+                    page.intValue = 1;
+                    orderItemsViewModel.getMyOrderItemBelongToMyStore(
+                        page,
+                        isLoadingMore
+                    )
+                    if (isRefresh.value) {
+                        delay(1000)
+                        isRefresh.value = false
+                    }
+
+                }
             },
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    modifier = Modifier.padding(end = 15.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White
-                    ),
-                    title = {
-                        Text(
-                            "Order Belong To My Store",
-                            fontFamily = General.satoshiFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = (24).sp,
-                            color = CustomColor.neutralColor950,
-                            textAlign = TextAlign.Center
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                nav.popBackStack()
-                            }
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                "",
-                                modifier = Modifier.size(30.dp),
-                                tint = CustomColor.neutralColor950
-                            )
-                        }
-                    },
+                .background(Color.White)
+                .fillMaxSize(),
+            state = state,
+            indicator = {
+                Indicator(
+                    modifier = Modifier
+                        .padding(top = paddingValue.calculateTopPadding())
+                        .align(Alignment.TopCenter),
+                    isRefreshing = isRefresh.value,
+                    containerColor = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    state = state
                 )
             },
         )
         {
-            it.calculateTopPadding()
-            it.calculateBottomPadding()
-
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
+                    .padding(
+                        top = paddingValue.calculateTopPadding(),
+                        bottom = paddingValue.calculateBottomPadding()
+                    )
                     .background(Color.White),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -184,10 +218,21 @@ fun OrderForMyStoreScreen(
 
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.White)
                                 .padding(horizontal = 10.dp)
-                        ) {
+                                .fillMaxWidth()
+                                .padding(top = 1.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color =  CustomColor.neutralColor100,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .background(
+                                    Color.White,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .padding(vertical = 10.dp, horizontal = 10.dp)
+                        )
+                        {
                             OrderItemForMyStoreShape(
                                 orderItem = order,
                                 context = context,
@@ -233,7 +278,7 @@ fun OrderForMyStoreScreen(
 
                                     else -> {
                                         Box(
-                                            modifier = Modifier.width(((screenWidth / 2) - 15).dp)
+                                            modifier = Modifier.width(((screenWidth / 2) - 25).dp)
                                         )
                                         {
 
@@ -241,7 +286,7 @@ fun OrderForMyStoreScreen(
                                                 isLoading = isSendingData.value && currentUpdateOrderItemId.value == order.id,
                                                 isEnable = !isSendingData.value,
                                                 operation = {
-                                                    coroutineScop.launch {
+                                                    coroutine.launch {
                                                         currentUpdateOrderItemId.value =
                                                             order.id
                                                         isSendingData.value = true
@@ -267,7 +312,7 @@ fun OrderForMyStoreScreen(
                                             )
                                         }
                                         Box(
-                                            modifier = Modifier.width(((screenWidth / 2) - 16).dp)
+                                            modifier = Modifier.width(((screenWidth / 2) - 25).dp)
                                         )
                                         {
 
@@ -275,7 +320,7 @@ fun OrderForMyStoreScreen(
                                                 isLoading = isSendingData.value && currentUpdateOrderItemId.value == order.id,
                                                 isEnable = !isSendingData.value,
                                                 operation = {
-                                                    coroutineScop.launch {
+                                                    coroutine.launch {
                                                         currentUpdateOrderItemId.value =
                                                             order.id
                                                         isSendingData.value = true

@@ -55,7 +55,8 @@ fun BannerBage(
     banners: List<BannerModel>,
     isMe: Boolean? = false,
     nav: NavHostController? = null,
-    deleteBanner:((id: UUID)->Unit)?=null
+    deleteBanner:((id: UUID)->Unit)?=null,
+    isShowTitle: Boolean=true
 ) {
 
     val context = LocalContext.current
@@ -92,7 +93,7 @@ fun BannerBage(
         }
     }
 
-
+if(isShowTitle)
     Row(
         modifier =
             Modifier

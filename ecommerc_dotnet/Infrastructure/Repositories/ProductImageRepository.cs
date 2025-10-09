@@ -8,32 +8,31 @@ namespace ecommerc_dotnet.infrastructure.repositories;
 
 public class ProductImageRepository(AppDbContext context) : IProductImageRepository
 {
-    public async Task<int> deleteProductImages(Guid id)
+    public void  deleteProductImages(Guid id)
     {
-        await context.ProductImages.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        return await context.SaveChangesAsync();
+        var result = context.ProductImages.FirstOrDefault(p => p.ProductId == id);
+        if (result != null) throw new ArgumentNullException();
+        context.ProductImages.Remove(result);
     }
 
-    public async Task<int> deleteProductImages(List<string> images, Guid id)
+    public void deleteProductImages(List<string> images, Guid id)
     {
         foreach (var image in images)
         {
-            await context.ProductImages.Where(pi => pi.Path == image && pi.ProductId == id).ExecuteDeleteAsync();
+         var result =    context.ProductImages.Where(pi => pi.Path == image && pi.ProductId == id).ToList();
+         context.ProductImages.RemoveRange(result);
         }
 
-        return await context.SaveChangesAsync();
     }
 
 
 
-    public async Task<bool> addProductImage(ICollection<ProductImage> productImage)
+    public  void addProductImage(ICollection<ProductImage> productImage)
     {
         for (var i = 0; i < productImage.Count; i++)
         {
-            await context.ProductImages.AddAsync(productImage.ElementAt(i));
+             context.ProductImages.Add(productImage.ElementAt(i));
         }
-
-        return (await context.SaveChangesAsync()) > 0;
     }
 
     public async Task<List<string>> getProductImages(Guid id)

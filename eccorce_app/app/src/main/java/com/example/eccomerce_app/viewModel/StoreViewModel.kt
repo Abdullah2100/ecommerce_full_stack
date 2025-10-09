@@ -198,9 +198,9 @@ class StoreViewModel(
     }
 
     suspend fun updateStore(
-        name: String,
-        wallpaperImage: File?,
-        smallImage: File?,
+        name: String?=null,
+        wallpaperImage: File?=null,
+        smallImage: File?=null,
         longitude: Double?,
         latitude: Double?,
     ): String? {

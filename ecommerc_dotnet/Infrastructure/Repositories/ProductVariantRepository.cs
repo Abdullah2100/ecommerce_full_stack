@@ -14,35 +14,33 @@ public class ProductVariantRepository(AppDbContext context) : IProductVariantRep
             .FirstOrDefaultAsync(or => or.ProductId == productId && or.Id == id);
     }
 
-    public async Task<bool> addProductVariants(ICollection<ProductVarient> productVariants)
+    public void  addProductVariants(ICollection<ProductVarient> productVariants)
     {
         for (var i = 0; i < productVariants.Count; i++)
         {
-            await context.ProductVarients.AddAsync(productVariants.ElementAt(i));
+           context.ProductVarients.Add(productVariants.ElementAt(i));
         }
 
-        return (await context.SaveChangesAsync()) > 0;
     }
 
 
-    public async Task<int> deleteProductVariantByProductId(Guid productId)
+    public void deleteProductVariantByProductId(Guid productId)
     {
-        await context.ProductVarients.Where(p => p.ProductId == productId).ExecuteDeleteAsync();
-        return 1;
+        var result = context.ProductVarients.Where(p => p.ProductId == productId).ToList();
+        context.ProductVarients.RemoveRange(result);
     }
 
-    public async Task<int> deleteProductVariant(List<CreateProductVarientDto> productVariants, Guid productId)
+    public void deleteProductVariant(List<CreateProductVarientDto> productVariants, Guid productId)
     {
         for (var i = 0; i < productVariants.Count; i++)
         {
-            await context.ProductVarients.Where(pv =>
+            var result = context.ProductVarients.Where(pv =>
                 pv.ProductId == productId && pv.VarientId == productVariants[i].VarientId &&
                 pv.Name == productVariants[i].Name
-            ).ExecuteDeleteAsync();
+            ).ToList();
+            context.ProductVarients.RemoveRange(result);
         }
 
-        ;
-        return 1;
     }
 
     public void add(ProductVarient entity)

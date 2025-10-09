@@ -103,7 +103,7 @@ class StoreRepository(val client: HttpClient)   {
     }
 
      suspend fun updateStore(
-        name: String,
+        name: String?=null,
         wallpaperImage: File?,
         smallImage: File?,
         longitude: Double?,
@@ -122,12 +122,12 @@ class StoreRepository(val client: HttpClient)   {
                 setBody(
                     MultiPartFormDataContent(
                         formData {
-                            if (name.trim().length > 0)
+                            if (!name.isNullOrEmpty())
                                 append("name", name)
-                            if (latitude != null)
-                                append("longitude", latitude)
                             if (longitude != null)
-                                append("latitude", longitude)
+                                append("longitude", longitude)
+                            if (latitude != null)
+                                append("latitude", latitude)
                             if (wallpaperImage != null)
                                 append(
                                     key = "wallpaper_image", // Must match backend expectation

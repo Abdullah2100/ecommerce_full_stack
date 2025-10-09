@@ -5,8 +5,8 @@ namespace ecommerc_dotnet.domain.Interface;
 
 public interface IProductImageRepository: IRepository<ProductImage>
 {
-    Task<int> deleteProductImages(Guid id);
-    Task<int> deleteProductImages(List<string> images, Guid id);
-    Task<bool> addProductImage(ICollection<ProductImage> productImage);
+   void deleteProductImages(Guid id);
+    void deleteProductImages(List<string> images, Guid id);
+    void  addProductImage(ICollection<ProductImage> productImage);
     Task<List<string>> getProductImages(Guid id);
 }

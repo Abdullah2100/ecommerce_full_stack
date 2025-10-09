@@ -3,7 +3,6 @@ using ecommerc_dotnet.domain.Interface;
 using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
 using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.dto;
 using ecommerc_dotnet.Presentation.dto;
 using Npgsql;
 
@@ -252,56 +251,54 @@ public class OrderRepository(AppDbContext context)
 
     public async Task<IEnumerable<Order>> getOrderBelongToDelivery(Guid deliveryId, int pageNum, int pageSize)
     {
-    
-            var orders = await context.Orders
-                .Include(o => o.User)
-                .Include(o => o.Items)
+        var orders = await context.Orders
+            .Include(o => o.User)
+            .Include(o => o.Items)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Where(o => o.DeleveryId == deliveryId)
+            .Skip((pageNum - 1) * pageSize)
+            .Take(pageSize)
+            .OrderDescending()
+            .ToListAsync();
+        foreach (var order in orders)
+        {
+            order.Items = await context.OrderItems
+                .Include(oi => oi.Product)
+                .Include(oi => oi.Store)
                 .AsSplitQuery()
-                .AsNoTracking()
-                .Where(o => o.DeleveryId == deliveryId)
-                .Skip((pageNum - 1) * pageSize)
-                .Take(pageSize)
-                .OrderDescending()
-                .ToListAsync();
-            foreach (var order in orders)
-            {
-                order.Items = await context.OrderItems
-                    .Include(oi => oi.Product)
-                    .Include(oi => oi.Store)
-                    .AsSplitQuery()
-                    .Where(oi => oi.OrderId == order.Id)
-                    .Select(it => new OrderItem
+                .Where(oi => oi.OrderId == order.Id)
+                .Select(it => new OrderItem
+                {
+                    Id = it.Id,
+                    OrderId = it.OrderId,
+                    ProductId = it.ProductId,
+                    Price = it.Price,
+                    Quanity = it.Quanity,
+                    StoreId = it.StoreId,
+                    Order = it.Order,
+                    Store = new Store
                     {
-                        Id = it.Id,
-                        OrderId = it.OrderId,
-                        ProductId = it.ProductId,
-                        Price = it.Price,
-                        Quanity = it.Quanity,
-                        StoreId = it.StoreId,
-                        Order = it.Order,
-                        Store = new Store
-                        {
-                            Id = it.Store.Id,
-                            Name = it.Store.Name,
-                            WallpaperImage = "",
-                            SmallImage = "",
-                            IsBlock = it.Store.IsBlock,
-                            UserId = it.Store.UserId,
-                            Addresses = context
-                                .Address
-                                .AsNoTracking()
-                                .Where(ad => ad.OwnerId == it.Store.Id)
-                                .ToList()
-                        },
-                        Product = it.Product,
-                        OrderProductsVarients = it.OrderProductsVarients,
-                        Status = it.Status
-                    })
-                    .ToListAsync();
-            }
+                        Id = it.Store.Id,
+                        Name = it.Store.Name,
+                        WallpaperImage = "",
+                        SmallImage = "",
+                        IsBlock = it.Store.IsBlock,
+                        UserId = it.Store.UserId,
+                        Addresses = context
+                            .Address
+                            .AsNoTracking()
+                            .Where(ad => ad.OwnerId == it.Store.Id)
+                            .ToList()
+                    },
+                    Product = it.Product,
+                    OrderProductsVarients = it.OrderProductsVarients,
+                    Status = it.Status
+                })
+                .ToListAsync();
+        }
 
-            return orders;
-      
+        return orders;
     }
 
     public void removeOrderFromDelivery(Guid id, Guid deliveryId)
@@ -314,6 +311,36 @@ public class OrderRepository(AppDbContext context)
         result.DeleveryId = null;
     }
 
+   
+    public void add(Order entity)
+    {
+        context.Orders.Add(entity);
+    }
+
+    public void update(Order entity)
+    {
+        context.Orders.Update(entity);
+    }
+
+    public void delete(Guid id)
+    {
+        var orders = context.Orders.Where(o => o.Id == id).ToList();
+        context.Orders.RemoveRange(orders);
+    }
+
+
+
+    public async Task<bool> isSavedDistanceToOrder(Guid id)
+    {
+       var result = (await isSavedDistance(id) == true ? 1: 0);
+        if (result == 0)
+        {
+            delete(id);
+            return false;
+        }
+
+        return true;
+    }
     private async Task<bool> isSavedDistance(Guid orderId)
     {
         try
@@ -337,63 +364,6 @@ public class OrderRepository(AppDbContext context)
         }
     }
 
-
-    public void add(Order entity)
-    {
-        // try
-        //{
-        context.Orders.Add(entity);
-
-        /* foreach (var orderItem in entity.Items)
-         {
-             var orderItemId = clsUtil.generateGuid();
-             await context.OrderItems.AddAsync(new OrderItem
-             {
-                 Id = orderItemId,
-                 OrderId = entity.Id,
-                 ProductId = orderItem.ProductId,
-                 Quanity = orderItem.Quanity,
-                 StoreId = orderItem.StoreId,
-                 Price = orderItem.Price,
-             });
-             if (orderItem.OrderProductsVarients is not null)
-                 foreach (var orderProductVarient in orderItem.OrderProductsVarients)
-                 {
-                     await context.OrdersProductsVarients.AddAsync(new OrderProductsVarient()
-                     {
-                         Id = clsUtil.generateGuid(),
-                         OrderItemId = orderItemId,
-                         ProductVarientId = orderProductVarient.ProductVarientId,
-                     });
-                 }
-         }
-
-         int result = await context.SaveChangesAsync();
-         if (result == 0) return 0;
-         result = (await isSavedDistance(entity.Id)) == true ? 1 : 0;
-         if (result == 0)
-         {
-             await deleteAsync(entity.Id);
-             return 0;
-         }
-
-         return 1;
-     }
-     catch (Exception ex)
-     {
-         Console.WriteLine("Error from add New Order " + ex);
-         return 0;
-     }*/
-    }
-
-    public void update(Order entity)
-    {
-        context.Orders.Update(entity);
-    }
-
-    public void delete(Guid id)
-    {
-        var orders = context.Orders.Where(o => o.Id == id).ToList();
-        context.Orders.RemoveRange(orders);
-    }
+ 
+     
 }

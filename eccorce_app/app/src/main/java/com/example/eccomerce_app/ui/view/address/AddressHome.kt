@@ -179,7 +179,7 @@ fun AddressHomeScreen(
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = (24 / fontScall).sp,
-                color = CustomColor.primaryColor950,
+                color = CustomColor.neutralColor950,
                 textAlign = TextAlign.Center
 
             )

@@ -12,7 +12,6 @@ namespace ecommerc_dotnet.infrastructure.repositories;
 
 public class ProductRepository(
     AppDbContext context
-    //,
   ) : IProductRepository
 {
     public async Task<IEnumerable<Product>> getAllAsync(int page, int length)

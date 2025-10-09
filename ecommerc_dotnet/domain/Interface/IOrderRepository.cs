@@ -20,6 +20,7 @@ public interface IOrderRepository:IRepository<Order>
     Task<IEnumerable<Order>> getOrderNoBelongToAnyDelivery(int pageNum,int pageSize);
     Task<IEnumerable<Order>> getOrderBelongToDelivery(Guid deliveryId,int pageNum,int pageSize);
     void  removeOrderFromDelivery(Guid id,Guid deliveryId);
+    Task<bool> isSavedDistanceToOrder(Guid id);
     void delete(Guid id);
 
 }

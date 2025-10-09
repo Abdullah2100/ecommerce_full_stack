@@ -174,7 +174,7 @@ fun HomePage(
             Indicator(
                 modifier = Modifier.align(Alignment.TopCenter),
                 isRefreshing = isRefresh.value,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = Color.White,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 state = state
             )
