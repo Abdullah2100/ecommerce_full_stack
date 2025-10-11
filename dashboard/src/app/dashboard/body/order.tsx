@@ -1,4 +1,4 @@
-import InputWithTitle from "@/components/ui/inputWithTitle";
+import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import {
     getOrderPages,
     getOrderStatusDefination,
     updateOrderStatus
-} from "../controller/data";
+} from "../../../stores/data";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuLabel, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
@@ -15,9 +15,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import iOrderStatusUpdateRequestDto from "../dto/request/iOrderStatusUpdateRequestDto";
+import iOrderStatusUpdateRequestDto from "../../../dto/request/iOrderStatusUpdateRequestDto";
 
-const OrderPage = () => {
+const Order = () => {
 
     const [currnetPage, setCurrentPage] = useState(1);
     const queryClient = useQueryClient()
@@ -203,4 +203,4 @@ const OrderPage = () => {
     );
 
 };
-export default OrderPage;
+export default Order;

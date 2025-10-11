@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Util from "../util/globle";
+import { Util } from "@/util/globle";
 
 interface ComponentWithProps {
   [key: string]: unknown;

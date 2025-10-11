@@ -1,17 +1,17 @@
 "use client"
-import InputWithTitle from "@/components/ui/inputWithTitle";
+import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { createVarient, deleteVarient, getVarient, updateVarient } from "../controller/data";
+import { createVarient, deleteVarient, getVarient, updateVarient } from "../../../stores/data";
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
-import { iVarient } from "../model/iVarient";
+import { iVarient } from "../../../model/iVarient";
 import { Button } from "@/components/ui/button";
-import { EditeIcon } from "../../../public/editeIcon";
-import { DeleteIcon } from "../../../public/delete";
+import { EditeIcon } from "../../../../public/editeIcon";
+import { DeleteIcon } from "../../../../public/delete";
 
-const VarientPage = () => {
+const Varient = () => {
     const [varient, setVarient] = useState<iVarient>({
         id: undefined,
         name: ''
@@ -117,7 +117,8 @@ const VarientPage = () => {
                             {/* Table body */}
                             <tbody className="text-sm font-medium">
                                 {
-                                    data?.map((value, index) => (
+                                    
+                                   data!==undefined&&data.length>0&& data?.map((value, index) => (
                                         <tr key={index}
                                             className={`${index != data.length - 1 ? 'border-b-1' : undefined}`}
                                         >
@@ -162,4 +163,4 @@ const VarientPage = () => {
     );
 
 };
-export default VarientPage;
+export default Varient;

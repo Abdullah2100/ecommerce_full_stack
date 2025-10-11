@@ -1,40 +1,39 @@
-import InputWithTitle from "@/components/ui/inputWithTitle";
+import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { changeStoreStatus, changeUserStatus, createVarient, deleteVarient, getStoreAtPage, getStorePages, getUserAtPage, getUserPages, getVarient, updateVarient } from "../controller/data";
+import { changeUserStatus, createVarient, deleteVarient, getProductAtPage, getProductPages, getUserAtPage, getUserPages, getVarient, updateVarient } from "../../../stores/data";
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "@/components/ui/button";
-import { getStaticProps } from "next/dist/build/templates/pages";
 
-const StoresPage = () => {
+const Product = () => {
     const queryClient = useQueryClient()
-    const { data: storePages } = useQuery({
-        queryKey: ['storePages'],
-        queryFn: () => getStorePages()
+    const { data: userPages } = useQuery({
+        queryKey: ['usersPage'],
+        queryFn: () => getProductPages()
 
     })
 
     const [currnetPage, setCurrentPage] = useState(1);
 
     const { data, refetch, isPlaceholderData } = useQuery({
-        queryKey: ['stores', currnetPage],
-        queryFn: () => getStoreAtPage(currnetPage)
+        queryKey: ['products', currnetPage],
+        queryFn: () => getProductAtPage(currnetPage)
 
     })
 
     useEffect(() => {
         queryClient.prefetchQuery({
-            queryKey: ['stores', currnetPage],
-            queryFn: () => getStoreAtPage(currnetPage),
+            queryKey: ['products', currnetPage],
+            queryFn: () => getUserAtPage(currnetPage),
         })
     }, [currnetPage])
 
 
-    const changeStoreStatusFun = useMutation(
+    const changeUserStatusFun = useMutation(
         {
-            mutationFn: (store_id: string) => changeStoreStatus(store_id),
+            mutationFn: (userId: string) => changeUserStatus(userId),
             onError: (e) => {
                 toast.error(e.message)
             },
@@ -48,12 +47,12 @@ const StoresPage = () => {
     )
     return (
         <div className="flex flex-col w-auto h-auto">
-            <Label className="text-5xl">Stores</Label>
+            <Label className="text-5xl">Products</Label>
             <div className="h-10" />
 
             {data != undefined && <div className="w-fit">
 
-                <div className="p-3 max-w-[740px] overflow-hidden">
+                <div className="p-3 max-w-[840px]">
                     {/* Table */}
                     <div className="overflow-x-auto  border-2 border-[#F0F2F5]  rounded-[9px]">
                         <table className="table-auto min-w-full ">
@@ -72,17 +71,17 @@ const StoresPage = () => {
                                         <div className="font-medium text-left">Name</div>
                                     </th>
                                     <th className="py-4 px-10">
-                                        <div className="font-medium text-left">Owner Name</div>
+                                        <div className="font-medium text-left">Price</div>
                                     </th>
                                     <th className="py-4 px-10">
-                                        <div className="font-medium text-left whitespace-nowrap">Created At</div>
+                                        <div className="font-medium text-left">Store Name</div>
                                     </th>
                                     <th className="py-4 px-10">
-                                        <div className="font-medium text-left">isBlock</div>
+                                        <div className="font-medium text-left">Sub Category</div>
                                     </th>
-
-
-
+                                    <th className="py-4 px-10">
+                                        <div className="font-medium text-left">Product Varient</div>
+                                    </th>
                                 </tr>
                             </thead>
                             {/* Table body */}
@@ -99,7 +98,7 @@ const StoresPage = () => {
                                                 <div  >
                                                     <img
                                                         className="h-6 w-6 rounded-full"
-                                                        src={value.small_image}
+                                                        src={value.thmbnail}
                                                         alt="thumbnail"
                                                     />
                                                 </div>
@@ -112,35 +111,44 @@ const StoresPage = () => {
                                                 </div>
                                             </td>
                                             <td className="py-4 px-10">
-                                                <div>
+                                                <div className="w-32">
                                                     <Label className="font-normal">
-                                                        {value.userName}
+                                                        {value.price}
                                                     </Label>
                                                 </div>
                                             </td>
-
-
                                             <td className="py-4 px-10">
-                                                <div>
+                                                <div className="w-32">
                                                     <Label className="font-normal">
-                                                        {(value.created_at.toString().split('T')[0]).replaceAll('-','/')}
+                                                        {value.store}
                                                     </Label>
                                                 </div>
                                             </td>
 
                                             <td className="py-4 px-10">
-                                                <div>
-                                                    {
+                                                <div className="w-32">
+                                                    <Label className="font-normal">
+                                                        {value.subcategory}
+                                                    </Label>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-10 whitespace-nowrap">
+                                                <div className="w-32">
 
-                                                        <Button
-                                                            disabled={changeStoreStatusFun.isPending}
-                                                            onClick={() => changeStoreStatusFun.mutate(value.id)}
-                                                            className={`${value.isBlocked ? 'bg-red-500' : 'bg-gray-400'} h-8 w-20`}>
-                                                            <Label className="text-white text-[12px]">  {value.isBlocked ? 'Bolck' : 'UnBlock'}</Label>
-
-                                                        </Button>
-                                                    }
-
+                                                    {value.productVarients.map((value, index) => (
+                                                        value.map((insidV, iIndex) => (
+                                                            <div className="flex flex-row">
+                                                                {iIndex == 0 &&
+                                                                    <Label>
+                                                                        {insidV.varientName+': '}
+                                                                    </Label>}
+                                                                <div className="ms-4 flex flex-row">
+                                                                    <Label>{insidV.name}</Label>
+                                                                    <Label>{insidV.precentage}</Label>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ))}
                                                 </div>
                                             </td>
                                         </tr>
@@ -153,9 +161,9 @@ const StoresPage = () => {
                 </div>
             </div>}
 
-            {storePages != undefined && <div className="flex flex-row w-full justify-center items-center">
+            {userPages != undefined && <div className="flex flex-row w-full justify-center">
 
-                {Array.from({ length: storePages }, (_, i) => (
+                {Array.from({ length: userPages }, (_, i) => (
                     <div
                         onClick={() => setCurrentPage(i + 1)}
                         className={`py-2 px-2 border-1 border-gray-500 rounded-full mr-2 ${currnetPage == i + 1 ? 'bg-[#452CE8]' : undefined} pointer-coarse:`}
@@ -168,4 +176,4 @@ const StoresPage = () => {
     );
 
 };
-export default StoresPage;
+export default Product;

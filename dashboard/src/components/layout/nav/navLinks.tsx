@@ -1,16 +1,16 @@
 import { useState } from "react";
-import NavItem, { iNavItemProp } from "./navItem"
-import homIcon from '../../../public/home.svg'
-import logo from '../../../public/logo.svg'
-import myInfo from '../../../public/user.svg'
-import varient from '../../../public/products-major.svg'
-import users from '../../../public/users.svg'
-import store from '../../../public/store.svg'
-import category from '../../../public/category.svg'
-import order from '../../../public/order.svg'
+import homIcon from '../../../../public/home.svg'
+import logo from '../../../../public/logo.svg'
+import myInfo from '../../../../public/user.svg'
+import varient from '../../../../public/products-major.svg'
+import users from '../../../../public/users.svg'
+import store from '../../../../public/store.svg'
+import category from '../../../../public/category.svg'
+import order from '../../../../public/order.svg'
 
-import product from '../../../public/product.svg'
+import product from '../../../../public/product.svg'
 import Image from 'next/image'
+import NavItem, { iNavItemProp } from "@/components/ui/nav/navItem";
 
 export interface iNavProp {
     selectedIndex: number

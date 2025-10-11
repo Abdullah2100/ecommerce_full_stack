@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Util from "../util/globle";
+import { Util } from "@/util/globle";
 
-export default function withAuth(Component: React.ComponentType<any>) {
+export default function IsCanNavToDashboard(Component: React.ComponentType<any>) {
     return function WithAuth(props: any) {
         const router = useRouter();
         const auth = Util.token?.trim() || '';

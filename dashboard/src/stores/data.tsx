@@ -1,17 +1,17 @@
 import axios from "axios";
-import Util from "../util/globle";
+import { Util } from "@/util/globle";
 import { iUserInfo } from "../model/iUserInfo";
 import { iUserUpdateInfoDto } from "../dto/response/iUserUpdateInfoDto";
 import { iVarient } from "../model/iVarient";
 import iStore from "../model/iStore";
 import iCategory from "../model/iCategory";
-import iCategoryDto from "../dto/response/iCategoryDto";
+import iCategoryDto from "@/dto/response/iCategoryDto";
 import iProductResponseDto from "../dto/response/iProductResponseDto";
 import iOrderResponseDto from "../dto/response/iOrderResponseDto";
 import iOrderStatusUpdateRequestDto from "../dto/request/iOrderStatusUpdateRequestDto";
 
 export async function getMyInfo() {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User';
+    const url = process.env.NEXT_PUBLIC_PASE_URL + '/api/User/me';
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.get(url, {
@@ -438,7 +438,9 @@ export async function getCategory(pageNumber: number) {
                 'Authorization': `Bearer ${Util.token}`
             }
         })
-        return result.data as iCategory[]
+        
+        let data =result.data as iCategory[]
+        return data
     } catch (error) {
         // Extract meaningful error message
         let errorMessage = "An unexpected error occurred";

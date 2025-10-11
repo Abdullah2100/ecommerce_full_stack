@@ -1,14 +1,15 @@
 import { Label } from "@/components/ui/label"
-import { getMyInfo, updateUser } from "../controller/data"
+import { getMyInfo, updateUser } from "../../../stores/data"
 import { useMutation, useQuery } from "@tanstack/react-query";
-import InputWithTitle from "@/components/ui/inputWithTitle";
+import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { iUserUpdateInfoDto } from "../dto/response/iUserUpdateInfoDto";
-import edite from '../../../public/edite.svg'
-import user from '../../../public/user.svg'
+import { iUserUpdateInfoDto } from "../../../dto/response/iUserUpdateInfoDto";
+import edite from '../../../../public/edite.svg'
+import user from '../../../../public/user.svg'
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
+import { replaceUrlWithNewUrl } from "@/util/globle";
 
 const MyInfoPage = () => {
     const { data, refetch } = useQuery({
@@ -72,14 +73,14 @@ const MyInfoPage = () => {
                     >
                         {data?.thumbnail != undefined && data?.thumbnail?.length > 0 ? <Image
                             className="h-30 w-30  rounded-full"
-                            src={data.thumbnail}
+                            src={replaceUrlWithNewUrl(data.thumbnail)}
                             alt="userimage"
                             fill={true}
                         />
                             :
                             <img
                                 className="h-30 w-30  rounded-full"
-                                src={userUpdate.thumbnail != undefined ? URL.createObjectURL(userUpdate.thumbnail) : user.src}
+                                src={userUpdate.thumbnail != undefined ? URL.createObjectURL(userUpdate.thumbnail) : replaceUrlWithNewUrl(user.src)}
                                 alt="userimage"
                             />
                         }

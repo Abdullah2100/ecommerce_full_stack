@@ -1,5 +1,5 @@
 import axios from "axios";
-import { iLoginData } from "../login/page";
+import { iLoginData } from "../app/login/page";
 
 
 

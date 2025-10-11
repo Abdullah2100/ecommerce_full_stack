@@ -1,6 +1,5 @@
+import { Label } from "@radix-ui/react-label";
 import Image from "next/image";
-import { Label } from "./label";
-import { SetStateAction } from "react";
 
 
 export interface iNavItemProp {

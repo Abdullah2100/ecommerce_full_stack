@@ -5,11 +5,11 @@ import { useMutation } from '@tanstack/react-query'
 import { toast, ToastContainer } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 import { Label } from '@/components/ui/label'
-import InputWithTitle from '@/components/ui/inputWithTitle'
-import { login } from '../controller/auth'
-import iAuthResult from '../model/iAuthResult'
-import Util from '../util/globle'
+import InputWithTitle from '@/components/ui/input/inputWithTitle'
+import { login } from '../../stores/auth'
+import iAuthResult from '../../model/iAuthResult'
 import { Button } from '@/components/ui/button'
+import { Util } from '@/util/globle'
 export interface iLoginData {
     name: string;
     password: string;
@@ -18,7 +18,7 @@ export interface iLoginData {
 const  Login = ()=> {
    const rout = useRouter() 
     const [data, setData] = useState<iLoginData>({
-        name: 'ali@gmail.com',
+        name: 'ali55@gmail.com',
         password: '12AS@#fs'
     });
 
