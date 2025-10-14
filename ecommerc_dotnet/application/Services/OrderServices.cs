@@ -294,7 +294,14 @@ public class OrderServices(
                 statusCode: 400
             );
         }
-//this for notification operation for all user at the system
+
+        await hubContext.Clients.All.SendAsync("orderStatus", new UpdateOrderStatusDto
+        {
+            Id = order.Id,
+            Status = status
+        });
+        
+        //this for notification operation for all user at the system
         sendNotificationToStore(order, status);
         sendNotificationToUser(order, status);
         sendNotificationToDelivery(order, status);

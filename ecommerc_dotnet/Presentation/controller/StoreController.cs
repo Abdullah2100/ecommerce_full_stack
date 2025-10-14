@@ -16,7 +16,6 @@ namespace ecommerc_dotnet.Presentation.controller;
 [ApiController]
 [Route("api/Store")]
 public class StoreController(
-    IHubContext<StoreHub> hubContext,
     IStoreServices storeServices,
     IAuthenticationService authenticationService
 )
@@ -116,12 +115,7 @@ public class StoreController(
 
         var result = await storeServices.updateStoreStatus(adminId.Value, storeId);
 
-        if (result.IsSeccessful)
-            await hubContext.Clients.All.SendAsync("storeStatus", new StoreStatusDto
-            {
-                StoreId = storeId,
-                Status = true
-            });
+          
 
         return result.IsSeccessful switch
         {

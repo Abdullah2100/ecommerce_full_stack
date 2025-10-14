@@ -9,7 +9,9 @@ using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.infrastructure;
 using ecommerc_dotnet.shared.extentions;
+using ecommerc_dotnet.shared.signalr;
 using hotel_api.util;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ecommerc_dotnet.application.Services;
 
@@ -17,7 +19,9 @@ public class StoreServices(
     IWebHostEnvironment host,
     IConfig config,
     IFileServices fileServices,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IHubContext<StoreHub> hubContext
+
 )
     : IStoreServices
 {
@@ -402,6 +406,12 @@ public class StoreServices(
                 isSeccessful: false,
                 statusCode: 400
             );
+        
+        await hubContext.Clients.All.SendAsync("storeStatus", new StoreStatusDto
+        {
+            StoreId = storeId,
+            Status = true
+        });
         return new Result<bool?>
         (
             data: true,

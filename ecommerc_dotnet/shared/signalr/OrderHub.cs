@@ -17,9 +17,9 @@ public class OrderHub : Hub
     }
 
 
-    public async Task updatingStoreStatus(StoreStatusDto status)
+    public async Task updateOrderStatus(UpdateOrderStatusDto status)
     {
-        await Clients.All.SendAsync("storeStatus", status);
+        await Clients.All.SendAsync("orderStatus", status);
     }
 
 
