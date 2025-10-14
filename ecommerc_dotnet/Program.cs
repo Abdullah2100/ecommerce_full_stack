@@ -78,15 +78,16 @@ builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
 //     Credential = firebaseCredential
 // });
 
-
+var corsName = "AllowAllOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins", policy =>
+    options.AddPolicy(corsName, policy =>
     {
         policy
             .WithOrigins("http://localhost:3000")
             .AllowAnyMethod() // Allows any HTTP methods (GET, POST, etc.)
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
@@ -133,8 +134,8 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+//           AllowAllOrigins
 
-app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
@@ -144,12 +145,20 @@ app.UseStaticFiles(new StaticFileOptions
         Path.Combine(builder.Environment.ContentRootPath, "images")),
     RequestPath = "/StaticFiles"
 });
+
+
+app.UseRouting();  
+
+app.UseCors(corsName);
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.MapHub<BannerHub>("/bannerHub");
-app.MapHub<OrderHub>("/bannerHub");
-app.MapHub<OrderItemHub>("/bannerHub");
-app.MapHub<StoreHub>("/bannerHub");
+app.MapHub<OrderHub>("/orderHub"); 
+app.MapHub<OrderItemHub>("/orderItemHub"); 
+app.MapHub<StoreHub>("/storeHub"); 
+
 app.ConfigureExceptionHandler();
 app.Run();

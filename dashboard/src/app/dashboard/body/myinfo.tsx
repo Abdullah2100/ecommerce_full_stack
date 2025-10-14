@@ -1,18 +1,18 @@
 import { Label } from "@/components/ui/label"
-import { getMyInfo, updateUser } from "../../../stores/data"
-import { useMutation, useQuery } from "@tanstack/react-query";
+import * as reactQuery from "@tanstack/react-query";
 import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { iUserUpdateInfoDto } from "../../../dto/response/iUserUpdateInfoDto";
-import edite from '../../../../public/edite.svg'
-import user from '../../../../public/user.svg'
+import edite from '../../../../public/images/edite.svg'
+import user from '../../../../public/images/user.svg'
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { replaceUrlWithNewUrl } from "@/util/globle";
+import { getMyInfo, updateUser } from "@/lib/api/user";
 
 const MyInfoPage = () => {
-    const { data, refetch } = useQuery({
+    const { data, refetch } = reactQuery.useQuery({
         queryKey: ['myinfo'],
         queryFn: () => getMyInfo()
     })
@@ -29,7 +29,7 @@ const MyInfoPage = () => {
     const inputRef = useRef<HTMLInputElement>(null);
 
 
-    const updateUserData = useMutation(
+    const updateUserData = reactQuery.useMutation(
         {
             mutationFn: (userData: iUserUpdateInfoDto) => updateUser(userData),
             onError: (e) => {

@@ -1,11 +1,9 @@
-import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
+import { getProductAtPage, getProductPages } from "@/lib/api/product";
+import { changeUserStatus, getUserAtPage } from "@/lib/api/user";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { changeUserStatus, createVarient, deleteVarient, getProductAtPage, getProductPages, getUserAtPage, getUserPages, getVarient, updateVarient } from "../../../stores/data";
-import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
-import { Button } from "@/components/ui/button";
 
 const Product = () => {
     const queryClient = useQueryClient()

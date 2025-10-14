@@ -17,7 +17,12 @@ namespace ecommerc_dotnet.Presentation.dto
         public int Status { get; set; }
         public List<OrderItemDto>? OrderItems { get; set; } = null;
     }
-    
+
+    public class AdminOrderDto
+    {
+        public List<OrderDto>? Orders { get; set; }
+        public int pageNum { get; set; } = 1;
+    }
     public class DeliveryOrderDto
     {
         public Guid Id { get; set; }

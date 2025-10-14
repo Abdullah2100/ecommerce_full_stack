@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.application.Interface;
+using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.Presentation.dto;
 using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -46,8 +47,38 @@ public class OrderController(IOrderServices orderServices) : ControllerBase
             _ => StatusCode(result.StatusCode, result.Message)
         };
     }
+    
+    [HttpGet("orderStatusDeffination")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> getOrderStatus()
+    {
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+        Guid? adminId = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
+        {
+            adminId = outId;
+        }
 
+        if (adminId is null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+        
+        var result = await orderServices.getOrdersStatus(adminId.Value);
 
+        return result.IsSeccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };  
+
+    }
+    
     [HttpGet("all/{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]

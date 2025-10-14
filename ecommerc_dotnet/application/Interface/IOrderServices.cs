@@ -9,7 +9,7 @@ public interface IOrderServices
     Task<Result<List<OrderDto>>> getMyOrders(Guid userId,int pageNum,int pageSize);
     
     //order for admin
-    Task<Result<List<OrderDto>>> getOrders(Guid userId,int pageNum,int pageSize);
+    Task<Result<AdminOrderDto?>> getOrders(Guid userId,int pageNum,int pageSize);
 
     Task<Result<bool>> updateOrderStatus(Guid id, int status);
     
@@ -23,4 +23,5 @@ public interface IOrderServices
    Task<Result<bool>> cancelOrderFromDelivery(Guid id,Guid deliveryId);
 
 
+   Task<Result<List<string>>> getOrdersStatus(Guid adminId);
 }

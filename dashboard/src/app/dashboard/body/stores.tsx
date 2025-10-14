@@ -2,11 +2,9 @@ import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { changeStoreStatus, changeUserStatus, createVarient, deleteVarient, getStoreAtPage, getStorePages, getUserAtPage, getUserPages, getVarient, updateVarient } from "../../../stores/data";
-import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "@/components/ui/button";
-import { getStaticProps } from "next/dist/build/templates/pages";
+import { changeStoreStatus, getStoreAtPage, getStorePages } from "@/lib/api/store";
 
 const Stores = () => {
     const queryClient = useQueryClient()

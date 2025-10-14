@@ -5,6 +5,7 @@ import com.example.eccomerce_app.di.dataBaseModule
 import com.example.eccomerce_app.di.httpClientModule
 import com.example.eccomerce_app.di.repositoryModel
 import com.example.eccomerce_app.di.viewModelModel
+import com.example.eccomerce_app.di.webSocketClientModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -19,6 +20,8 @@ class MyApplication : Application() {
                 httpClientModule,
                 viewModelModel,
                 repositoryModel,
+                webSocketClientModule
+
             )
         }
     }

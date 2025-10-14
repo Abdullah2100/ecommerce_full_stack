@@ -2,10 +2,6 @@ package com.example.eccomerce_app.di
 
 import android.util.Log
 import com.example.eccomerce_app.data.Room.AuthDao
-import com.example.eccomerce_app.util.Secrets
-import com.microsoft.signalr.HubConnection
-import com.microsoft.signalr.HubConnectionBuilder
-import com.microsoft.signalr.TransportEnum
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.HttpTimeout
@@ -95,20 +91,7 @@ null
     }
 }
 
-fun socketClient(): HubConnection? {
-    try {
-        val connectionUrl=Secrets.getBaseUrl().replace("/api","")+"/bannerHub"
-        return  HubConnectionBuilder
-            .create(connectionUrl)
-            .withTransport(TransportEnum.LONG_POLLING)
-            .build()
-    }catch(e: Exception){
-        return null
-    }
-}
 
 val httpClientModule = module {
     single { provideHttpClient(get()) }
-    single { socketClient() }
-
 }

@@ -2,10 +2,10 @@ import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { changeUserStatus, createVarient, deleteVarient, getUserAtPage, getUserPages, getVarient, updateVarient } from "../../../stores/data";
 import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "@/components/ui/button";
+import { changeUserStatus, getUserAtPage, getUserPages } from "@/lib/api/user";
 
 const Users = () => {
     const queryClient = useQueryClient()
@@ -26,7 +26,9 @@ const Users = () => {
     useEffect(() => {
         queryClient.prefetchQuery({
             queryKey: ['users', currnetPage],
-            queryFn: () => getUserAtPage(currnetPage),
+            queryFn: () => {
+                return getUserAtPage(currnetPage);
+            },
         })
     }, [currnetPage])
 

@@ -23,6 +23,18 @@ public class OrderServices(
     IHubContext<OrderHub> hubContext)
     : IOrderServices
 {
+    
+    public static List<string> OrderStatus = new List<string>
+    {
+        "Regected",
+        "Inprogress",
+        "Excpected",
+        "Inway",
+        "Received",
+        "Completed",
+    };
+
+    
     private async Task<Result<bool>?> isValideDelivery(Guid id, bool isAdmin = false)
     {
         if (!isAdmin)
@@ -218,15 +230,15 @@ public class OrderServices(
     }
 
     //for admin dashboard
-    public async Task<Result<List<OrderDto>>> getOrders(Guid userId, int pageNum, int pageSize)
+    public async Task<Result<AdminOrderDto?>> getOrders(Guid userId, int pageNum, int pageSize)
     {
         Result<bool>? isValide = await isValideDelivery(userId, true);
 
         if (isValide is not null)
         {
-            return new Result<List<OrderDto>>
+            return new Result<AdminOrderDto?>
             (
-                data: new List<OrderDto>(),
+                data:null,
                 message: isValide.Message,
                 isSeccessful: false,
                 statusCode: isValide.StatusCode
@@ -238,9 +250,12 @@ public class OrderServices(
             .Select(o => o.toDto(config.getKey("url_file")))
             .ToList();
 
-        return new Result<List<OrderDto>>
+        int orderPages = (int)Math.Ceiling((double)orders.Count / pageSize);
+
+        var holder = new AdminOrderDto { Orders = orders,pageNum = orderPages};
+        return new Result<AdminOrderDto?>
         (
-            data: orders,
+            data: holder,
             message: "",
             isSeccessful: true,
             statusCode: 200
@@ -506,5 +521,28 @@ public class OrderServices(
             isSeccessful: true,
             statusCode: 204
         );
+    }
+
+    public async Task<Result<List<string>>> getOrdersStatus(Guid adminId)
+    {
+        User? user =await unitOfWork.UserRepository.getUser(adminId);
+        var  isValide = user.isValidateFunc();
+
+        if (isValide is not null)
+        {
+            return new Result<List<string>>(
+                data:new List<string>(),
+                message: isValide.Message,
+                isSeccessful: false,
+                statusCode: isValide.StatusCode
+            );
+        } 
+        
+        return   new Result<List<string>>(
+            data:OrderStatus,
+            message: isValide.Message,
+            isSeccessful: false,
+            statusCode: isValide.StatusCode
+        ); 
     }
 }

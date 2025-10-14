@@ -2,18 +2,13 @@ import { Label } from "@/components/ui/label";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import Image from "next/image";
-import {
-  createCategory,
-  deleteCategory,
-  getCategory,
-  updateCategory,
-} from "../../../stores/data";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
-import { DeleteIcon } from "../../../../public/delete";
+import { DeleteIcon } from "../../../../public/images/delete";
 import iCategoryDto from "../../../dto/response/iCategoryDto";
-import edite from "../../../../public/edite.svg";
+import edite from "../../../../public/images/edite.svg";
 import { replaceUrlWithNewUrl } from "@/util/globle";
+import { createCategory, deleteCategory, getCategory, updateCategory } from "@/lib/api/category";
 
 const Category = () => {
   const [category, setCategory] = useState<iCategoryDto>({

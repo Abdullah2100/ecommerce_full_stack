@@ -1,15 +1,14 @@
 "use client"
 import InputWithTitle from "@/components/ui/input/inputWithTitle";
 import { Label } from "@/components/ui/label";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { createVarient, deleteVarient, getVarient, updateVarient } from "../../../stores/data";
-import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import { iVarient } from "../../../model/iVarient";
 import { Button } from "@/components/ui/button";
-import { EditeIcon } from "../../../../public/editeIcon";
-import { DeleteIcon } from "../../../../public/delete";
+import { EditeIcon } from "../../../../public/images/editeIcon";
+import { DeleteIcon } from "../../../../public/images/delete";
+import { createVarient, deleteVarient, getVarient, updateVarient } from "@/lib/api/variant";
 
 const Varient = () => {
     const [varient, setVarient] = useState<iVarient>({

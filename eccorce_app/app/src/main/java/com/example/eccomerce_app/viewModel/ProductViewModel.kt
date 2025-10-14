@@ -25,11 +25,11 @@ import java.util.UUID
 
 class ProductViewModel(
     val productRepository: ProductRepository,
-    val webSocket: HubConnection?
+//    val webSocket: HubConnection?
 ) : ViewModel() {
 
 
-     val _hub = MutableStateFlow<HubConnection?>(null)
+//     val _hub = MutableStateFlow<HubConnection?>(null)
 
      val _products = MutableStateFlow<List<ProductModel>?>(null)
     val products = _products.asStateFlow()
@@ -39,7 +39,7 @@ class ProductViewModel(
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
-
+/*
     fun connection() {
 
         if (webSocket != null) {
@@ -79,7 +79,7 @@ class ProductViewModel(
         }
         super.onCleared()
     }
-
+*/
     fun getProducts(
         pageNumber: MutableState<Int>,
         isLoading: MutableState<Boolean>? = null
