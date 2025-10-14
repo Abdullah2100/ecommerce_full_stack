@@ -4,6 +4,74 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 insert into "GeneralSettings"("Id","Name","Value","CreatedAt") 
 VALUES(uuid_generate_v4(),'one_kilo_price',150,CURRENT_TIMESTAMP);
 
+--triger for prevent deleted the orderItems  after it is complated received
+CREATE OR REPLACE FUNCTION Fun_prevent_delete_orderItem()
+RETURNS Trigger As $$
+DECLARE
+orderItemStatus INT :=0;
+BEGIN
+ SELECT "Status" into orderItemStatus FROM "OrdersItems" where "Id"=OLD."Id";
+ if orderStatus>3 THEN
+   RETURN NULL;
+ END IF;
+ return OLD;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tr_prevent_delete_orderItem
+BEFORE DELETE ON "OrdersItems" FOR EACH ROW EXECUTE FUNCTION Fun_prevent_delete_orderItem();
+
+--triger for prevent uppdate the order after it is complated
+CREATE OR REPLACE FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes()
+RETURNS Trigger As $$
+DECLARE
+orderStatus INT :=0;
+BEGIN
+  if(OLD."Status">New."Status")
+   return null;
+ return NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tr_prevent_delete_orderItem 
+BEFORE UPDATE ON "OrdersItems"   FOR EACH ROW EXECUTE FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes();
+
+
+
+
+--triger for prevent deleted the order after it is complated
+CREATE OR REPLACE FUNCTION Fun_prevent_delete_order()
+RETURNS Trigger As $$
+DECLARE
+orderStatus INT :=0;
+BEGIN
+ SELECT "Status" into orderStatus FROM "Orders" where "Id"=OLD."Id";
+ if(orderStatus>3)
+   return null;
+ return OLD;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tr_prevent_delete_order 
+BEFORE DELETE ON "Orders"   FOR EACH ROW EXECUTE FUNCTION Fun_prevent_delete_order();
+
+--triger for prevent uppdate the order after it is complated
+CREATE OR REPLACE FUNCTION fun_prevent_update_order_to_less_state_of_previes()
+RETURNS Trigger As $$
+DECLARE
+orderStatus INT :=0;
+BEGIN
+  if(OLD."Status">New."Status")
+   return null;
+ return NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tr_prevent_delete_order 
+BEFORE UPDATE ON "Orders"   FOR EACH ROW EXECUTE FUNCTION fun_prevent_update_order_to_less_state_of_previes()
+
+
+
 CREATE OR REPLACE FUNCTION calculate_order_item_price(OrderItemId UUID,product_price NUMERIC )
 RETURNS NUMERIC AS $$
 DECLARE

@@ -1,14 +1,12 @@
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using System.Text.Json;
 using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using Exception = System.Exception;
 
-namespace hotel_api.Services.EmailService;
+namespace ecommerc_dotnet.application;
 
-public class Email(IConfig config) : IEmail
+public class EmailServices(IConfig config) : IMessageSerivice 
 {
     public async Task<bool> sendingMessage(string message, string to)
     {

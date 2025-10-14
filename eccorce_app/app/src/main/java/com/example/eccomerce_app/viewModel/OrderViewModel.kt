@@ -22,10 +22,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+import javax.inject.Named
 
 class OrderViewModel(
     val orderRepository: OrderRepository,
-    val webSocket: HubConnection?
+    @Named("orderHub")  val webSocket: HubConnection?
 
 ) : ViewModel() {
      val _hub = MutableStateFlow<HubConnection?>(null)

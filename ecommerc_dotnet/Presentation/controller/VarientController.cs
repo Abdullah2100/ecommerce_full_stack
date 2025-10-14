@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -11,14 +11,13 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/Varient")]
-public class VarientController : ControllerBase
-{
-    public VarientController(IVarientServices varientServices)
-    {
-        _varientServices = varientServices;
-    }
+public class VarientController(
+    IVarientServices variantServices,
+    IAuthenticationService authenticationService
 
-    private readonly IVarientServices _varientServices;
+    ) : ControllerBase
+{
+    
 
 
     [HttpPost("")]
@@ -29,7 +28,7 @@ public class VarientController : ControllerBase
     public async Task<IActionResult> createVarient([FromBody] CreateVarientDto varient)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -43,7 +42,7 @@ public class VarientController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _varientServices.createVarient(varient, adminId.Value);
+        var result = await variantServices.createVarient(varient, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -60,7 +59,7 @@ public class VarientController : ControllerBase
     public async Task<IActionResult> updateVarient([FromBody] UpdateVarientDto varient)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -74,7 +73,7 @@ public class VarientController : ControllerBase
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await _varientServices.updateVarient(varient, adminId.Value);
+        var result = await variantServices.updateVarient(varient, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -91,7 +90,7 @@ public class VarientController : ControllerBase
     public async Task<IActionResult> deleteVarient(Guid varientId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -106,7 +105,7 @@ public class VarientController : ControllerBase
         }
 
 
-        var result = await _varientServices.deleteVarient(varientId, adminId.Value);
+        var result = await variantServices.deleteVarient(varientId, adminId.Value);
 
         return result.IsSeccessful switch
         {
@@ -124,7 +123,7 @@ public class VarientController : ControllerBase
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
-        var result = await _varientServices.getVarients(pageNumber, 25);
+        var result = await variantServices.getVarients(pageNumber, 25);
 
         return result.IsSeccessful switch
         {

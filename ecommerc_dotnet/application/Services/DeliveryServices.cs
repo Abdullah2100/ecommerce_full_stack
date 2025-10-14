@@ -9,7 +9,6 @@ using ecommerc_dotnet.dto;
 using ecommerc_dotnet.infrastructure;
 using ecommerc_dotnet.Presentation.dto;
 using ecommerc_dotnet.shared.extentions;
-using hotel_api.Services;
 using hotel_api.util;
 
 namespace ecommerc_dotnet.application.Services;
@@ -25,7 +24,8 @@ public class DeliveryServices(
     IWebHostEnvironment host,
     IUnitOfWork unitOfWork,
     IFileServices fileServices,
-    IUserServices userServices
+    IUserServices userServices,
+    IAuthenticationService authenticationService
 )
     : IDeliveryServices
 {
@@ -97,15 +97,13 @@ public class DeliveryServices(
 
 
         string? token = null, refreshToken = null;
-        token = AuthinticationUtil.generateToken(
-            userId: delivery.Id,
-            email: delivery.User.Email,
-            config);
+        token = authenticationService.generateToken(
+            id: delivery.Id,
+            email: delivery.User.Email);
 
-        refreshToken = AuthinticationUtil.generateToken(
-            userId: delivery.Id,
+        refreshToken = authenticationService.generateToken(
+            id: delivery.Id,
             email: delivery.User.Email,
-            config,
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(

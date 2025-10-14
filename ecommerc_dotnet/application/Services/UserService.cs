@@ -10,7 +10,6 @@ using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.Presentation.dto;
 using ecommerc_dotnet.shared.extentions;
-using hotel_api.Services;
 using hotel_api.util;
 
 namespace ecommerc_dotnet.application.Services;
@@ -18,8 +17,8 @@ namespace ecommerc_dotnet.application.Services;
 public class UserService(
     IConfig config,
     IFileServices fileServices,
-    IEmail email,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IAuthenticationService authenticationService
 )
     : IUserServices
 {
@@ -118,15 +117,13 @@ public class UserService(
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationUtil.generateToken(
-            userId: userId,
-            email: signupDto.Email,
-            config);
+        token = authenticationService.generateToken(
+            id: userId,
+            email: signupDto.Email);
 
-        refreshToken = AuthinticationUtil.generateToken(
-            userId: userId,
+        refreshToken = authenticationService.generateToken(
+            id: userId,
             email: signupDto.Email,
-            config,
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
@@ -158,15 +155,13 @@ public class UserService(
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationUtil.generateToken(
-            userId: user.Id,
-            email: user.Email,
-            config);
+        token = authenticationService.generateToken(
+            id: user.Id,
+            email: user.Email);
 
-        refreshToken = AuthinticationUtil.generateToken(
-            userId: user.Id,
+        refreshToken = authenticationService.generateToken(
+            id: user.Id,
             email: user.Email,
-            config,
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
@@ -759,7 +754,7 @@ public class UserService(
             );
         }
 
-        var SendMessageSerivce = new SendMessageSerivcies(email);
+        var SendMessageSerivce = new SendMessageSerivcies(new EmailServices(config));
         bool emailSendResult = await SendMessageSerivce.sendMessage(message: otp, otp);
 
         if (!emailSendResult)
@@ -898,15 +893,14 @@ public class UserService(
 
         string token = "", refreshToken = "";
 
-        token = AuthinticationUtil.generateToken(
-            userId: user.Id,
-            email: user.Email,
-            config);
+        token = authenticationService.generateToken(
+            id: user.Id,
+            email: user.Email
+            );
 
-        refreshToken = AuthinticationUtil.generateToken(
-            userId: user.Id,
+        refreshToken = authenticationService.generateToken(
+            id: user.Id,
             email: user.Email,
-            config,
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(

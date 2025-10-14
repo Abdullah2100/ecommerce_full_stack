@@ -43,8 +43,7 @@ const Order = () => {
     mutationFn: (orderStatus: iOrderStatusUpdateRequestDto) =>
       updateOrderStatus(orderStatus),
     onError: (e) => {
-      var result = toast; //.error(e.message);
-      result;
+       toast.error(e.message);
     },
     onSuccess: (res) => {
       toast.success("تم التعديل بنجاح");

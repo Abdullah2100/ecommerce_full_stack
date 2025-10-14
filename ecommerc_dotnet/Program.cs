@@ -12,7 +12,6 @@ using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.shared.signalr;
-using hotel_api.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -25,7 +24,12 @@ builder.Services.AddOptions();
 
 
 builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
-builder.Services.AddTransient<IEmail, Email>();
+builder.Services.AddTransient<IMessageSerivice, EmailServices>();
+builder.Services.AddTransient<IMessageSerivice, NotificationServices>();
+
+builder.Services.AddTransient<IAuthenticationService, AuthenticationServices>();
+
+
 
 //respoitory 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
@@ -65,6 +69,7 @@ builder.Services.AddTransient<IDeliveryServices, DeliveryServices>();
 builder.Services.AddTransient<IProductSerivces, ProductServices>();
 builder.Services.AddTransient<IOrderServices, OrderServices>();
 builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
+builder.Services.AddTransient<IRefreshTokenServices, RefreshTokenServices>();
 
 
 // var fireBaseConfig = Path.Combine(

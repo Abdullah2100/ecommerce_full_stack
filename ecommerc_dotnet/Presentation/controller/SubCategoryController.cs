@@ -1,8 +1,8 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -12,7 +12,10 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/SubCategory")]
-public class SubCategoryController(ISubCategoryServices subCategoryServices) : ControllerBase
+public class SubCategoryController(
+    ISubCategoryServices subCategoryServices,
+    IAuthenticationService authenticationService
+    ) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -22,7 +25,7 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
     public async Task<IActionResult> creatSubCategory([FromBody] CreateSubCategoryDto subCategory)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -54,7 +57,7 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
     public async Task<IActionResult> updateSubCategory([FromBody] UpdateSubCategoryDto subCategory)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -89,7 +92,7 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -121,7 +124,7 @@ public class SubCategoryController(ISubCategoryServices subCategoryServices) : C
     public async Task<IActionResult> getSubCategory(int page)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;

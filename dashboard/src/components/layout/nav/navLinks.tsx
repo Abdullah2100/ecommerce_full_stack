@@ -21,7 +21,7 @@ export interface iNavProp {
 }
 
 const NavLink = ({ selectedIndex, setSelectedIndex, isNewOrder }: iNavProp) => {
-  const { getOrdersAt,changeHasNewOrderStatus } = useOrder();
+  const { getOrdersAt,changeHasNewOrderStatus,getOrderStatus } = useOrder();
 
   const navLinkItems: iNavItemProp[] = [
     {
@@ -96,6 +96,7 @@ const NavLink = ({ selectedIndex, setSelectedIndex, isNewOrder }: iNavProp) => {
       chageSelectedIndex: (index) => {
         setSelectedIndex(index);
         getOrdersAt(1);
+        getOrderStatus();
         changeHasNewOrderStatus(false)
       },
     },

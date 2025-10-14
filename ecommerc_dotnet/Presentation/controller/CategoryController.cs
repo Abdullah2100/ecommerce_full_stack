@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -11,7 +11,9 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/Category")]
-public class CategoryController(ICategoryServices categoryServices) : ControllerBase
+public class CategoryController(
+    ICategoryServices categoryServices,
+    IAuthenticationService authenticationService) : ControllerBase
 {
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -21,7 +23,7 @@ public class CategoryController(ICategoryServices categoryServices) : Controller
     public async Task<IActionResult> createCategory([FromForm] CreateCategoryDto category)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -53,7 +55,7 @@ public class CategoryController(ICategoryServices categoryServices) : Controller
         [FromForm] UpdateCategoryDto category)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -83,7 +85,7 @@ public class CategoryController(ICategoryServices categoryServices) : Controller
     public async Task<IActionResult> deleteCategory(Guid categoryId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;

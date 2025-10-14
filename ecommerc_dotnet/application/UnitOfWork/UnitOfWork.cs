@@ -43,7 +43,16 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<int> saveChanges()
     {
-        return await _context.SaveChangesAsync();
+        try
+        {
+            return await _context.SaveChangesAsync();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"this the exption error {ex.Message}");
+            return 0;
+        }
     }
 
     public IAddressRepository AddressRepository { get; }

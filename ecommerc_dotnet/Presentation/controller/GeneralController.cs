@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto.Request;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -11,7 +11,9 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/General")]
-public class GeneralController(IGeneralSettingServices generalSettingServices) : ControllerBase
+public class GeneralController(
+    IGeneralSettingServices generalSettingServices,
+    IAuthenticationService authenticationService) : ControllerBase
 {
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -23,7 +25,7 @@ public class GeneralController(IGeneralSettingServices generalSettingServices) :
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -59,7 +61,7 @@ public class GeneralController(IGeneralSettingServices generalSettingServices) :
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -96,7 +98,7 @@ public class GeneralController(IGeneralSettingServices generalSettingServices) :
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? admin = null;

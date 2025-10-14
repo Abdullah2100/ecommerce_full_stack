@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -11,7 +11,9 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/Banner")]
-public class BannerController(IBannerSerivces bannerSerivces) : ControllerBase
+public class BannerController(
+    IBannerSerivces bannerSerivces,
+    IAuthenticationService authenticationService) : ControllerBase
 {
     [HttpPost("")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -23,7 +25,7 @@ public class BannerController(IBannerSerivces bannerSerivces) : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -57,7 +59,7 @@ public class BannerController(IBannerSerivces bannerSerivces) : ControllerBase
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -109,7 +111,7 @@ public class BannerController(IBannerSerivces bannerSerivces) : ControllerBase
     public async Task<IActionResult> getBannerRandom(int pageNumber)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;

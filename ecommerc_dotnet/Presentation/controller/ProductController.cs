@@ -1,7 +1,7 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -11,7 +11,10 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/Product")]
-public class ProductController(IProductSerivces productSerivces) : ControllerBase
+public class ProductController(
+    IProductSerivces productServices,
+    IAuthenticationService authenticationService
+    ) : ControllerBase
 {
     [HttpGet("store/{storeId}/{pageNumber:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -23,7 +26,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await productSerivces.getProductsByStoreId(storeId,pageNumber,25);
+        var result = await productServices.getProductsByStoreId(storeId,pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -42,7 +45,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
-        var result = await productSerivces.getProductsByCategoryId(categoryId,pageNumber,25);
+        var result = await productServices.getProductsByCategoryId(categoryId,pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -64,7 +67,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await productSerivces.getProducts(
+        var result = await productServices.getProducts(
             storeId,
             subcategoryId,
             pageNumber,
@@ -86,7 +89,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await productSerivces.getProducts(pageNumber,25);
+        var result = await productServices.getProducts(pageNumber,25);
 
         return result.IsSeccessful switch
         {
@@ -107,7 +110,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid adminId = Guid.Empty;
@@ -121,7 +124,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await productSerivces.getProductsForAdmin(adminId,
+        var result = await productServices.getProductsForAdmin(adminId,
             pageNumber,
             25);
 
@@ -146,7 +149,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -160,7 +163,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await productSerivces.createProducts(
+        var result = await productServices.createProducts(
             userId,product);
 
         return result.IsSeccessful switch
@@ -183,7 +186,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -197,7 +200,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await productSerivces.updateProducts(
+        var result = await productServices.updateProducts(
             userId,product);
 
         return result.IsSeccessful switch
@@ -219,7 +222,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -232,7 +235,7 @@ public class ProductController(IProductSerivces productSerivces) : ControllerBas
         {
             return Unauthorized("هناك مشكلة في التحقق");
         }
-        var result = await productSerivces.deleteProducts(
+        var result = await productServices.deleteProducts(
             userId,productId);
 
         return result.IsSeccessful switch

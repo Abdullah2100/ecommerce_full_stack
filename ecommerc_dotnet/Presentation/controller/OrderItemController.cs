@@ -1,8 +1,8 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.application.services;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.Presentation.dto;
-using hotel_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -13,7 +13,9 @@ namespace ecommerc_dotnet.Presentation.controller;
 [Authorize]
 [ApiController]
 [Route("api/OrderItems")]
-public class OrderItemController(IOrderItemServices orderItemServices) : ControllerBase
+public class OrderItemController(
+    IOrderItemServices orderItemServices,
+    IAuthenticationService authenticationService) : ControllerBase
 {
     [HttpGet("{pageNumber}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -29,7 +31,7 @@ public class OrderItemController(IOrderItemServices orderItemServices) : Control
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -65,7 +67,7 @@ public class OrderItemController(IOrderItemServices orderItemServices) : Control
         ([FromBody] UpdateOrderItemStatusDto orderItemStatusDto)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = AuthinticationUtil.GetPayloadFromToken("id",
+        Claim? id = authenticationService.getPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;

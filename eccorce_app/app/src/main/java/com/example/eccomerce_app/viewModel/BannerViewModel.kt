@@ -17,9 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
+import javax.inject.Named
 
 class BannerViewModel(
-    val bannerRepository: BannerRepository,
+    @Named("bannerHub")   val bannerRepository: BannerRepository,
     val webSocket: HubConnection?
 
 ) : ViewModel() {

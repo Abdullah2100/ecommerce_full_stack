@@ -87,7 +87,7 @@ const useOrder = create<IOrder>((set, get) => ({
         errorMessage = error.message;
       }
 
-      throw new Error(errorMessage);
+      // throw new Error(errorMessage);
     }
   },
   updateOrderStatus: async (

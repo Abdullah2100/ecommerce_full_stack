@@ -4,6 +4,7 @@ using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.domain.Interface;
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.application.Result;
+using ecommerc_dotnet.di.email;
 using ecommerc_dotnet.Presentation.dto;
 using ecommerc_dotnet.mapper;
 using ecommerc_dotnet.midleware.ConfigImplment;
@@ -20,10 +21,10 @@ namespace ecommerc_dotnet.application.Services;
 public class OrderServices(
     IUnitOfWork unitOfWork,
     IConfig config,
+    IMessageSerivice messageSerivice,
     IHubContext<OrderHub> hubContext)
     : IOrderServices
 {
-    
     public static List<string> OrderStatus = new List<string>
     {
         "Regected",
@@ -34,7 +35,7 @@ public class OrderServices(
         "Completed",
     };
 
-    
+
     private async Task<Result<bool>?> isValideDelivery(Guid id, bool isAdmin = false)
     {
         if (!isAdmin)
@@ -162,7 +163,7 @@ public class OrderServices(
 
 
         int result = await unitOfWork.saveChanges();
-        
+
 
         if (result == 0)
         {
@@ -176,7 +177,7 @@ public class OrderServices(
         }
 
         var isSavedDistance = await unitOfWork.OrderRepository.isSavedDistanceToOrder(order.Id);
-        
+
         if (isSavedDistance == false)
         {
             return new Result<OrderDto?>
@@ -238,7 +239,7 @@ public class OrderServices(
         {
             return new Result<AdminOrderDto?>
             (
-                data:null,
+                data: null,
                 message: isValide.Message,
                 isSeccessful: false,
                 statusCode: isValide.StatusCode
@@ -252,7 +253,7 @@ public class OrderServices(
 
         int orderPages = (int)Math.Ceiling((double)orders.Count / pageSize);
 
-        var holder = new AdminOrderDto { Orders = orders,pageNum = orderPages};
+        var holder = new AdminOrderDto { Orders = orders, pageNum = orderPages };
         return new Result<AdminOrderDto?>
         (
             data: holder,
@@ -293,6 +294,8 @@ public class OrderServices(
                 statusCode: 400
             );
         }
+
+        sendNotificationToAllStore(order, status);
 
         return new Result<bool>
         (
@@ -525,24 +528,79 @@ public class OrderServices(
 
     public async Task<Result<List<string>>> getOrdersStatus(Guid adminId)
     {
-        User? user =await unitOfWork.UserRepository.getUser(adminId);
-        var  isValide = user.isValidateFunc();
+        User? user = await unitOfWork.UserRepository.getUser(adminId);
+        var isValide = user.isValidateFunc();
 
         if (isValide is not null)
         {
             return new Result<List<string>>(
-                data:new List<string>(),
+                data: new List<string>(),
                 message: isValide.Message,
                 isSeccessful: false,
                 statusCode: isValide.StatusCode
             );
-        } 
-        
-        return   new Result<List<string>>(
-            data:OrderStatus,
-            message: isValide.Message,
-            isSeccessful: false,
-            statusCode: isValide.StatusCode
-        ); 
+        }
+
+        return new Result<List<string>>(
+            data: OrderStatus,
+            message: "",
+            isSeccessful: true,
+            statusCode: 200
+        );
+    }
+
+    private async void sendNotificationToAllStore(Order order, int status)
+    {
+        try
+        {
+            var messageServe = new SendMessageSerivcies(new NotificationServices());
+
+            var userMessage = mobileMessage(status);
+            if (!string.IsNullOrEmpty(userMessage))
+            {
+                await messageServe.sendMessage(userMessage, order.User.deviceToken);
+            }
+
+            var orderItems = order.Items.ToList();
+
+            for (int i = 0; i < orderItems.Count; i++)
+            {
+                var orderItem = orderItems[i];
+                var cancelMessage = orderItem.Product.Name + " is Rejected For " + order.User.Name;
+                var storeMessage = this.storeMessage(status,cancelMessage);
+                if (!string.IsNullOrEmpty(storeMessage))
+                {
+                    await messageServe.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error from notification service: {e.Message}");
+        }
+    }
+
+    private string mobileMessage(int status)
+    {
+        return status switch
+        {
+            0 => "Your Order is Rejected",
+            2 => "Your Order Will Start Operation",
+            3 => "Your Order in Away to Your Place",
+            4 => "Your Order is Received",
+            5 => "Your Order is Delivered",
+            _ => ""
+        };
+    }
+
+    private string storeMessage(int status,string customMessage="")
+    {
+        return status switch
+        {
+            0 => customMessage,
+            2 => "There Are New Order For Your Store Check them",
+            5 => "Your Order is Delivered",
+            _ => ""
+        };
     }
 }
