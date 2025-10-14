@@ -294,8 +294,10 @@ public class OrderServices(
                 statusCode: 400
             );
         }
-
-        sendNotificationToAllStore(order, status);
+//this for notification operation for all user at the system
+        sendNotificationToStore(order, status);
+        sendNotificationToUser(order, status);
+        sendNotificationToDelivery(order, status);
 
         return new Result<bool>
         (
@@ -549,17 +551,11 @@ public class OrderServices(
         );
     }
 
-    private async void sendNotificationToAllStore(Order order, int status)
+    private async void sendNotificationToStore(Order order, int status)
     {
         try
         {
             var messageServe = new SendMessageSerivcies(new NotificationServices());
-
-            var userMessage = mobileMessage(status);
-            if (!string.IsNullOrEmpty(userMessage))
-            {
-                await messageServe.sendMessage(userMessage, order.User.deviceToken);
-            }
 
             var orderItems = order.Items.ToList();
 
@@ -567,7 +563,7 @@ public class OrderServices(
             {
                 var orderItem = orderItems[i];
                 var cancelMessage = orderItem.Product.Name + " is Rejected For " + order.User.Name;
-                var storeMessage = this.storeMessage(status,cancelMessage);
+                var storeMessage = this.storeMessage(status, cancelMessage);
                 if (!string.IsNullOrEmpty(storeMessage))
                 {
                     await messageServe.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
@@ -580,7 +576,68 @@ public class OrderServices(
         }
     }
 
-    private string mobileMessage(int status)
+    private async void sendNotificationToUser(Order order, int status)
+    {
+        try
+        {
+            var messageServe = new SendMessageSerivcies(new NotificationServices());
+
+            var userMessage = this.userMessage(status);
+            if (!string.IsNullOrEmpty(userMessage))
+            {
+                await messageServe.sendMessage(userMessage, order.User.deviceToken);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error from notification service: {e.Message}");
+        }
+    }
+
+    private async void sendNotificationToDelivery(Order order, int status)
+    {
+        try
+        {
+            var messageServe = new SendMessageSerivcies(new NotificationServices());
+
+            var deliveryMessage = this.delivaryMessage(status);
+
+            Delivery? delivery = null;
+            if (order.DeleveryId is not null)
+            {
+                delivery = await unitOfWork.DeliveryRepository.getDelivery(order.DeleveryId ?? Guid.Empty);
+            }
+
+            switch (status)
+            {
+                case 1:
+                {
+                    await messageServe.sendMessage(deliveryMessage, delivery.User.deviceToken);
+                }
+                    break;
+                case 2:
+                {
+                    var deliveries = await unitOfWork.DeliveryRepository.getDeliveries();
+                    for (int i = 0; i < deliveries.Count; i++)
+                    {messageServe.sendMessage(deliveryMessage, deliveries[i].User.deviceToken);
+                    }
+                }
+                    break;
+                case 3:
+                {
+                    await messageServe.sendMessage(deliveryMessage, delivery.User.deviceToken);
+                }
+                    break;
+            }
+        }
+        catch
+            (Exception e)
+        {
+            Console.WriteLine($"Error from notification service: {e.Message}");
+        }
+    }
+
+    private string userMessage(int status)
     {
         return status switch
         {
@@ -593,7 +650,18 @@ public class OrderServices(
         };
     }
 
-    private string storeMessage(int status,string customMessage="")
+    private string delivaryMessage(int status)
+    {
+        return status switch
+        {
+            0 => "Order is Rejected",
+            2 => "New Order Is Added Check",
+            5 => "Your Order is Received",
+            _ => ""
+        };
+    }
+
+    private string storeMessage(int status, string customMessage = "")
     {
         return status switch
         {

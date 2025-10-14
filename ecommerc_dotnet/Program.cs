@@ -12,6 +12,8 @@ using ecommerc_dotnet.infrastructure.repositories;
 using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using ecommerc_dotnet.shared.signalr;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -72,16 +74,16 @@ builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
 builder.Services.AddTransient<IRefreshTokenServices, RefreshTokenServices>();
 
 
-// var fireBaseConfig = Path.Combine(
-//     Directory.GetCurrentDirectory(), 
-//     "firebase-adminsdk.json"
-// );
+ var fireBaseConfig = Path.Combine(
+     Directory.GetCurrentDirectory(), 
+     "librarynotification-notification.json"
+ );
 
-// var firebaseCredential = GoogleCredential.FromFile(fireBaseConfig);
-// FirebaseApp.Create(new AppOptions()
-// {
-//     Credential = firebaseCredential
-// });
+ var firebaseCredential = GoogleCredential.FromFile(fireBaseConfig);
+FirebaseApp.Create(new AppOptions()
+{
+     Credential = firebaseCredential
+ });
 
 var corsName = "AllowAllOrigins";
 builder.Services.AddCors(options =>

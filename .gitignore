@@ -18,7 +18,8 @@ Migrations/
 images/
 obj/
 bin/
-firebase-adminsdk.json
+
+librarynotification-notification.json
 
 # Build results
 [Dd]ebug/

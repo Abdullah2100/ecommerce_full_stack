@@ -363,7 +363,7 @@ public class DeliveryServices(
 
 
         List<DeliveryDto>? deliveryDto = (await unitOfWork.DeliveryRepository
-                .getDeliveryByBelongTo(id, pageNumber, pageSize))
+                .getDeliveriesByBelongTo(id, pageNumber, pageSize))
             ?.Select((de) => de.toDto(config.getKey("url_file")))
             ?.ToList();
 

@@ -78,7 +78,7 @@ public class DeliveryRepository(
         return delivery; 
     }
 
-    public async Task<List<Delivery>?> getDeliveryByBelongTo(Guid belongToId,int page, int size)
+    public async Task<List<Delivery>?> getDeliveriesByBelongTo(Guid belongToId,int page, int size)
     {
         List<Delivery> deliveries = await context
             .Deliveries
@@ -95,6 +95,16 @@ public class DeliveryRepository(
         }
 
         return deliveries;
+    }
+
+    public async Task<List<Delivery>?> getDeliveries()
+    {
+        var delivery= (await context
+            .Deliveries
+            .AsNoTracking()
+            .Include(de => de.User).ToListAsync());
+        
+        return delivery;  
     }
 
     public async Task<DeliveryAnalysDto> getDeliveryAnalys(Guid id)
