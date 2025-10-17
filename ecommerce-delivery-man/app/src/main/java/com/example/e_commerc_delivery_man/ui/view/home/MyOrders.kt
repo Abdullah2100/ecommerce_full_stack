@@ -2,6 +2,7 @@ package com.example.e_commerc_delivery_man.ui.view.home
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +13,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,6 +37,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +64,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -70,6 +76,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commerc_delivery_man.Util.General
@@ -91,6 +98,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
+import kotlin.system.exitProcess
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,7 +131,6 @@ fun MyOrdersScreen(
     }
 
 
-
     val page = remember { mutableIntStateOf(1) }
 
 
@@ -141,18 +148,18 @@ fun MyOrdersScreen(
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
-                        val selectedOrderData = orders.value?.firstOrNull() { it.id==selectedId }
+                        val selectedOrderData = orders.value?.firstOrNull() { it.id == selectedId }
                         data?.let { location ->
                             nav.navigate(
                                 Screens.Map(
                                     lognit = selectedOrderData?.longitude,
                                     latitt = selectedOrderData?.latitude,
                                     title = selectedOrderData?.name,
-                                    additionLat = location.latitude ,
-                                    additionLong =  location.longitude ,
+                                    additionLat = location.latitude,
+                                    additionLong = location.longitude,
                                     isFromLogin = false,
                                     mapType = enMapType.TrackOrder,
-                                    id=selectedId.value.toString()
+                                    id = selectedId.value.toString()
                                 )
                             )
 
@@ -170,6 +177,15 @@ fun MyOrdersScreen(
                 }
             }
         })
+    val requestCameraPermission = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { permission ->
+            if (permission) {
+               nav.navigate(Screens.QrScanner)
+            }
+        }
+    )
+
 
 
 
@@ -217,15 +233,26 @@ fun MyOrdersScreen(
                 )
         },
         floatingActionButton = {
-            Column(
+            FloatingActionButton(
+                onClick = {
+                    requestCameraPermission.launch(Manifest.permission.CAMERA)
+                },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 65.dp)
-                    .offset(x = 16.dp),
+//                    .padding(bottom = 20.dp)
+                    .navigationBarsPadding()
             ) {
-
+                Image(
+                    imageVector = ImageVector
+                        .vectorResource(
+                            R.drawable.camera_scanner
+                        ),
+                    "",
+                    colorFilter = ColorFilter.tint(Color.Black)
+                )
             }
-        }
+        },
+        floatingActionButtonPosition = FabPosition.EndOverlay
+
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()

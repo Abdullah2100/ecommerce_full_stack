@@ -18,6 +18,7 @@ public static class OrderItemMapperExtention
             Price = item.Price,
             Product = item.ToOrderProductDto(url),
             Quanity = item?.Quanity ?? 0,
+            OrderStatusName = item.Order.Status.toOrderStatusName(),
             Address = item.Store?.Addresses==null ||item.Store.Addresses.Count<1? new List<AddressWithTitleDto>():
                 item.Store?.Addresses.Select(ad=>
                 new AddressWithTitleDto() 

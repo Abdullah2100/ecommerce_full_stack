@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 import java.io.File
+import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Calendar
@@ -121,5 +122,12 @@ object General {
 
     fun String.removeTheSingle():String{
         return this.replace("\'","");
+    }
+
+    fun ByteBuffer.toByteArray(): ByteArray{
+        rewind()
+        return ByteArray(remaining()).also{
+            get(it)}
+
     }
 }

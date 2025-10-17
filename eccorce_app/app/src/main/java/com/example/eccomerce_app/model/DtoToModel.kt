@@ -185,7 +185,9 @@ object DtoToModel {
             productVariant = if (this.productVarient.isNullOrEmpty())
                 listOf()
             else this.productVarient.map { it.toOrderVarient() },
-            orderItemStatus = this.orderItemStatus
+            orderItemStatus = this.orderItemStatus,
+            orderStatusName = this.orderStatusName,
+            orderId = this.orderId
         )
     }
 

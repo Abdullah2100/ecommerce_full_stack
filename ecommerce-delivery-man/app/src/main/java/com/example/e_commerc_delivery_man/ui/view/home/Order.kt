@@ -1,18 +1,15 @@
 package com.example.e_commerc_delivery_man.ui.view.home
 
-import android.Manifest
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,8 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -46,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -128,15 +126,15 @@ fun OrdersScreen(
 
                     try {
                         val data = fusedLocationClient.lastLocation.await()
-                        val selectedOrderData = orders.value?.firstOrNull() { it.id==selectedId }
+                        val selectedOrderData = orders.value?.firstOrNull() { it.id == selectedId }
                         data?.let { location ->
                             nav.navigate(
                                 Screens.Map(
                                     lognit = selectedOrderData?.longitude,
                                     latitt = selectedOrderData?.latitude,
                                     title = selectedOrderData?.name,
-                                    additionLat = location.latitude ,
-                                    additionLong =  location.longitude ,
+                                    additionLat = location.latitude,
+                                    additionLong = location.longitude,
                                     isFromLogin = false,
                                     mapType = enMapType.TrackOrder,
                                     id = selectedId.value.toString()
@@ -161,7 +159,7 @@ fun OrdersScreen(
 
     LaunchedEffect(reachedBottom.value) {
 
-        if (!orders.value.isNullOrEmpty() && reachedBottom.value && orders.value!!.size>23) {
+        if (!orders.value.isNullOrEmpty() && reachedBottom.value && orders.value!!.size > 23) {
             orderViewModel.getOrders(
                 page,
                 isLoadingMore
@@ -187,25 +185,27 @@ fun OrdersScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
-        topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier.padding(end = 15.dp),
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                ),
-                title = {
-                    Text(
-                        "Orders",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = (24).sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center
-                    )
-                },
 
-                )
-        },
+        /*    topBar = {
+                CenterAlignedTopAppBar(
+                    modifier = Modifier.padding(end = 15.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White
+                    ),
+                    title = {
+                        Text(
+                            "Orders",
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = (24).sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center
+                        )
+                    },
+
+                    )
+            },
+    */
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -264,18 +264,19 @@ fun OrdersScreen(
                     .background(Color.Gray.copy(alpha = 0.01f)),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(items = orders.value as List<Order>, key = { it -> it.id }) { order ->
-                    OrderComponent(
-                        order = order,
-                        isCancel = true,
-                        screenWidth = screenWidth,
-                        isSendingData = isSendingData,
-                        requestPermission = requestPermission,
-                        snackBarHostState = snackBarHostState,
-                        orderViewModel = orderViewModel,
-                        selectedId = selectedId
-                    )
-                }
+                if (!orders.value.isNullOrEmpty())
+                    items(items = orders.value as List<Order>, key = { it -> it.id }) { order ->
+                        OrderComponent(
+                            order = order,
+                            isCancel = true,
+                            screenWidth = screenWidth,
+                            isSendingData = isSendingData,
+                            requestPermission = requestPermission,
+                            snackBarHostState = snackBarHostState,
+                            orderViewModel = orderViewModel,
+                            selectedId = selectedId
+                        )
+                    }
                 if (isLoadingMore.value) {
                     item {
                         Box(

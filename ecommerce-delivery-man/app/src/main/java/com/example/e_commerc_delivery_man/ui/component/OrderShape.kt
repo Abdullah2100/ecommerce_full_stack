@@ -298,8 +298,7 @@ fun OrderComponent(
                                         ) {
 
                                             Text(
-                                                (value.varient_name
-                                                    ?: "") + ": ",
+                                                value.varient_name + ": ",
                                                 fontFamily = General.satoshiFamily,
                                                 fontWeight = FontWeight.Normal,
                                                 fontSize = (16).sp,

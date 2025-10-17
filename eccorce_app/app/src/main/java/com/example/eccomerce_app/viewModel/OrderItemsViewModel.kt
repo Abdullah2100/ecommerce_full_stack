@@ -11,6 +11,7 @@ import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderItemsStatusEvent
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.OrderItemRepository
+import com.example.eccomerce_app.dto.OrderUpdateStatusDto
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -23,28 +24,52 @@ import javax.inject.Named
 
 class OrderItemsViewModel(
     val orderItemRepository: OrderItemRepository,
-    @Named("orderItemHub")   val webSocket: HubConnection?
-
+    @Named("orderItemHub") val orderItmeHub: HubConnection?,
+    @Named("orderHub") val orderHub: HubConnection?,
 ) : ViewModel() {
-     val _hub = MutableStateFlow<HubConnection?>(null)
 
-     val _orderItemForMyStore = MutableStateFlow<List<OrderItem>?>(null)
+    val _orderItemSocket = MutableStateFlow<HubConnection?>(null)
+    val _orderSocket = MutableStateFlow<HubConnection?>(null)
+
+
+    val _orderItemForMyStore = MutableStateFlow<List<OrderItem>?>(null)
     val orderItemForMyStore = _orderItemForMyStore.asStateFlow()
 
-     val _coroutineException = CoroutineExceptionHandler { _, message ->
+    val _coroutineException = CoroutineExceptionHandler { _, message ->
         Log.d("ErrorMessageIs", message.message.toString())
     }
 
 
     fun connection() {
 
-        if (webSocket != null) {
+        if (orderItmeHub != null) {
             viewModelScope.launch(Dispatchers.IO + _coroutineException) {
 
-                _hub.emit(webSocket)
-                _hub.value?.start()?.blockingAwait()
+                _orderItemSocket.emit(orderItmeHub)
+                _orderSocket.emit(orderHub)
 
-                _hub.value?.on(
+                _orderItemSocket.value?.start()?.blockingAwait()
+                _orderSocket.value?.start()?.blockingAwait()
+                _orderSocket.value?.on(
+                    "orderStatus",
+                    { response ->
+
+                        val orderUpdateData = _orderItemForMyStore.value?.map { data->
+                            if(data.orderId==response.id){
+                                data.copy(orderStatusName = response.status)
+                            }
+                            else data
+                        }
+
+
+                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                            _orderItemForMyStore.emit(orderUpdateData)
+                        }
+                    },
+                    OrderUpdateStatusDto::class.java
+                )
+
+                _orderItemSocket.value?.on(
                     "orderExceptedByAdmin",
                     { response ->
                         val orderItemList = mutableListOf<OrderItem>()
@@ -59,7 +84,7 @@ class OrderItemsViewModel(
                     },
                     OrderDto::class.java
                 )
-                _hub.value?.on(
+                _orderItemSocket.value?.on(
                     "orderItemsStatusChange",
                     { response ->
                         val myStoreOrderItemHolder = _orderItemForMyStore.value?.map {
@@ -90,8 +115,10 @@ class OrderItemsViewModel(
 
     override fun onCleared() {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            if (_hub.value != null)
-                _hub.value!!.stop()
+            if (_orderItemSocket.value != null) {
+                _orderItemSocket.value?.stop()
+                _orderSocket.value?.stop()
+            }
         }
         super.onCleared()
     }
@@ -106,7 +133,7 @@ class OrderItemsViewModel(
                 isLoading.value = true
                 delay(500)
             }
-            val result = orderItemRepository.getMyOrderItemForStoreId( pageNumber.value)
+            val result = orderItemRepository.getMyOrderItemForStoreId(pageNumber.value)
             when (result) {
                 is NetworkCallHandler.Successful<*> -> {
                     val data = result.data as List<OrderItemDto>

@@ -26,6 +26,8 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
     }
 
 
+
+
     public async Task<IEnumerable<OrderItem>> getOrderItems(
         Guid storeId,
         int pageNum,
@@ -33,6 +35,7 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
     )
     {
         return await context.OrderItems
+            .Include(oi => oi.Order)
             .Include(oi => oi.Product)
             .Include(oi => oi.OrderProductsVarients)
             .Include(oi => oi.Store)

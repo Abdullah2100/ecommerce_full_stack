@@ -16,7 +16,7 @@ public static class OrderMapperExtention
             Name = order.User.Name,
             Longitude = order.Longitude,
             Latitude = order.Latitude,
-            Status = order.Status,
+            Status = order.Status.toOrderStatusName(),
             TotalPrice = order.TotalPrice,
             UserPhone = order.User.Phone,
             OrderItems = order

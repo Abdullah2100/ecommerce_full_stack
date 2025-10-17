@@ -2,9 +2,9 @@ package com.example.e_commerc_delivery_man.data.repository
 
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.util.Secrets
-import com.example.e_commercompose.dto.response.VariantDto
 import com.example.eccomerce_app.dto.response.OrderItemResponseDto
 import com.example.eccomerce_app.dto.response.OrderDto
+import com.example.eccomerce_app.dto.response.UpdateOrderStatus
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -12,6 +12,7 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.patch
+import io.ktor.client.request.put
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import java.io.IOException
@@ -63,14 +64,13 @@ class OrderRepository(val client: HttpClient) {
     }
 
 
-//user
 
+    suspend fun updateOrderStatus(orderUpdate: UpdateOrderStatus): NetworkCallHandler
+    {
 
-    //varient
-    suspend fun getVarient(pageNumber: Int = 1): NetworkCallHandler {
         try {
-            val result = client.get(
-                Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
+            val result = client.put(
+                Secrets.getBaseUrl() + "/Delivery"
             ) {
                 headers {
                     append(
@@ -78,24 +78,27 @@ class OrderRepository(val client: HttpClient) {
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
+
             }
             return if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<VariantDto>>())
-            } else if (result.status == HttpStatusCode.NoContent) {
-                NetworkCallHandler.Error("No Data Found")
+                NetworkCallHandler.Successful(true)
             } else {
                 NetworkCallHandler.Error(result.body())
             }
-
-        } catch (e: UnknownHostException) {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: IOException) {
+        }
+        catch (e: UnknownHostException)
+        {
 
             return NetworkCallHandler.Error(e.message)
 
-        } catch (e: Exception) {
+        }
+        catch (e: IOException)
+        {
+
+            return NetworkCallHandler.Error(e.message)
+
+        } catch (e: Exception)
+        {
 
             return NetworkCallHandler.Error(e.message)
         }
@@ -121,15 +124,20 @@ class OrderRepository(val client: HttpClient) {
             } else {
                 NetworkCallHandler.Error(result.body())
             }
-        } catch (e: UnknownHostException) {
+        }
+        catch (e: UnknownHostException)
+        {
 
             return NetworkCallHandler.Error(e.message)
 
-        } catch (e: IOException) {
+        }
+        catch (e: IOException)
+        {
 
             return NetworkCallHandler.Error(e.message)
 
-        } catch (e: Exception) {
+        } catch (e: Exception)
+        {
 
             return NetworkCallHandler.Error(e.message)
         }

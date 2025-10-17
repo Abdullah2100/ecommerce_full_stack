@@ -14,6 +14,7 @@ import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderItemsStatusEvent
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.OrderRepository
+import com.example.eccomerce_app.dto.OrderUpdateStatusDto
 import com.microsoft.signalr.HubConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ class OrderViewModel(
     @Named("orderHub")  val webSocket: HubConnection?
 
 ) : ViewModel() {
-     val _hub = MutableStateFlow<HubConnection?>(null)
+     val _orderSocket = MutableStateFlow<HubConnection?>(null)
 
      val _orders = MutableStateFlow<List<Order>?>(null)
     val orders = _orders.asStateFlow()
@@ -44,10 +45,28 @@ class OrderViewModel(
         if (webSocket != null) {
             viewModelScope.launch(Dispatchers.IO + _coroutineException) {
 
-                _hub.emit(webSocket)
-                _hub.value?.start()?.blockingAwait()
+                _orderSocket.emit(webSocket)
+                _orderSocket.value?.start()?.blockingAwait()
+                _orderSocket.value?.on(
+                    "orderStatus",
+                    { response ->
 
-                _hub.value?.on(
+                          val orderUpdateData = _orders.value?.map { data->
+                              if(data.id==response.id){
+                                  data.copy(status = response.status)
+                              }
+                              else data
+                          }
+
+
+                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                            _orders.emit(orderUpdateData)
+                        }
+                    },
+                    OrderUpdateStatusDto::class.java
+                )
+
+                _orderSocket.value?.on(
                     "orderItemsStatusChange",
                     { response ->
 
@@ -86,8 +105,8 @@ class OrderViewModel(
 
     override fun onCleared() {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            if (_hub.value != null)
-                _hub.value!!.stop()
+            if (_orderSocket.value != null)
+                _orderSocket.value!!.stop()
         }
         super.onCleared()
     }

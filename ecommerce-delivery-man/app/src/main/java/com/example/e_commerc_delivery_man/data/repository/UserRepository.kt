@@ -95,7 +95,6 @@ class UserRepository(val client: HttpClient) {
         address: Address? = null,
         thumbnail: File? = null,
         userInfo: UpdateMyInfo? = null
-
     ): NetworkCallHandler {
         try {
             val result = client.put(

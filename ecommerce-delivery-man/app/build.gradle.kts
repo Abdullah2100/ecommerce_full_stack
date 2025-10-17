@@ -156,6 +156,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.compose.runntime)
 
+    //scanner qr
+    implementation("androidx.camera:camera-core:1.5.1")
+    implementation("androidx.camera:camera-camera2:1.5.1")
+    implementation("androidx.camera:camera-lifecycle:1.5.1")
+    implementation("androidx.camera:camera-view:1.5.1")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+
+
     //googleMap
     implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)

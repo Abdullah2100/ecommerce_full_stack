@@ -58,7 +58,7 @@ import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
-import com.example.eccomerce_app.ui.component.OrderItemForMyStoreShape
+import com.example.eccomerce_app.ui.component.OrderItemShape
 import com.example.eccomerce_app.viewModel.OrderItemsViewModel
 import com.example.eccomerce_app.viewModel.UserViewModel
 import kotlinx.coroutines.async
@@ -232,10 +232,11 @@ fun OrderForMyStoreScreen(
                                 .padding(vertical = 10.dp, horizontal = 10.dp)
                         )
                         {
-                            OrderItemForMyStoreShape(
+                            OrderItemShape(
                                 orderItem = order,
                                 context = context,
-                                screenWidth = screenWidth
+                                screenWidth = screenWidth,
+                                isShowOrderStatus = true
 
                             )
                             Sizer(10)
@@ -244,8 +245,8 @@ fun OrderForMyStoreScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             )
                             {
-                                when (order.orderItemStatus) {
-                                    "Cancelled" -> {
+                                when  {
+                                    order.orderItemStatus== "Cancelled" || order.orderStatusName=="Regected" -> {
                                         Box(
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
@@ -260,7 +261,11 @@ fun OrderForMyStoreScreen(
 
                                     }
 
-                                    "Excepted" -> {
+                                    order.orderItemStatus==  "Excepted"
+                                            || order.orderStatusName =="Completed"
+                                            || order.orderStatusName =="Received"
+                                            || order.orderStatusName =="Inway"
+                                        -> {
                                         Box(
                                             modifier = Modifier.fillMaxWidth()
                                         ) {

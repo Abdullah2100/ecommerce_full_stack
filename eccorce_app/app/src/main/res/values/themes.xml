@@ -8,4 +8,9 @@
         <item name="postSplashScreenTheme">@android:style/Theme.Material.NoActionBar</item>
 <!--        <item name="android:statusBarColor">@color/white</item>-->
     </style>
+
+    <style name="roundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
 </resources>

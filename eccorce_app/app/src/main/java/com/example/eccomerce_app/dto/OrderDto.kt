@@ -14,10 +14,16 @@ data class OrderDto(
     val totalPrice: Double,
     val deliveryFee: Double,
     val userPhone: String,
-    val status:Int,
+    val status:String,
     val orderItems:List<OrderItemDto>
 )
 
+@Serializable
+data class OrderUpdateStatusDto(
+    @Serializable(with = UUIDKserialize::class)
+    val id: UUID,
+    val status:String,
+)
 @Serializable
 data class CreateOrderDto(
     val Longitude: Double,

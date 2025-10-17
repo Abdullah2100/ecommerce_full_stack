@@ -162,6 +162,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.compose.runntime)
 
+    //qc
+    implementation("network.chaintech:qr-kit:1.0.8")
+
     //google map
     implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)

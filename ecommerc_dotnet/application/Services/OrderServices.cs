@@ -27,10 +27,10 @@ public class OrderServices(
 {
     public static List<string> OrderStatus = new List<string>
     {
-        "Regected",
+        "Rejected",
         "Inprogress",
-        "Excpected",
-        "Inway",
+        "Accepted",
+        "In away",
         "Received",
         "Completed",
     };
@@ -281,6 +281,7 @@ public class OrderServices(
 
         order.Status = status;
 
+
         unitOfWork.OrderRepository.update(order);
         int result = await unitOfWork.saveChanges();
 
@@ -295,16 +296,18 @@ public class OrderServices(
             );
         }
 
-        await hubContext.Clients.All.SendAsync("orderStatus", new UpdateOrderStatusDto
+        await hubContext.Clients.All.SendAsync("orderStatus", new UpdateOrderStatusEventDto 
         {
             Id = order.Id,
-            Status = status
+            Status = OrderStatus[status]
         });
-        
+
         //this for notification operation for all user at the system
-        sendNotificationToStore(order, status);
-        sendNotificationToUser(order, status);
-        sendNotificationToDelivery(order, status);
+        var messageServe = new SendMessageSerivcies(new NotificationServices());
+
+        await sendNotificationToStore(order, status,messageServe);
+        await sendNotificationToUser(order, status,messageServe);
+        await sendNotificationToDelivery(order, status,messageServe);
 
         return new Result<bool>
         (
@@ -558,11 +561,10 @@ public class OrderServices(
         );
     }
 
-    private async void sendNotificationToStore(Order order, int status)
+    private async Task sendNotificationToStore(Order order, int status, SendMessageSerivcies sendMessageSerivcies)
     {
         try
         {
-            var messageServe = new SendMessageSerivcies(new NotificationServices());
 
             var orderItems = order.Items.ToList();
 
@@ -573,7 +575,7 @@ public class OrderServices(
                 var storeMessage = this.storeMessage(status, cancelMessage);
                 if (!string.IsNullOrEmpty(storeMessage))
                 {
-                    await messageServe.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
+                    await sendMessageSerivcies.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
                 }
             }
         }
@@ -583,16 +585,14 @@ public class OrderServices(
         }
     }
 
-    private async void sendNotificationToUser(Order order, int status)
+    private async Task sendNotificationToUser(Order order, int status, SendMessageSerivcies? sendMessageSerivcies = null)
     {
         try
         {
-            var messageServe = new SendMessageSerivcies(new NotificationServices());
-
             var userMessage = this.userMessage(status);
             if (!string.IsNullOrEmpty(userMessage))
             {
-                await messageServe.sendMessage(userMessage, order.User.deviceToken);
+                await sendMessageSerivcies.sendMessage(userMessage, order.User.deviceToken);
             }
         }
         catch (Exception e)
@@ -601,11 +601,10 @@ public class OrderServices(
         }
     }
 
-    private async void sendNotificationToDelivery(Order order, int status)
+    private async Task sendNotificationToDelivery(Order order, int status, SendMessageSerivcies sendMessageSerivcies)
     {
         try
         {
-            var messageServe = new SendMessageSerivcies(new NotificationServices());
 
             var deliveryMessage = this.delivaryMessage(status);
 
@@ -619,20 +618,21 @@ public class OrderServices(
             {
                 case 1:
                 {
-                    await messageServe.sendMessage(deliveryMessage, delivery.User.deviceToken);
+                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.User.deviceToken);
                 }
                     break;
                 case 2:
                 {
                     var deliveries = await unitOfWork.DeliveryRepository.getDeliveries();
                     for (int i = 0; i < deliveries.Count; i++)
-                    {messageServe.sendMessage(deliveryMessage, deliveries[i].User.deviceToken);
+                    {
+                        sendMessageSerivcies.sendMessage(deliveryMessage, deliveries[i].User.deviceToken);
                     }
                 }
                     break;
                 case 3:
                 {
-                    await messageServe.sendMessage(deliveryMessage, delivery.User.deviceToken);
+                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.User.deviceToken);
                 }
                     break;
             }

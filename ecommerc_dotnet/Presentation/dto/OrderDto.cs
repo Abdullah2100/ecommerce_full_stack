@@ -14,7 +14,7 @@ namespace ecommerc_dotnet.Presentation.dto
         public decimal DeliveryFee { get; set; }
         public String Name { get; set; }
         public String UserPhone { get; set; }
-        public int Status { get; set; }
+        public string Status { get; set; }
         public List<OrderItemDto>? OrderItems { get; set; } = null;
     }
 
@@ -55,5 +55,10 @@ namespace ecommerc_dotnet.Presentation.dto
     {
         public Guid Id { get; set; }
         public int Status { get; set; } 
+    }
+    public class UpdateOrderStatusEventDto
+    {
+        public Guid Id { get; set; }
+        public string Status { get; set; } 
     }
 }

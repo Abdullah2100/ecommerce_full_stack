@@ -43,7 +43,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
-
-        notificationManager.notify(0, notification)
+        val currentTime = System.currentTimeMillis().toInt()
+        notificationManager.notify(currentTime, notification)
     }
 }

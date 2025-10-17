@@ -25,3 +25,10 @@ data class OrderUpdateEvent(
     @Serializable(with = UUIDKserialize::class)
     val deliveryId: UUID,
 )
+
+@Serializable
+data class UpdateOrderStatus(
+    @Serializable(with = UUIDKserialize::class)
+    val id: UUID,
+    val status:Int=5
+)

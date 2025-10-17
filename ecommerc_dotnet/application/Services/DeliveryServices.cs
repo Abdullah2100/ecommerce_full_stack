@@ -45,6 +45,7 @@ public class DeliveryServices(
                 loginDto.Username,
                 clsUtil.hashingText(loginDto.Password));
 
+
         var isValide = user.isValidateFunc(isAdmin: false);
 
         if (isValide is not null)
@@ -154,7 +155,7 @@ public class DeliveryServices(
         string? deliveryThumnail = null;
         if (deliveryDto.Thumbnail is not null)
         {
-            deliveryThumnail = await fileServices 
+            deliveryThumnail = await fileServices
                 .saveFile(
                     deliveryDto.Thumbnail,
                     EnImageType.DELIVERY);
@@ -404,28 +405,28 @@ public class DeliveryServices(
 
         if (deliveryDto.Longitude is not null && deliveryDto.Latitude is not null)
         {
-            var addressHolder = delivery.Address;
+            var addressHolder = delivery.Address ?? new Address()
+            {
+                Id = clsUtil.generateGuid(),
+                CreatedAt = DateTime.Now,
+                OwnerId = delivery.Id,
+                IsCurrent = true,
+                Title = "My Place"
+            };
             addressHolder.Longitude = deliveryDto.Longitude;
             addressHolder.Latitude = deliveryDto.Latitude;
             addressHolder.IsCurrent = true;
-
-            unitOfWork.AddressRepository.update(addressHolder);
+            if (delivery.Address is null)
+                unitOfWork.AddressRepository.add(addressHolder);
+            else
+                unitOfWork.AddressRepository.update(addressHolder);
         }
 
-        if (!isPassOperation)
-        {
-            return new Result<DeliveryDto>
-            (
-                data: null,
-                message: "could not update delivery address",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
 
+        
         var userUpdateData = new UpdateUserInfoDto
         {
-            Name = deliveryDto.Name,
+            Name = deliveryDto.Name ,
             Phone = deliveryDto.Phone,
             Thumbnail = deliveryDto.Thumbnail,
             Password = deliveryDto.Password,
@@ -444,28 +445,17 @@ public class DeliveryServices(
             delivery.Thumbnail = newThumbNail;
 
             unitOfWork.DeliveryRepository.update(delivery);
-             
         }
 
-        var result = await unitOfWork.saveChanges();
-        
         if (userUpdateData.isUpdateAnyFeild() is true)
         {
-            var updateUserData = await userServices.updateUser(userUpdateData, delivery!.UserId);
-
-            if (updateUserData.Data is not null)
-            {
-                return new Result<DeliveryDto>
-                (
-                    data: null,
-                    message: updateUserData.Message,
-                    isSeccessful: false,
-                    statusCode: updateUserData.StatusCode
-                );
-            }
+            await userServices.updateUser(userUpdateData, delivery!.UserId,true);
         }
         
-        if (result <1)
+        var result = await unitOfWork.saveChanges();
+
+
+        if (result < 1)
         {
             return new Result<DeliveryDto>
             (
@@ -475,7 +465,7 @@ public class DeliveryServices(
                 statusCode: 404
             );
         }
-        
+
 
         delivery = await unitOfWork.DeliveryRepository.getDelivery(delivery.Id);
 

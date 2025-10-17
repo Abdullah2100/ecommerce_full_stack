@@ -74,6 +74,7 @@ object Screens {
     @Serializable
     object Orders
 
-
+    @Serializable
+    object  QrScanner
 
 }

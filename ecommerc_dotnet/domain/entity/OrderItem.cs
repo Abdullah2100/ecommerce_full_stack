@@ -3,7 +3,7 @@ using ecommerc_dotnet.core.entity;
 
 namespace ecommerc_dotnet.domain.entity;
 
-public enum enOrderItemStatus {Cancelled,InProgress,Excepted,RecivedByDelivery, }
+public enum enOrderItemStatus {Cancelled,InProgress,Excepted,ReceivedByDelivery,Delivered }
 
 public class OrderItem
 {

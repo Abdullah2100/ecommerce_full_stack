@@ -1,5 +1,6 @@
 using ecommerc_dotnet.application.Result;
 using ecommerc_dotnet.dto;
+using ecommerc_dotnet.infrastructure;
 using ecommerc_dotnet.Presentation.dto;
 
 namespace ecommerc_dotnet.application.Interface;
@@ -16,7 +17,9 @@ public interface IUserServices
 
     public Task<Result<bool>> blockOrUnBlockUser(Guid id,Guid userId);
     
-    public Task<Result<UserInfoDto?>> updateUser(UpdateUserInfoDto userDto, Guid id);
+    public Task<Result<UserInfoDto?>> updateUser(
+        UpdateUserInfoDto userDto, Guid id
+        ,bool isUpdateWillBeUp=false);
 
     public Task<Result<AddressDto?>> addAddressToUser(CreateAddressDto addressDto, Guid id);
     public Task<Result<AddressDto?>> updateUserAddress(UpdateAddressDto addressDto, Guid id);

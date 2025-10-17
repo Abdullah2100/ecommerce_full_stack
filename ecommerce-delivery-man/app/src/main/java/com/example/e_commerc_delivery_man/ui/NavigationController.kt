@@ -20,6 +20,7 @@ import com.example.e_commerc_delivery_man.ui.view.account.ProfileScreen
 import com.example.e_commerc_delivery_man.ui.view.home.MyOrdersScreen
 import com.example.e_commerc_delivery_man.ui.view.home.HomePage
 import com.example.e_commerc_delivery_man.ui.view.home.OrdersScreen
+import com.example.e_commerc_delivery_man.ui.view.home.QrScannerPage
 import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 import com.example.eccomerce_app.ui.view.address.AddressHomeScreen
@@ -153,6 +154,24 @@ fun NavController(
                 )
             }
 
+
+            composable<Screens.QrScanner>(
+                enterTransition = {
+                    return@composable slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End, tween(750)
+                    )
+                },
+                exitTransition = {
+                    return@composable slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start, tween(750)
+                    )
+                }
+            ) {
+                QrScannerPage(
+                    nav = nav,
+                    orderViewModel =orderViewModel
+                )
+            }
 
 
 

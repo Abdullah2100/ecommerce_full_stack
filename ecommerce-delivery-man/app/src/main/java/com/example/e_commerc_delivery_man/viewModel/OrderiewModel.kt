@@ -21,6 +21,7 @@ import java.util.UUID
 import android.util.Log
 import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
 import com.example.eccomerce_app.dto.response.OrderUpdateEvent
+import com.example.eccomerce_app.dto.response.UpdateOrderStatus
 
 class OrderViewModel(
     val orderRepository: OrderRepository,
@@ -297,5 +298,32 @@ class OrderViewModel(
 
     }
 
+    //this function to handle if delivery collect the order from store or giving the order to user
+    suspend fun updateStatus(id: String): String? {
 
+        val idUUID = UUID.fromString(id)
+        val isInOrder = _orders.value?.firstOrNull { it.id == idUUID }
+
+        when (isInOrder) {
+            null -> {
+                val reqest = orderRepository.updateOrderStatus(UpdateOrderStatus(id = idUUID))
+                when (reqest) {
+                    is NetworkCallHandler.Successful<*> -> {
+                        return null;
+                    }
+
+                    is NetworkCallHandler.Error -> {
+                        return reqest.data
+                    }
+
+                }
+            }
+
+            else -> {
+
+            }
+        }
+        return null;
+
+    }
 }

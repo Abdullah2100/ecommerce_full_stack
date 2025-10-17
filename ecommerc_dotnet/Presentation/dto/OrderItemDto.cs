@@ -6,7 +6,8 @@ namespace ecommerc_dotnet.Presentation.dto
     public enum enOrderItemStatusDto
     {
         Excepted,
-        Cancelled
+        Cancelled,
+        TakedByDelivery
     }
 
     public class OrderItemDto
@@ -15,6 +16,7 @@ namespace ecommerc_dotnet.Presentation.dto
         public Guid OrderId { get; set; }
         public decimal Price { get; set; }
         public int Quanity { get; set; }
+        public string OrderStatusName { get; set; }
         public List<AddressWithTitleDto>? Address { get; set; } = null;
         public OrderProductDto? Product { get; set; }
         public List<OrderVarientDto>? ProductVarient { get; set; } = null;

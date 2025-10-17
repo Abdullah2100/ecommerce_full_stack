@@ -30,6 +30,7 @@ public class OrderRepository(AppDbContext context)
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
+                .Include(oi=>oi.Order)
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
@@ -54,6 +55,7 @@ public class OrderRepository(AppDbContext context)
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
+                .Include(oi=>oi.Order) 
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
@@ -101,8 +103,10 @@ public class OrderRepository(AppDbContext context)
             .FirstOrDefaultAsync(o => o.Id == id);
         if (order is null) return null;
         order.Items = await context.OrderItems
+            .Include(oi => oi.Order)
             .Include(oi => oi.Product)
             .Include(oi => oi.Store)
+            .AsNoTracking()
             .AsSplitQuery()
             .Where(oi => oi.OrderId == order.Id)
             .ToListAsync();
@@ -119,6 +123,7 @@ public class OrderRepository(AppDbContext context)
             .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
         if (order is null) return null;
         order.Items = await context.OrderItems
+            .Include(oi => oi.Order)
             .Include(oi => oi.Product)
             .Include(oi => oi.Store)
             .AsSplitQuery()
@@ -140,7 +145,7 @@ public class OrderRepository(AppDbContext context)
         return await context
             .OrderItems
             .AsNoTracking()
-            .AnyAsync(i => i.OrderId == id && i.Status == enOrderItemStatus.RecivedByDelivery
+            .AnyAsync(i => i.OrderId == id && i.Status == enOrderItemStatus.ReceivedByDelivery
             );
     }
 
@@ -210,6 +215,7 @@ public class OrderRepository(AppDbContext context)
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
+                .Include(it => it.Order)
                 .Include(it => it.OrderProductsVarients)
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
@@ -264,6 +270,7 @@ public class OrderRepository(AppDbContext context)
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
+                .Include(oi => oi.Order)
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
                 .AsSplitQuery()

@@ -29,7 +29,7 @@ val viewModelModel = module {
     single { UserViewModel(get(), get(), get()) }
     single { GeneralSettingViewModel(get()) }
     single { OrderViewModel(get(), get(named("orderHub"))) }
-    single { OrderItemsViewModel(get(), get(named("orderItemHub"))) }
+    single { OrderItemsViewModel(get(), get(named("orderItemHub")),get(named("orderHub"))) }
     single { MapViewModel(get()) }
     single { DeliveryViewModel(get()) }
 }

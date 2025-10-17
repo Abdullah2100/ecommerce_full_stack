@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,7 +53,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.eccomerce_app.ui.component.OrderItemCartShape
+import com.example.eccomerce_app.ui.component.OrderItemShape
 import com.example.eccomerce_app.viewModel.OrderViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -64,6 +65,8 @@ import java.util.UUID
 fun OrderScreen(orderViewModel: OrderViewModel) {
 
     val context = LocalContext.current
+    val config = LocalConfiguration.current
+    val screenWidth = config.screenWidthDp
 
     val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
@@ -191,7 +194,12 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
 
                         ) {
                             order.orderItems.forEach { value ->
-                                OrderItemCartShape(value, context)
+                                OrderItemShape(
+                                    orderItem = value,
+                                    context = context,
+                                    screenWidth = screenWidth
+
+                                )
                                 Sizer(5)
 
                                 Row(
@@ -236,6 +244,31 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                     )
                                     Text(
                                         "$${order.deliveryFee}",
+
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                                Sizer(5)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                )
+                                {
+                                    Text(
+                                        "Order Status",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Text(
+                                        "${order.status}",
 
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Bold,

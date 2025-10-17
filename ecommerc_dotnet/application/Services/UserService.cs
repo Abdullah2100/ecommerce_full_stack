@@ -289,7 +289,8 @@ public class UserService(
 
     public async Task<Result<UserInfoDto?>> updateUser(
         UpdateUserInfoDto userDto,
-        Guid id)
+        Guid id,
+       bool isUpdateWillBeTop=false)
     {
         if (userDto.isEmpty())
             return new Result<UserInfoDto?>
@@ -363,8 +364,20 @@ public class UserService(
         user.Phone = userDto.Phone ?? user.Phone;
         user.UpdatedAt = DateTime.Now;
         user.Password = hashedPassword ?? user.Password;
+        
+         unitOfWork.UserRepository.update(user);
 
-        unitOfWork.UserRepository.update(user);
+        if (isUpdateWillBeTop)
+        {
+            return new Result<UserInfoDto?>
+            (
+                data: null,
+                message: "",
+                isSeccessful: true,
+                statusCode: 200
+            );  
+        }
+        
         int result = await unitOfWork.saveChanges();
 
         if (result == 0)
@@ -381,7 +394,7 @@ public class UserService(
         return new Result<UserInfoDto?>
         (
             data: user.toUserInfoDto(config.getKey("url_file")),
-            message: "password not corrected",
+            message: "",
             isSeccessful: true,
             statusCode: 200
         );

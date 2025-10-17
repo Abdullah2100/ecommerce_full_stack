@@ -1,5 +1,7 @@
 using ecommerc_dotnet.application.Interface;
 using ecommerc_dotnet.application.Result;
+using ecommerc_dotnet.application.services;
+using ecommerc_dotnet.core.entity;
 using ecommerc_dotnet.domain.entity;
 using ecommerc_dotnet.dto;
 using ecommerc_dotnet.infrastructure;
@@ -14,16 +16,17 @@ namespace ecommerc_dotnet.application.Services;
 public class OrderItemServices(
     IConfig config,
     IHubContext<OrderItemHub> hubContext,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IOrderServices orderServices
 )
     : IOrderItemServices
 {
     public async Task<Result<List<OrderItemDto>>> getOrderItmes(
-        Guid userId,
+        Guid storeId,
         int pageNum,
         int pageSize)
     {
-        User? user = await unitOfWork.UserRepository.getUser(userId);
+        User? user = await unitOfWork.UserRepository.getUser(storeId);
 
         var isValidate = user.isValidateFunc(isAdmin: false, isStore: true);
         if (isValidate is not null)
@@ -96,6 +99,12 @@ public class OrderItemServices(
         };
         await hubContext.Clients.All.SendAsync("orderItemsStatusChange", statusEvent);
 
+        bool isPassCondition = await isAlreadyOrderItemsIsCollectedByDelivery(orderItem.OrderId);
+        if (!isPassCondition && orderItemsStatusDto.Status==enOrderItemStatusDto.TakedByDelivery)
+        {
+         await   orderServices.updateOrderStatus(orderItem.OrderId, 3);
+        }
+
         return new Result<int>
         (
             data: 1,
@@ -103,5 +112,16 @@ public class OrderItemServices(
             isSeccessful: true,
             statusCode: 204
         );
+    }
+
+ 
+
+    private async Task<bool> isAlreadyOrderItemsIsCollectedByDelivery(Guid orderId)
+    {
+        var order = await unitOfWork.OrderRepository.getOrder(orderId);
+        bool isDeliveredByDelivery = false;
+        bool isStillOneOrderDevliveryNotTacked =
+            order.Items.Any(oi => oi.Status != enOrderItemStatus.ReceivedByDelivery);
+        return isStillOneOrderDevliveryNotTacked;
     }
 }
