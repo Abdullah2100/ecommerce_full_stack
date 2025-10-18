@@ -2,19 +2,23 @@ package com.example.e_commerc_delivery_man.data.repository
 
 import com.example.e_commerc_delivery_man.Util.General
 import com.example.e_commerc_delivery_man.util.Secrets
-import com.example.eccomerce_app.dto.response.OrderItemResponseDto
+import com.example.eccomerce_app.dto.response.OrderItemDto
 import com.example.eccomerce_app.dto.response.OrderDto
 import com.example.eccomerce_app.dto.response.UpdateOrderStatus
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.patch
 import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import java.io.IOException
 import java.net.UnknownHostException
 import java.util.UUID
@@ -39,7 +43,7 @@ class OrderRepository(val client: HttpClient) {
 
             if (result.status == HttpStatusCode.OK) {
 
-                NetworkCallHandler.Successful(result.body<List<OrderItemResponseDto>>())
+                NetworkCallHandler.Successful(result.body<List<OrderDto>>())
 
             } else if (result.status == HttpStatusCode.NoContent) {
                 NetworkCallHandler.Error("No Data Found")
@@ -70,7 +74,7 @@ class OrderRepository(val client: HttpClient) {
 
         try {
             val result = client.put(
-                Secrets.getBaseUrl() + "/Delivery"
+                Secrets.getBaseUrl() + "/Order"
             ) {
                 headers {
                     append(
@@ -78,6 +82,8 @@ class OrderRepository(val client: HttpClient) {
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
+                setBody(orderUpdate)
+                contentType(ContentType.Application.Json)
 
             }
             return if (result.status == HttpStatusCode.OK) {
@@ -105,43 +111,7 @@ class OrderRepository(val client: HttpClient) {
     }
 
 
-    //orders
-    suspend fun getOrders(pageNumber: Int): NetworkCallHandler {
-        try {
-            val result = client.get(
-                Secrets.getBaseUrl() + "/Delivery/${pageNumber}"
-            ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer ${General.authData.value?.refreshToken}"
-                    )
-                }
 
-            }
-            return if (result.status == HttpStatusCode.OK) {
-                NetworkCallHandler.Successful(result.body<List<OrderDto>>())
-            } else {
-                NetworkCallHandler.Error(result.body())
-            }
-        }
-        catch (e: UnknownHostException)
-        {
-
-            return NetworkCallHandler.Error(e.message)
-
-        }
-        catch (e: IOException)
-        {
-
-            return NetworkCallHandler.Error(e.message)
-
-        } catch (e: Exception)
-        {
-
-            return NetworkCallHandler.Error(e.message)
-        }
-    }
 
     suspend fun getOrdersBelongToMe(pageNumber: Int): NetworkCallHandler {
         try {

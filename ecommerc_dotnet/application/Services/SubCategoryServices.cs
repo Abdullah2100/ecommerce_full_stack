@@ -26,7 +26,7 @@ public class SubCategoryServices(
         if (isValide is not null)
         {
             return new Result<SubCategoryDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -42,7 +42,7 @@ public class SubCategoryServices(
             (
                 data: null,
                 message: "store can maximum 20 subcategories",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -68,7 +68,7 @@ public class SubCategoryServices(
             (
                 data: null,
                 message: "error while adding new subcategory",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -77,7 +77,7 @@ public class SubCategoryServices(
         (
             data: subCategory.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -92,7 +92,7 @@ public class SubCategoryServices(
             (
                 data: null,
                 message: "",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 200
             );
 
@@ -105,7 +105,7 @@ public class SubCategoryServices(
         if (isValide is not null)
         {
             return new Result<SubCategoryDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -121,7 +121,7 @@ public class SubCategoryServices(
             (
                 data: null,
                 message: "subcategory not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -134,7 +134,7 @@ public class SubCategoryServices(
             (
                 data: null,
                 message: "invalide category",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -152,7 +152,7 @@ public class SubCategoryServices(
             (
                 data: null,
                 message: "error while update subcategory",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -161,7 +161,7 @@ public class SubCategoryServices(
         (
             data: subCategory.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -176,7 +176,7 @@ public class SubCategoryServices(
         if (isValide is not null)
         {
             return new Result<bool>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: false,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -192,7 +192,7 @@ public class SubCategoryServices(
             (
                 data: false,
                 message: "subcategory not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -205,7 +205,7 @@ public class SubCategoryServices(
             (
                 data: false,
                 message: "error while deleting subcategory",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
 
@@ -213,7 +213,7 @@ public class SubCategoryServices(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -231,14 +231,14 @@ public class SubCategoryServices(
                 (
                     data: subCategories,
                     message: "",
-                    isSeccessful: true,
+                    isSuccessful: true,
                     statusCode: 200
                 ),
             _ => new Result<List<SubCategoryDto>>
             (
                 data: new List<SubCategoryDto>(),
                 message: "",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 204
             )
         };
@@ -256,7 +256,7 @@ public class SubCategoryServices(
         if (isValide is not null)
         {
             return new Result<List<SubCategoryDto>>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: new List<SubCategoryDto>(),
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -273,7 +273,7 @@ public class SubCategoryServices(
         (
             data: subcategories,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }

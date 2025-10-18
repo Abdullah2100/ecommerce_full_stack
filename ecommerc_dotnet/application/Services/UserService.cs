@@ -30,7 +30,7 @@ public class UserService(
             (
                 data: null,
                 message: "role must be 1 or 0",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -48,7 +48,7 @@ public class UserService(
             (
                 data: null,
                 message: validationResult,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -59,7 +59,7 @@ public class UserService(
             (
                 data: null,
                 message: "email already exist",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -70,7 +70,7 @@ public class UserService(
             (
                 data: null,
                 message: "phone already exist",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -81,7 +81,7 @@ public class UserService(
             (
                 data: null,
                 message: "you cannot create a user with exist role",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -110,7 +110,7 @@ public class UserService(
             (
                 data: null,
                 message: "there are error in create new user",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -127,7 +127,7 @@ public class UserService(
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
-            isSeccessful: true,
+            isSuccessful: true,
             data: new AuthDto { RefreshToken = refreshToken, Token = token },
             message: "",
             statusCode: 201
@@ -145,7 +145,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<AuthDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -165,7 +165,7 @@ public class UserService(
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
-            isSeccessful: true,
+            isSuccessful: true,
             data: new AuthDto { RefreshToken = refreshToken, Token = token },
             message: "",
             statusCode: 200
@@ -182,7 +182,7 @@ public class UserService(
         if (validate is not null)
         {
             return new Result<UserInfoDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: validate.Message,
                 statusCode: validate.StatusCode
@@ -190,7 +190,7 @@ public class UserService(
         }
 
         return new Result<UserInfoDto?>(
-            isSeccessful: true,
+            isSuccessful: true,
             data: user!.toUserInfoDto(config.getKey("url_file")),
             message: "",
             statusCode: 200
@@ -209,7 +209,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<List<UserInfoDto>?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -225,7 +225,7 @@ public class UserService(
         (
             data: users,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -239,7 +239,7 @@ public class UserService(
         if (isValideAdmin is not null)
         {
             return new Result<bool>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: false,
                 message: isValideAdmin.Message,
                 statusCode: isValideAdmin.StatusCode
@@ -254,7 +254,7 @@ public class UserService(
         if (isValideAdmin?.StatusCode == 404 || isValideAdmin == null)
         {
             return new Result<bool>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: false,
                 message: $"unable to {(user?.IsBlocked == true ? "block" : "unblock")}  user",
                 statusCode: isValideAdmin?.StatusCode ?? 400
@@ -272,7 +272,7 @@ public class UserService(
             (
                 data: false,
                 message: "error while change user Blocking status",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -281,7 +281,7 @@ public class UserService(
         (
             data: true,
             message: "",
-            isSeccessful: false,
+            isSuccessful: false,
             statusCode: 204
         );
     }
@@ -297,7 +297,7 @@ public class UserService(
             (
                 data: null,
                 message: "no data changes",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 200
             );
 
@@ -309,7 +309,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<UserInfoDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -327,7 +327,7 @@ public class UserService(
                 (
                     data: null,
                     message: "phone already exist",
-                    isSeccessful: false,
+                    isSuccessful: false,
                     statusCode: 400
                 );
             }
@@ -347,7 +347,7 @@ public class UserService(
                 (
                     data: null,
                     message: "password not corrected",
-                    isSeccessful: false,
+                    isSuccessful: false,
                     statusCode: 400
                 );
             }
@@ -373,7 +373,7 @@ public class UserService(
             (
                 data: null,
                 message: "",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 200
             );  
         }
@@ -386,7 +386,7 @@ public class UserService(
             (
                 data: null,
                 message: "error while updating user",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -395,7 +395,7 @@ public class UserService(
         (
             data: user.toUserInfoDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -412,7 +412,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<AddressDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -427,7 +427,7 @@ public class UserService(
             (
                 data: null,
                 message: "maximum 20 addresses reached",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -453,7 +453,7 @@ public class UserService(
             (
                 data: null,
                 message: "error while adding address",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -462,7 +462,7 @@ public class UserService(
         (
             data: address.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -477,7 +477,7 @@ public class UserService(
             (
                 data: null,
                 message: "nothing to be updated",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 200
             );
 
@@ -488,7 +488,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<AddressDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -501,7 +501,7 @@ public class UserService(
         )
         {
             return new Result<AddressDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: "when update address you must change both longitude and latitude not one of them only ",
                 statusCode: 400
@@ -517,7 +517,7 @@ public class UserService(
             (
                 data: null,
                 message: "address not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -528,7 +528,7 @@ public class UserService(
             (
                 data: null,
                 message: "address not owned",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -547,7 +547,7 @@ public class UserService(
             (
                 data: null,
                 message: "error while updating address",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -556,7 +556,7 @@ public class UserService(
         (
             data: address.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -571,7 +571,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<bool>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: false,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -586,7 +586,7 @@ public class UserService(
             (
                 data: false,
                 message: "address not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -597,7 +597,7 @@ public class UserService(
             (
                 data: false,
                 message: "address not owned",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -608,7 +608,7 @@ public class UserService(
             (
                 data: false,
                 message: "could not delete current address",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -622,7 +622,7 @@ public class UserService(
             (
                 data: false,
                 message: "error while delete address",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -631,7 +631,7 @@ public class UserService(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -646,7 +646,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<bool>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: false,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -661,7 +661,7 @@ public class UserService(
             (
                 data: false,
                 message: "address not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -672,7 +672,7 @@ public class UserService(
             (
                 data: false,
                 message: "address not owned",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -683,7 +683,7 @@ public class UserService(
             (
                 data: false,
                 message: "address is already current address",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -700,7 +700,7 @@ public class UserService(
             (
                 data: false,
                 message: "error while update current address",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -709,7 +709,7 @@ public class UserService(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -725,7 +725,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<bool>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: false,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -762,7 +762,7 @@ public class UserService(
             (
                 data: false,
                 message: "error while generate otp",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -776,7 +776,7 @@ public class UserService(
             (
                 data: false,
                 message: "error while send  otp email",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -785,7 +785,7 @@ public class UserService(
         (
             data: true,
             message: "",
-            isSeccessful: false,
+            isSuccessful: false,
             statusCode: 204
         );
     }
@@ -800,7 +800,7 @@ public class UserService(
             (
                 data: false,
                 message: "user not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -814,7 +814,7 @@ public class UserService(
             (
                 data: false,
                 message: "otp not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -830,7 +830,7 @@ public class UserService(
             (
                 data: false,
                 message: "error while update otp",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -840,7 +840,7 @@ public class UserService(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -855,7 +855,7 @@ public class UserService(
             (
                 data: null,
                 message: "user not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -869,7 +869,7 @@ public class UserService(
             (
                 data: null,
                 message: "otp not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -880,7 +880,7 @@ public class UserService(
         if (isValide is not null)
         {
             return new Result<AuthDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -898,7 +898,7 @@ public class UserService(
             (
                 data: null,
                 message: "error while update user password",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -917,7 +917,7 @@ public class UserService(
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
-            isSeccessful: true,
+            isSuccessful: true,
             data: new AuthDto { RefreshToken = refreshToken, Token = token },
             message: "",
             statusCode: 200

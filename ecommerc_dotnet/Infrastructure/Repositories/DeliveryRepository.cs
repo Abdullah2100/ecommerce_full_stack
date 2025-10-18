@@ -76,7 +76,10 @@ public class DeliveryRepository(
             .FirstOrDefaultAsync(de => de.UserId == userId));
         
         if (delivery is null) return null;
-        delivery.Address = await context.Address.FirstOrDefaultAsync(ad => ad.OwnerId == delivery.Id);
+        delivery.Address = await context
+            .Address
+            .AsNoTracking()
+            .FirstOrDefaultAsync(ad => ad.OwnerId == delivery.Id);
         return delivery; 
     }
 

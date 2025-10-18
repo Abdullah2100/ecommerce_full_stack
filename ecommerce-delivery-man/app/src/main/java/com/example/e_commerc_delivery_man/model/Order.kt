@@ -1,8 +1,5 @@
 package com.example.eccomerce_app.model
 
-import com.example.eccomerce_app.dto.response.OrderItemResponseDto
-import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
-import kotlinx.serialization.Serializable
 import java.util.UUID
 
 data class Order(
@@ -10,7 +7,7 @@ data class Order(
     val longitude: Double,
     val latitude: Double,
     val user_phone: String,
-    val status:Int,
+    val status:String,
     val userPhone: String,
     var name: String,
     val totalPrice: Double,

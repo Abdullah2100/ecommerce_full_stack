@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data class OrderProductResponseDto(
+data class OrderProductDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
     @Serializable(with = UUIDKserialize::class)
     val storeId: UUID,
     val name: String,
-    val thmbnail: String
+    val thmbnail: String?=null
 )

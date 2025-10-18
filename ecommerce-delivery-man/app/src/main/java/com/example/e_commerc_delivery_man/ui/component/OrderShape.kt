@@ -189,33 +189,12 @@ fun OrderComponent(
                     )
                 }
 
-                Row {
-                    Text(
-                        "realPayed : ",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center
-
-                    )
-
-                    Text(
-                        "${order.realPrice}",
-                        fontFamily = General.satoshiFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp,
-                        color = CustomColor.neutralColor950,
-                        textAlign = TextAlign.Center
-
-                    )
-                }
 
 
             }
 
             IconButton({
-                selectedId.value=order.id
+                selectedId.value = order.id
                 requestPermission.launch(
                     arrayOf(
                         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -242,16 +221,19 @@ fun OrderComponent(
                     animationSpec = tween()
                 ) + fadeOut()
 
-            ) {
+            )
+            {
 
                 order.orderItems
-                    .groupBy { it.product.storeId }
+                    .groupBy { it.product?.storeId ?: UUID.randomUUID() }
                     .values
                     .forEach { it ->
                         it.forEach { orderItems ->
-                            Row(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 10.dp)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp)
+                            ) {
                                 SubcomposeAsyncImage(
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -259,7 +241,7 @@ fun OrderComponent(
                                         .width(80.dp)
                                         .clip(RoundedCornerShape(8.dp)),
                                     model = General.handlingImageForCoil(
-                                        orderItems.product.thmbnail,
+                                        orderItems.product?.thmbnail,
                                         context
                                     ),
                                     contentDescription = "",
@@ -281,7 +263,7 @@ fun OrderComponent(
                                 Column(
                                 ) {
                                     Text(
-                                        orderItems.product.name,
+                                        orderItems.product?.name ?: "",
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Medium,
                                         fontSize = (16).sp,
@@ -391,24 +373,25 @@ fun OrderComponent(
 
 
             }
-if(isCancel)
-        Row(
-            modifier = Modifier
-                .padding(top = 20.dp, bottom = 20.dp)
-                .fillMaxWidth()
-                .clickable {
-                    isExpanded.value = !isExpanded.value
-                },
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Show Items")
-            Sizer(width = 5)
-            Icon(
-                Icons.Default.KeyboardArrowDown, "",
-                modifier = Modifier.rotate(rotation.value)
+        if (isCancel)
+            Row(
+                modifier = Modifier
+                    .padding(top = 20.dp, bottom = 20.dp)
+                    .fillMaxWidth()
+                    .clickable {
+                        isExpanded.value = !isExpanded.value
+                    },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             )
-        }
+            {
+                Text("Show Items")
+                Sizer(width = 5)
+                Icon(
+                    Icons.Default.KeyboardArrowDown, "",
+                    modifier = Modifier.rotate(rotation.value)
+                )
+            }
         Box(
             Modifier
                 .padding(top = 10.dp)
@@ -431,10 +414,12 @@ if(isCancel)
                             snackBarHostState
                                 .showSnackbar(result)
                         }
+                        orderViewModel.getMyOrders(mutableStateOf(1))
                     }
 
                 },
-                color = CustomColor.alertColor_1_600,
+                color = if (!isCancel) CustomColor.alertColor_2_700
+                else CustomColor.alertColor_1_600,
 //                                        isLoading = isSendingData.value && deletedId.value == order.id
             )
         }

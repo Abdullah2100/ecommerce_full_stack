@@ -43,7 +43,7 @@ public class GeneralController(
             adminId:adminId.Value,
             generalSetting
             );
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -80,7 +80,7 @@ public class GeneralController(
             adminId:adminId.Value,
             id:genralSettingId
         );
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -118,7 +118,7 @@ public class GeneralController(
             id:genralSettingId,
             settingDto:generalSetting
         );
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -143,7 +143,7 @@ public class GeneralController(
             pageNum:pageNumber,
             pageSize:25
         );
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

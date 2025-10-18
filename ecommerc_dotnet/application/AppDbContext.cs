@@ -141,7 +141,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithOne(orIt => orIt.Order)
                 .HasForeignKey(ord => ord.OrderId)
                 .HasPrincipalKey(orIt => orIt.Id);
-        });
+            
+             
+        })
+        ;
 
         modelBuilder.Entity<OrderItem>(oIt =>
         {

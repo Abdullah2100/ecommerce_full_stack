@@ -28,7 +28,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -39,7 +39,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: "there are  generalsetting with the same name",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -61,7 +61,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: "error while adding generalsetting",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -70,7 +70,7 @@ public class GeneralSettingServices(
         (
             data: generalSetting?.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -85,7 +85,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: "no change found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 200
             );
 
@@ -99,7 +99,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -111,7 +111,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: "no generalsetting found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -130,7 +130,7 @@ public class GeneralSettingServices(
             (
                 data: null,
                 message: "error while update generalsetting",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -139,7 +139,7 @@ public class GeneralSettingServices(
         (
             data: generalSetting?.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -155,7 +155,7 @@ public class GeneralSettingServices(
             (
                 data: false,
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -166,7 +166,7 @@ public class GeneralSettingServices(
             (
                 data: false,
                 message: "generalSetting not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -181,7 +181,7 @@ public class GeneralSettingServices(
             (
                 data: false,
                 message: "error while delete generalsetting",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -190,7 +190,7 @@ public class GeneralSettingServices(
         (
             data: false,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -204,7 +204,7 @@ public class GeneralSettingServices(
         (
             data: categories,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }

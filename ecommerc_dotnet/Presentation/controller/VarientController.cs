@@ -44,7 +44,7 @@ public class VarientController(
 
         var result = await variantServices.createVarient(varient, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -75,7 +75,7 @@ public class VarientController(
 
         var result = await variantServices.updateVarient(varient, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -107,7 +107,7 @@ public class VarientController(
 
         var result = await variantServices.deleteVarient(varientId, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -125,7 +125,7 @@ public class VarientController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
         var result = await variantServices.getVarients(pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

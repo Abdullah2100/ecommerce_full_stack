@@ -32,7 +32,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: isValid.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValid.StatusCode
             );
         }
@@ -43,7 +43,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: "there are category with the same name",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -57,7 +57,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: "there error while saving image to server",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         Guid categoryId = clsUtil.generateGuid();
@@ -79,7 +79,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: "error while adding category",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -88,7 +88,7 @@ public class CategoryServices(
         (
             data: category?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -100,7 +100,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: "no change found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 200
             );
 
@@ -114,7 +114,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: isValid.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValid.StatusCode
             );
         }
@@ -126,7 +126,7 @@ public class CategoryServices(
                 (
                     data: null,
                     message: "there are category with the same name",
-                    isSeccessful: false,
+                    isSuccessful: false,
                     statusCode: 400
                 );
             }
@@ -140,7 +140,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: "category not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -169,7 +169,7 @@ public class CategoryServices(
             (
                 data: null,
                 message: "error while update category",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -178,7 +178,7 @@ public class CategoryServices(
         (
             data: category.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -194,7 +194,7 @@ public class CategoryServices(
             (
                 data: false,
                 message: isValid.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValid.StatusCode
             );
         }
@@ -205,7 +205,7 @@ public class CategoryServices(
             (
                 data: false,
                 message: "category not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -219,7 +219,7 @@ public class CategoryServices(
             (
                 data: false,
                 message: "error while delete category",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -228,7 +228,7 @@ public class CategoryServices(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -242,7 +242,7 @@ public class CategoryServices(
         (
             data: categories,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }

@@ -1,21 +1,20 @@
 package com.example.eccomerce_app.dto.response
 
-import com.example.e_commerc_delivery_man.dto.AddressDto
 import com.example.e_commerc_delivery_man.dto.AddressWithTitleDto
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-data class OrderItemResponseDto(
+data class OrderItemDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
-    val price: Double,
-    val quanity:Int,
+    val price: Double?=null,
+    val quanity:Int?=null,
     val address: List<AddressWithTitleDto>?=null,
-    val product: OrderProductResponseDto,
-    val productVarient:List<OrderVarientResponseDto>?=null,
-    val orderItemStatus: String
+    val product: OrderProductDto?=null,
+    val productVarient:List<OrderVarientDto>?=null,
+    val orderItemStatus: String?=null
 )
 
 @Serializable()

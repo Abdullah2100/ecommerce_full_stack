@@ -42,7 +42,7 @@ public class SubCategoryController(
 
         var result = await subCategoryServices.createSubCategory(userId.Value, subCategory);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -73,7 +73,7 @@ public class SubCategoryController(
 
         var result = await subCategoryServices.updateSubCategory(userId.Value, subCategory);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -110,7 +110,7 @@ public class SubCategoryController(
             userId: userId.Value,
             id: subCateogyId);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -140,7 +140,7 @@ public class SubCategoryController(
 
         var result = await subCategoryServices.getSubCategoryAll(adminId.Value, page, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -156,7 +156,7 @@ public class SubCategoryController(
         var result = await subCategoryServices.getSubCategories(
             storeId, page, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

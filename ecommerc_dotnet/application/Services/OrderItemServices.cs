@@ -34,7 +34,7 @@ public class OrderItemServices(
             return new Result<List<OrderItemDto>>(
                 data: new List<OrderItemDto>(),
                 message: isValidate.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValidate.StatusCode
             );
         }
@@ -48,7 +48,7 @@ public class OrderItemServices(
         (
             data: orderItems,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -65,7 +65,7 @@ public class OrderItemServices(
             (
                 data: 0,
                 message: "orderItem not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -86,7 +86,7 @@ public class OrderItemServices(
             (
                 data: 0,
                 message: "error while update orderItme status",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -109,7 +109,7 @@ public class OrderItemServices(
         (
             data: 1,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }

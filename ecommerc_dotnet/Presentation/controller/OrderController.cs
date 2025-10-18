@@ -19,7 +19,7 @@ public class OrderController(
     IOrderServices orderServices,
     IAuthenticationService authenticationService) : ControllerBase
 {
-    [HttpPost("")]
+    [HttpPost()]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -44,7 +44,7 @@ public class OrderController(
 
         var result = await orderServices.CreateOrder(userId.Value, orderDto);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -74,7 +74,7 @@ public class OrderController(
         
         var result = await orderServices.getOrdersStatus(adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -112,7 +112,7 @@ public class OrderController(
 
         var result = await orderServices.getOrders(adminId.Value, pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -154,13 +154,54 @@ public class OrderController(
                 pageNumber,
                 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
         };
     }
 
+    [HttpGet("delivery/{pageNumber}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> getOrderNotBelongToDelivery
+    (int pageNumber = 1)
+    {
+        if (pageNumber < 1)
+            return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
+
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = authenticationService.getPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+
+        Guid? deliveryId = null;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
+        {
+            deliveryId = outId;
+        }
+
+        if (deliveryId is null)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var result = await orderServices
+            .getOrdersNotBelongToDeliveries(
+                deliveryId.Value,
+                pageNumber,
+                25);
+
+        return result.IsSuccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
+    }
+
+
+    
 
     [HttpDelete("{orderId}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -190,7 +231,7 @@ public class OrderController(
             .deleteOrder(
                 orderId, userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -228,7 +269,7 @@ public class OrderController(
                 orderStatus.Id,
                 orderStatus.Status);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

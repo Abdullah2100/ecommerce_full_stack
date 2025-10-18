@@ -27,7 +27,7 @@ public class RefreshTokenController(
        
         var result = await refreshTokenServices.generateRefreshToken(token, id, issuAt, expire);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

@@ -59,7 +59,7 @@ public static class UserMapperExtention
                     (
                         data: null,
                         message: "store is Blocked",
-                        isSeccessful: false,
+                        isSuccessful: false,
                         statusCode: 400
                     );
                 }
@@ -75,7 +75,7 @@ public static class UserMapperExtention
                     (
                         data: null,
                         message: "you must has store before done this operation",
-                        isSeccessful: false,
+                        isSuccessful: false,
                         statusCode: 404
                     );
                 }
@@ -96,7 +96,7 @@ public static class UserMapperExtention
             (
                 data: null,
                 message: "user not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -113,7 +113,7 @@ public static class UserMapperExtention
                     (
                         data: null,
                         message: "user is blocked",
-                        isSeccessful: false,
+                        isSuccessful: false,
                         statusCode: 404
                     );
                 }
@@ -129,7 +129,7 @@ public static class UserMapperExtention
                     (
                         data: null,
                         message: "user not havs the permission",
-                        isSeccessful: false,
+                        isSuccessful: false,
                         statusCode: 400
                     );
                 }

@@ -30,7 +30,7 @@ public class OrderRepository(AppDbContext context)
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
-                .Include(oi=>oi.Order)
+                .Include(oi => oi.Order)
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
@@ -55,7 +55,7 @@ public class OrderRepository(AppDbContext context)
         foreach (var order in orders)
         {
             order.Items = await context.OrderItems
-                .Include(oi=>oi.Order) 
+                .Include(oi => oi.Order)
                 .Include(oi => oi.Product)
                 .Include(oi => oi.Store)
                 .AsSplitQuery()
@@ -106,12 +106,13 @@ public class OrderRepository(AppDbContext context)
             .Include(oi => oi.Order)
             .Include(oi => oi.Product)
             .Include(oi => oi.Store)
-            .AsNoTracking()
             .AsSplitQuery()
+            .AsNoTracking()
             .Where(oi => oi.OrderId == order.Id)
             .ToListAsync();
         return order;
     }
+
 
     public async Task<Order?> getOrder(Guid id, Guid userId)
     {
@@ -318,7 +319,7 @@ public class OrderRepository(AppDbContext context)
         result.DeleveryId = null;
     }
 
-   
+
     public void add(Order entity)
     {
         context.Orders.Add(entity);
@@ -339,7 +340,7 @@ public class OrderRepository(AppDbContext context)
 
     public async Task<bool> isSavedDistanceToOrder(Guid id)
     {
-       var result = (await isSavedDistance(id) == true ? 1: 0);
+        var result = (await isSavedDistance(id) == true ? 1 : 0);
         if (result == 0)
         {
             delete(id);
@@ -348,6 +349,7 @@ public class OrderRepository(AppDbContext context)
 
         return true;
     }
+
     private async Task<bool> isSavedDistance(Guid orderId)
     {
         try
@@ -370,7 +372,4 @@ public class OrderRepository(AppDbContext context)
             return false;
         }
     }
-
- 
-     
 }

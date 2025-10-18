@@ -36,7 +36,7 @@ public class RefreshTokenServices(
             (
                 data: null,
                 message: "error while adding delivery",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -54,7 +54,7 @@ public class RefreshTokenServices(
             (
                 data: null,
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -65,7 +65,7 @@ public class RefreshTokenServices(
             (
                 data: null,
                 message: "send valid token ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -80,7 +80,7 @@ public class RefreshTokenServices(
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
-            isSeccessful: true,
+            isSuccessful: true,
             data: new AuthDto { RefreshToken = refreshTokenHolder, Token = tokenHolder },
             message: "",
             statusCode: 200

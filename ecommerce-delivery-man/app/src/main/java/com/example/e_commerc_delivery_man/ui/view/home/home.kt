@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -25,7 +26,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +61,7 @@ import com.example.e_commerc_delivery_man.ui.component.OrdersAnalys
 import com.example.e_commerc_delivery_man.ui.component.VerticalLine
 import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -71,6 +76,8 @@ fun HomePage(
 
     val coroutine = rememberCoroutineScope()
     val lazyState = rememberLazyListState()
+    val state = rememberPullToRefreshState()
+
 
     val myInfo = userViewModel.myInfo.collectAsState()
 
@@ -93,7 +100,6 @@ fun HomePage(
     )
 
     LaunchedEffect(Unit) {
-        userViewModel.getMyInfo()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             requestPermission.launch(input = android.Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -153,6 +159,10 @@ fun HomePage(
                         textAlign = TextAlign.Start
                     )
                 }
+                ,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
             )
         }
     ) {
@@ -162,7 +172,32 @@ fun HomePage(
 
         PullToRefreshBox(
             isRefreshing = isRefresh.value,
-            onRefresh = { userViewModel.getMyInfo(true) }
+            onRefresh = {
+                coroutine.launch {
+                    if (!isRefresh.value) isRefresh.value = true
+                    userViewModel.getMyInfo(true)
+                    if (isRefresh.value) {
+                        delay(2000)
+                        isRefresh.value = false
+                    }
+
+                }
+            },
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxSize(),
+            state = state,
+            indicator = {
+                Indicator(
+                    modifier = Modifier
+                        .padding(top = 50.dp)
+                        .align(Alignment.TopCenter),
+                    isRefreshing = isRefresh.value,
+                    containerColor = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    state = state
+                )
+            },
         ) {
             LazyColumn(
                 state = lazyState,

@@ -41,7 +41,7 @@ public class BannerController(
 
         var result = await bannerSerivces.createBanner(userId.Value, banner);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -76,7 +76,7 @@ public class BannerController(
         var result = await bannerSerivces
             .deleteBanner(bannerId, userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -96,7 +96,7 @@ public class BannerController(
         var result = await bannerSerivces
             .getBanners(storeId, pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -128,7 +128,7 @@ public class BannerController(
         var result = await bannerSerivces
             .getBanners(adminId.Value, pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -143,7 +143,7 @@ public class BannerController(
         var result = await bannerSerivces
             .getBanners(15);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

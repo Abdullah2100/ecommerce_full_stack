@@ -21,6 +21,7 @@ import java.util.UUID
 import android.util.Log
 import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
 import com.example.eccomerce_app.dto.response.OrderUpdateEvent
+import com.example.eccomerce_app.dto.response.OrderUpdateStatusDto
 import com.example.eccomerce_app.dto.response.UpdateOrderStatus
 
 class OrderViewModel(
@@ -128,6 +129,24 @@ class OrderViewModel(
                     },
                     OrderDto::class.java
                 )
+                _hub.value?.on(
+                    "orderStatus",
+                    { response ->
+
+                        val orderUpdateData = _myOrders.value?.map { data->
+                            if(data.id==response.id){
+                                data.copy(status = response.status)
+                            }
+                            else data
+                        }
+
+
+                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                            _myOrders.emit(orderUpdateData)
+                        }
+                    },
+                    OrderUpdateStatusDto::class.java
+                )
 
                 _hub.value?.on(
                     "orderGettingByDelivery",
@@ -169,7 +188,7 @@ class OrderViewModel(
         viewModelScope.launch(Dispatchers.Default + _coroutineException) {
             if (isLoading != null)
                 delay(500)
-            val result = orderRepository.getOrders(pageNumber.value)
+            val result = orderRepository.getOrdersNoSubmitted(pageNumber.value)
             when (result) {
 
                 is NetworkCallHandler.Successful<*> -> {
@@ -217,10 +236,13 @@ class OrderViewModel(
                     val data = result.data as List<OrderDto>
                     val orderList = mutableListOf<Order>()
                     orderList.addAll(data.map { it.toOrder() })
+
                     if (!_myOrders.value.isNullOrEmpty()) {
                         orderList.addAll(_orders.value!!)
                     }
+
                     val distinctOrder = orderList.distinctBy { it.id }.toList()
+
                     _myOrders.emit(distinctOrder)
 
                     if (isLoading != null) isLoading.value = false
@@ -250,7 +272,8 @@ class OrderViewModel(
         when (result) {
 
             is NetworkCallHandler.Successful<*> -> {
-
+                val newOrder = _orders.value?.filter { x-> x.id!=orderId };
+                _orders.emit(newOrder)
                 return null
             }
 
@@ -276,11 +299,8 @@ class OrderViewModel(
         when (result) {
 
             is NetworkCallHandler.Successful<*> -> {
-                val ordersWithRemovedCurrent = _myOrders.value?.filter { it -> it.id != orderId }
-                if (ordersWithRemovedCurrent != null) {
-
-                    _myOrders.emit(ordersWithRemovedCurrent)
-                }
+                val newOrder = _myOrders.value?.filter { x-> x.id!=orderId };
+                _myOrders.emit(newOrder)
                 return null
             }
 
@@ -302,18 +322,18 @@ class OrderViewModel(
     suspend fun updateStatus(id: String): String? {
 
         val idUUID = UUID.fromString(id)
-        val isInOrder = _orders.value?.firstOrNull { it.id == idUUID }
+        val isInOrder = _myOrders.value?.firstOrNull { it.id == idUUID }
 
-        when (isInOrder) {
-            null -> {
-                val reqest = orderRepository.updateOrderStatus(UpdateOrderStatus(id = idUUID))
-                when (reqest) {
+        when  {
+            isInOrder!=null -> {
+                val reqest = orderRepository.updateOrderStatus(UpdateOrderStatus(Id = idUUID))
+                return when (reqest) {
                     is NetworkCallHandler.Successful<*> -> {
-                        return null;
+                        null;
                     }
 
                     is NetworkCallHandler.Error -> {
-                        return reqest.data
+                        reqest.data
                     }
 
                 }

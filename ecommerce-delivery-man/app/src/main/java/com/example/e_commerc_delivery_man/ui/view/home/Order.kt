@@ -106,12 +106,9 @@ fun OrdersScreen(
     }
 
 
-    val deletedId = remember { mutableStateOf<UUID?>(null) }
 
 
     val page = remember { mutableStateOf(1) }
-
-    val address = remember { mutableStateOf<Address?>(null) }
 
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -186,7 +183,7 @@ fun OrdersScreen(
             .fillMaxSize()
             .background(Color.White),
 
-        /*    topBar = {
+        topBar = {
                 CenterAlignedTopAppBar(
                     modifier = Modifier.padding(end = 15.dp),
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -205,7 +202,7 @@ fun OrdersScreen(
 
                     )
             },
-    */
+
     ) {
         it.calculateTopPadding()
         it.calculateBottomPadding()
@@ -247,7 +244,7 @@ fun OrdersScreen(
             indicator = {
                 Indicator(
                     modifier = Modifier
-                        .padding(top = 15.dp)
+                        .padding(top = 50.dp)
                         .align(Alignment.TopCenter),
                     isRefreshing = isRefresh.value,
                     containerColor = Color.White,
@@ -268,7 +265,7 @@ fun OrdersScreen(
                     items(items = orders.value as List<Order>, key = { it -> it.id }) { order ->
                         OrderComponent(
                             order = order,
-                            isCancel = true,
+                            isCancel = false,
                             screenWidth = screenWidth,
                             isSendingData = isSendingData,
                             requestPermission = requestPermission,

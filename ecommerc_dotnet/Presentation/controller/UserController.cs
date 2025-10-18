@@ -25,7 +25,7 @@ public class UserController(
     {
         var result = await userServices.signup(data);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -42,7 +42,7 @@ public class UserController(
     {
         var result = await userServices.login(data);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -72,7 +72,7 @@ public class UserController(
 
         var result = await userServices.getMe(userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -103,7 +103,7 @@ public class UserController(
 
         var result = await userServices.getUsers(page, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -135,7 +135,7 @@ public class UserController(
 
         var result = await userServices.blockOrUnBlockUser(adminId.Value, userId);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -170,7 +170,7 @@ public class UserController(
 
         var result = await userServices.updateUser(userData, userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result
                 .StatusCode, result.Data),
@@ -205,7 +205,7 @@ public class UserController(
 
         var result = await userServices.addAddressToUser(address, userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result
                 .StatusCode, result.Data),
@@ -241,7 +241,7 @@ public class UserController(
         var result = await userServices.updateUserAddress(address, userId.Value);
 
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result
                 .StatusCode, result.Data),
@@ -277,7 +277,7 @@ public class UserController(
         var result = await userServices.deleteUserAddress(addressId, adminId.Value);
 
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result
                 .StatusCode, result.Data),
@@ -312,7 +312,7 @@ public class UserController(
         var result = await userServices.updateUserCurrentAddress(addressId, userId.Value);
 
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result
                 .StatusCode, result.Data),
@@ -336,7 +336,7 @@ public class UserController(
         var result = await userServices.generateOtp(otp);
 
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
 
@@ -357,7 +357,7 @@ public class UserController(
         var result = await userServices.otpVerification(verification);
 
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
 
@@ -376,7 +376,7 @@ public class UserController(
         var result = await userServices.reseatePassword(data);
 
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
 

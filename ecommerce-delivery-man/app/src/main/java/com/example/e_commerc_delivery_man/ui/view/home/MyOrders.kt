@@ -177,6 +177,7 @@ fun MyOrdersScreen(
                 }
             }
         })
+
     val requestCameraPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { permission ->

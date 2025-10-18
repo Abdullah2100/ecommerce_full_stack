@@ -31,7 +31,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: isValid.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValid.StatusCode
             );
         }
@@ -42,7 +42,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: "there are varient with the same name",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -64,7 +64,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: "error while adding new varient",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -73,7 +73,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
         (
             data: varient?.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -88,7 +88,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: "",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 200
             );
 
@@ -102,7 +102,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: isValid.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValid.StatusCode
             );
         }
@@ -114,7 +114,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
                 (
                     data: null,
                     message: "there are varient with the same name",
-                    isSeccessful: false,
+                    isSuccessful: false,
                     statusCode: 400
                 );
             }
@@ -127,7 +127,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: "varient not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -143,7 +143,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: null,
                 message: "error while update varient",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -152,7 +152,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
         (
             data: varient?.toDto(),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -168,7 +168,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: false,
                 message: isValid.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValid.StatusCode
             );
         }
@@ -182,7 +182,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: false,
                 message: "varient not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -198,7 +198,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
             (
                 data: false,
                 message: "error while delete varient",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -207,7 +207,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -222,7 +222,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
         (
             data: varients,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }

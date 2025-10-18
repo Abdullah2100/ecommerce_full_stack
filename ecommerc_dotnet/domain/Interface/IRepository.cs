@@ -1,4 +1,4 @@
-namespace ecommerc_dotnet.application.Repository;
+namespace ecommerc_dotnet.domain.Interface;
 
 public interface IRepository<T> where T : class
 {

@@ -45,7 +45,7 @@ public class StoreServices(
         if (isValide is not null)
         {
             return new Result<StoreDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -59,7 +59,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "store already exist",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -81,7 +81,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "error while saving store images",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -126,7 +126,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "error while adding store",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -139,7 +139,7 @@ public class StoreServices(
         (
             data: storeData?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -155,7 +155,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "user not found",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 200
             );
         }
@@ -168,7 +168,7 @@ public class StoreServices(
         if (isValide is not null)
         {
             return new Result<StoreDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -185,7 +185,7 @@ public class StoreServices(
                 (
                     data: null,
                     message: "store already exist",
-                    isSeccessful: false,
+                    isSuccessful: false,
                     statusCode: 400
                 );
             }
@@ -224,7 +224,7 @@ public class StoreServices(
         )
         {
             return new Result<StoreDto?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: "when update address you must change both longitude and latitude not one of them only ",
                 statusCode: 400
@@ -241,7 +241,7 @@ public class StoreServices(
                 (
                     data: null,
                     message: "store not has any address",
-                    isSeccessful: false,
+                    isSuccessful: false,
                     statusCode: 404
                 );
             address.Title = storeDto?.Name ?? address.Title;
@@ -259,7 +259,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "could not update store",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -271,7 +271,7 @@ public class StoreServices(
         (
             data: store?.toDto(config.getKey("url_file")),
             message: "error while update store Data",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -285,7 +285,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "store not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
 
@@ -293,7 +293,7 @@ public class StoreServices(
         (
             data: store.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -308,7 +308,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "store not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
 
@@ -316,7 +316,7 @@ public class StoreServices(
         (
             data: store.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -332,7 +332,7 @@ public class StoreServices(
         if (isValide is not null)
         {
             return new Result<List<StoreDto>?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -348,7 +348,7 @@ public class StoreServices(
         (
             data: stores,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -363,7 +363,7 @@ public class StoreServices(
         if (isValide is not null)
         {
             return new Result<bool?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: isValide.Message,
                 statusCode: isValide.StatusCode
@@ -377,7 +377,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "store not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
 
@@ -386,7 +386,7 @@ public class StoreServices(
         if (isValide is null && store.UserId != user!.Id)
         {
             return new Result<bool?>(
-                isSeccessful: false,
+                isSuccessful: false,
                 data: null,
                 message: "only Admin can update his store Status",
                 statusCode: 404
@@ -403,7 +403,7 @@ public class StoreServices(
             (
                 data: null,
                 message: "error while update store status",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         
@@ -416,7 +416,7 @@ public class StoreServices(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }

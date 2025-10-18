@@ -27,6 +27,6 @@ public class Order
     public DateTime? UpdatedAt { get; set; } = null;
     
     public User User { get; set; }
-    public Delivery? DeliveredBy { get; set; }
-    public ICollection<OrderItem> Items { get; set; }
+    public Delivery? DeliveredBy { get; set; } = null;
+    public ICollection<OrderItem> Items { get; set; }=new List<OrderItem>();
 }

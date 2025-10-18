@@ -33,7 +33,7 @@ public class BannerSerivces(
             (
                 data: null,
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -49,7 +49,7 @@ public class BannerSerivces(
             (
                 data: null,
                 message: "error while saving banner  image",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -71,7 +71,7 @@ public class BannerSerivces(
             (
                 data: null,
                 message: "error while adding new banner",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -82,7 +82,7 @@ public class BannerSerivces(
         (
             data: banner.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -99,7 +99,7 @@ public class BannerSerivces(
             (
                 data: false,
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -115,7 +115,7 @@ public class BannerSerivces(
             (
                 data: false,
                 message: "banner  not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -126,7 +126,7 @@ public class BannerSerivces(
             (
                 data: false,
                 message: "only store owner can delete banner",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -140,7 +140,7 @@ public class BannerSerivces(
             (
                 data: false,
                 message: "error while deleting banner",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -154,7 +154,7 @@ public class BannerSerivces(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -173,7 +173,7 @@ public class BannerSerivces(
             (
                 data: new List<BannerDto>(),
                 message: validation.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: validation.StatusCode
             );
         }
@@ -188,7 +188,7 @@ public class BannerSerivces(
         (
             data: banners,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -208,7 +208,7 @@ public class BannerSerivces(
         (
             data: banners,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -226,7 +226,7 @@ public class BannerSerivces(
         (
             data: banners,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }

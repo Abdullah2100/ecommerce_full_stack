@@ -8,7 +8,7 @@ data class OrderItem(
     val price: Double,
     val quanity:Int,
     val address: List<AddressWithTitle>?=null,
-    val product: OrderProduct,
+    val product: OrderProduct?=null,
     val productVarient:List<OrderVarient>?=null,
     val orderItemStatus: String
 )

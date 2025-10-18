@@ -36,62 +36,6 @@ public class OrderServices(
     };
 
 
-    private async Task<Result<bool>?> isValideDelivery(Guid id, bool isAdmin = false)
-    {
-        if (!isAdmin)
-        {
-            Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(id);
-
-            if (delivery is null)
-                return new Result<bool>
-                (
-                    data: false,
-                    message: "delivery not  found ",
-                    isSeccessful: false,
-                    statusCode: 404
-                );
-            if (delivery.IsBlocked)
-            {
-                return new Result<bool>
-                (
-                    data: false,
-                    message: "delivery is blocked ",
-                    isSeccessful: false,
-                    statusCode: 400
-                );
-            }
-        }
-        else
-        {
-            User? user = await unitOfWork.UserRepository
-                .getUser(id);
-            if (user is null)
-            {
-                return new Result<bool>
-                (
-                    data: false,
-                    message: "user not found",
-                    isSeccessful: false,
-                    statusCode: 404
-                );
-            }
-
-            if (user.Role != 0)
-            {
-                return new Result<bool>
-                (
-                    data: false,
-                    message: "not authorized user",
-                    isSeccessful: false,
-                    statusCode: 400
-                );
-            }
-        }
-
-
-        return null;
-    }
-
     public async Task<Result<OrderDto?>> CreateOrder(Guid userId, CreateOrderDto orderDto)
     {
         User? user = await unitOfWork.UserRepository.getUser(userId);
@@ -104,7 +48,7 @@ public class OrderServices(
             (
                 data: null,
                 message: isValidated.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValidated.StatusCode
             );
         }
@@ -115,7 +59,7 @@ public class OrderServices(
             (
                 data: null,
                 message: "order totalPrice is not valid",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -171,7 +115,7 @@ public class OrderServices(
             (
                 data: null,
                 message: "error while create order",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -184,7 +128,7 @@ public class OrderServices(
             (
                 data: null,
                 message: "could not calculate  distance distance to user ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -196,7 +140,7 @@ public class OrderServices(
             (
                 data: null,
                 message: "error while create order",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -208,7 +152,7 @@ public class OrderServices(
         (
             data: dtoOrder,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -225,7 +169,7 @@ public class OrderServices(
         (
             data: orders,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -233,16 +177,18 @@ public class OrderServices(
     //for admin dashboard
     public async Task<Result<AdminOrderDto?>> getOrders(Guid userId, int pageNum, int pageSize)
     {
-        Result<bool>? isValide = await isValideDelivery(userId, true);
+        User? delivery = await unitOfWork.UserRepository.getUser(userId);
 
-        if (isValide is not null)
+        var isValid = delivery.isValidateFunc(true);
+
+        if (isValid is not null)
         {
             return new Result<AdminOrderDto?>
             (
                 data: null,
-                message: isValide.Message,
-                isSeccessful: false,
-                statusCode: isValide.StatusCode
+                message: isValid.Message,
+                isSuccessful: false,
+                statusCode: isValid.StatusCode
             );
         }
 
@@ -258,7 +204,7 @@ public class OrderServices(
         (
             data: holder,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -274,13 +220,12 @@ public class OrderServices(
             (
                 data: false,
                 message: "order not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
 
         order.Status = status;
-
 
         unitOfWork.OrderRepository.update(order);
         int result = await unitOfWork.saveChanges();
@@ -291,29 +236,24 @@ public class OrderServices(
             (
                 data: false,
                 message: "error while update order status",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
 
-        await hubContext.Clients.All.SendAsync("orderStatus", new UpdateOrderStatusEventDto 
+        await hubContext.Clients.All.SendAsync("orderStatus", new UpdateOrderStatusEventDto
         {
             Id = order.Id,
             Status = OrderStatus[status]
         });
 
         //this for notification operation for all user at the system
-        var messageServe = new SendMessageSerivcies(new NotificationServices());
-
-        await sendNotificationToStore(order, status,messageServe);
-        await sendNotificationToUser(order, status,messageServe);
-        await sendNotificationToDelivery(order, status,messageServe);
-
+        await sendNotification(order, status);
         return new Result<bool>
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -327,7 +267,7 @@ public class OrderServices(
             (
                 data: false,
                 message: "order not found ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -340,7 +280,7 @@ public class OrderServices(
             (
                 data: false,
                 message: "error while delete order",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -349,7 +289,7 @@ public class OrderServices(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -358,15 +298,18 @@ public class OrderServices(
     // for delivery 
     public async Task<Result<List<OrderDto>>> getOrdersbyDeliveryId(Guid deliveryId, int pageNum, int pageSize)
     {
-        Result<bool>? isValide = await isValideDelivery(deliveryId);
-        if (isValide is not null)
+        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
+
+        var isValid = delivery.isValidated();
+
+        if (isValid is not null)
         {
             return new Result<List<OrderDto>>
             (
                 data: new List<OrderDto>(),
-                message: isValide.Message,
-                isSeccessful: false,
-                statusCode: isValide.StatusCode
+                message: isValid.Message,
+                isSuccessful: false,
+                statusCode: isValid.StatusCode
             );
         }
 
@@ -379,22 +322,24 @@ public class OrderServices(
         (
             data: orders,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
 
     public async Task<Result<List<OrderDto>>> getOrdersNotBelongToDeliveries(Guid deliveryId, int pageNum, int pageSize)
     {
-        Result<bool>? isValide = await isValideDelivery(deliveryId);
-        if (isValide is not null)
+        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
+
+        var isValid = delivery.isValidated();
+        if (isValid is not null)
         {
             return new Result<List<OrderDto>>
             (
                 data: new List<OrderDto>(),
-                message: isValide.Message,
-                isSeccessful: false,
-                statusCode: isValide.StatusCode
+                message: isValid.Message,
+                isSuccessful: false,
+                statusCode: isValid.StatusCode
             );
         }
 
@@ -407,86 +352,105 @@ public class OrderServices(
         (
             data: orders,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
 
+
     public async Task<Result<bool>> submitOrderToDelivery(Guid id, Guid deliveryId)
     {
-        Result<bool>? isValide = await isValideDelivery(deliveryId);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
 
-        if (isValide is not null)
+        var isValid = delivery.isValidated();
+
+        if (isValid is not null)
         {
-            return isValide;
+            return new Result<bool>
+            (
+                data: false,
+                message: isValid.Message,
+                isSuccessful: false,
+                statusCode: isValid.StatusCode
+            );
         }
 
 
         Order? order = await unitOfWork.OrderRepository.getOrder(id);
 
-        if (order is null)
+        if (order == null)
         {
             return new Result<bool>
             (
                 data: false,
-                message: "order not found ",
-                isSeccessful: false,
+                message: "Order not exists",
+                isSuccessful: false,
                 statusCode: 404
             );
         }
 
-        if (order.DeleveryId is not null)
-        {
+        if (order.DeleveryId != null)
             return new Result<bool>
             (
                 data: false,
-                message: "order already has delivered by  another delivery ",
-                isSeccessful: false,
+                message: "Order Delivered By another Delivery",
+                isSuccessful: false,
                 statusCode: 404
             );
-        }
+
 
         order.DeleveryId = deliveryId;
-
+        order.UpdatedAt = DateTime.Now;
+        
         unitOfWork.OrderRepository.update(order);
-        int result = await unitOfWork.saveChanges();
 
-        if (result == 0)
+        var result = await unitOfWork.saveChanges();
+
+
+        if (result <1)
         {
             return new Result<bool>
             (
                 data: false,
                 message: "error while update order",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
 
-        OrderTakedByEvent eventHolder = new OrderTakedByEvent
+        OrderTookByEvent eventHolder = new OrderTookByEvent
         {
-            Id = order.Id,
+            Id = id,
             DeliveryId = deliveryId
         };
+
         await hubContext.Clients.All.SendAsync("orderGettingByDelivery", eventHolder);
 
+        await sendNotification(order, status:2);
         return new Result<bool>
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
 
     public async Task<Result<bool>> cancelOrderFromDelivery(Guid id, Guid deliveryId)
     {
-        Result<bool>? isValide = await isValideDelivery(deliveryId);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
 
-        if (isValide is not null)
+        var isValid = delivery.isValidated();
+        if (isValid is not null)
         {
-            return isValide;
+            return new Result<bool>
+            (
+                data: false,
+                message: isValid.Message,
+                isSuccessful: false,
+                statusCode: isValid.StatusCode
+            );
         }
-
 
         Order? order = await unitOfWork.OrderRepository.getOrder(id);
 
@@ -496,7 +460,7 @@ public class OrderServices(
             (
                 data: false,
                 message: "order not found ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -507,7 +471,7 @@ public class OrderServices(
             (
                 data: false,
                 message: "order can not cancel some orderitems recived from stores by delivery ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -522,7 +486,7 @@ public class OrderServices(
             (
                 data: false,
                 message: "error while remove order from delivery",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -533,7 +497,7 @@ public class OrderServices(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }
@@ -548,7 +512,7 @@ public class OrderServices(
             return new Result<List<string>>(
                 data: new List<string>(),
                 message: isValide.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValide.StatusCode
             );
         }
@@ -556,16 +520,23 @@ public class OrderServices(
         return new Result<List<string>>(
             data: OrderStatus,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
 
+    private async Task sendNotification(Order order, int status)
+    {
+        var messageServe = new SendMessageSerivcies(new NotificationServices());
+
+        await sendNotificationToStore(order, status, messageServe);
+        await sendNotificationToUser(order, status, messageServe);
+    }
+    
     private async Task sendNotificationToStore(Order order, int status, SendMessageSerivcies sendMessageSerivcies)
     {
         try
         {
-
             var orderItems = order.Items.ToList();
 
             for (int i = 0; i < orderItems.Count; i++)
@@ -585,7 +556,8 @@ public class OrderServices(
         }
     }
 
-    private async Task sendNotificationToUser(Order order, int status, SendMessageSerivcies? sendMessageSerivcies = null)
+    private async Task sendNotificationToUser(Order order, int status,
+        SendMessageSerivcies? sendMessageSerivcies = null)
     {
         try
         {
@@ -605,7 +577,6 @@ public class OrderServices(
     {
         try
         {
-
             var deliveryMessage = this.delivaryMessage(status);
 
             Delivery? delivery = null;
@@ -618,21 +589,13 @@ public class OrderServices(
             {
                 case 1:
                 {
-                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.User.deviceToken);
+                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.DeviceToken);
                 }
                     break;
-                case 2:
-                {
-                    var deliveries = await unitOfWork.DeliveryRepository.getDeliveries();
-                    for (int i = 0; i < deliveries.Count; i++)
-                    {
-                        sendMessageSerivcies.sendMessage(deliveryMessage, deliveries[i].User.deviceToken);
-                    }
-                }
-                    break;
+
                 case 3:
                 {
-                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.User.deviceToken);
+                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.DeviceToken);
                 }
                     break;
             }
@@ -662,7 +625,6 @@ public class OrderServices(
         return status switch
         {
             0 => "Order is Rejected",
-            2 => "New Order Is Added Check",
             5 => "Your Order is Received",
             _ => ""
         };

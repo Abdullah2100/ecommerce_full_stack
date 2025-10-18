@@ -28,7 +28,7 @@ public class ProductController(
 
         var result = await productServices.getProductsByStoreId(storeId,pageNumber,25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -47,7 +47,7 @@ public class ProductController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
         var result = await productServices.getProductsByCategoryId(categoryId,pageNumber,25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -73,7 +73,7 @@ public class ProductController(
             pageNumber,
             25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -91,7 +91,7 @@ public class ProductController(
 
         var result = await productServices.getProducts(pageNumber,25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -128,7 +128,7 @@ public class ProductController(
             pageNumber,
             25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -166,7 +166,7 @@ public class ProductController(
         var result = await productServices.createProducts(
             userId,product);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -203,7 +203,7 @@ public class ProductController(
         var result = await productServices.updateProducts(
             userId,product);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -238,7 +238,7 @@ public class ProductController(
         var result = await productServices.deleteProducts(
             userId,productId);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

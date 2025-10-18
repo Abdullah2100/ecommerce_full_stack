@@ -52,7 +52,7 @@ public class OrderItemController(
                 25
             );
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -86,7 +86,7 @@ public class OrderItemController(
                 userId.Value,
                 orderItemStatusDto);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

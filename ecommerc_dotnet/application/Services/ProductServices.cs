@@ -34,7 +34,7 @@ public class ProductServices(
         return new Result<List<ProductDto>>(
             data: products,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -53,7 +53,7 @@ public class ProductServices(
         return new Result<List<ProductDto>>(
             data: products,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -73,7 +73,7 @@ public class ProductServices(
         return new Result<List<ProductDto>>(
             data: products,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -91,7 +91,7 @@ public class ProductServices(
         return new Result<List<ProductDto>>(
             data: products,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -110,7 +110,7 @@ public class ProductServices(
             (
                 data: new List<AdminProductsDto>(),
                 message: "user not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -121,7 +121,7 @@ public class ProductServices(
             (
                 data: new List<AdminProductsDto>(),
                 message: "not authorized user",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -135,7 +135,7 @@ public class ProductServices(
         return new Result<List<AdminProductsDto>>(
             data: products,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -150,7 +150,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "user not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -161,7 +161,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "user is blocked",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -172,7 +172,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "user not has store",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -183,7 +183,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "admin is block you store from creating product",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -216,7 +216,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "error while saving image ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -238,7 +238,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "product image can maximum has 20 images",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -265,7 +265,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "productvarient  can maximum has 20 images",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -297,7 +297,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "error while adding product",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -308,7 +308,7 @@ public class ProductServices(
         (
             data: product?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -322,7 +322,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "",
-                isSeccessful: true,
+                isSuccessful: true,
                 statusCode: 201
             );
 
@@ -340,7 +340,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "subCategory  is not found ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -353,7 +353,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "product is not found ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -403,7 +403,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "product image can maximum has 20 images",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -414,7 +414,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "product image must  has 2 image at least ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -439,7 +439,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "product image can maximum has 20 images",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -465,7 +465,7 @@ public class ProductServices(
             (
                 data: null,
                 message: "error while updating product",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -476,7 +476,7 @@ public class ProductServices(
         (
             data: finalUpdateProduct?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -495,7 +495,7 @@ public class ProductServices(
             (
                 data: false,
                 message: isPassed.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -509,7 +509,7 @@ public class ProductServices(
             (
                 data: false,
                 message: "product is not found ",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -523,7 +523,7 @@ public class ProductServices(
             (
                 data: false,
                 message: "product had linke with some order",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -538,7 +538,7 @@ public class ProductServices(
         (
             data: true,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 204
         );
     }

@@ -30,7 +30,7 @@ public class DeliveryController(
     {
         var result = await deliveryServices.login(data);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -65,7 +65,7 @@ public class DeliveryController(
             userId.Value,
             delivery);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -95,7 +95,7 @@ public class DeliveryController(
 
         var result = await deliveryServices.getDelivery(userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -125,7 +125,7 @@ public class DeliveryController(
 
         var result = await deliveryServices.updateDelivery(delivery, deliveryId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -155,7 +155,7 @@ public class DeliveryController(
 
         var result = await deliveryServices.getDeliveries(belongToId.Value, pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -186,7 +186,7 @@ public class DeliveryController(
 
         var result = await deliveryServices.updateDeliveryStatus(userId.Value, status);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -225,7 +225,7 @@ public class DeliveryController(
         var result = await orderServices
             .getOrdersNotBelongToDeliveries(deliveryId.Value, pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -264,7 +264,7 @@ public class DeliveryController(
         var result = await orderServices.getOrdersbyDeliveryId(
             deliveryId.Value, pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -295,7 +295,7 @@ public class DeliveryController(
 
         var result = await orderServices.submitOrderToDelivery(orderId, deliveryId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -326,7 +326,7 @@ public class DeliveryController(
 
         var result = await orderServices.cancelOrderFromDelivery(orderId, deliveryId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

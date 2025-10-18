@@ -38,7 +38,7 @@ public class CategoryController(
 
         var result = await categoryServices.createCategory(category, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -70,7 +70,7 @@ public class CategoryController(
 
         var result = await categoryServices.updateCategory(category, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -101,7 +101,7 @@ public class CategoryController(
 
         var result = await categoryServices.deleteCategory(categoryId, adminId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -120,7 +120,7 @@ public class CategoryController(
 
         var result = await categoryServices.getCategories(pageNumber, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)

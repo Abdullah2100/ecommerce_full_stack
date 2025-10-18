@@ -11,7 +11,7 @@ public class OrderHub : Hub
     }
 
 
-    public async Task orderGettingByCustomer(OrderTakedByEvent orderUpdatedEvent)
+    public async Task orderGettingByCustomer(OrderTookByEvent orderUpdatedEvent)
     {
         await Clients.All.SendAsync("orderGettingByDelivery", orderUpdatedEvent);
     }

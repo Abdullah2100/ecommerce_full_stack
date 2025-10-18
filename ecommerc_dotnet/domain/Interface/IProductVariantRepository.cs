@@ -1,5 +1,6 @@
 using ecommerc_dotnet.Presentation.dto;
 using ecommerc_dotnet.domain.entity;
+using ecommerc_dotnet.domain.Interface;
 
 namespace ecommerc_dotnet.application.Repository;
 

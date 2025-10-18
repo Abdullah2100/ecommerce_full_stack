@@ -11,6 +11,7 @@ public interface IOrderRepository:IRepository<Order>
     Task<IEnumerable<Order>> getOrders(int page,int lenght);
     
     Task<Order?> getOrder(Guid id);
+    
     Task<Order?> getOrder(Guid id,Guid  userId);
     
     Task<bool> isExist(Guid id);
@@ -22,5 +23,5 @@ public interface IOrderRepository:IRepository<Order>
     void  removeOrderFromDelivery(Guid id,Guid deliveryId);
     Task<bool> isSavedDistanceToOrder(Guid id);
     void delete(Guid id);
-
+    
 }

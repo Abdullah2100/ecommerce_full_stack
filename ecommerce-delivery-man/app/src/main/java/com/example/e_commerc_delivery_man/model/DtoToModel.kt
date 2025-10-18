@@ -7,10 +7,10 @@ import com.example.e_commerc_delivery_man.dto.DeliveryDto
 import com.example.e_commerc_delivery_man.dto.UserDto
 import com.example.e_commercompose.dto.response.VariantDto
 import com.example.e_commercompose.model.VariantModel
-import com.example.eccomerce_app.dto.response.OrderItemResponseDto
-import com.example.eccomerce_app.dto.response.OrderProductResponseDto
+import com.example.eccomerce_app.dto.response.OrderItemDto
+import com.example.eccomerce_app.dto.response.OrderProductDto
 import com.example.eccomerce_app.dto.response.OrderDto
-import com.example.eccomerce_app.dto.response.OrderVarientResponseDto
+import com.example.eccomerce_app.dto.response.OrderVarientDto
 import com.example.eccomerce_app.model.Order
 import com.example.eccomerce_app.model.OrderItem
 import com.example.eccomerce_app.model.OrderProduct
@@ -47,8 +47,8 @@ object DtoToModel {
             phone = this.phone,
             email = this.email,
             thumbnail = if (this.thumbnail.isNullOrEmpty()) "" else this.thumbnail.replace(
-                "localhost",
-                "10.0.2.2"
+                "0.0.0.0",
+                "192.168.1.45"
             ),
         )
     }
@@ -60,8 +60,8 @@ object DtoToModel {
             userId = this.userId,
             isAvailable = this.isAvailable,
             thumbnail = if (this.thumbnail.isNullOrEmpty()) "" else this.thumbnail.replace(
-                "localhost",
-                "10.0.2.2"
+                "0.0.0.0",
+                "192.168.1.45"
             ),
             address = this.address.toAddress(),
             user = this.user.toUser(),
@@ -76,34 +76,34 @@ object DtoToModel {
         )
     }
 
-    fun OrderVarientResponseDto.toOrderVarient(): OrderVarient {
+    fun OrderVarientDto.toOrderVarient(): OrderVarient {
         return OrderVarient(
             varient_name = this.varientName,
             product_varient_name = this.productVarientName
         )
     }
 
-    fun OrderProductResponseDto.toOrderProduct(): OrderProduct {
+    fun OrderProductDto.toOrderProduct(): OrderProduct {
         return OrderProduct(
             id = this.id,
             name = this.name,
             storeId = this.storeId,
-            thmbnail = if (this.thmbnail.isNotEmpty()) this.thmbnail.replace(
-                "localhost",
-                "10.0.2.2"
+            thmbnail = if (!this.thmbnail.isNullOrEmpty()) this.thmbnail.replace(
+                "0.0.0.0",
+                "192.168.1.45"
             ) else ""
         )
     }
 
-    fun OrderItemResponseDto.toOrderItem(): OrderItem {
+    fun OrderItemDto.toOrderItem(): OrderItem {
         return OrderItem(
             id = this.id,
-            quanity = this.quanity,
-            price = this.price,
-            product = this.product.toOrderProduct(),
+            quanity = this.quanity?:0,
+            price = this.price?:0.0,
+            product = this.product?.toOrderProduct(),
             address = this.address?.map { it.toAddressWithTitle() },
             productVarient = this.productVarient?.map { it.toOrderVarient() },
-            orderItemStatus = this.orderItemStatus
+            orderItemStatus = this.orderItemStatus?:""
         )
     }
 

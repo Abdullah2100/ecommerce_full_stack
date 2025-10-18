@@ -45,7 +45,7 @@ namespace ecommerc_dotnet.Presentation.dto
         [Required] public List<CreateOrderItemDto> Items { get; set; }
     }
 
-    public class OrderTakedByEvent
+    public class OrderTookByEvent
     {
         public Guid Id { get; set; }
         public Guid DeliveryId { get; set; }

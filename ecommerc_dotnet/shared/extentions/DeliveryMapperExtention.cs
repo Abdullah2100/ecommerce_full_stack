@@ -32,7 +32,7 @@ public static class DeliveryMapperExtention
             (
                 data: null,
                 message: "delivery not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -43,7 +43,7 @@ public static class DeliveryMapperExtention
             (
                 data: null,
                 message: "delivery is blocked",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }

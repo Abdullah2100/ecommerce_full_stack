@@ -1,8 +1,10 @@
 package com.example.eccomerce_app.ui.view.home
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,13 +43,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
@@ -58,7 +63,9 @@ import com.example.eccomerce_app.viewModel.OrderViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import qrgenerator.QRCodeImage
 import java.util.UUID
+import com.example.e_commercompose.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,11 +83,13 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
     val orders = orderViewModel.orders.collectAsState()
 
     val isSendingData = remember { mutableStateOf(false) }
+    val isShowDialog = remember { mutableStateOf(false) }
     val reachedBottom = remember { derivedStateOf { lazyState.reachedBottom() } }
     val isLoadingMore = remember { mutableStateOf(false) }
     val isRefresh = remember { mutableStateOf(false) }
 
     val deletedId = remember { mutableStateOf<UUID?>(null) }
+    val selecteOrderId = remember { mutableStateOf<UUID?>(null) }
 
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -161,7 +170,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
             indicator = {
                 Indicator(
                     modifier = Modifier
-                        .padding(top = it.calculateTopPadding()+1.dp)
+                        .padding(top = it.calculateTopPadding() + 1.dp)
                         .align(Alignment.TopCenter),
                     isRefreshing = isRefresh.value,
                     containerColor = Color.White,
@@ -169,7 +178,8 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                     state = state
                 )
             },
-        ) {
+        )
+        {
             LazyColumn(
                 state = lazyState,
                 modifier = Modifier
@@ -278,6 +288,30 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                     )
                                 }
 
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                )
+                                {
+                                    Text(
+                                        "order Qr ",
+                                        fontFamily = General.satoshiFamily,
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = (16).sp,
+                                        color = CustomColor.neutralColor950,
+                                        textAlign = TextAlign.Center
+                                    )
+
+                                    Image(
+                                        imageVector = ImageVector.vectorResource(R.drawable.qr_button),
+                                        "",
+                                        modifier = Modifier.clickable(onClick = {
+                                            selecteOrderId.value=order.id
+                                            isShowDialog.value=true
+                                        })
+                                    )
+                                }
                                 Sizer(5)
 
                                 CustomButton(
@@ -334,7 +368,8 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
         if (isSendingData.value)
             Dialog(
                 onDismissRequest = {}
-            ) {
+            )
+            {
                 Box(
                     modifier = Modifier
                         .height(90.dp)
@@ -351,6 +386,25 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                     )
                 }
             }
+
+        if (isShowDialog.value) {
+            Dialog(
+                onDismissRequest = { isShowDialog.value = false },
+                properties = DialogProperties(), content = {
+                    Box {
+                        QRCodeImage(
+                            url = selecteOrderId.toString(),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(8.dp)
+                                ),
+
+                            )
+                    }
+                })
+        }
+
 
     }
 }

@@ -36,7 +36,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "you should login from phone",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
 
@@ -54,7 +54,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: isValide.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValide.StatusCode
             );
         }
@@ -67,7 +67,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "delivery not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -78,7 +78,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "delivery is blocked",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         delivery.DeviceToken = loginDto.DeviceToken;
@@ -91,7 +91,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "error while adding delivery",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -108,7 +108,7 @@ public class DeliveryServices(
             EnTokenMode.RefreshToken);
 
         return new Result<AuthDto?>(
-            isSeccessful: true,
+            isSuccessful: true,
             data: new AuthDto { RefreshToken = refreshToken, Token = token },
             message: "",
             statusCode: 200
@@ -134,7 +134,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: admin?.Message ?? store.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: admin?.StatusCode ?? store.StatusCode
             );
         }
@@ -146,7 +146,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "delivery already exists",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -191,7 +191,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "error while adding delivery",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -202,7 +202,7 @@ public class DeliveryServices(
         (
             data: delivery?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -217,7 +217,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "delivery not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -228,7 +228,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "delivery is blocked",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -244,7 +244,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "error while update delivery",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 400
             );
         }
@@ -253,7 +253,7 @@ public class DeliveryServices(
         (
             data: delivery?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 201
         );
     }
@@ -263,25 +263,16 @@ public class DeliveryServices(
         Delivery? delivery = await unitOfWork.DeliveryRepository
             .getDelivery(id);
 
-        if (delivery is null)
-        {
-            return new Result<DeliveryDto?>
-            (
-                data: null,
-                message: "delivery not found",
-                isSeccessful: false,
-                statusCode: 404
-            );
-        }
+        var isValid = delivery.isValidated(); 
 
-        if (delivery.IsBlocked)
+        if (isValid is not null)
         {
             return new Result<DeliveryDto?>
             (
                 data: null,
-                message: "delivery is blocked",
-                isSeccessful: false,
-                statusCode: 404
+                message: isValid.Message,
+                isSuccessful: false,
+                statusCode: isValid.StatusCode 
             );
         }
 
@@ -292,7 +283,7 @@ public class DeliveryServices(
         (
             data: deliveryDto,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -335,7 +326,7 @@ public class DeliveryServices(
                     (
                         data: new List<DeliveryDto>(),
                         message: isValidated.Message,
-                        isSeccessful: false,
+                        isSuccessful: false,
                         statusCode: isValidated.StatusCode
                     );
                 }
@@ -352,7 +343,7 @@ public class DeliveryServices(
                     (
                         data: new List<DeliveryDto>(),
                         message: isValidated.Message,
-                        isSeccessful: false,
+                        isSuccessful: false,
                         statusCode: isValidated.StatusCode
                     );
                 }
@@ -378,7 +369,7 @@ public class DeliveryServices(
         (
             data: deliveryDto,
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }
@@ -396,7 +387,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: isValidated.Message,
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: isValidated.StatusCode
             );
         }
@@ -461,7 +452,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "Something went wrong",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -475,7 +466,7 @@ public class DeliveryServices(
             (
                 data: null,
                 message: "Delivery not found",
-                isSeccessful: false,
+                isSuccessful: false,
                 statusCode: 404
             );
         }
@@ -484,7 +475,7 @@ public class DeliveryServices(
         (
             data: delivery?.toDto(config.getKey("url_file")),
             message: "",
-            isSeccessful: true,
+            isSuccessful: true,
             statusCode: 200
         );
     }

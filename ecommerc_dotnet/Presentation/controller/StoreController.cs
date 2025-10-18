@@ -45,7 +45,7 @@ public class StoreController(
 
         var result = await storeServices.createStore(store, userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -80,7 +80,7 @@ public class StoreController(
 
         var result = await storeServices.updateStore(store, userId.Value);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -117,7 +117,7 @@ public class StoreController(
 
           
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -148,7 +148,7 @@ public class StoreController(
 
         var result = await storeServices.getStoreByUserId(userId);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -163,7 +163,7 @@ public class StoreController(
     {
         var result = await storeServices.getStoreByStoreId(storeId);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
@@ -194,7 +194,7 @@ public class StoreController(
 
         var result = await storeServices.getStores(adminId.Value, page, 25);
 
-        return result.IsSeccessful switch
+        return result.IsSuccessful switch
         {
             true => StatusCode(result.StatusCode, result.Data),
             _ => StatusCode(result.StatusCode, result.Message)
