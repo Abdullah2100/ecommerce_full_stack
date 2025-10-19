@@ -30,13 +30,11 @@ CREATE OR REPLACE
 FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes()
 RETURNS Trigger As $$
 DECLARE
-	orderStatus INT :=0;
-	isCanModifiOrderItem BOOLEAN :=false;
+ 	isCanModifiOrderItem BOOLEAN :=false;
 BEGIN
 	SELECT "Status"< 4 INTO isCanModifiOrderItem FROM "Orders" WHERE "Id"=OLD."Id";
- 
-	IF OLD."Status">New."Status" and isCanModifiOrderItem = FALSE THEN 
-   		RETURN NULL;
+ 	IF  isCanModifiOrderItem = FALSE THEN   -- this to prevent update on orderitme if the order is complate
+	    RETURN NULL;
 	END IF;
  	RETURN NEW;
 END
@@ -70,10 +68,14 @@ BEFORE DELETE ON "Orders"   FOR EACH ROW EXECUTE FUNCTION Fun_prevent_delete_ord
 CREATE OR REPLACE FUNCTION fun_prevent_update_order_to_less_state_of_previes()
 RETURNS Trigger As $$
 DECLARE
-orderStatus INT :=0;
+
+isThereOrderItemsNotSelected BOOLEAN :=false;
 BEGIN
-	IF OLD."Status">New."Status" THEN
-		null;
+   -- prevent any update on status 
+    SELECT COUNT(*)>1 INTO isThereOrderItemsNotSelected FROM "OrderItems" WHERE "Status"<3;
+	
+	IF OLD."Status">4 OR isThereOrderItemsNotSelected =FALSE THEN -- prevent update in order if it is complate or the items is recived from delivery
+	    RETURN NULL;
 	END IF;
 	return NEW;
 END
