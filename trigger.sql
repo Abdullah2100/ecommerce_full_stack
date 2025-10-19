@@ -9,9 +9,12 @@ CREATE OR REPLACE FUNCTION Fun_prevent_delete_orderItem()
 RETURNS Trigger As $$
 DECLARE
 orderItemStatus INT :=0;
+isCanModifiOrderItem BOOLEAN :=false;
 BEGIN
  SELECT "Status" into orderItemStatus FROM "OrdersItems" where "Id"=OLD."Id";
- if orderStatus>3 THEN
+ SELECT "Status"<4 into isCanModifiOrderItem FROM "Orders" where "Id"=OLD."Id";
+ 
+ if orderStatus>3 and isCanModifiOrderItem = FALSE THEN
    RETURN NULL;
  END IF;
  return OLD;
@@ -21,17 +24,24 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER tr_prevent_delete_orderItem
 BEFORE DELETE ON "OrdersItems" FOR EACH ROW EXECUTE FUNCTION Fun_prevent_delete_orderItem();
 
+
 --triger for prevent uppdate the order after it is complated
-CREATE OR REPLACE FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes()
+CREATE OR REPLACE 
+FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes()
 RETURNS Trigger As $$
 DECLARE
-orderStatus INT :=0;
+	orderStatus INT :=0;
+	isCanModifiOrderItem BOOLEAN :=false;
 BEGIN
-  if(OLD."Status">New."Status")
-   return null;
- return NEW;
+	SELECT "Status"< 4 INTO isCanModifiOrderItem FROM "Orders" WHERE "Id"=OLD."Id";
+ 
+	IF OLD."Status">New."Status" and isCanModifiOrderItem = FALSE THEN 
+   		RETURN NULL;
+	END IF;
+ 	RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE TRIGGER tr_prevent_delete_orderItem 
 BEFORE UPDATE ON "OrdersItems"   FOR EACH ROW EXECUTE FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes();
@@ -45,9 +55,10 @@ RETURNS Trigger As $$
 DECLARE
 orderStatus INT :=0;
 BEGIN
- SELECT "Status" into orderStatus FROM "Orders" where "Id"=OLD."Id";
- if(orderStatus>3)
-   return null;
+ 	SELECT "Status" into orderStatus FROM "Orders" where "Id"=OLD."Id";
+	IF orderStatus>4 THEN 
+		return null;
+	END IF;
  return OLD;
 END
 $$ LANGUAGE plpgsql;
@@ -61,9 +72,10 @@ RETURNS Trigger As $$
 DECLARE
 orderStatus INT :=0;
 BEGIN
-  if(OLD."Status">New."Status")
-   return null;
- return NEW;
+	IF OLD."Status">New."Status" THEN
+		null;
+	END IF;
+	return NEW;
 END
 $$ LANGUAGE plpgsql;
 
@@ -71,31 +83,6 @@ CREATE OR REPLACE TRIGGER tr_prevent_delete_order
 BEFORE UPDATE ON "Orders"   FOR EACH ROW EXECUTE FUNCTION fun_prevent_update_order_to_less_state_of_previes()
 
 
-
-CREATE OR REPLACE FUNCTION calculate_order_item_price(OrderItemId UUID,product_price NUMERIC )
-RETURNS NUMERIC AS $$
-DECLARE
-    order_product_varient      RECORD;
-    precentage_holder NUMERIC  ;
-    price   NUMERIC := product_price;
-BEGIN
-    
-
-     FOR order_product_varient IN
-        SELECT 
-             "ProductVarientId"
-        FROM "OrdersProductsVarients"
-         
-    LOOP
-        SELECT "Precentage" FROM "ProductVarients" INTO precentage_holder;
-   
-       price := price*precentage_holder;
-    END LOOP;
-
-    RETURN price;
- 
-END;
-$$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION Calculate_distance_from_store_to_order_location(orderId UUID,storeId UUID)
@@ -106,9 +93,7 @@ DECLARE
     user_lat          NUMERIC;
     store_long         NUMERIC;
     store_lat          NUMERIC;
-    distance_to_user_from_store_lat          NUMERIC;
     kilo_price        NUMERIC;
-    store_coords      RECORD;
     store_distance    DOUBLE PRECISION;
 BEGIN
     -- Fetch per-km price with error handling
@@ -140,6 +125,32 @@ BEGIN
     total_distance_km := total_distance_km + GREATEST(1, CEIL(store_distance));
 
     RETURN total_distance_km::INT;
+ 
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION calculate_order_item_price(OrderItemId UUID,product_price NUMERIC )
+RETURNS NUMERIC AS $$
+DECLARE
+    order_product_varient      RECORD;
+    precentage_holder NUMERIC  ;
+    price   NUMERIC := product_price;
+BEGIN
+    
+
+     FOR order_product_varient IN
+        SELECT 
+             "ProductVarientId"
+        FROM "OrdersProductsVarients"
+         
+    LOOP
+        SELECT "Precentage" FROM "ProductVarients" INTO precentage_holder;
+   
+       price := price*precentage_holder;
+    END LOOP;
+
+    RETURN price;
  
 END;
 $$ LANGUAGE plpgsql;
@@ -299,21 +310,38 @@ DECLARE
 	dayFee DECIMAL:=0.0;
 	weekFee DECIMAL :=0.0;
 	monthFee DECIMAL :=0.0;
-	weekDate DATE := now()::DATE-7;
-	monthDate DATE := now()::DATE-3;
 	orders   RECORD;
 	dayOrder INT:=0;
     weekOrder Int:=0;
+	--this to get the current day of week
+	currentDay INT:=0;
+	--this to get rest days of week
+	restDaies INT :=7;
+	--this to holde the start week and end week date 
+	startWeek DATE ;
+	endWeek DATE ;
+	
 BEGIN
+   -- submite the current day of week
+   SELECT 
+  (((EXTRACT(ISODOW FROM now())::int + 1) % 7) + 1) 
+  INTO currentDay;
+
+   -- this to get the rest of days until end of week
+   restDaies:= restDaies-(currentDay+1);-- 7-6
+   
+   endWeek:= (now()::DATE+restDaies);
+   startWeek:= (now()::DATE -(currentDay+1));
 
    FOR orders IN
-	   (SELECT "Orders"."DistanceFee" as fee,
-	           "Orders"."CreatedAt" as createdDate
+	   (SELECT "DistanceFee" as fee,
+	           "CreatedAt" as createdDate
 	   FROM "Orders" 
-       WHERE "Orders"."Id"=deleiveryId
-	   AND "Orders"."Status">=5
-	   AND ("Orders"."CreatedAt"<=now()::DATE OR 
-	   "Orders"."CreatedAt"<=monthDate)
+       WHERE "Id"=deleiveryId
+	   AND "Status">=5
+	   AND 
+	   date_trunc('month',"CreatedAt")=
+	   date_trunc('month',now())
 	   )
    LOOP 
     IF orders.createdDate=now()::DATE THEN 
@@ -321,7 +349,7 @@ BEGIN
 	  dayOrder:= dayOrder+1;
 	END IF;
 
-	IF orders.createdDate<=now()::DATE AND orders.createdDate>=weekDate THEN 
+	IF orders.createdDate<=endWeek AND orders.createdDate>=startWeek THEN 
 	  weekFee := weekFee +  orders.fee;
 	  weekOrder:= weekOrder+1;
 	END IF ;
@@ -337,4 +365,4 @@ END
 $$ LANGUAGE plpgsql;
 
 
-SELECT * FROM get_delivery_fee_info('3b7406e2-7b35-4cd7-9c5a-d1788555b5b3')
+ 

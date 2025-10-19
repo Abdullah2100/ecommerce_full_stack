@@ -163,12 +163,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose.runntime)
 
     //qc
-    implementation("network.chaintech:qr-kit:1.0.8")
+    implementation(libs.qr.kit)
 
     //google map
     implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)
-    implementation("com.google.android.gms:play-services-maps:19.1.0")
+    implementation(libs.play.services.maps)
 
     implementation(libs.maps.navigation) {
         exclude(group = "com.google.android.gms", module = "play-services-maps")
