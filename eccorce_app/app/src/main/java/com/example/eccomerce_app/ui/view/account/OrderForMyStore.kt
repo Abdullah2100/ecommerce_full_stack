@@ -222,7 +222,7 @@ fun OrderForMyStoreScreen(
                                 .padding(top = 1.dp)
                                 .border(
                                     width = 1.dp,
-                                    color =  CustomColor.neutralColor100,
+                                    color = CustomColor.neutralColor100,
                                     shape = RoundedCornerShape(8.dp)
                                 )
                                 .background(
@@ -245,8 +245,8 @@ fun OrderForMyStoreScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             )
                             {
-                                when  {
-                                    order.orderItemStatus== "Cancelled" || order.orderStatusName=="Regected" -> {
+                                when {
+                                    order.orderItemStatus == "Cancelled" || order.orderStatusName == "Regected" -> {
                                         Box(
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
@@ -261,10 +261,11 @@ fun OrderForMyStoreScreen(
 
                                     }
 
-                                    order.orderItemStatus==  "Excepted"
-                                            || order.orderStatusName =="Completed"
-                                            || order.orderStatusName =="Received"
-                                            || order.orderStatusName =="Inway"
+                                    order.orderItemStatus == "Excepted"
+                                            || order.orderStatusName == "Completed"
+                                            || order.orderStatusName == "Received"
+                                            || order.orderStatusName == "Inway"
+                                            || order.orderItemStatus == "ReceivedByDelivery"
                                         -> {
                                         Box(
                                             modifier = Modifier.fillMaxWidth()

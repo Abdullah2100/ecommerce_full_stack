@@ -3,7 +3,7 @@ package com.example.e_commerc_delivery_man.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.data.Room.ILocationDao
 import com.example.e_commerc_delivery_man.data.Room.IsSetLocation
 import com.example.e_commerc_delivery_man.data.repository.UserRepository

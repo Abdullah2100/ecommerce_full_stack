@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.model.enMapType
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.AccountCustomBottom

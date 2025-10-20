@@ -44,10 +44,9 @@ import androidx.navigation.NavHostController
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.viewModel.UserViewModel
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.model.enMapType
 import com.example.e_commerc_delivery_man.ui.component.CustomBotton
-import com.example.e_commerc_delivery_man.ui.component.CustomTitleBotton
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
 import com.google.android.gms.location.LocationServices

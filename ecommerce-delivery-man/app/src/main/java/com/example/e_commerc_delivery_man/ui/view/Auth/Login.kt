@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.ui.Screens
 import com.example.e_commerc_delivery_man.ui.component.CustomAuthBotton
 import com.example.e_commerc_delivery_man.ui.component.Sizer

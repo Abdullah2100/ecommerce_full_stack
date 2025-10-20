@@ -152,6 +152,18 @@ public class UserService(
             );
         }
 
+        user.deviceToken = loginDto.DeviceToken;
+        unitOfWork.UserRepository.update(user);
+
+        int result = await unitOfWork.saveChanges();
+        if (result == 0)
+            new Result<AuthDto?>(
+                isSuccessful: true,
+                data: null,
+                message: "",
+                statusCode: 200
+            ); 
+
 
         string token = "", refreshToken = "";
 

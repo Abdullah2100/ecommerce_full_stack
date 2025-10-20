@@ -19,17 +19,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 import android.util.Log
+import com.example.e_commerc_delivery_man.data.repository.OrderItemRepository
 import com.example.eccomerce_app.dto.response.OrderItemStatusChangeDto
+import com.example.eccomerce_app.dto.response.OrderItemsStatusEvent
 import com.example.eccomerce_app.dto.response.OrderUpdateEvent
 import com.example.eccomerce_app.dto.response.OrderUpdateStatusDto
 import com.example.eccomerce_app.dto.response.UpdateOrderStatus
+import javax.inject.Named
 
 class OrderViewModel(
     val orderRepository: OrderRepository,
-    val webSocket: HubConnection?,
+    val orderItemRepository: OrderItemRepository,
+    @Named("orderHub") val orderSocket: HubConnection?,
+    @Named("orderItemHub") val orderItemSocket: HubConnection?
 ) : ViewModel() {
 
-    private val _hub = MutableStateFlow<HubConnection?>(null)
+    private val _orderHub = MutableStateFlow<HubConnection?>(null)
+    private val _orderItemHub = MutableStateFlow<HubConnection?>(null)
 
 
     private val _orders = MutableStateFlow<List<Order>?>(null);
@@ -50,26 +56,28 @@ class OrderViewModel(
     fun initialFun() {
         getMyOrders(mutableStateOf(1))
         getOrders(mutableStateOf(1), null)
-        if (webSocket != null) {
+        if (orderSocket != null) {
             connection()
         }
     }
 
     override fun onCleared() {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            if (_hub.value != null)
-                _hub.value!!.stop()
+            if (_orderHub.value != null)
+                _orderHub.value!!.stop()
         }
         super.onCleared()
     }
 
     fun connection() {
-        if (webSocket != null) {
+        if (orderSocket != null) {
             viewModelScope.launch(Dispatchers.IO + _coroutineException) {
 //                try {
-                _hub.emit(webSocket)
-                _hub.value?.start()?.blockingAwait()
-                _hub.value?.on(
+                _orderHub.emit(orderSocket)
+                _orderItemHub.emit(orderItemSocket)
+                _orderHub.value?.start()?.blockingAwait()
+                _orderItemHub.value?.start()?.blockingAwait()
+                _orderHub.value?.on(
                     "orderItemsStatusChange",
                     { response ->
 
@@ -114,7 +122,7 @@ class OrderViewModel(
                     },
                     OrderItemStatusChangeDto::class.java
                 )
-                _hub.value?.on(
+                _orderHub.value?.on(
                     "createdOrder",
                     { response ->
                         val orderListHolder = mutableListOf<Order>()
@@ -129,15 +137,14 @@ class OrderViewModel(
                     },
                     OrderDto::class.java
                 )
-                _hub.value?.on(
+                _orderHub.value?.on(
                     "orderStatus",
                     { response ->
 
-                        val orderUpdateData = _myOrders.value?.map { data->
-                            if(data.id==response.id){
+                        val orderUpdateData = _myOrders.value?.map { data ->
+                            if (data.id == response.id) {
                                 data.copy(status = response.status)
-                            }
-                            else data
+                            } else data
                         }
 
 
@@ -148,7 +155,7 @@ class OrderViewModel(
                     OrderUpdateStatusDto::class.java
                 )
 
-                _hub.value?.on(
+                _orderItemHub.value?.on(
                     "orderGettingByDelivery",
                     { response ->
                         val orderWithOutCurrent =
@@ -171,9 +178,28 @@ class OrderViewModel(
                     },
                     OrderUpdateEvent::class.java
                 )
-//                } catch (e: Exception) {
-//                    Log.e("OrderViewModel", "Failed to connect to SignalR: " + e.message)
-//                }
+
+                _orderItemHub.value?.on(
+                    "orderItemsStatusChange",
+                    { response ->
+                        val orderHolder =
+                            _myOrders.value?.map { data ->
+                                if (data.id == response) {
+                                    data.orderItems.map { oi ->
+                                        if (oi.id == response.orderItemId)
+                                            oi.copy(orderItemStatus = response.Status)
+                                    }
+                                } else data
+
+                            } as List<Order>
+
+                        viewModelScope.launch(Dispatchers.IO + _coroutineException) {
+                            if (!orderHolder.isNullOrEmpty())
+                                _myOrders.emit(orderHolder)
+                        }
+                    },
+                    OrderItemsStatusEvent::class.java
+                )
             }
 
         }
@@ -238,7 +264,7 @@ class OrderViewModel(
                     orderList.addAll(data.map { it.toOrder() })
 
                     if (!_myOrders.value.isNullOrEmpty()) {
-                        orderList.addAll(_orders.value!!)
+                        orderList.addAll(_myOrders.value!!)
                     }
 
                     val distinctOrder = orderList.distinctBy { it.id }.toList()
@@ -272,7 +298,7 @@ class OrderViewModel(
         when (result) {
 
             is NetworkCallHandler.Successful<*> -> {
-                val newOrder = _orders.value?.filter { x-> x.id!=orderId };
+                val newOrder = _orders.value?.filter { x -> x.id != orderId };
                 _orders.emit(newOrder)
                 return null
             }
@@ -299,7 +325,7 @@ class OrderViewModel(
         when (result) {
 
             is NetworkCallHandler.Successful<*> -> {
-                val newOrder = _myOrders.value?.filter { x-> x.id!=orderId };
+                val newOrder = _myOrders.value?.filter { x -> x.id != orderId };
                 _myOrders.emit(newOrder)
                 return null
             }
@@ -318,15 +344,17 @@ class OrderViewModel(
 
     }
 
+
     //this function to handle if delivery collect the order from store or giving the order to user
     suspend fun updateStatus(id: String): String? {
 
         val idUUID = UUID.fromString(id)
         val isInOrder = _myOrders.value?.firstOrNull { it.id == idUUID }
 
-        when  {
-            isInOrder!=null -> {
-                val reqest = orderRepository.updateOrderStatus(UpdateOrderStatus(Id = idUUID))
+        when {
+            isInOrder != null -> {
+                val reqest =
+                    orderRepository.updateOrderStatus(UpdateOrderStatus(Id = idUUID, Status = 5))
                 return when (reqest) {
                     is NetworkCallHandler.Successful<*> -> {
                         null;
@@ -340,7 +368,23 @@ class OrderViewModel(
             }
 
             else -> {
+                val reqest =
+                    orderItemRepository.updateOrderItemStatus(
+                        UpdateOrderStatus(
+                            Id = idUUID,
+                            Status = 2
+                        )
+                    )
+                return when (reqest) {
+                    is NetworkCallHandler.Successful<*> -> {
+                        null;
+                    }
 
+                    is NetworkCallHandler.Error -> {
+                        reqest.data
+                    }
+
+                }
             }
         }
         return null;

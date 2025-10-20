@@ -68,16 +68,16 @@ public class OrderItemServices(
                 isSuccessful: false,
                 statusCode: 404
             );
-        }
-
-        ;
-        unitOfWork.OrderItemRepository.updateOrderItemStatus(
-            orderItemsStatusDto.Id
-            ,
-            orderItemsStatusDto.Status == enOrderItemStatusDto.Excepted
-                ? enOrderItemStatus.Excepted
-                : enOrderItemStatus.Cancelled
-        );
+        } ;
+        
+        orderItem.Status = orderItemsStatusDto.Status == enOrderItemStatusDto.Excepted
+            ? enOrderItemStatus.Excepted
+            : orderItemsStatusDto.Status == enOrderItemStatusDto.TakedByDelivery
+                ? enOrderItemStatus.ReceivedByDelivery
+                : enOrderItemStatus.Cancelled;
+        
+        unitOfWork.OrderItemRepository.update(orderItem);
+        
         int result = await unitOfWork.saveChanges();
 
         if (result == 0)
@@ -95,15 +95,11 @@ public class OrderItemServices(
         {
             OrderId = orderItem.OrderId,
             OrderItemId = orderItem.Id,
-            Status = enOrderItemStatus.Excepted.ToString()
+            Status = orderItem.Status.ToString()
         };
         await hubContext.Clients.All.SendAsync("orderItemsStatusChange", statusEvent);
 
-        bool isPassCondition = await isAlreadyOrderItemsIsCollectedByDelivery(orderItem.OrderId);
-        if (!isPassCondition && orderItemsStatusDto.Status==enOrderItemStatusDto.TakedByDelivery)
-        {
-         await   orderServices.updateOrderStatus(orderItem.OrderId, 3);
-        }
+       
 
         return new Result<int>
         (
@@ -116,12 +112,4 @@ public class OrderItemServices(
 
  
 
-    private async Task<bool> isAlreadyOrderItemsIsCollectedByDelivery(Guid orderId)
-    {
-        var order = await unitOfWork.OrderRepository.getOrder(orderId);
-        bool isDeliveredByDelivery = false;
-        bool isStillOneOrderDevliveryNotTacked =
-            order.Items.Any(oi => oi.Status != enOrderItemStatus.ReceivedByDelivery);
-        return isStillOneOrderDevliveryNotTacked;
-    }
 }

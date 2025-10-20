@@ -36,10 +36,10 @@ data class CreateOrderItemDto(
 @Serializable()
 data class OrderItemsStatusEvent(
     @Serializable(with = UUIDKserialize::class)
-    val OrderId: UUID,
+    val orderId: UUID,
     @Serializable(with = UUIDKserialize::class)
-    val OrderItemId: UUID,
-    val Status: String
+    val orderItemId: UUID,
+    val status: String
 )
 
 @Serializable

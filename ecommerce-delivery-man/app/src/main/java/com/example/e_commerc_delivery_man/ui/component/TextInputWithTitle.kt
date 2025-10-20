@@ -32,7 +32,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
 
 

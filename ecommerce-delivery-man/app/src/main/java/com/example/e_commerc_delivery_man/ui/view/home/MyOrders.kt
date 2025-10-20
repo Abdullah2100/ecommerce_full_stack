@@ -2,29 +2,16 @@ package com.example.e_commerc_delivery_man.ui.view.home
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,15 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -61,44 +44,34 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.navigation.NavHostController
-import coil.compose.SubcomposeAsyncImage
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.Util.General.reachedBottom
-import com.example.e_commerc_delivery_man.model.Address
+import com.example.e_commerc_delivery_man.util.General.reachedBottom
 import com.example.e_commerc_delivery_man.model.enMapType
 import com.example.e_commerc_delivery_man.ui.Screens
-import com.example.e_commerc_delivery_man.ui.component.CustomBotton
 import com.example.e_commerc_delivery_man.ui.component.OrderComponent
 import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.example.eccomerce_app.model.Order
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
-import kotlin.system.exitProcess
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -254,12 +227,13 @@ fun MyOrdersScreen(
         },
         floatingActionButtonPosition = FabPosition.EndOverlay
 
-    ) {
-        it.calculateTopPadding()
-        it.calculateBottomPadding()
+    ) { paddingValue ->
+        paddingValue.calculateTopPadding()
+        paddingValue.calculateBottomPadding()
 
         if (isSendingData.value) Dialog(
-            onDismissRequest = {}) {
+            onDismissRequest = {})
+        {
             Box(
                 modifier = Modifier
                     .height(90.dp)
@@ -280,10 +254,9 @@ fun MyOrdersScreen(
                 coroutine.launch {
                     if (!isRefresh.value) isRefresh.value = true
                     page.value = 1;
-                    orderViewModel.getMyOrders(page)
+                    orderViewModel.getMyOrders(page,isRefresh)
                     if (isRefresh.value) {
                         delay(2000)
-                        isRefresh.value = false
                     }
 
                 }
@@ -295,7 +268,7 @@ fun MyOrdersScreen(
             indicator = {
                 Indicator(
                     modifier = Modifier
-                        .padding(top = 15.dp)
+                        .padding(top = paddingValue.calculateTopPadding()+5.dp)
                         .align(Alignment.TopCenter),
                     isRefreshing = isRefresh.value,
                     containerColor = Color.White,
@@ -308,7 +281,7 @@ fun MyOrdersScreen(
                 state = lazyState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = it.calculateTopPadding(), bottom = it.calculateBottomPadding())
+                    .padding(top = paddingValue.calculateTopPadding(), bottom = paddingValue.calculateBottomPadding())
                     .background(Color.Gray.copy(alpha = 0.01f)),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {

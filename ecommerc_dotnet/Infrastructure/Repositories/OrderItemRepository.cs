@@ -18,13 +18,6 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
     //orderitmes
     
 
-    public void  updateOrderItemStatus(Guid id, enOrderItemStatus status)
-    {
-        OrderItem? orderItem =  context.OrderItems.Find(id);
-        if (orderItem is null) throw new ArgumentNullException();
-        orderItem.Status = status;
-    }
-
 
 
 
@@ -41,7 +34,7 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
             .Include(oi => oi.Store)
             .AsSplitQuery()
             .AsNoTracking()
-            .Where(o => o.StoreId == storeId)
+            .Where(o => o.StoreId == storeId && ((int)o.Order.Status)>1 )
             .Skip((pageNum - 1) * pageSize)
             .Take(pageSize)
             .OrderDescending()

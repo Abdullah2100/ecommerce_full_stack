@@ -4,7 +4,8 @@ import android.app.Application
 import com.example.eccomerce_app.di.dataBaseModule
 import com.example.e_commerc_delivery_man.di.httpClientModule
 import com.example.e_commerc_delivery_man.di.repositoryModel
-import com.example.eccomerce_app.di.viewModelModel
+import com.example.e_commerc_delivery_man.di.viewModelModel
+import com.example.eccomerce_app.di.webSocketClientModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -19,6 +20,7 @@ class MyApplication : Application() {
                 httpClientModule,
                 viewModelModel,
                 repositoryModel,
+                webSocketClientModule
               )
         }
     }

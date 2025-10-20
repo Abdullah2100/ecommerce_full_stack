@@ -24,7 +24,7 @@ android {
     defaultConfig {
         applicationId = "com.example.e_commercompose"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         multiDexEnabled = true
@@ -163,23 +163,19 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose.runntime)
 
     //qc
-    implementation(libs.qr.kit)
+   // implementation(libs.qr.kit)
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.3.0")
 
     //google map
     implementation(libs.maps.utils.ktx)
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
 
-    implementation(libs.maps.navigation) {
-        exclude(group = "com.google.android.gms", module = "play-services-maps")
-    }
-    configurations.all {
-        exclude(group = "com.google.android.gms", module = "play-services-maps")
-    }
-//
-//
-//    implementation("com.mapbox.maps:android:10.15.0")
-//    implementation("com.mapbox.navigation:android:2.14.0")
 
+}
 
+configurations.all {
+    resolutionStrategy.force(libs.androidx.junit)
+    resolutionStrategy.force(libs.androidx.espresso.core)
 }

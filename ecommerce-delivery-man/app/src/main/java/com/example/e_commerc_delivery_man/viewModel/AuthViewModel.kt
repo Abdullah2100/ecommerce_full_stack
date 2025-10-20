@@ -3,8 +3,8 @@ package com.example.e_commerc_delivery_man.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commerc_delivery_man.Util.General
-import com.example.e_commerc_delivery_man.Util.General.removeTheSingle
+import com.example.e_commerc_delivery_man.util.General
+import com.example.e_commerc_delivery_man.util.General.removeTheSingle
 import com.example.e_commerc_delivery_man.data.Room.AuthModleEntity
 import com.example.e_commerc_delivery_man.data.Room.IAuthDao
 import com.example.e_commerc_delivery_man.data.Room.ILocationDao

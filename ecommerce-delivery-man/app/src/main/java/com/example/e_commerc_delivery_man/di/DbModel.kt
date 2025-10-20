@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.e_commerc_delivery_man.data.Room.AuthDataBase
 import com.example.e_commerc_delivery_man.util.Secrets
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import org.koin.dsl.module
 
 fun provideDataBase(application: Context): AuthDataBase {

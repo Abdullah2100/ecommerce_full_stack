@@ -2,6 +2,8 @@ package com.example.eccomerce_app.ui.component
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -38,12 +41,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.SubcomposeAsyncImage
+import com.example.e_commercompose.R
 import com.example.e_commercompose.model.OrderItem
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.util.General
-import com.example.e_commercompose.R
-import qrgenerator.QRCodeImage
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
+
+
+//import qrgenerator.QRCodeImage
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,6 +63,7 @@ fun OrderItemShape(
     isShowOrderStatus: Boolean = false
 ) {
     val isShowDialog = remember { mutableStateOf(false) }
+    val qrBitMap = remember { mutableStateOf<Bitmap?>(null) }
 
     val orderStatus = when (orderItem.orderStatusName) {
         "Rejected" -> R.drawable.rejected
@@ -69,23 +77,37 @@ fun OrderItemShape(
 
     fun openQrDialog() {
         isShowDialog.value = true
+        try {
+            val barcodeEncoder = BarcodeEncoder()
+            val bitmap = barcodeEncoder.encodeBitmap(
+                orderItem.id.toString(),
+                BarcodeFormat.QR_CODE,
+                400,
+                400
+            )
+            qrBitMap.value = bitmap
+        } catch (e: Exception) {
+            isShowDialog.value = false;
+
+        }
 
     }
-    if(isShowDialog.value){
+    if (isShowDialog.value) {
         Dialog(
             onDismissRequest = { isShowDialog.value = false },
             properties = DialogProperties(), content = {
-                Box {
-                    QRCodeImage(
-                        url = orderItem.id.toString(),
-                        contentDescription = "",
-                        modifier = Modifier
-                            .clip(
-                                RoundedCornerShape(8.dp)
-                            ),
+                if (qrBitMap.value != null)
+                    Box {
+                        Image(
+                            bitmap = qrBitMap.value!!.asImageBitmap(),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(8.dp)
+                                ),
 
-                        )
-                }
+                            )
+                    }
             })
     }
 
@@ -224,7 +246,8 @@ fun OrderItemShape(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    )
+                    {
                         Text(
                             "Order Status :",
 
@@ -251,12 +274,40 @@ fun OrderItemShape(
 
                     }
 
+                    if (orderItem.orderItemStatus != "ReceivedByDelivery")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        )
+                        {
+                            Text(
+                                "Collect Order :",
+
+                                fontFamily = General.satoshiFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = (16).sp,
+                                color = CustomColor.neutralColor950,
+                                textAlign = TextAlign.Center
+                            )
+                            Image(
+                                imageVector = ImageVector
+                                    .vectorResource(R.drawable.qr_button),
+                                "",
+                                modifier = Modifier.clickable(onClick = {
+                                    openQrDialog()
+                                })
+                            )
+
+
+                        }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                    )
+                    {
                         Text(
-                            "Collect Order :",
+                            "Item Status :",
 
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
@@ -264,17 +315,19 @@ fun OrderItemShape(
                             color = CustomColor.neutralColor950,
                             textAlign = TextAlign.Center
                         )
-                        Image(
-                            imageVector = ImageVector
-                                .vectorResource(R.drawable.delivery_collecte_icon),
-                            "",
-                            modifier = Modifier.clickable(onClick = {
-                                openQrDialog()
-                            })
+
+                        Text(
+                            orderItem.orderItemStatus,
+                            fontFamily = General.satoshiFamily,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = (12).sp,
+                            color = CustomColor.neutralColor950,
+                            textAlign = TextAlign.Center
                         )
 
-
                     }
+
+
                 }
             }
 

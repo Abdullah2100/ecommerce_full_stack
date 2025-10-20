@@ -33,7 +33,6 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,9 +51,8 @@ import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.navigation.NavHostController
 import com.example.e_commerc_delivery_man.ui.component.Sizer
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
-import com.example.e_commerc_delivery_man.Util.General.reachedBottom
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.ui.component.MonayAnalys
 import com.example.e_commerc_delivery_man.ui.component.OrdersAnalys
 import com.example.e_commerc_delivery_man.ui.component.VerticalLine

@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.ui.theme.CustomColor
 import com.example.e_commerc_delivery_man.viewModel.OrderViewModel
 import com.example.eccomerce_app.model.Order
@@ -189,6 +189,27 @@ fun OrderComponent(
                     )
                 }
 
+                Row {
+                    Text(
+                        "Order Status : ",
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
+                    )
+
+                    Text(
+                        order.status,
+                        fontFamily = General.satoshiFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = CustomColor.neutralColor950,
+                        textAlign = TextAlign.Center
+
+                    )
+                }
 
 
             }

@@ -54,8 +54,9 @@ namespace ecommerc_dotnet.Presentation.dto
     public class UpdateOrderStatusDto
     {
         public Guid Id { get; set; }
-        public int Status { get; set; } 
+        public int Status { get; } 
     }
+    
     public class UpdateOrderStatusEventDto
     {
         public Guid Id { get; set; }

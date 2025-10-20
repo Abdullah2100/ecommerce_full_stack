@@ -25,4 +25,11 @@ data class OrderItemStatusChangeDto(
     val orderItemId: UUID,
     val status: String
 )
-
+@Serializable()
+data class OrderItemsStatusEvent(
+    @Serializable(with = UUIDKserialize::class)
+    val orderId: UUID,
+    @Serializable(with = UUIDKserialize::class)
+    val orderItemId: UUID,
+    val Status: String
+)

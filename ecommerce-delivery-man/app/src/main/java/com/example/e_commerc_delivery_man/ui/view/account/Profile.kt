@@ -52,8 +52,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import com.example.e_commerc_delivery_man.R
-import com.example.e_commerc_delivery_man.Util.General
-import com.example.e_commerc_delivery_man.Util.General.toCustomFil
+import com.example.e_commerc_delivery_man.util.General
+import com.example.e_commerc_delivery_man.util.General.toCustomFil
 import com.example.e_commerc_delivery_man.ui.component.TextInputWithTitle
 import com.example.e_commerc_delivery_man.ui.component.TextNumberInputWithTitle
 import com.example.e_commerc_delivery_man.ui.component.TextSecureInputWithTitle

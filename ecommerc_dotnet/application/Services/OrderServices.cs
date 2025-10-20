@@ -248,6 +248,7 @@ public class OrderServices(
         });
 
         //this for notification operation for all user at the system
+
         await sendNotification(order, status);
         return new Result<bool>
         (
@@ -425,6 +426,12 @@ public class OrderServices(
         };
 
         await hubContext.Clients.All.SendAsync("orderGettingByDelivery", eventHolder);
+        await hubContext.Clients.All.SendAsync("orderStatus", new UpdateOrderStatusEventDto
+        {
+            Id = order.Id,
+            Status = OrderStatus[2]
+        });
+        
 
         await sendNotification(order, status:2);
         return new Result<bool>
@@ -527,16 +534,18 @@ public class OrderServices(
 
     private async Task sendNotification(Order order, int status)
     {
-        var messageServe = new SendMessageSerivcies(new NotificationServices());
 
-        await sendNotificationToStore(order, status, messageServe);
-        await sendNotificationToUser(order, status, messageServe);
+        await sendNotificationToStore(order, status);
+        await sendNotificationToUser(order, status);
+        await sendNotificationToDelivery(order, status);
     }
     
-    private async Task sendNotificationToStore(Order order, int status, SendMessageSerivcies sendMessageSerivcies)
+    private async Task sendNotificationToStore(Order order, int status)
     {
         try
         {
+            var messageServe = new SendMessageSerivcies(new NotificationServices());
+
             var orderItems = order.Items.ToList();
 
             for (int i = 0; i < orderItems.Count; i++)
@@ -546,7 +555,7 @@ public class OrderServices(
                 var storeMessage = this.storeMessage(status, cancelMessage);
                 if (!string.IsNullOrEmpty(storeMessage))
                 {
-                    await sendMessageSerivcies.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
+                    await messageServe.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
                 }
             }
         }
@@ -556,15 +565,15 @@ public class OrderServices(
         }
     }
 
-    private async Task sendNotificationToUser(Order order, int status,
-        SendMessageSerivcies? sendMessageSerivcies = null)
-    {
+    private async Task sendNotificationToUser(Order order, int status){
         try
         {
+            var messageServe = new SendMessageSerivcies(new NotificationServices());
+
             var userMessage = this.userMessage(status);
             if (!string.IsNullOrEmpty(userMessage))
             {
-                await sendMessageSerivcies.sendMessage(userMessage, order.User.deviceToken);
+                await messageServe.sendMessage(userMessage, order.User.deviceToken);
             }
         }
         catch (Exception e)
@@ -573,11 +582,13 @@ public class OrderServices(
         }
     }
 
-    private async Task sendNotificationToDelivery(Order order, int status, SendMessageSerivcies sendMessageSerivcies)
+    private async Task sendNotificationToDelivery(Order order, int status)
     {
         try
         {
-            var deliveryMessage = this.delivaryMessage(status);
+            var messageServe = new SendMessageSerivcies(new NotificationServices());
+
+            var deliveryMessage = this.deliveryMessage(status);
 
             Delivery? delivery = null;
             if (order.DeleveryId is not null)
@@ -589,13 +600,13 @@ public class OrderServices(
             {
                 case 1:
                 {
-                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.DeviceToken);
+                    await messageServe.sendMessage(deliveryMessage, delivery.DeviceToken);
                 }
                     break;
 
                 case 3:
                 {
-                    await sendMessageSerivcies.sendMessage(deliveryMessage, delivery.DeviceToken);
+                    await messageServe.sendMessage(deliveryMessage, delivery.DeviceToken);
                 }
                     break;
             }
@@ -620,7 +631,7 @@ public class OrderServices(
         };
     }
 
-    private string delivaryMessage(int status)
+    private string deliveryMessage(int status)
     {
         return status switch
         {

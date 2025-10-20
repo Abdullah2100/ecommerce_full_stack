@@ -1,4 +1,4 @@
-package com.example.e_commerc_delivery_man.Util
+package com.example.e_commerc_delivery_man.util
 
 import android.content.Context
 import android.net.Uri
@@ -13,16 +13,14 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.example.e_commerc_delivery_man.R
 import com.example.e_commerc_delivery_man.data.Room.AuthModleEntity
-import com.example.e_commerc_delivery_man.util.Secrets
 import kotlinx.coroutines.flow.MutableStateFlow
 import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
 import java.io.File
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Calendar
-
+import net.sqlcipher.database.SupportFactory
 
 object General {
 
@@ -62,12 +60,7 @@ object General {
     }
 
 
-    fun isValideMony(number:String): Boolean{
-        var reges= Regex("/^(?:100(?:\\.0(?:0)?)?|\\d{1,2}(?:\\.\\d{1,2})?)\$")
-        return reges.containsMatchIn(number)
-    }
-
-    fun Uri.toCustomFil(context: Context): File? {
+     fun Uri.toCustomFil(context: Context): File? {
         var file: File? = null;
 
         try {

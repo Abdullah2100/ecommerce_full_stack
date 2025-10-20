@@ -1,9 +1,8 @@
 package com.example.e_commerc_delivery_man.data.repository
 
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.dto.DeliveryDto
 import com.example.e_commerc_delivery_man.model.Address
-import com.example.e_commerc_delivery_man.model.Delivery
 import com.example.e_commerc_delivery_man.model.UpdateMyInfo
 import com.example.e_commerc_delivery_man.util.Secrets
 import com.example.hotel_mobile.Modle.NetworkCallHandler

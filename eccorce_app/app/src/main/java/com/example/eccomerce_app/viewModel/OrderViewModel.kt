@@ -70,18 +70,18 @@ class OrderViewModel(
                     "orderItemsStatusChange",
                     { response ->
 
-                        val orderHolder = _orders.value?.firstOrNull { it.id == response.OrderId }
+                        val orderHolder = _orders.value?.firstOrNull { it.id == response.orderId }
                         if (orderHolder != null) {
                             val orderItemsHolder = orderHolder.orderItems.map { oi ->
-                                if (oi.id == response.OrderItemId) {
-                                    oi.copy(orderItemStatus = response.Status)
+                                if (oi.id == response.orderItemId) {
+                                    oi.copy(orderItemStatus = response.status)
                                 } else oi
                             }
                             orderHolder.copy(orderItems = orderItemsHolder)
 
                         }
                         val userOrderList = _orders.value?.map {
-                            if (it.id == response.OrderId && orderHolder != null)
+                            if (it.id == response.orderId && orderHolder != null)
                                 it.copy(orderItems = orderHolder.orderItems)
                             else it
                         }

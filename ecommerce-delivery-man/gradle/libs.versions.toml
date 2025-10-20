@@ -18,7 +18,7 @@ materialIconsExtended = "1.7.8"
 playServicesLocation = "21.3.0"
 room = "2.8.2"
 signalr = "10.0.0-rc.2.25502.107"
-sqlcipher= "4.11.0"
+sqlcipher= "4.5.4"
 sqlight = "2.6.1"
 koin = "4.1.1"
 kspVersion = "2.2.20-2.0.3"
@@ -69,7 +69,7 @@ room-ktx = { group = "androidx.room",name="room-ktx", version.ref = "room" }
 signalr = { module = "com.microsoft.signalr:signalr", version.ref = "signalr" }
 
 #sqlciper
-sqlcipher= {group= "net.zetetic", name="sqlcipher-android", version.ref= "sqlcipher"}
+sqlcipher= {module= "net.zetetic:android-database-sqlcipher", version.ref= "sqlcipher"}
 sql-light= {group = "androidx.sqlite" , name = "sqlite" , version.ref = "sqlight"}
 
 #koin

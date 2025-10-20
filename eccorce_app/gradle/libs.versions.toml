@@ -18,7 +18,7 @@ materialIconsExtended = "1.7.8"
 playServicesLocation = "21.3.0"
 room = "2.8.2"
 signalr = "10.0.0-rc.2.25502.107"
-sqlcipher= "4.11.0"
+sqlcipher= "4.5.4"
 sqlight = "2.6.1"
 koin = "4.1.1"
 kspVersion = "2.2.20-2.0.3"
@@ -32,7 +32,6 @@ constrain-compose = "1.1.1"
 coilCompose = "2.7.0"
 gms="4.4.4"
 mapsUtilsKtx = "5.2.1"
-mapsNav = "7.1.0"
 playServicesMaps = "19.2.0"
 qrKit = "3.1.3"
 uiGraphics = "1.9.3"
@@ -43,7 +42,6 @@ gradleSecret = "2.0.1"
 [libraries]
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
-qr-kit = { module = "network.chaintech:qr-kit", version.ref = "qrKit" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
@@ -64,7 +62,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 
 #firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-messaging-directboot = { module = "com.google.firebase:firebase-messaging-directboot", version.ref = "firebaseMessagingDirectboot" }
+firebase-messaging-directboot = { module = "com.google.firebase:firebase-messaging-directboot",version.ref="firebaseMessagingDirectboot" }
 
 #coil
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
@@ -79,8 +77,11 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 #signalr
 signalr = { module = "com.microsoft.signalr:signalr", version.ref = "signalr" }
 
+#qr package
+#qr-kit = { module = "network.chaintech:qr-kit", version.ref = "qrKit" }
 
-sqlcipher= {group= "net.zetetic", name="sqlcipher-android", version.ref= "sqlcipher"}
+#sqlcipher
+sqlcipher= {module= "net.zetetic:android-database-sqlcipher", version.ref= "sqlcipher"}
 sql-light = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlight" }
 
 #koin
@@ -122,7 +123,6 @@ compose-constrin = { group = "androidx.constraintlayout", name = "constraintlayo
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "mapsUtilsKtx" }
-maps-navigation = { module = "com.google.android.libraries.navigation:navigation", version.ref = "mapsNav" }
 
 #lifecycle
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelKtx" }

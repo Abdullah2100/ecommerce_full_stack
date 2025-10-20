@@ -267,7 +267,8 @@ public class OrderController(
         var result = await orderServices
             .updateOrderStatus(
                 orderStatus.Id,
-                orderStatus.Status);
+               orderStatus.Status
+                );
 
         return result.IsSuccessful switch
         {

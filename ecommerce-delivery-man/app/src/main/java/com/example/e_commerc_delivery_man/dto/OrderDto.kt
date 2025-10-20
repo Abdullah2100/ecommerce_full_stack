@@ -37,6 +37,5 @@ data class OrderUpdateEvent(
 data class UpdateOrderStatus(
     @Serializable(with = UUIDKserialize::class)
     val Id: UUID,
-    @SerialName("Status")
-    val Status:Int=5
+    val Status:Int
 )

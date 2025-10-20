@@ -54,11 +54,10 @@ class OrderItemsViewModel(
                     "orderStatus",
                     { response ->
 
-                        val orderUpdateData = _orderItemForMyStore.value?.map { data->
-                            if(data.orderId==response.id){
+                        val orderUpdateData = _orderItemForMyStore.value?.map { data ->
+                            if (data.orderId == response.id) {
                                 data.copy(orderStatusName = response.status)
-                            }
-                            else data
+                            } else data
                         }
 
 
@@ -88,15 +87,16 @@ class OrderItemsViewModel(
                     "orderItemsStatusChange",
                     { response ->
                         val myStoreOrderItemHolder = _orderItemForMyStore.value?.map {
-                            if (it.id == response.OrderId) {
-                                it.copy(orderItemStatus = response.Status)
+                            if (it.id == response.orderItemId) {
+                                it.copy(orderItemStatus = response.status)
 
                             } else it
                         }
 
 
                         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-                            _orderItemForMyStore.emit(myStoreOrderItemHolder)
+                            if (myStoreOrderItemHolder?.isNotEmpty() == true)
+                                _orderItemForMyStore.emit(myStoreOrderItemHolder)
                         }
                     },
                     OrderItemsStatusEvent::class.java

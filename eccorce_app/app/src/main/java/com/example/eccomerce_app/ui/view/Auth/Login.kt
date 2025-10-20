@@ -225,12 +225,12 @@ fun LoginScreen(
 
                                 delay(10)
 
-                                val token =// async { authKoin.generateTokenNotification() }.await()
+                                val token = async { authKoin.generateTokenNotification() }.await()
 
-                                Pair(
-                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-                                    null
-                                )
+//                                Pair(
+//                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+//                                    null
+//                                )
                                 if (!token.first.isNullOrEmpty()) {
                                     val result = authKoin.loginUser(
                                         userNameOrEmail.value.text,

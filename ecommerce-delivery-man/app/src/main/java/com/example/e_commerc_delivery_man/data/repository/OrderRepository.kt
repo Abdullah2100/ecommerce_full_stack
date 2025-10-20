@@ -1,14 +1,12 @@
 package com.example.e_commerc_delivery_man.data.repository
 
-import com.example.e_commerc_delivery_man.Util.General
+import com.example.e_commerc_delivery_man.util.General
 import com.example.e_commerc_delivery_man.util.Secrets
-import com.example.eccomerce_app.dto.response.OrderItemDto
 import com.example.eccomerce_app.dto.response.OrderDto
 import com.example.eccomerce_app.dto.response.UpdateOrderStatus
 import com.example.hotel_mobile.Modle.NetworkCallHandler
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -82,8 +80,8 @@ class OrderRepository(val client: HttpClient) {
                         "Bearer ${General.authData.value?.refreshToken}"
                     )
                 }
-                setBody(orderUpdate)
                 contentType(ContentType.Application.Json)
+                setBody(orderUpdate)
 
             }
             return if (result.status == HttpStatusCode.OK) {

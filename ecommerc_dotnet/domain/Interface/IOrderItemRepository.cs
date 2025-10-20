@@ -12,5 +12,4 @@ public interface IOrderItemRepository: IRepository<OrderItem>
     Task<IEnumerable<OrderItem>> getOrderItems(Guid storeId,int pageNum,int pageSize);
     Task<OrderItem?> getOrderItem(Guid id ,Guid storeId);
     Task<OrderItem?> getOrderItem(Guid id );
-    void  updateOrderItemStatus(Guid id,enOrderItemStatus status );
 }

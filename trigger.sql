@@ -32,8 +32,8 @@ RETURNS Trigger As $$
 DECLARE
  	isCanModifiOrderItem BOOLEAN :=false;
 BEGIN
-	SELECT "Status"< 4 INTO isCanModifiOrderItem FROM "Orders" WHERE "Id"=OLD."Id";
- 	IF  isCanModifiOrderItem = FALSE THEN   -- this to prevent update on orderitme if the order is complate
+	SELECT "Status">= 4 INTO isCanModifiOrderItem FROM "Orders" WHERE "Id"=OLD."OrderId";
+ 	IF  isCanModifiOrderItem  THEN   -- this to prevent update on orderitme if the order is complate
 	    RETURN NULL;
 	END IF;
  	RETURN NEW;
