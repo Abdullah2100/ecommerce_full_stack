@@ -1,17 +1,16 @@
+using api.domain.entity;
+using api.domain.Interface;
+using api.Presentation.dto;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
 using Npgsql;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class OrderRepository(AppDbContext context)
     : IOrderRepository
 {
-    public async Task<IEnumerable<Order>> getOrders(
+    public async Task<IEnumerable<Order>> GetOrders(
         Guid userId,
         int pageNum,
         int pageSize
@@ -41,7 +40,7 @@ public class OrderRepository(AppDbContext context)
         return orders;
     }
 
-    public async Task<IEnumerable<Order>> getOrders(int page, int length)
+    public async Task<IEnumerable<Order>> GetOrders(int page, int length)
     {
         var orders = await context.Orders
             .Include(o => o.User)
@@ -93,7 +92,7 @@ public class OrderRepository(AppDbContext context)
         return orders;
     }
 
-    public async Task<Order?> getOrder(Guid id)
+    public async Task<Order?> GetOrder(Guid id)
     {
         var order = await context.Orders
             .Include(o => o.User)
@@ -114,7 +113,7 @@ public class OrderRepository(AppDbContext context)
     }
 
 
-    public async Task<Order?> getOrder(Guid id, Guid userId)
+    public async Task<Order?> GetOrder(Guid id, Guid userId)
     {
         var order = await context.Orders
             .Include(o => o.User)
@@ -134,14 +133,14 @@ public class OrderRepository(AppDbContext context)
         return order;
     }
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context.Orders
             .AsNoTracking()
             .AnyAsync(o => o.Id == id);
     }
 
-    public async Task<bool> isCanCancelOrder(Guid id)
+    public async Task<bool> IsCanCancelOrder(Guid id)
     {
         return await context
             .OrderItems
@@ -150,7 +149,7 @@ public class OrderRepository(AppDbContext context)
             );
     }
 
-    public async Task<bool> isValidTotalPrice(decimal totalPrice, List<CreateOrderItemDto> items)
+    public async Task<bool> IsValidTotalPrice(decimal totalPrice, List<CreateOrderItemDto> items)
     {
         bool isAmbiguous = false;
         decimal realPrice = 0;
@@ -200,7 +199,7 @@ public class OrderRepository(AppDbContext context)
         return realPrice == totalPrice;
     }
 
-    public async Task<IEnumerable<Order>> getOrderNoBelongToAnyDelivery(int pageNum, int pageSize)
+    public async Task<IEnumerable<Order>> GetOrderNoBelongToAnyDelivery(int pageNum, int pageSize)
     {
         var orders =
             await context.Orders
@@ -256,7 +255,7 @@ public class OrderRepository(AppDbContext context)
         return orders;
     }
 
-    public async Task<IEnumerable<Order>> getOrderBelongToDelivery(Guid deliveryId, int pageNum, int pageSize)
+    public async Task<IEnumerable<Order>> GetOrderBelongToDelivery(Guid deliveryId, int pageNum, int pageSize)
     {
         var orders = await context.Orders
             .Include(o => o.User)
@@ -309,7 +308,7 @@ public class OrderRepository(AppDbContext context)
         return orders;
     }
 
-    public void removeOrderFromDelivery(Guid id, Guid deliveryId)
+    public void RemoveOrderFromDelivery(Guid id, Guid deliveryId)
     {
         Order? result = context
             .Orders
@@ -320,17 +319,17 @@ public class OrderRepository(AppDbContext context)
     }
 
 
-    public void add(Order entity)
+    public void Add(Order entity)
     {
         context.Orders.Add(entity);
     }
 
-    public void update(Order entity)
+    public void Update(Order entity)
     {
         context.Orders.Update(entity);
     }
 
-    public void delete(Guid id)
+    public void Delete(Guid id)
     {
         var orders = context.Orders.Where(o => o.Id == id).ToList();
         context.Orders.RemoveRange(orders);
@@ -338,12 +337,12 @@ public class OrderRepository(AppDbContext context)
 
 
 
-    public async Task<bool> isSavedDistanceToOrder(Guid id)
+    public async Task<bool> IsSavedDistanceToOrder(Guid id)
     {
         var result = (await isSavedDistance(id) == true ? 1 : 0);
         if (result == 0)
         {
-            delete(id);
+            Delete(id);
             return false;
         }
 

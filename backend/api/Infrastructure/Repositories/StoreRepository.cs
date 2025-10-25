@@ -1,31 +1,30 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class StoreRepository(AppDbContext context) : IStoreRepository
 {
-     public void  add(Store entity)
+     public void  Add(Store entity)
     {
          context.Stores.Add(entity);
     }
 
-    public void update(Store entity)
+    public void Update(Store entity)
     {
         context.Stores.Update(entity);
     }
 
-    public void  delete(Guid id)
+    public void  Delete(Guid id)
     {
         Store? store =  context.Stores.Find(id);
         if (store == null) throw new ArgumentNullException();
         store.IsBlock = !store.IsBlock;
     }
 
-    public async Task<Store?> getStore(Guid id)
+    public async Task<Store?> GetStore(Guid id)
     {
         Store? store = await context
             .Stores
@@ -45,7 +44,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
         return store;
     }
 
-    public async Task<Store?> getStoreByUserId(Guid id)
+    public async Task<Store?> GetStoreByUserId(Guid id)
     {
         Store? store = await context
             .Stores
@@ -65,7 +64,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
         return store;
     }
 
-    public async Task<List<Store>> getStores(int page, int length)
+    public async Task<List<Store>> GetStores(int page, int length)
     {
         List<Store> stores = await context
             .Stores
@@ -92,7 +91,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
         return stores;
     }
 
-    public async Task<int> getStoresCount()
+    public async Task<int> GetStoresCount()
     {
         return await context
             .Stores
@@ -100,7 +99,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
             .CountAsync();
     }
 
-    public async Task<bool> isExist(string name)
+    public async Task<bool> IsExist(string name)
     {
         return await context
             .Stores
@@ -108,7 +107,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
             .AnyAsync(st => st.Name == name);
     }
 
-    public async Task<bool> isExist(string name, Guid id)
+    public async Task<bool> IsExist(string name, Guid id)
     {
         return await context
             .Stores
@@ -116,7 +115,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
             .AnyAsync(st => st.Name == name&& st.Id != id);
     }
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context
             .Stores
@@ -124,7 +123,7 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
             .AnyAsync(st => st.Id == id);
     }
 
-    public async Task<bool> isExist(Guid id, Guid subCategoryId)
+    public async Task<bool> IsExist(Guid id, Guid subCategoryId)
     {
         return await context
             .Stores

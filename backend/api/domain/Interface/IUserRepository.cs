@@ -1,22 +1,21 @@
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
+using api.domain.entity;
 
-namespace ecommerc_dotnet.application.Repository;
+namespace api.domain.Interface;
 
 public interface IUserRepository:IRepository<User>
 {
-      Task<User?> getUser(Guid id);
-      Task<User?> getUser(string email);
-      Task<int> getUserCount();
-      Task<User?> getUserByStoreId(Guid id);
-      Task<List<User>> getUsers(int page,int length);
-      Task<User?> getUser(string username ,string password);
+      Task<User?> GetUser(Guid id);
+      Task<User?> GetUser(string email);
+      Task<int> GetUserCount();
+      Task<User?> GetUserByStoreId(Guid id);
+      Task<List<User>> GetUsers(int page,int length);
+      Task<User?> GetUser(string username ,string password);
       
-      Task<bool> isExist(Guid id);
+      Task<bool> IsExist(Guid id);
       
-      Task<bool> isExist(int role);
-      Task<bool> isExistByPhone(string phone);
-      Task<bool> isExistByEmail(string email);
+      Task<bool> IsExist(int role);
+      Task<bool> IsExistByPhone(string phone);
+      Task<bool> IsExistByEmail(string email);
 
-      void deleteAsync(Guid id);
+      void Delete(Guid id);
 }

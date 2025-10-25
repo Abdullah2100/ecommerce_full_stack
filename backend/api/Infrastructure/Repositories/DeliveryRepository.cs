@@ -1,12 +1,11 @@
+using api.domain.entity;
+using api.domain.Interface;
+using api.Presentation.dto;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.dto;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class DeliveryRepository(
     AppDbContext context
@@ -15,7 +14,7 @@ public class DeliveryRepository(
 
     
 
-    public void  add(Delivery entity)
+    public void  Add(Delivery entity)
     {
        //  context.Address.AddAsync(entity.Address!);
 
@@ -32,7 +31,7 @@ public class DeliveryRepository(
 
     }
 
-    public void  update(Delivery entity)
+    public void  Update(Delivery entity)
     {
  
             context.Deliveries.Update(new Delivery
@@ -46,14 +45,14 @@ public class DeliveryRepository(
        
     }
 
-    public void  delete(Guid id)
+    public void  Delete(Guid id)
     {
         Delivery? entity = context.Deliveries.Find(id);
         if (entity is null)throw new  ArgumentNullException();
         entity.IsBlocked = !entity.IsBlocked;
     }
 
-    public async Task<Delivery?> getDelivery(Guid id)
+    public async Task<Delivery?> GetDelivery(Guid id)
     {
         var delivery =(await context
             .Deliveries
@@ -67,7 +66,7 @@ public class DeliveryRepository(
         return delivery;
     }
 
-    public async Task<Delivery?> getDeliveryByUserId(Guid userId)
+    public async Task<Delivery?> GetDeliveryByUserId(Guid userId)
     {
         var delivery= (await context
             .Deliveries
@@ -83,7 +82,7 @@ public class DeliveryRepository(
         return delivery; 
     }
 
-    public async Task<List<Delivery>?> getDeliveriesByBelongTo(Guid belongToId,int page, int size)
+    public async Task<List<Delivery>?> GetDeliveriesByBelongTo(Guid belongToId,int page, int size)
     {
         List<Delivery> deliveries = await context
             .Deliveries
@@ -102,17 +101,28 @@ public class DeliveryRepository(
         return deliveries;
     }
 
-    public async Task<List<Delivery>?> getDeliveries()
+    public async Task<List<Delivery>?> GetDeliveries(int page, int size)
     {
         var delivery= (await context
             .Deliveries
             .AsNoTracking()
-            .Include(de => de.User).ToListAsync());
+            .Include(de => de.User)
+            .AsNoTracking()
+            .Take(page)
+            .Skip((page - 1) * size)
+            .ToListAsync());
         
         return delivery;  
     }
 
-    public async Task<DeliveryAnalysDto> getDeliveryAnalys(Guid id)
+    public async Task<int> GetDeliveriesPage(int deliveryPerSize)
+    {
+        int deliveriesCount = await context.Deliveries.CountAsync();
+        if (deliveriesCount == 0) return 0;
+        return (int)Math.Ceiling((decimal)(deliveriesCount) / deliveryPerSize);
+    }
+
+    public async Task<DeliveryAnalysDto> GetDeliveryAnalys(Guid id)
     {
         using (var cmd = context.Database.GetDbConnection().CreateCommand())
         {
@@ -143,7 +153,7 @@ public class DeliveryRepository(
     }
 
 
-    public async Task<bool> isExistByUserId(Guid userId)
+    public async Task<bool> IsExistByUserId(Guid userId)
     {
         return await context
             .Deliveries

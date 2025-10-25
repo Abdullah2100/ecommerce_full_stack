@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ecommerc_dotnet.domain.entity;
+namespace api.domain.entity;
 
 public class ReseatePasswordOtp
 {

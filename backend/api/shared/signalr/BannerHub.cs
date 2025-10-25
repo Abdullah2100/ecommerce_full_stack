@@ -1,16 +1,16 @@
-using ecommerc_dotnet.Presentation.dto;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.shared.signalr;
+namespace api.shared.signalr;
 
 public class BannerHub : Hub
 {
-    public async Task sendingNewBanner(BannerDto banner)
+    public async Task SendingNewBanner(BannerDto banner)
     {
         await Clients.All.SendAsync("createdBanner", banner);
     }
     
-    public async Task sendDeletedBannerEvent(Guid bannerId)
+    public async Task SendDeletedBannerEvent(Guid bannerId)
     {
         await Clients.All.SendAsync("deletedOrder", bannerId);
     }

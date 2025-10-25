@@ -8,13 +8,12 @@ VALUES(uuid_generate_v4(),'one_kilo_price',150,CURRENT_TIMESTAMP);
 CREATE OR REPLACE FUNCTION Fun_prevent_delete_orderItem()
 RETURNS Trigger As $$
 DECLARE
-orderItemStatus INT :=0;
-isCanModifiOrderItem BOOLEAN :=false;
+isCanModifiOrder BOOLEAN :=false;
 BEGIN
- SELECT "Status" into orderItemStatus FROM "OrdersItems" where "Id"=OLD."Id";
- SELECT "Status"<4 into isCanModifiOrderItem FROM "Orders" where "Id"=OLD."Id";
+
+ SELECT "Status"<=4 into isCanModifiOrder FROM "Orders" where "Id"=OLD."OrderId";
  
- if orderStatus>3 and isCanModifiOrderItem = FALSE THEN
+ if OLD."Status">3 and isCanModifiOrder THEN
    RETURN NULL;
  END IF;
  return OLD;
@@ -24,16 +23,17 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER tr_prevent_delete_orderItem
 BEFORE DELETE ON "OrdersItems" FOR EACH ROW EXECUTE FUNCTION Fun_prevent_delete_orderItem();
 
-
---triger for prevent uppdate the order after it is complated
+ --triger for prevent uppdate the order after it is complated
 CREATE OR REPLACE 
 FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes()
 RETURNS Trigger As $$
 DECLARE
  	isCanModifiOrderItem BOOLEAN :=false;
 BEGIN
-	SELECT "Status">= 4 INTO isCanModifiOrderItem FROM "Orders" WHERE "Id"=OLD."OrderId";
- 	IF  isCanModifiOrderItem  THEN   -- this to prevent update on orderitme if the order is complate
+ 	SELECT ("Status">= 4) 
+	INTO isCanModifiOrderItem 
+	FROM "Orders" WHERE "Id" = OLD."OrderId";
+ 	IF  isCanModifiOrderItem = TRUE  THEN   -- this to prevent update on orderitme if the order is complate
 	    RETURN NULL;
 	END IF;
  	RETURN NEW;
@@ -41,10 +41,11 @@ END
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE TRIGGER tr_prevent_delete_orderItem 
-BEFORE UPDATE ON "OrdersItems"   FOR EACH ROW EXECUTE FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes();
+CREATE OR REPLACE TRIGGER tr_prevent_update_orderItem 
+BEFORE UPDATE ON "OrderItems"   FOR EACH ROW EXECUTE FUNCTION fun_prevent_update_orderItem_to_less_state_of_previes();
 
-
+select * from "OrderItems"
+update "OrderItems" set "Status" =1
 
 
 --triger for prevent deleted the order after it is complated
@@ -74,7 +75,7 @@ BEGIN
    -- prevent any update on status 
     SELECT COUNT(*)>1 INTO isThereOrderItemsNotSelected FROM "OrderItems" WHERE "Status"<3;
 	
-	IF OLD."Status">4 OR isThereOrderItemsNotSelected =FALSE THEN -- prevent update in order if it is complate or the items is recived from delivery
+	IF OLD."Status">4 OR isThereOrderItemsNotSelected  THEN -- prevent update in order if it is complate or the items is recived from delivery
 	    RETURN NULL;
 	END IF;
 	return NEW;

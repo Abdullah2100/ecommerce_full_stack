@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ecommerc_dotnet.Presentation.dto
+namespace api.Presentation.dto
 {
     
     
@@ -14,7 +14,7 @@ namespace ecommerc_dotnet.Presentation.dto
         public Guid CategoryId { get; set; }
         public Guid StoreId { get; set; }
         public decimal Price { get; set; }
-        public List<List<ProductVarientDto>>? ProductVarients { get; set; }
+        public List<List<ProductVariantDto>>? ProductVarients { get; set; }
         public List<string> ProductImages { get; set; }
     }
     
@@ -27,7 +27,7 @@ namespace ecommerc_dotnet.Presentation.dto
         public Guid SubcategoryId { get; set; }
         public Guid StoreId { get; set; }
         public decimal Price { get; set; }
-        public List<CreateProductVarientDto>? ProductVarients { get; set; } = null;
+        public List<CreateProductVariantDto>? ProductVarients { get; set; } = null;
         public List<IFormFile> Images { get; set; }
     }
     
@@ -44,8 +44,8 @@ namespace ecommerc_dotnet.Presentation.dto
         public Guid? SubcategoryId { get; set; }= null;
         [Required] public Guid StoreId { get; set; }
         public decimal? Price { get; set; }= null;
-        public List<CreateProductVarientDto>? ProductVarients { get; set; } = null;
-        public List<CreateProductVarientDto>? DeletedProductVarients { get; set; } = null;
+        public List<CreateProductVariantDto>? ProductVarients { get; set; } = null;
+        public List<CreateProductVariantDto>? DeletedProductVarients { get; set; } = null;
         public List<IFormFile>? Images { get; set; }= null;
         public List<string>? Deletedimages { get; set; }= null;
 

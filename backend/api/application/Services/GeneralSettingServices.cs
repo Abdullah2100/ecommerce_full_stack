@@ -1,27 +1,26 @@
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto.Request;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.shared.extentions;
-using hotel_api.util;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class GeneralSettingServices(
     IUnitOfWork unitOfWork
 )
     : IGeneralSettingServices
 {
-    public async Task<Result<GeneralSettingDto?>> createGeneralSetting(
+    public async Task<Result<GeneralSettingDto?>> CreateGeneralSetting(
         Guid adminId,
         GeneralSettingDto settingDto)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var validation = user.isValidateFunc();
+        var validation = user.IsValidateFunc();
         if (validation is not null)
         {
             return new Result<GeneralSettingDto?>
@@ -33,7 +32,7 @@ public class GeneralSettingServices(
             );
         }
 
-        if (await unitOfWork.GeneralSettingRepository.isExist(settingDto.Name))
+        if (await unitOfWork.GeneralSettingRepository.IsExist(settingDto.Name))
         {
             return new Result<GeneralSettingDto?>
             (
@@ -47,12 +46,12 @@ public class GeneralSettingServices(
         GeneralSetting generalSetting = new GeneralSetting
         {
             CreatedAt = DateTime.Now,
-            Id = clsUtil.generateGuid(),
+            Id = ClsUtil.GenerateGuid(),
             Name = settingDto.Name,
             Value = settingDto.Value
         };
-        unitOfWork.GeneralSettingRepository.add(generalSetting);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.GeneralSettingRepository.Add(generalSetting);
+        int result = await unitOfWork.SaveChanges();
 
 
         if (result == 0)
@@ -68,19 +67,19 @@ public class GeneralSettingServices(
 
         return new Result<GeneralSettingDto?>
         (
-            data: generalSetting?.toDto(),
+            data: generalSetting?.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<GeneralSettingDto?>> updateGeneralSetting(
+    public async Task<Result<GeneralSettingDto?>> UpdateGeneralSetting(
         Guid id, Guid adminId,
         UpdateGeneralSettingDto settingDto
     )
     {
-        if (settingDto.isEmpty())
+        if (settingDto.IsEmpty())
             return new Result<GeneralSettingDto?>
             (
                 data: null,
@@ -90,9 +89,9 @@ public class GeneralSettingServices(
             );
 
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var validation = user.isValidateFunc();
+        var validation = user.IsValidateFunc();
         if (validation is not null)
         {
             return new Result<GeneralSettingDto?>
@@ -104,7 +103,7 @@ public class GeneralSettingServices(
             );
         }
 
-        GeneralSetting? generalSetting = await unitOfWork.GeneralSettingRepository.getGeneralSetting(id);
+        GeneralSetting? generalSetting = await unitOfWork.GeneralSettingRepository.GetGeneralSetting(id);
         if (generalSetting is null)
         {
             return new Result<GeneralSettingDto?>
@@ -120,8 +119,8 @@ public class GeneralSettingServices(
         generalSetting.Value = settingDto.Value ?? generalSetting.Value;
         generalSetting.UpdatedAt = DateTime.Now;
 
-        unitOfWork.GeneralSettingRepository.add(generalSetting);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.GeneralSettingRepository.Add(generalSetting);
+        int result = await unitOfWork.SaveChanges();
 
 
         if (result == 0)
@@ -137,18 +136,18 @@ public class GeneralSettingServices(
 
         return new Result<GeneralSettingDto?>
         (
-            data: generalSetting?.toDto(),
+            data: generalSetting?.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 200
         );
     }
 
-    public async Task<Result<bool>> deleteGeneralSetting(Guid id, Guid adminId)
+    public async Task<Result<bool>> DeleteGeneralSetting(Guid id, Guid adminId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
-        var validation = user.isValidateFunc();
+            .GetUser(adminId);
+        var validation = user.IsValidateFunc();
         if (validation is not null)
         {
             return new Result<bool>
@@ -160,7 +159,7 @@ public class GeneralSettingServices(
             );
         }
 
-        if (!(await unitOfWork.GeneralSettingRepository.isExist(id)))
+        if (!(await unitOfWork.GeneralSettingRepository.IsExist(id)))
         {
             return new Result<bool>
             (
@@ -171,8 +170,8 @@ public class GeneralSettingServices(
             );
         }
 
-        unitOfWork.GeneralSettingRepository.delete(id);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.GeneralSettingRepository.Delete(id);
+        int result = await unitOfWork.SaveChanges();
 
 
         if (result == 0)
@@ -195,10 +194,10 @@ public class GeneralSettingServices(
         );
     }
 
-    public async Task<Result<List<GeneralSettingDto>>> getGeneralSettings(int pageNum, int pageSize)
+    public async Task<Result<List<GeneralSettingDto>>> GetGeneralSettings(int pageNum, int pageSize)
     {
-        List<GeneralSettingDto> categories = (await unitOfWork.GeneralSettingRepository.getgenralsettings(pageNum, pageSize))
-            .Select(ca => ca.toDto())
+        List<GeneralSettingDto> categories = (await unitOfWork.GeneralSettingRepository.Getgenralsettings(pageNum, pageSize))
+            .Select(ca => ca.ToDto())
             .ToList();
         return new Result<List<GeneralSettingDto>>
         (

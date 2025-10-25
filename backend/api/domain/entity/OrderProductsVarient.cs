@@ -1,17 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ecommerc_dotnet.domain.entity;
+namespace api.domain.entity;
 
 public class OrderProductsVarient
 {
     [Key]
     public Guid Id { get; set; }
 
-    public Guid  ProductVarientId { get; set; }
+    public Guid  ProductVariantId { get; set; }
     public Guid OrderItemId { get; set; }
     public Guid Name { get; set; }
-
-    public ProductVarient? ProductVarient { get; set; } = null;
+    public ProductVariant? ProductVariant { get; set; } = null;
     public OrderItem? OrderItem { get; set; } = null;
 
 }

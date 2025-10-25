@@ -1,33 +1,25 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class AddressRepository(AppDbContext context) : IAddressRepository
 {
-    public void add(Address entity)
+    public void Add(Address entity)
     {
         context.Address.Add(entity);
     }
 
 
-    public void update(Address entity)
+    public void Update(Address entity)
     {
         context.Address.Update(entity);
     }
 
-    public void   deleteAsync(Guid id)
 
-    {
-       var address = context
-            .Address
-            .Where(x => x.Id == id);
-       context.RemoveRange(address);
-    }
-
-    public Task<int> getAddressCount(Guid id)
+    public Task<int> GetAddressCount(Guid id)
     {
         return context
             .Address
@@ -35,19 +27,19 @@ public class AddressRepository(AppDbContext context) : IAddressRepository
             .CountAsync();
     }
 
-    public async Task<Address?> getAddress(Guid id)
+    public async Task<Address?> GetAddress(Guid id)
     {
         return await context.Address.FindAsync(id);
     }
 
-    public async Task<Address?> getAddressByOwnerId(Guid id)
+    public async Task<Address?> GetAddressByOwnerId(Guid id)
     {
         return await context
             .Address
             .FirstOrDefaultAsync(x => x.OwnerId == id);
     }
 
-    public async Task<List<Address>> getAllAddressByOwnerId(Guid id)
+    public async Task<List<Address>> GetAllAddressByOwnerId(Guid id)
     {
         return await context
             .Address
@@ -55,7 +47,7 @@ public class AddressRepository(AppDbContext context) : IAddressRepository
             .ToListAsync();
     }
 
-    public void updateCurrentLocation(Guid id, Guid ownerId)
+    public void UpdateCurrentLocation(Guid id, Guid ownerId)
     {
         var currentAddress = context.Address
             .FirstOrDefault(ad => ad.OwnerId == ownerId && ad.Id == id);
@@ -64,7 +56,7 @@ public class AddressRepository(AppDbContext context) : IAddressRepository
         
     }
 
-    public  void makeAddressNotCurrentToId(Guid ownerId)
+    public  void MakeAddressNotCurrentToId(Guid ownerId)
     {
         var address =  context.Address
             .Where(ad => ad.OwnerId == ownerId);
@@ -75,7 +67,7 @@ public class AddressRepository(AppDbContext context) : IAddressRepository
         context.UpdateRange(address);
     }
 
-    public void delete(Guid id)
+    public void Delete(Guid id)
     {
         var address= context
             .Address

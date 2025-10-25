@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using ecommerc_dotnet.domain.entity;
 
-namespace ecommerc_dotnet.core.entity;
+namespace api.domain.entity;
 
 public class Product
 {
@@ -23,7 +22,7 @@ public class Product
     [Column(TypeName = "Timestamp")] 
     public DateTime? UpdatedAt { get; set; } = null;
 
-    public ICollection<ProductVarient>? ProductVarients { get; set; } = null;
+    public ICollection<ProductVariant>? ProductVarients { get; set; } = null;
     public ICollection<ProductImage>? ProductImages { get; set; } = null;
     
    public SubCategory SubCategory { get; set; }

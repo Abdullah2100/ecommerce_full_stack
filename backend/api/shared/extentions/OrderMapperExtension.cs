@@ -1,13 +1,11 @@
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.shared.extentions;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.mapper;
+namespace api.shared.extentions;
 
-public static class OrderMapperExtention
+public static class OrderMapperExtension
 {
-    public static OrderDto toDto(this Order order,string url)
+    public static OrderDto ToDto(this Order order,string url)
     {
         return new OrderDto
         {
@@ -16,17 +14,17 @@ public static class OrderMapperExtention
             Name = order.User.Name,
             Longitude = order.Longitude,
             Latitude = order.Latitude,
-            Status = order.Status.toOrderStatusName(),
+            Status = order.Status.ToOrderStatusName(),
             TotalPrice = order.TotalPrice,
             UserPhone = order.User.Phone,
             OrderItems = order
                 .Items
-                .Select(it=>it.toOrderItemDto(url))
+                .Select(it=>it.ToOrderItemDto(url))
                 .ToList()
         };
     }
     
-    public static DeliveryOrderDto toDeliveryDto(this Order order,string url)
+    public static DeliveryOrderDto ToDeliveryDto(this Order order,string url)
     {
         return new DeliveryOrderDto 
         {
@@ -40,7 +38,7 @@ public static class OrderMapperExtention
             UserPhone = order.User.Phone,
             OrderItems = order
                 .Items
-                .Select(it=>it.toDeliveryOrderItemDto(url))
+                .Select(it=>it.ToDeliveryOrderItemDto(url))
                 .ToList()
         };
     }

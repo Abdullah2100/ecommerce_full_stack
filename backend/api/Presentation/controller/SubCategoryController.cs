@@ -1,13 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -22,10 +20,10 @@ public class SubCategoryController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> creatSubCategory([FromBody] CreateSubCategoryDto subCategory)
+    public async Task<IActionResult> CreatSubCategory([FromBody] CreateSubCategoryDto subCategory)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -40,7 +38,7 @@ public class SubCategoryController(
         }
 
 
-        var result = await subCategoryServices.createSubCategory(userId.Value, subCategory);
+        var result = await subCategoryServices.CreateSubCategory(userId.Value, subCategory);
 
         return result.IsSuccessful switch
         {
@@ -54,10 +52,10 @@ public class SubCategoryController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> updateSubCategory([FromBody] UpdateSubCategoryDto subCategory)
+    public async Task<IActionResult> UpdateSubCategory([FromBody] UpdateSubCategoryDto subCategory)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -71,7 +69,7 @@ public class SubCategoryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await subCategoryServices.updateSubCategory(userId.Value, subCategory);
+        var result = await subCategoryServices.UpdateSubCategory(userId.Value, subCategory);
 
         return result.IsSuccessful switch
         {
@@ -81,18 +79,18 @@ public class SubCategoryController(
     }
 
 
-    [HttpDelete("{subCateogyId}")]
+    [HttpDelete("{subCategoryId}")]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> deleteSubCategory
+    public async Task<IActionResult> DeleteSubCategory
     (
-        Guid subCateogyId
+        Guid subCategoryId
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -106,9 +104,9 @@ public class SubCategoryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await subCategoryServices.deleteSubCategory(
+        var result = await subCategoryServices.DeleteSubCategory(
             userId: userId.Value,
-            id: subCateogyId);
+            id: subCategoryId);
 
         return result.IsSuccessful switch
         {
@@ -121,10 +119,10 @@ public class SubCategoryController(
     [HttpGet("all/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getSubCategory(int page)
+    public async Task<IActionResult> GetSubCategory(int page)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -138,7 +136,7 @@ public class SubCategoryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await subCategoryServices.getSubCategoryAll(adminId.Value, page, 25);
+        var result = await subCategoryServices.GetSubCategoryAll(adminId.Value, page, 25);
 
         return result.IsSuccessful switch
         {
@@ -151,9 +149,9 @@ public class SubCategoryController(
     [HttpGet("{storeId}/{page:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getSubCategories(Guid storeId, int page)
+    public async Task<IActionResult> GetSubCategories(Guid storeId, int page)
     {
-        var result = await subCategoryServices.getSubCategories(
+        var result = await subCategoryServices.GetSubCategories(
             storeId, page, 25);
 
         return result.IsSuccessful switch

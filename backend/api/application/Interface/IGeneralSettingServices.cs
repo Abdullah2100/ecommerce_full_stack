@@ -1,14 +1,14 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto.Request;
+using api.application.Result;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.application.Interface;
+namespace api.application.Interface;
 
 public interface IGeneralSettingServices
 {
-   Task<Result<GeneralSettingDto?>> createGeneralSetting(Guid adminId, GeneralSettingDto settingDto);
-   Task<Result<GeneralSettingDto?>> updateGeneralSetting(Guid id ,Guid adminId,UpdateGeneralSettingDto settingDto);
+   Task<Result<GeneralSettingDto?>> CreateGeneralSetting(Guid adminId, GeneralSettingDto settingDto);
+   Task<Result<GeneralSettingDto?>> UpdateGeneralSetting(Guid id ,Guid adminId,UpdateGeneralSettingDto settingDto);
    
-   Task<Result<bool>> deleteGeneralSetting(Guid id,Guid adminId);
+   Task<Result<bool>> DeleteGeneralSetting(Guid id,Guid adminId);
    
-   Task<Result<List<GeneralSettingDto>>> getGeneralSettings(int pageNum, int pageSize);
+   Task<Result<List<GeneralSettingDto>>> GetGeneralSettings(int pageNum, int pageSize);
 }

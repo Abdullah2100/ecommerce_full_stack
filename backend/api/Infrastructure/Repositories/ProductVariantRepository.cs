@@ -1,20 +1,20 @@
+using api.domain.entity;
+using api.domain.Interface;
+using api.Presentation.dto;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class ProductVariantRepository(AppDbContext context) : IProductVariantRepository
 {
-    public async Task<ProductVarient?> getProductVarient(Guid productId, Guid id)
+    public async Task<ProductVariant?> GetProductVarient(Guid productId, Guid id)
     {
         return await context.ProductVarients
             .FirstOrDefaultAsync(or => or.ProductId == productId && or.Id == id);
     }
 
-    public void  addProductVariants(ICollection<ProductVarient> productVariants)
+    public void  AddProductVariants(ICollection<ProductVariant> productVariants)
     {
         for (var i = 0; i < productVariants.Count; i++)
         {
@@ -24,18 +24,18 @@ public class ProductVariantRepository(AppDbContext context) : IProductVariantRep
     }
 
 
-    public void deleteProductVariantByProductId(Guid productId)
+    public void DeleteProductVariantByProductId(Guid productId)
     {
         var result = context.ProductVarients.Where(p => p.ProductId == productId).ToList();
         context.ProductVarients.RemoveRange(result);
     }
 
-    public void deleteProductVariant(List<CreateProductVarientDto> productVariants, Guid productId)
+    public void DeleteProductVariant(List<CreateProductVariantDto> productVariants, Guid productId)
     {
         for (var i = 0; i < productVariants.Count; i++)
         {
             var result = context.ProductVarients.Where(pv =>
-                pv.ProductId == productId && pv.VarientId == productVariants[i].VarientId &&
+                pv.ProductId == productId && pv.VariantId == productVariants[i].VariantId &&
                 pv.Name == productVariants[i].Name
             ).ToList();
             context.ProductVarients.RemoveRange(result);
@@ -43,12 +43,12 @@ public class ProductVariantRepository(AppDbContext context) : IProductVariantRep
 
     }
 
-    public void add(ProductVarient entity)
+    public void Add(ProductVariant entity)
     {
        context.ProductVarients.Add(entity); 
     }
 
-    public void update(ProductVarient entity)
+    public void Update(ProductVariant entity)
     {
         context.ProductVarients.Update(entity);
     }

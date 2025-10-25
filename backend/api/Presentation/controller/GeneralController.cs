@@ -1,12 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto.Request;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -20,12 +19,12 @@ public class GeneralController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> createGeneralSetting(
+    public async Task<IActionResult> CreateGeneralSetting(
         [FromBody] GeneralSettingDto generalSetting
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -39,7 +38,7 @@ public class GeneralController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await generalSettingServices.createGeneralSetting(
+        var result = await generalSettingServices.CreateGeneralSetting(
             adminId:adminId.Value,
             generalSetting
             );
@@ -56,12 +55,12 @@ public class GeneralController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> deleteGeneralSetting(
+    public async Task<IActionResult> DeleteGeneralSetting(
         Guid genralSettingId 
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -76,7 +75,7 @@ public class GeneralController(
         }
 
        
-        var result = await generalSettingServices.deleteGeneralSetting(
+        var result = await generalSettingServices.DeleteGeneralSetting(
             adminId:adminId.Value,
             id:genralSettingId
         );
@@ -98,7 +97,7 @@ public class GeneralController(
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? admin = null;
@@ -113,7 +112,7 @@ public class GeneralController(
         }
 
         
-        var result = await generalSettingServices.updateGeneralSetting(
+        var result = await generalSettingServices.UpdateGeneralSetting(
             adminId:admin.Value,
             id:genralSettingId,
             settingDto:generalSetting
@@ -132,14 +131,14 @@ public class GeneralController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getGeneralSettings(
+    public async Task<IActionResult> GetGeneralSettings(
          int pageNumber
     )
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
-        var result = await generalSettingServices.getGeneralSettings(
+        var result = await generalSettingServices.GetGeneralSettings(
             pageNum:pageNumber,
             pageSize:25
         );

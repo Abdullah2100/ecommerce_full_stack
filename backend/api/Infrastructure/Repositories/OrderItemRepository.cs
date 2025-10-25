@@ -1,15 +1,9 @@
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.domain.entity;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
-using hotel_api.util;
-using Npgsql;
+using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class OrderItemRepository(AppDbContext context) :IOrderItemRepository 
 {
@@ -21,7 +15,7 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
 
 
 
-    public async Task<IEnumerable<OrderItem>> getOrderItems(
+    public async Task<IEnumerable<OrderItem>> GetOrderItems(
         Guid storeId,
         int pageNum,
         int pageSize
@@ -41,7 +35,7 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
             .ToListAsync();
     }
 
-    public async Task<OrderItem?> getOrderItem(Guid id, Guid storeId)
+    public async Task<OrderItem?> GetOrderItem(Guid id, Guid storeId)
     {
         return await context.OrderItems
             .Include(oi => oi.Product)
@@ -52,7 +46,7 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
             .FirstOrDefaultAsync(o => o.Id == id && o.StoreId == storeId);
     }
 
-    public async Task<OrderItem?> getOrderItem(Guid id)
+    public async Task<OrderItem?> GetOrderItem(Guid id)
     {
         return await context.OrderItems
             .Include(oi => oi.Product)
@@ -64,12 +58,12 @@ public class OrderItemRepository(AppDbContext context) :IOrderItemRepository
             .FirstOrDefaultAsync(o => o.Id == id);
     }
 
-    public void add(OrderItem entity)
+    public void Add(OrderItem entity)
     {
         context.OrderItems.Add(entity:entity);
     }
 
-    public void update(OrderItem entity)
+    public void Update(OrderItem entity)
     {
         context.Update(entity:entity);
     }

@@ -420,7 +420,7 @@ fun OrderComponent(
         ) {
             CustomBotton(
 
-                buttonTitle = if (isCancel) "Cancel Order" else "Except Order",
+                buttonTitle = if (isCancel) "Cancel Order" else "Accept Order",
                 operation = {
                     coroutine.launch {
                         isSendingData.value = true;

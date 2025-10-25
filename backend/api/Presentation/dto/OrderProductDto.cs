@@ -1,4 +1,4 @@
-namespace ecommerc_dotnet.Presentation.dto;
+namespace api.Presentation.dto;
 
 public class OrderProductDto
 {

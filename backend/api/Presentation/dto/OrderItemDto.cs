@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using ecommerc_dotnet.Presentation.dto.Response;
 
-namespace ecommerc_dotnet.Presentation.dto
+namespace api.Presentation.dto
 {
-    public enum enOrderItemStatusDto
+    public enum EnOrderItemStatusDto
     {
         Excepted,
         Cancelled,
@@ -53,7 +52,7 @@ namespace ecommerc_dotnet.Presentation.dto
     public class UpdateOrderItemStatusDto
     {
         [Required] public Guid Id { get; set; }
-        [Required] public enOrderItemStatusDto Status { get; set; }
+        [Required] public EnOrderItemStatusDto Status { get; set; }
     }
 
     public class OrderItemsStatusEvent

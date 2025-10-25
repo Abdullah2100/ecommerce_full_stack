@@ -1,27 +1,24 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Result;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.application.services;
+namespace api.application.Interface;
 
 public interface IOrderServices
 {
     Task<Result<OrderDto?>> CreateOrder(Guid userId,CreateOrderDto orderDto);
-    Task<Result<List<OrderDto>>> getMyOrders(Guid userId,int pageNum,int pageSize);
+    Task<Result<List<OrderDto>>> GetMyOrders(Guid userId,int pageNum,int pageSize);
     
     //order for admin
-    Task<Result<AdminOrderDto?>> getOrders(Guid userId,int pageNum,int pageSize);
+    Task<Result<AdminOrderDto?>> GetOrders(Guid userId,int pageNum,int pageSize);
 
-    Task<Result<bool>> updateOrderStatus(Guid id, int status);
+    Task<Result<bool>> UpdateOrderStatus(Guid id, int status);
     
- 
-   Task<Result<bool>> deleteOrder(Guid id,Guid userId);
-    
+   Task<Result<bool>> DeleteOrder(Guid id,Guid userId);
+   
    //delivery 
-   Task<Result<List<OrderDto>>> getOrdersbyDeliveryId(Guid deliveryId,int pageNum,int pageSize);
-   Task<Result<List<OrderDto>>> getOrdersNotBelongToDeliveries(Guid deliveryId,int pageNum,int pageSize);
-   Task<Result<bool>> submitOrderToDelivery(Guid id,Guid deliveryId);
-   Task<Result<bool>> cancelOrderFromDelivery(Guid id,Guid deliveryId);
-
-
-   Task<Result<List<string>>> getOrdersStatus(Guid adminId);
+   Task<Result<List<OrderDto>>> GetOrdersbyDeliveryId(Guid deliveryId,int pageNum,int pageSize);
+   Task<Result<List<OrderDto>>> GetOrdersNotBelongToDeliveries(Guid deliveryId,int pageNum,int pageSize);
+   Task<Result<bool>> SubmitOrderToDelivery(Guid id,Guid deliveryId);
+   Task<Result<bool>> CancelOrderFromDelivery(Guid id,Guid deliveryId);
+   Task<Result<List<string>>> GetOrdersStatus(Guid adminId);
 }

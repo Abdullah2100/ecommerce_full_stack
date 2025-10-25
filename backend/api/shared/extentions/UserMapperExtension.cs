@@ -1,15 +1,12 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.mapper;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.dto;
-using Mono.TextTemplating;
+using api.application.Result;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.shared.extentions;
+namespace api.shared.extentions;
 
-public static class UserMapperExtention
+public static class UserMapperExtension
 {
-    public static UserInfoDto toUserInfoDto(this User user, string url)
+    public static UserInfoDto ToUserInfoDto(this User user, string url)
     {
         return new UserInfoDto
         {
@@ -20,13 +17,13 @@ public static class UserMapperExtention
             Thumbnail = string.IsNullOrEmpty(user.Thumbnail) ? "" : url + user.Thumbnail,
             IsActive = user.IsBlocked == false,
             IsAdmin = user.Role == 0,
-            Address = user.Addresses?.Select(ad => ad.toDto()).ToList(),
+            Address = user.Addresses?.Select(ad => ad.ToDto()).ToList(),
             StoreId = user?.Store?.Id
         };
     }
 
 
-    public static UserDeliveryInfoDto toDeliveryInfoDto(this User user, string url)
+    public static UserDeliveryInfoDto ToDeliveryInfoDto(this User user, string url)
     {
         return new UserDeliveryInfoDto
         {
@@ -37,7 +34,7 @@ public static class UserMapperExtention
         };
     }
 
-    public static bool isEmpty(this UpdateUserInfoDto dto)
+    public static bool IsEmpty(this UpdateUserInfoDto dto)
     {
         return string.IsNullOrWhiteSpace(dto.Name) &&
                string.IsNullOrWhiteSpace(dto.Phone) &&
@@ -47,7 +44,7 @@ public static class UserMapperExtention
             ;
     }
 
-    public static Result<AuthDto?>? isHasStore(User user)
+    public static Result<AuthDto?>? IsHasStore(User user)
     {
         switch (user.Store is not null)
         {
@@ -85,7 +82,7 @@ public static class UserMapperExtention
         }
     }
 
-    public static Result<AuthDto?>? isValidateFunc(
+    public static Result<AuthDto?>? IsValidateFunc(
         this User? user,
         bool isAdmin = true,
         bool isStore = false)
@@ -119,7 +116,7 @@ public static class UserMapperExtention
                 }
 
                 //check if user has store
-                return isStore ? isHasStore(user) : null;
+                return isStore ? IsHasStore(user) : null;
             }
             default:
             {
@@ -135,12 +132,12 @@ public static class UserMapperExtention
                 }
 
                 //check if admin has store
-                return isStore ? isHasStore(user) : null;
+                return isStore ? IsHasStore(user) : null;
             }
         }
     }
 
-    public static bool isUpdateAnyFeild(this UpdateUserInfoDto dto)
+    public static bool IsUpdateAnyFeild(this UpdateUserInfoDto dto)
     {
         return dto.Thumbnail != null ||
                !(string.IsNullOrEmpty(dto.NewPassword) && string.IsNullOrEmpty(dto.Password)) ||

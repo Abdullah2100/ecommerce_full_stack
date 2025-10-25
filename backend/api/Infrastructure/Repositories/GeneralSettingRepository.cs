@@ -1,13 +1,13 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class GeneralSettingRepository(AppDbContext context) : IGeneralSettingRepository
 {
-    public async Task<IEnumerable<GeneralSetting>> getgenralsettings(int page, int length)
+    public async Task<IEnumerable<GeneralSetting>> Getgenralsettings(int page, int length)
     {
         return await context
             .GeneralSettings
@@ -16,17 +16,17 @@ public class GeneralSettingRepository(AppDbContext context) : IGeneralSettingRep
             .Take(length)
             .ToListAsync();
     }
-    public void add(GeneralSetting entity)
+    public void Add(GeneralSetting entity)
     {
         context.GeneralSettings.Add(entity);
     }
 
-    public void update(GeneralSetting entity)
+    public void Update(GeneralSetting entity)
     {
         context.GeneralSettings.Update(entity);
     }
 
-    public void delete(Guid id)
+    public void Delete(Guid id)
     {
         var generalSetting = context.GeneralSettings
             .FirstOrDefault(gs => gs.Id == id);
@@ -35,18 +35,18 @@ public class GeneralSettingRepository(AppDbContext context) : IGeneralSettingRep
         context.Remove(generalSetting);
     }
 
-    public async Task<GeneralSetting?> getGeneralSetting(Guid id)
+    public async Task<GeneralSetting?> GetGeneralSetting(Guid id)
     {
         return await context.GeneralSettings.FindAsync(id);
     }
 
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context.GeneralSettings.FindAsync(id) != null;
     }
 
-    public async Task<bool> isExist(string name)
+    public async Task<bool> IsExist(string name)
     {
         return await context
             .GeneralSettings
@@ -54,7 +54,7 @@ public class GeneralSettingRepository(AppDbContext context) : IGeneralSettingRep
             .AnyAsync(gs => gs.Name == name);
     }
 
-    public async Task<bool> isExist(Guid id, string name)
+    public async Task<bool> IsExist(Guid id, string name)
     {
         return await context
             .GeneralSettings

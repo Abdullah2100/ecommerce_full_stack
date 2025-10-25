@@ -1,6 +1,6 @@
 using ecommerc_dotnet.midleware.ConfigImplment;
 
-namespace ecommerc_dotnet.application;
+namespace api.application;
 
 public class ConfigurationImplement(IConfiguration configurationService) : IConfig
 {

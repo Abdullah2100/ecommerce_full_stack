@@ -1,12 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -20,10 +19,10 @@ public class CategoryController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> createCategory([FromForm] CreateCategoryDto category)
+    public async Task<IActionResult> CreateCategory([FromForm] CreateCategoryDto category)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -36,7 +35,7 @@ public class CategoryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await categoryServices.createCategory(category, adminId.Value);
+        var result = await categoryServices.CreateCategory(category, adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -51,11 +50,11 @@ public class CategoryController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> updateCateogry(
+    public async Task<IActionResult> UpdateCateogry(
         [FromForm] UpdateCategoryDto category)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -68,7 +67,7 @@ public class CategoryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await categoryServices.updateCategory(category, adminId.Value);
+        var result = await categoryServices.UpdateCategory(category, adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -82,10 +81,10 @@ public class CategoryController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> deleteCategory(Guid categoryId)
+    public async Task<IActionResult> DeleteCategory(Guid categoryId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -99,7 +98,7 @@ public class CategoryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await categoryServices.deleteCategory(categoryId, adminId.Value);
+        var result = await categoryServices.DeleteCategory(categoryId, adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -113,12 +112,12 @@ public class CategoryController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getCategories(int pageNumber = 1)
+    public async Task<IActionResult> GetCategories(int pageNumber = 1)
     {
         if (pageNumber < 1)
             return BadRequest("خطء في البيانات المرسلة");
 
-        var result = await categoryServices.getCategories(pageNumber, 25);
+        var result = await categoryServices.GetCategories(pageNumber, 25);
 
         return result.IsSuccessful switch
         {

@@ -1,9 +1,10 @@
 using System.Security.Claims;
+using ecommerc_dotnet.application;
 
-namespace ecommerc_dotnet.application.Interface;
+namespace api.application.Interface;
 
 public interface IAuthenticationService
 {
-   string generateToken(Guid id, string email, EnTokenMode tokenType=EnTokenMode.AccessToken);
-   Claim? getPayloadFromToken(string key, string token);
+   string GenerateToken(Guid id, string email, EnTokenMode tokenType=EnTokenMode.AccessToken);
+   Claim? GetPayloadFromToken(string key, string token);
 }

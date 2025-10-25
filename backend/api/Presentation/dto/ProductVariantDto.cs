@@ -1,22 +1,22 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ecommerc_dotnet.Presentation.dto
+namespace api.Presentation.dto
 {
-    public class ProductVarientDto
+    public class ProductVariantDto
     {
         public Guid Id { get; set; }
         public Guid ProductId { get; set; }
         public string? Name { get; set; }
         public decimal Precentage { get; set; }
-        public Guid VarientId { get; set; }
+        public Guid VariantId { get; set; }
     }
     
-    public class CreateProductVarientDto
+    public class CreateProductVariantDto
     {
         [StringLength(maximumLength:50,MinimumLength =3 ,ErrorMessage= "name must not be empty")]
         public string Name { get; set; }
         public decimal Precentage { get; set; } = 1;
-        public Guid VarientId { get; set; }
+        public Guid VariantId { get; set; }
     }
     
     public class AdminProductVarientDto
@@ -24,6 +24,6 @@ namespace ecommerc_dotnet.Presentation.dto
         [StringLength(maximumLength:50 ,ErrorMessage= "name must not  be empty")]
         public string? Name { get; set; }
         public decimal Precentage { get; set; }
-        public string?  VarientName { get; set; } 
+        public string?  VariantName { get; set; } 
     }
 }

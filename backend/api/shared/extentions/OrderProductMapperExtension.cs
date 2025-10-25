@@ -1,9 +1,9 @@
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.shared.extentions;
+namespace api.shared.extentions;
 
-public static class OrderProductMapperExtention
+public static class OrderProductMapperExtension
 {
     public static OrderProductDto ToOrderProductDto(this OrderItem orderItem,string url)
     {

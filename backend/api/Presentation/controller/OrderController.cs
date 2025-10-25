@@ -1,16 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.di.email;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -24,11 +19,11 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> createOrder
+    public async Task<IActionResult> CreateOrder
         ([FromBody] CreateOrderDto orderDto)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -56,10 +51,10 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getOrderStatus()
+    public async Task<IActionResult> GetOrderStatus()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? adminId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -72,7 +67,7 @@ public class OrderController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
         
-        var result = await orderServices.getOrdersStatus(adminId.Value);
+        var result = await orderServices.GetOrdersStatus(adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -87,7 +82,7 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getOrders
+    public async Task<IActionResult> GetOrders
     (
         int pageNumber = 1
     )
@@ -96,7 +91,7 @@ public class OrderController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -110,7 +105,7 @@ public class OrderController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await orderServices.getOrders(adminId.Value, pageNumber, 25);
+        var result = await orderServices.GetOrders(adminId.Value, pageNumber, 25);
 
         return result.IsSuccessful switch
         {
@@ -125,7 +120,7 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getMyOrders
+    public async Task<IActionResult> GetMyOrders
     (
         int pageNumber = 1
     )
@@ -134,7 +129,7 @@ public class OrderController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -149,7 +144,7 @@ public class OrderController(
         }
 
         var result = await orderServices
-            .getMyOrders(
+            .GetMyOrders(
                 userId.Value,
                 pageNumber,
                 25);
@@ -166,14 +161,14 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getOrderNotBelongToDelivery
+    public async Task<IActionResult> GetOrderNotBelongToDelivery
     (int pageNumber = 1)
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? deliveryId = null;
@@ -188,7 +183,7 @@ public class OrderController(
         }
 
         var result = await orderServices
-            .getOrdersNotBelongToDeliveries(
+            .GetOrdersNotBelongToDeliveries(
                 deliveryId.Value,
                 pageNumber,
                 25);
@@ -208,11 +203,11 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> deleteOrders
+    public async Task<IActionResult> DeleteOrders
         (Guid orderId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -228,7 +223,7 @@ public class OrderController(
 
 
         var result = await orderServices
-            .deleteOrder(
+            .DeleteOrder(
                 orderId, userId.Value);
 
         return result.IsSuccessful switch
@@ -244,13 +239,13 @@ public class OrderController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> updateOrderStatus
+    public async Task<IActionResult> UpdateOrderStatus
     (
         [FromBody] UpdateOrderStatusDto orderStatus
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? idHolder = null;
@@ -265,7 +260,7 @@ public class OrderController(
         }
 
         var result = await orderServices
-            .updateOrderStatus(
+            .UpdateOrderStatus(
                 orderStatus.Id,
                orderStatus.Status
                 );

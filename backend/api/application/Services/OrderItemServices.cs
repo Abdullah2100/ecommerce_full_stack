@@ -1,17 +1,14 @@
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.infrastructure;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.shared.signalr;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.shared.extentions;
-using ecommerc_dotnet.shared.signalr;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class OrderItemServices(
     IConfig config,
@@ -21,14 +18,14 @@ public class OrderItemServices(
 )
     : IOrderItemServices
 {
-    public async Task<Result<List<OrderItemDto>>> getOrderItmes(
+    public async Task<Result<List<OrderItemDto>>> GetOrderItmes(
         Guid storeId,
         int pageNum,
         int pageSize)
     {
-        User? user = await unitOfWork.UserRepository.getUser(storeId);
+        User? user = await unitOfWork.UserRepository.GetUser(storeId);
 
-        var isValidate = user.isValidateFunc(isAdmin: false, isStore: true);
+        var isValidate = user.IsValidateFunc(isAdmin: false, isStore: true);
         if (isValidate is not null)
         {
             return new Result<List<OrderItemDto>>(
@@ -40,8 +37,8 @@ public class OrderItemServices(
         }
 
         List<OrderItemDto> orderItems = (await unitOfWork.OrderItemRepository
-                .getOrderItems(storeId: user.Store.Id, pageNum: pageNum, pageSize: pageSize))
-            .Select(p => p.toOrderItemDto(config.getKey("url_file")))
+                .GetOrderItems(storeId: user.Store.Id, pageNum: pageNum, pageSize: pageSize))
+            .Select(p => p.ToOrderItemDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderItemDto>>
@@ -53,11 +50,11 @@ public class OrderItemServices(
         );
     }
 
-    public async Task<Result<int>> updateOrderItmesStatus(
+    public async Task<Result<int>> UpdateOrderItmesStatus(
         Guid userId,
         UpdateOrderItemStatusDto orderItemsStatusDto)
     {
-        OrderItem? orderItem = await unitOfWork.OrderItemRepository.getOrderItem(orderItemsStatusDto.Id);
+        OrderItem? orderItem = await unitOfWork.OrderItemRepository.GetOrderItem(orderItemsStatusDto.Id);
 
         if (orderItem is null)
         {
@@ -70,15 +67,15 @@ public class OrderItemServices(
             );
         } ;
         
-        orderItem.Status = orderItemsStatusDto.Status == enOrderItemStatusDto.Excepted
+        orderItem.Status = orderItemsStatusDto.Status == EnOrderItemStatusDto.Excepted
             ? enOrderItemStatus.Excepted
-            : orderItemsStatusDto.Status == enOrderItemStatusDto.TakedByDelivery
+            : orderItemsStatusDto.Status == EnOrderItemStatusDto.TakedByDelivery
                 ? enOrderItemStatus.ReceivedByDelivery
                 : enOrderItemStatus.Cancelled;
         
-        unitOfWork.OrderItemRepository.update(orderItem);
+        unitOfWork.OrderItemRepository.Update(orderItem);
         
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {

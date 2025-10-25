@@ -338,7 +338,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                     )
                                 }
                                 Sizer(5)
-
+                              if(!(order.status=="Received" || order.status=="Completed"))
                                 CustomButton(
 
                                     buttonTitle = "Cancel Order",

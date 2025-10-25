@@ -1,11 +1,11 @@
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.Presentation.dto;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.shared.extentions;
+namespace api.shared.extentions;
 
-public static class BannerMapperExtention
+public static class BannerMapperExtension
 {
-    public static BannerDto toDto(this Banner banner,string url)
+    public static BannerDto ToDto(this Banner banner,string url)
     {
         return new BannerDto
         {

@@ -1,27 +1,26 @@
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.shared.extentions;
-using hotel_api.util;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class SubCategoryServices(
     IUnitOfWork unitOfWork)
     : ISubCategoryServices
 {
-    public async Task<Result<SubCategoryDto?>> createSubCategory(
+    public async Task<Result<SubCategoryDto?>> CreateSubCategory(
         Guid userId,
         CreateSubCategoryDto subCategoryDto
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
-        var isValide = user.isValidateFunc(isAdmin: false, isStore: true);
+        var isValide = user.IsValidateFunc(isAdmin: false, isStore: true);
 
         if (isValide is not null)
         {
@@ -34,7 +33,7 @@ public class SubCategoryServices(
         }
 
 
-        int count = await unitOfWork.SubCategoryRepository.getSubCategoriesCount(user.Store.Id);
+        int count = await unitOfWork.SubCategoryRepository.GetSubCategoriesCount(user.Store.Id);
 
         if (count == 20)
         {
@@ -47,7 +46,7 @@ public class SubCategoryServices(
             );
         }
 
-        Guid id = clsUtil.generateGuid();
+        Guid id = ClsUtil.GenerateGuid();
 
         SubCategory subCategory = new SubCategory
         {
@@ -59,8 +58,8 @@ public class SubCategoryServices(
             CreatedAt = DateTime.Now,
         };
 
-        unitOfWork.SubCategoryRepository.add(subCategory);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.SubCategoryRepository.Add(subCategory);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -75,19 +74,19 @@ public class SubCategoryServices(
 
         return new Result<SubCategoryDto?>
         (
-            data: subCategory.toDto(),
+            data: subCategory.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<SubCategoryDto?>> updateSubCategory(
+    public async Task<Result<SubCategoryDto?>> UpdateSubCategory(
         Guid userId,
         UpdateSubCategoryDto subCategoryDto
     )
     {
-        if (subCategoryDto.isEmpty())
+        if (subCategoryDto.IsEmpty())
             return new Result<SubCategoryDto?>
             (
                 data: null,
@@ -98,9 +97,9 @@ public class SubCategoryServices(
 
 
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
-        var isValide = user.isValidateFunc(isStore: true);
+        var isValide = user.IsValidateFunc(isStore: true);
 
         if (isValide is not null)
         {
@@ -113,7 +112,7 @@ public class SubCategoryServices(
         }
 
         SubCategory? subCategory = await unitOfWork.SubCategoryRepository
-            .getSubCategory(subCategoryDto.Id);
+            .GetSubCategory(subCategoryDto.Id);
 
         if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
         {
@@ -127,7 +126,7 @@ public class SubCategoryServices(
         }
 
         if (subCategoryDto.CategoryId is not null &&
-            !(await unitOfWork.CategoryRepository.isExist((Guid)subCategoryDto!.CategoryId))
+            !(await unitOfWork.CategoryRepository.IsExist((Guid)subCategoryDto!.CategoryId))
            )
         {
             return new Result<SubCategoryDto?>
@@ -143,8 +142,8 @@ public class SubCategoryServices(
         subCategory.CategoryId = subCategoryDto.CategoryId ?? subCategory.CategoryId;
         subCategory.UpdatedAt = DateTime.Now;
 
-        unitOfWork.SubCategoryRepository.update(subCategory);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.SubCategoryRepository.Update(subCategory);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -159,19 +158,19 @@ public class SubCategoryServices(
 
         return new Result<SubCategoryDto?>
         (
-            data: subCategory.toDto(),
+            data: subCategory.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 200
         );
     }
 
-    public async Task<Result<bool>> deleteSubCategory(Guid id, Guid userId)
+    public async Task<Result<bool>> DeleteSubCategory(Guid id, Guid userId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
-        var isValide = user.isValidateFunc(isStore: true);
+        var isValide = user.IsValidateFunc(isStore: true);
 
         if (isValide is not null)
         {
@@ -184,7 +183,7 @@ public class SubCategoryServices(
         }
 
         SubCategory? subCategory = await unitOfWork.SubCategoryRepository
-            .getSubCategory(id);
+            .GetSubCategory(id);
 
         if (subCategory is null || subCategory.StoreId != user!.Store!.Id)
         {
@@ -197,8 +196,8 @@ public class SubCategoryServices(
             );
         }
 
-        unitOfWork.SubCategoryRepository.delete(id);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.SubCategoryRepository.Delete(id);
+        int result = await unitOfWork.SaveChanges();
         
         if (result == 0)
             return new Result<bool>
@@ -218,11 +217,11 @@ public class SubCategoryServices(
         );
     }
 
-    public async Task<Result<List<SubCategoryDto>>> getSubCategories(Guid id, int page, int length)
+    public async Task<Result<List<SubCategoryDto>>> GetSubCategories(Guid id, int page, int length)
     {
         List<SubCategoryDto> subCategories = (await unitOfWork.SubCategoryRepository
-                .getSubCategories(id, page, length))
-            .Select(su => su.toDto())
+                .GetSubCategories(id, page, length))
+            .Select(su => su.ToDto())
             .ToList();
         return (subCategories.Count > 0) switch
         {
@@ -244,14 +243,14 @@ public class SubCategoryServices(
         };
     }
 
-    public async Task<Result<List<SubCategoryDto>>> getSubCategoryAll(
+    public async Task<Result<List<SubCategoryDto>>> GetSubCategoryAll(
         Guid adminId,
         int page,
         int length)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
-        var isValide = user.isValidateFunc(isAdmin: true);
+            .GetUser(adminId);
+        var isValide = user.IsValidateFunc(isAdmin: true);
 
         if (isValide is not null)
         {
@@ -265,8 +264,8 @@ public class SubCategoryServices(
 
 
         List<SubCategoryDto> subcategories = (await unitOfWork.SubCategoryRepository
-                .getSubCategories(page, length))
-            .Select(ba => ba.toDto())
+                .GetSubCategories(page, length))
+            .Select(ba => ba.ToDto())
             .ToList();
 
         return new Result<List<SubCategoryDto>>

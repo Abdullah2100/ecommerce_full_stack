@@ -1,24 +1,22 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.Presentation.dto;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.domain.Interface;
+namespace api.domain.Interface;
 
 public interface IDeliveryRepository:IRepository<Delivery>
 {
     
-    Task<Delivery?> getDelivery(Guid id);
-    Task<Delivery?> getDeliveryByUserId(Guid userId);
-    Task<List<Delivery>?> getDeliveriesByBelongTo(Guid belongToId,int page, int size);
-    Task<List<Delivery>?> getDeliveries();
+    Task<Delivery?> GetDelivery(Guid id);
+    Task<Delivery?> GetDeliveryByUserId(Guid userId);
+    Task<List<Delivery>?> GetDeliveriesByBelongTo(Guid belongToId,int page, int size);
+    Task<List<Delivery>?> GetDeliveries(int page, int size);
+    Task<int> GetDeliveriesPage(int deliveryPerSize);
     
     
-    Task<DeliveryAnalysDto> getDeliveryAnalys(Guid id);
+    Task<DeliveryAnalysDto> GetDeliveryAnalys(Guid id);
     
-    Task<bool> isExistByUserId(Guid userId);
+    Task<bool> IsExistByUserId(Guid userId);
 
-    void delete(Guid id);
+    void Delete(Guid id);
 
 }

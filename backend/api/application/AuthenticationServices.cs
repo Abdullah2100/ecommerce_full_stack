@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using ecommerc_dotnet.application.Interface;
+using api.application.Interface;
+using api.util;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using hotel_api.util;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ecommerc_dotnet.application
+namespace api.application
 {
     public enum EnTokenMode
     {
@@ -64,7 +64,7 @@ namespace ecommerc_dotnet.application
             }
         }
 
-        public string generateToken(Guid id, string email, EnTokenMode tokenType)
+        public string GenerateToken(Guid id, string email, EnTokenMode tokenType)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             string key = config.getKey("credentials:key");
@@ -73,7 +73,7 @@ namespace ecommerc_dotnet.application
 
             List<Claim> claims = new List<Claim>()
             {
-                new(JwtRegisteredClaimNames.Jti, clsUtil.generateGuid().ToString()),
+                new(JwtRegisteredClaimNames.Jti, ClsUtil.GenerateGuid().ToString()),
                 new(JwtRegisteredClaimNames.Sub, id.ToString() ?? ""),
                 new(JwtRegisteredClaimNames.Email, email)
             };
@@ -81,7 +81,7 @@ namespace ecommerc_dotnet.application
             SecurityTokenDescriptor tokenDescip = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = clsUtil.generateDateTime(tokenType),
+                Expires = ClsUtil.GenerateDateTime(tokenType),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(
@@ -95,7 +95,7 @@ namespace ecommerc_dotnet.application
             return tokenHandler.WriteToken(token);
         }
 
-        public Claim? getPayloadFromToken(string key, string token)
+        public Claim? GetPayloadFromToken(string key, string token)
         {
             try
             {

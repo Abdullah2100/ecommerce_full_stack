@@ -1,19 +1,18 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class SubCategoryRepository(AppDbContext context) : ISubCategoryRepository
 {
-    public async Task<SubCategory?> getSubCategory(Guid id)
+    public async Task<SubCategory?> GetSubCategory(Guid id)
     {
        return await context.SubCategories.FindAsync(id);
     }
 
-    public async Task<List<SubCategory>> getSubCategories(
+    public async Task<List<SubCategory>> GetSubCategories(
         Guid storeId,
         int  pageNumber,
         int pageSize
@@ -29,7 +28,7 @@ public class SubCategoryRepository(AppDbContext context) : ISubCategoryRepositor
             .ToListAsync();
     }
     
-    public async Task<List<SubCategory>> getSubCategories(
+    public async Task<List<SubCategory>> GetSubCategories(
         int  pageNumber,
         int pageSize
     )
@@ -43,7 +42,7 @@ public class SubCategoryRepository(AppDbContext context) : ISubCategoryRepositor
             .ToListAsync();
     }
 
-    public async Task<int> getSubCategoriesCount(Guid storeId)
+    public async Task<int> GetSubCategoriesCount(Guid storeId)
     {
         return await context
             .SubCategories
@@ -52,20 +51,20 @@ public class SubCategoryRepository(AppDbContext context) : ISubCategoryRepositor
             .CountAsync();
     }
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context.SubCategories.FindAsync(id)!=null;
 
     }
 
-    public async Task<bool> isExist(Guid storeId, string name)
+    public async Task<bool> IsExist(Guid storeId, string name)
     {
         return await context.SubCategories
             .AsNoTracking()
             .AnyAsync(su => su.StoreId == storeId && su.Name == name);
     }
 
-    public async Task<bool> isExist(Guid storeId, Guid id)
+    public async Task<bool> IsExist(Guid storeId, Guid id)
     {
         return await context.SubCategories
             .AsNoTracking()
@@ -84,17 +83,17 @@ public class SubCategoryRepository(AppDbContext context) : ISubCategoryRepositor
             .ToListAsync(); 
     }
 
-    public void  add(SubCategory entity)
+    public void  Add(SubCategory entity)
     {
          context.SubCategories.Add(entity);
     }
 
-    public void update(SubCategory entity)
+    public void Update(SubCategory entity)
     {
         context.SubCategories.Update(entity);
     }
 
-    public  void  delete(Guid id)
+    public  void  Delete(Guid id)
     {
          var subcategories=context.SubCategories.Where(su => su.Id == id)
             .ToList();

@@ -1,10 +1,9 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.infrastructure.repositories;
+using api.domain.Interface;
+using api.Infrastructure;
+using api.Infrastructure.Repositories;
+using ecommerc_dotnet.application;
 
-namespace ecommerc_dotnet.application.UnitOfWork;
+namespace api.application.UnitOfWork;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -25,7 +24,7 @@ public class UnitOfWork : IUnitOfWork
         ProductImageRepository = new ProductImageRepository( _context );
         ProductRepository = new ProductRepository(context);
         OrderRepository = new OrderRepository( _context);
-        PasswordRepository = new ReseatePasswordRepository( _context );
+        PasswordRepository = new ReseatPasswordRepository( _context );
         StoreRepository = new StoreRepository( _context );
         SubCategoryRepository = new SubCategoryRepository( _context );
         UserRepository = new UserRepository( _context );
@@ -41,7 +40,7 @@ public class UnitOfWork : IUnitOfWork
 
     public IOrderProductVariant OrderProductVariantRepository { get; }
 
-    public async Task<int> saveChanges()
+    public async Task<int> SaveChanges()
     {
         try
         {

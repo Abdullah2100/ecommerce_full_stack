@@ -1,19 +1,15 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.mapper;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.shared.signalr;
+using api.util;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.shared.extentions;
-using ecommerc_dotnet.shared.signalr;
-using hotel_api.util;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class StoreServices(
     IWebHostEnvironment host,
@@ -25,22 +21,22 @@ public class StoreServices(
 )
     : IStoreServices
 {
-    private void deleteStoreImage(string? wallperper, string? smallImage)
+    private void DeleteStoreImage(string? wallperper, string? smallImage)
     {
         if (wallperper is not null)
-            fileServices.deleteFile(wallperper);
+            fileServices.DeleteFile(wallperper);
         if (smallImage is not null)
-            fileServices.deleteFile(smallImage);
+            fileServices.DeleteFile(smallImage);
     }
 
-    public async Task<Result<StoreDto?>> createStore(
+    public async Task<Result<StoreDto?>> CreateStore(
         CreateStoreDto store,
         Guid userId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
-        var isValide = user.isValidateFunc();
+        var isValide = user.IsValidateFunc();
 
         if (isValide is not null)
         {
@@ -53,7 +49,7 @@ public class StoreServices(
         }
 
 
-        if (await unitOfWork.StoreRepository.isExist(store.Name))
+        if (await unitOfWork.StoreRepository.IsExist(store.Name))
         {
             return new Result<StoreDto?>
             (
@@ -66,17 +62,17 @@ public class StoreServices(
 
         string? wallperper = null, smallImage = null;
 
-        smallImage = await fileServices.saveFile(
+        smallImage = await fileServices.SaveFile(
             store.SmallImage,
-            EnImageType.STORE);
-        wallperper = await fileServices.saveFile(
+            EnImageType.Store);
+        wallperper = await fileServices.SaveFile(
             store.WallpaperImage,
-            EnImageType.STORE);
+            EnImageType.Store);
 
 
         if (smallImage is null || wallperper is null)
         {
-            deleteStoreImage(wallperper, smallImage);
+            DeleteStoreImage(wallperper, smallImage);
             return new Result<StoreDto?>
             (
                 data: null,
@@ -86,7 +82,7 @@ public class StoreServices(
             );
         }
 
-        Guid id = clsUtil.generateGuid();
+        Guid id = ClsUtil.GenerateGuid();
         Store? storeData = new Store
         {
             Id = id,
@@ -100,7 +96,7 @@ public class StoreServices(
         };
         Address address = new Address
         {
-            Id = clsUtil.generateGuid(),
+            Id = ClsUtil.GenerateGuid(),
             IsCurrent = true,
             Latitude = store.Latitude,
             Longitude = store.Longitude,
@@ -110,18 +106,18 @@ public class StoreServices(
             OwnerId = id
         };
 
-        unitOfWork.StoreRepository.add(storeData);
+        unitOfWork.StoreRepository.Add(storeData);
 
 
-        unitOfWork.AddressRepository.add(address);
+        unitOfWork.AddressRepository.Add(address);
 
 
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
-            deleteStoreImage(wallperper, smallImage);
-            fileServices.deleteFile([wallperper, smallImage]);
+            DeleteStoreImage(wallperper, smallImage);
+            fileServices.DeleteFile([wallperper, smallImage]);
             return new Result<StoreDto?>
             (
                 data: null,
@@ -131,25 +127,25 @@ public class StoreServices(
             );
         }
 
-        storeData = await unitOfWork.StoreRepository.getStore(id)!;
+        storeData = await unitOfWork.StoreRepository.GetStore(id)!;
         storeData!.Addresses = new List<Address> { address };
 
 
         return new Result<StoreDto?>
         (
-            data: storeData?.toDto(config.getKey("url_file")),
+            data: storeData?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<StoreDto?>> updateStore(
+    public async Task<Result<StoreDto?>> UpdateStore(
         UpdateStoreDto storeDto,
         Guid userId
     )
     {
-        if (storeDto.isEmpty())
+        if (storeDto.IsEmpty())
         {
             return new Result<StoreDto?>
             (
@@ -161,9 +157,9 @@ public class StoreServices(
         }
 
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
-        var isValide = user.isValidateFunc(isStore: true);
+        var isValide = user.IsValidateFunc(isStore: true);
 
         if (isValide is not null)
         {
@@ -177,7 +173,7 @@ public class StoreServices(
 
         if (storeDto.Name is not null)
         {
-            bool isExist = await unitOfWork.StoreRepository.isExist(storeDto.Name, user!.Store!.Id);
+            bool isExist = await unitOfWork.StoreRepository.IsExist(storeDto.Name, user!.Store!.Id);
 
             if (isExist)
             {
@@ -196,19 +192,19 @@ public class StoreServices(
 
         if (storeDto.WallpaperImage is not null)
         {
-            wallperper = await fileServices.saveFile(
+            wallperper = await fileServices.SaveFile(
                 storeDto.WallpaperImage,
-                EnImageType.STORE);
+                EnImageType.Store);
 
-            deleteStoreImage(user!.Store!.WallpaperImage, null);
+            DeleteStoreImage(user!.Store!.WallpaperImage, null);
         }
 
         if (storeDto.SmallImage is not null)
         {
-            smallImage = await fileServices.saveFile(
+            smallImage = await fileServices.SaveFile(
                 storeDto.SmallImage,
-                EnImageType.STORE);
-            deleteStoreImage(null, user!.Store?.SmallImage);
+                EnImageType.Store);
+            DeleteStoreImage(null, user!.Store?.SmallImage);
         }
 
         user!.Store!.SmallImage = smallImage ?? user!.Store!.SmallImage;
@@ -216,7 +212,7 @@ public class StoreServices(
         user!.Store!.Name = storeDto.Name ?? user!.Store!.Name;
         user!.Store!.UpdatedAt = DateTime.Now;
 
-        unitOfWork.StoreRepository.update(user!.Store!);
+        unitOfWork.StoreRepository.Update(user!.Store!);
 
         if (
             (storeDto.Longitude is null && storeDto.Latitude is not null) ||
@@ -234,7 +230,7 @@ public class StoreServices(
         if (storeDto?.Longitude is not null && storeDto?.Latitude is not null)
         {
             Address? address = await unitOfWork.AddressRepository
-                .getAddressByOwnerId(user!.Store!.Id);
+                .GetAddressByOwnerId(user!.Store!.Id);
 
             if (address is null)
                 return new Result<StoreDto?>
@@ -248,10 +244,10 @@ public class StoreServices(
             address.UpdatedAt = DateTime.Now;
             address.Longitude = (decimal)storeDto?.Longitude!;
             address.Latitude = (decimal)storeDto!.Latitude;
-            unitOfWork.AddressRepository.update(address);
+            unitOfWork.AddressRepository.Update(address);
         }
 
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
 
         if (result < 1)
         {
@@ -264,21 +260,21 @@ public class StoreServices(
             );
         }
 
-        Store? store = await unitOfWork.StoreRepository.getStore(user.Store.Id);
-        store.Addresses = await unitOfWork.AddressRepository.getAllAddressByOwnerId(store!.Id);
+        Store? store = await unitOfWork.StoreRepository.GetStore(user.Store.Id);
+        store.Addresses = await unitOfWork.AddressRepository.GetAllAddressByOwnerId(store!.Id);
 
         return new Result<StoreDto?>
         (
-            data: store?.toDto(config.getKey("url_file")),
+            data: store?.ToDto(config.getKey("url_file")),
             message: "error while update store Data",
             isSuccessful: true,
             statusCode: 200
         );
     }
 
-    public async Task<Result<StoreDto?>> getStoreByUserId(Guid userId)
+    public async Task<Result<StoreDto?>> GetStoreByUserId(Guid userId)
     {
-        Store? store = await unitOfWork.StoreRepository.getStoreByUserId(userId);
+        Store? store = await unitOfWork.StoreRepository.GetStoreByUserId(userId);
 
         if (store is null)
             return new Result<StoreDto?>
@@ -291,7 +287,7 @@ public class StoreServices(
 
         return new Result<StoreDto?>
         (
-            data: store.toDto(config.getKey("url_file")),
+            data: store.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200
@@ -299,9 +295,9 @@ public class StoreServices(
     }
 
 
-    public async Task<Result<StoreDto?>> getStoreByStoreId(Guid id)
+    public async Task<Result<StoreDto?>> GetStoreByStoreId(Guid id)
     {
-        Store? store = await unitOfWork.StoreRepository.getStore(id);
+        Store? store = await unitOfWork.StoreRepository.GetStore(id);
 
         if (store is null)
             return new Result<StoreDto?>
@@ -314,7 +310,7 @@ public class StoreServices(
 
         return new Result<StoreDto?>
         (
-            data: store.toDto(config.getKey("url_file")),
+            data: store.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200
@@ -322,12 +318,12 @@ public class StoreServices(
     }
 
 
-    public async Task<Result<List<StoreDto>?>> getStores(Guid adminId, int pageNumber, int pageSize)
+    public async Task<Result<List<StoreDto>?>> GetStores(Guid adminId, int pageNumber, int pageSize)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var isValide = user.isValidateFunc(true);
+        var isValide = user.IsValidateFunc(true);
 
         if (isValide is not null)
         {
@@ -340,8 +336,8 @@ public class StoreServices(
         }
 
         List<StoreDto> stores = (await unitOfWork.StoreRepository
-                .getStores(pageNumber, pageSize)
-            ).Select(st => st.toDto(config.getKey("url_file")))
+                .GetStores(pageNumber, pageSize)
+            ).Select(st => st.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<StoreDto>?>
@@ -353,12 +349,12 @@ public class StoreServices(
         );
     }
 
-    public async Task<Result<bool?>> updateStoreStatus(Guid adminId, Guid storeId)
+    public async Task<Result<bool?>> UpdateStoreStatus(Guid adminId, Guid storeId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var isValide = user.isValidateFunc(true);
+        var isValide = user.IsValidateFunc(true);
 
         if (isValide is not null)
         {
@@ -370,7 +366,7 @@ public class StoreServices(
             );
         }
 
-        Store? store = await unitOfWork.StoreRepository.getStore(storeId);
+        Store? store = await unitOfWork.StoreRepository.GetStore(storeId);
 
         if (store is null)
             return new Result<bool?>
@@ -381,7 +377,7 @@ public class StoreServices(
                 statusCode: 404
             );
 
-        isValide = store.user.isValidateFunc(true);
+        isValide = store.user.IsValidateFunc(true);
 
         if (isValide is null && store.UserId != user!.Id)
         {
@@ -396,8 +392,8 @@ public class StoreServices(
 
         store.IsBlock = !store.IsBlock;
         
-        unitOfWork.StoreRepository.update(store);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.StoreRepository.Update(store);
+        int result = await unitOfWork.SaveChanges();
         if (result == 0)
             return new Result<bool?>
             (

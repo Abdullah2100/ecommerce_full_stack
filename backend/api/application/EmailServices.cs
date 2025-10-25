@@ -1,14 +1,14 @@
 using System.Net;
 using System.Net.Mail;
-using ecommerc_dotnet.di.email;
+using api.Infrastructure;
 using ecommerc_dotnet.midleware.ConfigImplment;
 using Exception = System.Exception;
 
-namespace ecommerc_dotnet.application;
+namespace api.application;
 
-public class EmailServices(IConfig config) : IMessageSerivice 
+public class EmailServices(IConfig config) : IMessageService 
 {
-    public async Task<bool> sendingMessage(string message, string to)
+    public async Task<bool> SendingMessage(string message, string to)
     {
         try
         {

@@ -1,32 +1,30 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Result;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.application.Interface;
+namespace api.application.Interface;
 
 public interface IUserServices
 {
-    public Task<Result<AuthDto?>> signup(SignupDto signupDto);
-    public Task<Result<AuthDto?>> login(LoginDto loginDto);
+    public Task<Result<AuthDto?>> Signup(SignupDto signupDto);
+    public Task<Result<AuthDto?>> Login(LoginDto loginDto);
 
 
-    public Task<Result<UserInfoDto?>> getMe(Guid id);
+    public Task<Result<UserInfoDto?>> GetMe(Guid id);
 
-    public Task<Result<List<UserInfoDto>?>> getUsers(int page, Guid id);
+    public Task<Result<List<UserInfoDto>?>> GetUsers(int page, Guid id);
 
-    public Task<Result<bool>> blockOrUnBlockUser(Guid id,Guid userId);
+    public Task<Result<bool>> BlockOrUnBlockUser(Guid id,Guid userId);
     
-    public Task<Result<UserInfoDto?>> updateUser(
+    public Task<Result<UserInfoDto?>> UpdateUser(
         UpdateUserInfoDto userDto, Guid id
         ,bool isUpdateWillBeUp=false);
 
-    public Task<Result<AddressDto?>> addAddressToUser(CreateAddressDto addressDto, Guid id);
-    public Task<Result<AddressDto?>> updateUserAddress(UpdateAddressDto addressDto, Guid id);
-    public Task<Result<bool>> deleteUserAddress(Guid addressId, Guid id);
-    public Task<Result<bool>> updateUserCurrentAddress(Guid addressId, Guid id);
+    public Task<Result<AddressDto?>> AddAddressToUser(CreateAddressDto addressDto, Guid id);
+    public Task<Result<AddressDto?>> UpdateUserAddress(UpdateAddressDto addressDto, Guid id);
+    public Task<Result<bool>> DeleteUserAddress(Guid addressId, Guid id);
+    public Task<Result<bool>> UpdateUserCurrentAddress(Guid addressId, Guid id);
 
-    public Task<Result<bool>> generateOtp(ForgetPasswordDto forgetPasswordDto);
-    public Task<Result<bool>> otpVerification(CreateVerificationDto createVerificationDto);
-    public Task<Result<AuthDto?>> reseatePassword(CreateReseatePasswordDto createReseatePasswordDto);
+    public Task<Result<bool>> GenerateOtp(ForgetPasswordDto forgetPasswordDto);
+    public Task<Result<bool>> OtpVerification(CreateVerificationDto createVerificationDto);
+    public Task<Result<AuthDto?>> ReseatePassword(CreateReseatePasswordDto createReseatePasswordDto);
 }

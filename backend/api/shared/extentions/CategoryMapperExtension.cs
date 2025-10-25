@@ -1,12 +1,11 @@
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.mapper;
+namespace api.shared.extentions;
 
-public static class CategoryMapperExtention
+public static class CategoryMapperExtension
 {
-    public static CategoryDto toDto(this Category category, string url)
+    public static CategoryDto ToDto(this Category category, string url)
     {
         return new CategoryDto
         {
@@ -16,7 +15,7 @@ public static class CategoryMapperExtention
         };
     }
 
-    public static bool isEmpty(this UpdateCategoryDto category)
+    public static bool IsEmpty(this UpdateCategoryDto category)
     {
         return string.IsNullOrWhiteSpace(category.Name) &&
                category.Image == null;

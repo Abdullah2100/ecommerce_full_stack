@@ -1,13 +1,12 @@
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.shared.extentions;
+namespace api.shared.extentions;
 
 
 public static class SubCategoryMapperExtensions
 {
-    public static SubCategoryDto toDto(this SubCategory subCategory)
+    public static SubCategoryDto ToDto(this SubCategory subCategory)
     {
         if (subCategory == null)
             throw new ArgumentNullException(nameof(subCategory));
@@ -21,7 +20,7 @@ public static class SubCategoryMapperExtensions
         };
     }
 
-    public static bool isEmpty(this UpdateSubCategoryDto dto)
+    public static bool IsEmpty(this UpdateSubCategoryDto dto)
     {
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));

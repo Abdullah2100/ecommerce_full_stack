@@ -1,7 +1,6 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.Interface;
+using api.domain.Interface;
 
-namespace ecommerc_dotnet.infrastructure;
+namespace api.Infrastructure;
 
 public interface IUnitOfWork:IDisposable
 {
@@ -22,5 +21,5 @@ public interface IUnitOfWork:IDisposable
     public IVarientRepository VarientRepository { get; }
     public IOrderProductVariant OrderProductVariantRepository { get; } 
 
-    public Task<int> saveChanges();
+    public Task<int> SaveChanges();
 }

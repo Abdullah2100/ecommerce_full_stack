@@ -1,11 +1,8 @@
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.Presentation.dto;
+namespace api.shared.extentions;
 
-namespace ecommerc_dotnet.shared.extentions;
-
-public static class  OrderStatusMapperExtention
+public static class  OrderStatusMapperExtension
 {
-    public static string toOrderStatusName(this int orderStatus)
+    public static string ToOrderStatusName(this int orderStatus)
     {
         return orderStatus switch
         {

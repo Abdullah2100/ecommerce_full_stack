@@ -1,19 +1,14 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Result;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.application.services;
+namespace api.application.Interface;
 
 public interface IStoreServices
 {
-   public Task<Result<StoreDto?>> createStore(CreateStoreDto store,Guid userId);
-   public Task<Result<StoreDto?>> updateStore(UpdateStoreDto storeDto,Guid userId);
-   
-   public Task<Result<StoreDto?>> getStoreByUserId(Guid userId);
-   public Task<Result<StoreDto?>> getStoreByStoreId(Guid id);
-   
-   public Task<Result<List<StoreDto>?>> getStores(Guid adminId, int pageNumber, int pageSize);
-   
-   
-   
-   public Task<Result<bool?>> updateStoreStatus(Guid adminId,Guid storeId);
+   public Task<Result<StoreDto?>> CreateStore(CreateStoreDto store,Guid userId);
+   public Task<Result<StoreDto?>> UpdateStore(UpdateStoreDto storeDto,Guid userId);
+   public Task<Result<StoreDto?>> GetStoreByUserId(Guid userId);
+   public Task<Result<StoreDto?>> GetStoreByStoreId(Guid id);
+   public Task<Result<List<StoreDto>?>> GetStores(Guid adminId, int pageNumber, int pageSize);
+   public Task<Result<bool?>> UpdateStoreStatus(Guid adminId,Guid storeId);
 }

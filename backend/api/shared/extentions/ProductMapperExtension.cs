@@ -1,13 +1,12 @@
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.mapper;
+namespace api.shared.extentions;
 
-public static class ProductMapperExtention
+public static class ProductMapperExtension
 {
    
-    public static ProductDto toDto(this Product product,string url)
+    public static ProductDto ToDto(this Product product,string url)
     {
         return new ProductDto
         {
@@ -19,15 +18,15 @@ public static class ProductMapperExtention
             CategoryId = product.SubCategory.CategoryId,
             ProductImages =product.ProductImages.Select(pi=>url+pi.Path).ToList(),
             ProductVarients = product.ProductVarients
-                .GroupBy(pv => pv.VarientId, (key, g)
-                    => g.Select(pvH=>pvH.toProductVarientDto()).ToList()
+                .GroupBy(pv => pv.VariantId, (key, g)
+                    => g.Select(pvH=>pvH.ToProductVarientDto()).ToList()
                 ).ToList(),
             StoreId = product.StoreId,
             SubcategoryId = product.SubcategoryId,
         };
     }
  
-    public static AdminProductsDto toAdminDto(this Product product,string url)
+    public static AdminProductsDto ToAdminDto(this Product product,string url)
     {
         return new AdminProductsDto 
         {
@@ -39,14 +38,14 @@ public static class ProductMapperExtention
             StoreName = product.Store.Name,
             ProductImages =product.ProductImages.Select(pi=>url+pi.Path).ToList(),
             ProductVarients = product.ProductVarients
-                .GroupBy(pv => pv.VarientId, (key, g)
-                    => g.Select(pvH=>pvH.toAdminProductVarientDto()).ToList()
+                .GroupBy(pv => pv.VariantId, (key, g)
+                    => g.Select(pvH=>pvH.ToAdminProductVarientDto()).ToList()
                 ).ToList(),
             Subcategory =  product.SubCategory.Name,
         };
     }
 
-    public static bool isEmpty(this UpdateProductDto dto)
+    public static bool IsEmpty(this UpdateProductDto dto)
     {
         return string.IsNullOrEmpty(dto.Name) &&
                string.IsNullOrEmpty(dto.Description)

@@ -1,5 +1,4 @@
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ecommerc_dotnet.application;
@@ -21,7 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Varient> Varients { get; set; }
 
     public DbSet<Product> Products { get; set; }
-    public DbSet<ProductVarient> ProductVarients { get; set; }
+    public DbSet<ProductVariant> ProductVarients { get; set; }
     public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
@@ -100,7 +99,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<Product>(pr =>
         {
-            pr.HasMany<ProductVarient>(pro => pro.ProductVarients)
+            pr.HasMany<ProductVariant>(pro => pro.ProductVarients)
                 .WithOne(p => p.Product)
                 .HasForeignKey(p => p.ProductId)
                 .HasPrincipalKey(pro => pro.Id);
@@ -125,7 +124,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             va.HasIndex(var => var.Name).IsUnique();
             va.HasMany(var => var.ProductVarients)
                 .WithOne(var => var.Varient)
-                .HasForeignKey(var => var.VarientId)
+                .HasForeignKey(var => var.VariantId)
                 .HasPrincipalKey(var => var.Id)
                 .OnDelete(DeleteBehavior.Restrict);
         });
@@ -161,9 +160,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<OrderProductsVarient>(opv =>
         {
-            opv.HasOne(OPV => OPV.ProductVarient)
-                .WithMany(or => or.OrderProductsVarients)
-                .HasForeignKey(or => or.ProductVarientId)
+            opv.HasOne(OPV => OPV.ProductVariant)
+                .WithMany(or => or.OrderProductsVariants)
+                .HasForeignKey(or => or.ProductVariantId)
                 .HasPrincipalKey(or => or.Id);
         });
 

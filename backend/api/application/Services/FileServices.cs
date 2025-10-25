@@ -1,17 +1,17 @@
-using ecommerc_dotnet.application.Interface;
-using hotel_api.util;
+using api.application.Interface;
+using api.util;
 
-namespace ecommerc_dotnet.application.Services
+namespace api.application.Services
 {
 
 
     public class FileServices(IWebHostEnvironment host) : IFileServices
     {
-        private static string localPath = "images";
+        private static readonly string LocalPath = "images";
 
-        public static string getFileExtention(IFormFile filename)=> Path.GetExtension(filename.FileName);
+        private static string GetFileExtention(IFormFile filename)=> Path.GetExtension(filename.FileName);
 
-        private static bool createDirectory(string dir)
+        private static bool CreateDirectory(string dir)
         {
             try
             {
@@ -25,24 +25,23 @@ namespace ecommerc_dotnet.application.Services
             }
         }
 
-        public async Task<string?> saveFile(IFormFile file, EnImageType type)
+        public async Task<string?> SaveFile(IFormFile file, EnImageType type)
         {
             // string filePath = localPath + type.ToString()+"/";
-            string filePath = Path.Combine(host.ContentRootPath, localPath, type.ToString());
-            string? fileFullName = null;
+            string filePath = Path.Combine(host.ContentRootPath, LocalPath, type.ToString());
             try
             {
                 if (!Directory.Exists(filePath))
                 {
-                    if (!createDirectory(filePath))
+                    if (!CreateDirectory(filePath))
                     {
                         return null;
                     }
                 }
 
-                fileFullName = Path.Combine(filePath, clsUtil.generateGuid() + getFileExtention(file));
+                var fileFullName = Path.Combine(filePath, ClsUtil.GenerateGuid() + GetFileExtention(file));
 
-                using (var stream = new FileStream(fileFullName, FileMode.Create))
+                await using (var stream = new FileStream(fileFullName, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
@@ -61,15 +60,15 @@ namespace ecommerc_dotnet.application.Services
 
         }
 
-        public async Task<List<string>?> saveFile(List<IFormFile> file, EnImageType type)
+        public async Task<List<string>?> SaveFile(List<IFormFile> file, EnImageType type)
         {
             List<string> images = new List<string>();
             foreach (var image in file)
             {
-                string? path = await saveFile(image, type);
+                string? path = await SaveFile(image, type);
                 if (path is null)
                 {
-                    deleteFile(images);
+                    DeleteFile(images);
                     return null;
                 }
 
@@ -79,7 +78,7 @@ namespace ecommerc_dotnet.application.Services
             return images;
         }
 
-        public bool deleteFile(string filePath)
+        public bool DeleteFile(string filePath)
         {
             try
             {
@@ -100,13 +99,13 @@ namespace ecommerc_dotnet.application.Services
             }
         }
 
-        public bool deleteFile(List<string> filePaths)
+        public bool DeleteFile(List<string> filePaths)
         {
             try
             {
                 foreach (var filePath in filePaths)
                 {
-                    deleteFile(filePath);
+                    DeleteFile(filePath);
                 }
 
                 return true;

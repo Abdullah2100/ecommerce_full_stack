@@ -1,21 +1,21 @@
+using api.domain.entity;
+using api.domain.Interface;
+using api.util;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
-using hotel_api.util;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class OrderProductVariantRepository(AppDbContext context):IOrderProductVariant
 {
-    public void add(List<OrderProductsVarient> entities)
+    public void Add(List<OrderProductsVarient> entities)
     {
         foreach (var entity in entities)
         {
              context.OrdersProductsVarients.Add(new OrderProductsVarient()
             {
-                Id = clsUtil.generateGuid(),
+                Id = ClsUtil.GenerateGuid(),
                 OrderItemId = entity.OrderItemId,
-                ProductVarientId = entity.ProductVarientId,
+                ProductVariantId = entity.ProductVariantId,
             });
         }    
     }

@@ -1,13 +1,13 @@
-using hotel_api.util;
+using api.util;
 
-namespace ecommerc_dotnet.application.Interface;
+namespace api.application.Interface;
 
 
 public interface IFileServices
 {
-    Task<string?> saveFile(IFormFile file, EnImageType type);
-    Task<List<string>?> saveFile(List<IFormFile> file, EnImageType type);
+    Task<string?> SaveFile(IFormFile file, EnImageType type);
+    Task<List<string>?> SaveFile(List<IFormFile> file, EnImageType type);
 
-    bool deleteFile(string filePath);
-    bool deleteFile(List<string> filePaths);
+    bool DeleteFile(string filePath);
+    bool DeleteFile(List<string> filePaths);
 }

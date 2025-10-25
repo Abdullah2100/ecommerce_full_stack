@@ -1,20 +1,15 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
-using hotel_api.util;
 using Microsoft.EntityFrameworkCore;
-using NuGet.DependencyResolver;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class ProductRepository(
     AppDbContext context
   ) : IProductRepository
 {
-    public async Task<IEnumerable<Product>> getAllAsync(int page, int length)
+    public async Task<IEnumerable<Product>> GetAllAsync(int page, int length)
     {
         return await context.Products
             .AsNoTracking()
@@ -30,11 +25,9 @@ public class ProductRepository(
 
     
 
-    public void add(Product entity)
+    public void Add(Product entity)
     {
-       // try
-        //{
-           // var result = true;
+       
            context.Products.Add(new Product
             {
                 Id = entity.Id,
@@ -47,80 +40,30 @@ public class ProductRepository(
                 UpdatedAt = null,
                 Thmbnail = entity.Thmbnail
             });
-          /*  result =   await context.SaveChangesAsync() >0;
-            if (entity.ProductVarients is not null)
-            {
-                result = await productVariantRepository.addProductVariants(entity.ProductVarients);
-                if (result != false)
-                {
-                    Console.WriteLine("could not save product image: ");
-                    return 0;
-                }
-            }
-
-            if (entity.ProductImages is not null)
-            {
-                result = await productImageRepository.addProductImage(entity.ProductImages);
-                if (!result)
-                {
-                    Console.WriteLine("could not save product image: ");
-                    return 0;
-                }
-            }
-
-       /*     return result==true? 1: 0;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error: fom create new Peoduct " + ex.Message);
-            return 0;
-        }*/
+          
     }
 
-    public void  update(Product entity)
+    public void  Update(Product entity)
     {
         var result = true;
         
         var product = context.Products.Find(entity.Id);
         if (product == null) throw new ArgumentNullException();
         
-       /* if (entity.ProductVarients is not null)
-        {
-            result =  productVariantRepository.addProductVariants(entity.ProductVarients);
-            if (result != false)
-            {
-                Console.WriteLine("could not save product image: ");
-                return 0;
-            }
-        } 
-
-       /* if (entity.ProductImages is not null)
-            if (entity.ProductImages is not null)
-            { 
-                result = await productImageRepository.addProductImage(entity.ProductImages);
-                if (result != false) return await context.SaveChangesAsync();
-                Console.WriteLine("could not save product image: ");
-                return 0;
-            }
-        */
-
         context.Products.Update(entity);
 
 
     }
 
-    public void delete(Guid id)
+    public void Delete(Guid id)
     
     {
-       // await productImageRepository.deleteProductImages(id);
-        //await context.ProductVarients.Where(p => p.ProductId == id).ExecuteDeleteAsync();
-        //await productVariantRepository.deleteProductVariantByProductId(id);
         var product= context.Products.Find(id);
         if (product == null) throw new ArgumentNullException();
         context.Products.Remove(product);
     }
 
-    public async Task<Product?> getProduct(Guid id)
+    public async Task<Product?> GetProduct(Guid id)
     {
         return await context.Products
             .AsNoTracking()
@@ -132,7 +75,7 @@ public class ProductRepository(
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
-    public async Task<Product?> getProduct(Guid id, Guid storeId)
+    public async Task<Product?> GetProduct(Guid id, Guid storeId)
     {
         return await context.Products
             .AsNoTracking()
@@ -144,7 +87,7 @@ public class ProductRepository(
             .FirstOrDefaultAsync(p => p.Id == id && p.StoreId == storeId);
     }
 
-    public async Task<Product?> getProductByUser(Guid id, Guid userId)
+    public async Task<Product?> GetProductByUser(Guid id, Guid userId)
     {
         return await context.Products
             .AsNoTracking()
@@ -156,7 +99,7 @@ public class ProductRepository(
             .FirstOrDefaultAsync(p => p.Id == id && p.Store.UserId == userId);
     }
 
-    public async Task<IEnumerable<Product>> getProducts(
+    public async Task<IEnumerable<Product>> GetProducts(
         Guid storeId,
         Guid subCategoryId,
         int pageNum,
@@ -177,7 +120,7 @@ public class ProductRepository(
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Product>> getProducts(
+    public async Task<IEnumerable<Product>> GetProducts(
         Guid storeId,
         int pageNum,
         int pageSize)
@@ -196,7 +139,7 @@ public class ProductRepository(
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Product>> getProducts(int page, int length)
+    public async Task<IEnumerable<Product>> GetProducts(int page, int length)
     {
         return await context.Products
             .AsNoTracking()
@@ -210,7 +153,7 @@ public class ProductRepository(
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Product>> getProductsByCategory(
+    public async Task<IEnumerable<Product>> GetProductsByCategory(
         Guid categoryId,
         int pageNum,
         int pageSize
@@ -231,7 +174,7 @@ public class ProductRepository(
     }
 
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context.Products.FindAsync(id) != null;
     }

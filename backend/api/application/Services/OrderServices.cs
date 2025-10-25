@@ -1,27 +1,21 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.di.email;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.mapper;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.shared.signalr;
+using api.util;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.shared;
-using ecommerc_dotnet.shared.extentions;
-using ecommerc_dotnet.shared.signalr;
-using hotel_api.util;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class OrderServices(
     IUnitOfWork unitOfWork,
     IConfig config,
-    IMessageSerivice messageSerivice,
+    IMessageService messageService,
     IHubContext<OrderHub> hubContext)
     : IOrderServices
 {
@@ -38,9 +32,9 @@ public class OrderServices(
 
     public async Task<Result<OrderDto?>> CreateOrder(Guid userId, CreateOrderDto orderDto)
     {
-        User? user = await unitOfWork.UserRepository.getUser(userId);
+        User? user = await unitOfWork.UserRepository.GetUser(userId);
 
-        var isValidated = user.isValidateFunc(isAdmin: false);
+        var isValidated = user.IsValidateFunc(isAdmin: false);
 
         if (isValidated is not null)
         {
@@ -53,7 +47,7 @@ public class OrderServices(
             );
         }
 
-        if (!(await unitOfWork.OrderRepository.isValidTotalPrice(orderDto.TotalPrice, orderDto.Items)))
+        if (!(await unitOfWork.OrderRepository.IsValidTotalPrice(orderDto.TotalPrice, orderDto.Items)))
         {
             return new Result<OrderDto?>
             (
@@ -64,7 +58,7 @@ public class OrderServices(
             );
         }
 
-        var id = clsUtil.generateGuid();
+        var id = ClsUtil.GenerateGuid();
         Order? order = new Order
         {
             Id = id,
@@ -77,17 +71,17 @@ public class OrderServices(
             UpdatedAt = null,
         };
 
-        unitOfWork.OrderRepository.add(order);
+        unitOfWork.OrderRepository.Add(order);
 
         foreach (var item in orderDto.Items)
         {
-            var orderItemId = clsUtil.generateGuid();
+            var orderItemId = ClsUtil.GenerateGuid();
             List<OrderProductsVarient> orderProductsVarients = item.ProductsVarientId
                 .Select(x => new OrderProductsVarient
                 {
-                    Id = clsUtil.generateGuid(),
+                    Id = ClsUtil.GenerateGuid(),
                     OrderItemId = orderItemId,
-                    ProductVarientId = x
+                    ProductVariantId = x
                 })
                 .ToList();
 
@@ -101,12 +95,12 @@ public class OrderServices(
                 Price = item.Price,
                 OrderProductsVarients = orderProductsVarients
             };
-            unitOfWork.OrderItemRepository.add(orderItem);
-            unitOfWork.OrderProductVariantRepository.add(orderProductsVarients);
+            unitOfWork.OrderItemRepository.Add(orderItem);
+            unitOfWork.OrderProductVariantRepository.Add(orderProductsVarients);
         }
 
 
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
 
 
         if (result == 0)
@@ -120,7 +114,7 @@ public class OrderServices(
             );
         }
 
-        var isSavedDistance = await unitOfWork.OrderRepository.isSavedDistanceToOrder(order.Id);
+        var isSavedDistance = await unitOfWork.OrderRepository.IsSavedDistanceToOrder(order.Id);
 
         if (isSavedDistance == false)
         {
@@ -133,7 +127,7 @@ public class OrderServices(
             );
         }
 
-        order = await unitOfWork.OrderRepository.getOrder(order.Id);
+        order = await unitOfWork.OrderRepository.GetOrder(order.Id);
         if (order is null)
         {
             return new Result<OrderDto?>
@@ -145,8 +139,10 @@ public class OrderServices(
             );
         }
 
-        var dtoOrder = order.toDto(config.getKey("url_file"));
+        var dtoOrder = order.ToDto(config.getKey("url_file"));
         await hubContext.Clients.All.SendAsync("createdOrder", dtoOrder);
+        await SendNotification(order, 1);
+
 
         return new Result<OrderDto?>
         (
@@ -158,11 +154,11 @@ public class OrderServices(
     }
 
 
-    public async Task<Result<List<OrderDto>>> getMyOrders(Guid userId, int pageNum, int pageSize)
+    public async Task<Result<List<OrderDto>>> GetMyOrders(Guid userId, int pageNum, int pageSize)
     {
         List<OrderDto> orders = (await unitOfWork.OrderRepository
-                .getOrders(userId, pageNum, pageSize))
-            .Select(o => o.toDto(config.getKey("url_file")))
+                .GetOrders(userId, pageNum, pageSize))
+            .Select(o => o.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -175,11 +171,11 @@ public class OrderServices(
     }
 
     //for admin dashboard
-    public async Task<Result<AdminOrderDto?>> getOrders(Guid userId, int pageNum, int pageSize)
+    public async Task<Result<AdminOrderDto?>> GetOrders(Guid userId, int pageNum, int pageSize)
     {
-        User? delivery = await unitOfWork.UserRepository.getUser(userId);
+        User? delivery = await unitOfWork.UserRepository.GetUser(userId);
 
-        var isValid = delivery.isValidateFunc(true);
+        var isValid = delivery.IsValidateFunc(true);
 
         if (isValid is not null)
         {
@@ -193,8 +189,8 @@ public class OrderServices(
         }
 
         List<OrderDto> orders = (await unitOfWork.OrderRepository
-                .getOrders(pageNum, pageSize))
-            .Select(o => o.toDto(config.getKey("url_file")))
+                .GetOrders(pageNum, pageSize))
+            .Select(o => o.ToDto(config.getKey("url_file")))
             .ToList();
 
         int orderPages = (int)Math.Ceiling((double)orders.Count / pageSize);
@@ -209,10 +205,10 @@ public class OrderServices(
         );
     }
 
-    public async Task<Result<bool>> updateOrderStatus(Guid id, int status)
+    public async Task<Result<bool>> UpdateOrderStatus(Guid id, int status)
     {
         Order? order = await unitOfWork.OrderRepository
-            .getOrder(id);
+            .GetOrder(id);
 
         if (order is null)
         {
@@ -227,8 +223,8 @@ public class OrderServices(
 
         order.Status = status;
 
-        unitOfWork.OrderRepository.update(order);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.OrderRepository.Update(order);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -249,7 +245,7 @@ public class OrderServices(
 
         //this for notification operation for all user at the system
 
-        await sendNotification(order, status);
+        await SendNotification(order, status);
         return new Result<bool>
         (
             data: true,
@@ -259,9 +255,9 @@ public class OrderServices(
         );
     }
 
-    public async Task<Result<bool>> deleteOrder(Guid id, Guid userId)
+    public async Task<Result<bool>> DeleteOrder(Guid id, Guid userId)
     {
-        Order? order = await unitOfWork.OrderRepository.getOrder(id, userId);
+        Order? order = await unitOfWork.OrderRepository.GetOrder(id, userId);
         if (order is null)
         {
             return new Result<bool>
@@ -273,8 +269,8 @@ public class OrderServices(
             );
         }
 
-        unitOfWork.OrderRepository.delete(id);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.OrderRepository.Delete(id);
+        int result = await unitOfWork.SaveChanges();
         if (result == 0)
         {
             return new Result<bool>
@@ -297,11 +293,11 @@ public class OrderServices(
 
 
     // for delivery 
-    public async Task<Result<List<OrderDto>>> getOrdersbyDeliveryId(Guid deliveryId, int pageNum, int pageSize)
+    public async Task<Result<List<OrderDto>>> GetOrdersbyDeliveryId(Guid deliveryId, int pageNum, int pageSize)
     {
-        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.GetDelivery(deliveryId);
 
-        var isValid = delivery.isValidated();
+        var isValid = delivery.IsValidated();
 
         if (isValid is not null)
         {
@@ -315,8 +311,8 @@ public class OrderServices(
         }
 
         List<OrderDto> orders = (await unitOfWork.OrderRepository
-                .getOrderBelongToDelivery(deliveryId, pageNum, pageSize))
-            .Select(o => o.toDto(config.getKey("url_file")))
+                .GetOrderBelongToDelivery(deliveryId, pageNum, pageSize))
+            .Select(o => o.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -328,11 +324,11 @@ public class OrderServices(
         );
     }
 
-    public async Task<Result<List<OrderDto>>> getOrdersNotBelongToDeliveries(Guid deliveryId, int pageNum, int pageSize)
+    public async Task<Result<List<OrderDto>>> GetOrdersNotBelongToDeliveries(Guid deliveryId, int pageNum, int pageSize)
     {
-        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.GetDelivery(deliveryId);
 
-        var isValid = delivery.isValidated();
+        var isValid = delivery.IsValidated();
         if (isValid is not null)
         {
             return new Result<List<OrderDto>>
@@ -345,8 +341,8 @@ public class OrderServices(
         }
 
         List<OrderDto> orders = (await unitOfWork.OrderRepository
-                .getOrderNoBelongToAnyDelivery(pageNum, pageSize))
-            .Select(o => o.toDto(config.getKey("url_file")))
+                .GetOrderNoBelongToAnyDelivery(pageNum, pageSize))
+            .Select(o => o.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<OrderDto>>
@@ -359,11 +355,11 @@ public class OrderServices(
     }
 
 
-    public async Task<Result<bool>> submitOrderToDelivery(Guid id, Guid deliveryId)
+    public async Task<Result<bool>> SubmitOrderToDelivery(Guid id, Guid deliveryId)
     {
-        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.GetDelivery(deliveryId);
 
-        var isValid = delivery.isValidated();
+        var isValid = delivery.IsValidated();
 
         if (isValid is not null)
         {
@@ -377,7 +373,7 @@ public class OrderServices(
         }
 
 
-        Order? order = await unitOfWork.OrderRepository.getOrder(id);
+        Order? order = await unitOfWork.OrderRepository.GetOrder(id);
 
         if (order == null)
         {
@@ -402,13 +398,13 @@ public class OrderServices(
 
         order.DeleveryId = deliveryId;
         order.UpdatedAt = DateTime.Now;
-        
-        unitOfWork.OrderRepository.update(order);
 
-        var result = await unitOfWork.saveChanges();
+        unitOfWork.OrderRepository.Update(order);
+
+        var result = await unitOfWork.SaveChanges();
 
 
-        if (result <1)
+        if (result < 1)
         {
             return new Result<bool>
             (
@@ -431,9 +427,9 @@ public class OrderServices(
             Id = order.Id,
             Status = OrderStatus[2]
         });
-        
 
-        await sendNotification(order, status:2);
+
+        await SendNotification(order, status: 2);
         return new Result<bool>
         (
             data: true,
@@ -443,11 +439,11 @@ public class OrderServices(
         );
     }
 
-    public async Task<Result<bool>> cancelOrderFromDelivery(Guid id, Guid deliveryId)
+    public async Task<Result<bool>> CancelOrderFromDelivery(Guid id, Guid deliveryId)
     {
-        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(deliveryId);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.GetDelivery(deliveryId);
 
-        var isValid = delivery.isValidated();
+        var isValid = delivery.IsValidated();
         if (isValid is not null)
         {
             return new Result<bool>
@@ -459,7 +455,7 @@ public class OrderServices(
             );
         }
 
-        Order? order = await unitOfWork.OrderRepository.getOrder(id);
+        Order? order = await unitOfWork.OrderRepository.GetOrder(id);
 
         if (order is null)
         {
@@ -472,7 +468,7 @@ public class OrderServices(
             );
         }
 
-        if (!(await unitOfWork.OrderRepository.isCanCancelOrder(id)))
+        if (!(await unitOfWork.OrderRepository.IsCanCancelOrder(id)))
         {
             return new Result<bool>
             (
@@ -483,8 +479,8 @@ public class OrderServices(
             );
         }
 
-        unitOfWork.OrderRepository.removeOrderFromDelivery(id, deliveryId);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.OrderRepository.RemoveOrderFromDelivery(id, deliveryId);
+        int result = await unitOfWork.SaveChanges();
 
 
         if (result == 0)
@@ -498,7 +494,7 @@ public class OrderServices(
             );
         }
 
-        await hubContext.Clients.All.SendAsync("createdOrder", order.toDto(config.getKey("url_file")));
+        await hubContext.Clients.All.SendAsync("createdOrder", order.ToDto(config.getKey("url_file")));
 
         return new Result<bool>
         (
@@ -509,10 +505,10 @@ public class OrderServices(
         );
     }
 
-    public async Task<Result<List<string>>> getOrdersStatus(Guid adminId)
+    public async Task<Result<List<string>>> GetOrdersStatus(Guid adminId)
     {
-        User? user = await unitOfWork.UserRepository.getUser(adminId);
-        var isValide = user.isValidateFunc();
+        User? user = await unitOfWork.UserRepository.GetUser(adminId);
+        var isValide = user.IsValidateFunc();
 
         if (isValide is not null)
         {
@@ -532,19 +528,18 @@ public class OrderServices(
         );
     }
 
-    private async Task sendNotification(Order order, int status)
+    private async Task SendNotification(Order order, int status)
     {
-
-        await sendNotificationToStore(order, status);
-        await sendNotificationToUser(order, status);
-        await sendNotificationToDelivery(order, status);
+        await SendNotificationToStore(order, status);
+        await SendNotificationToUser(order, status);
+        await SendNotificationToDelivery(order, status);
     }
-    
-    private async Task sendNotificationToStore(Order order, int status)
+
+    private async Task SendNotificationToStore(Order order, int status)
     {
         try
         {
-            var messageServe = new SendMessageSerivcies(new NotificationServices());
+            var messageServe = new SendMessageServices(new NotificationServices());
 
             var orderItems = order.Items.ToList();
 
@@ -552,10 +547,10 @@ public class OrderServices(
             {
                 var orderItem = orderItems[i];
                 var cancelMessage = orderItem.Product.Name + " is Rejected For " + order.User.Name;
-                var storeMessage = this.storeMessage(status, cancelMessage);
+                var storeMessage = this.StoreMessage(status, cancelMessage);
                 if (!string.IsNullOrEmpty(storeMessage))
                 {
-                    await messageServe.sendMessage(storeMessage, orderItem.Store.user.deviceToken);
+                    await messageServe.SendMessage(storeMessage, orderItem.Store.user.deviceToken);
                 }
             }
         }
@@ -565,15 +560,16 @@ public class OrderServices(
         }
     }
 
-    private async Task sendNotificationToUser(Order order, int status){
+    private async Task SendNotificationToUser(Order order, int status)
+    {
         try
         {
-            var messageServe = new SendMessageSerivcies(new NotificationServices());
+            var messageServe = new SendMessageServices(new NotificationServices());
 
-            var userMessage = this.userMessage(status);
+            var userMessage = this.UserMessage(status);
             if (!string.IsNullOrEmpty(userMessage))
             {
-                await messageServe.sendMessage(userMessage, order.User.deviceToken);
+                await messageServe.SendMessage(userMessage, order.User.deviceToken);
             }
         }
         catch (Exception e)
@@ -582,31 +578,37 @@ public class OrderServices(
         }
     }
 
-    private async Task sendNotificationToDelivery(Order order, int status)
+    private async Task SendNotificationToDelivery(Order order, int status)
     {
         try
         {
-            var messageServe = new SendMessageSerivcies(new NotificationServices());
+            var messageServe = new SendMessageServices(new NotificationServices());
 
-            var deliveryMessage = this.deliveryMessage(status);
+            var deliveryMessage = this.DeliveryMessage(status);
 
             Delivery? delivery = null;
             if (order.DeleveryId is not null)
             {
-                delivery = await unitOfWork.DeliveryRepository.getDelivery(order.DeleveryId ?? Guid.Empty);
+                delivery = await unitOfWork.DeliveryRepository.GetDelivery(order.DeleveryId ?? Guid.Empty);
             }
 
             switch (status)
             {
-                case 1:
+                case 0:
                 {
-                    await messageServe.sendMessage(deliveryMessage, delivery.DeviceToken);
+                    await messageServe.SendMessage(deliveryMessage, delivery.DeviceToken);
                 }
                     break;
 
-                case 3:
+                case 1:
                 {
-                    await messageServe.sendMessage(deliveryMessage, delivery.DeviceToken);
+                 await   SendNotificationToDeliveries(deliveryMessage, messageServe);
+                }
+                    break;
+
+                case 5:
+                {
+                    await messageServe.SendMessage(deliveryMessage, delivery.DeviceToken);
                 }
                     break;
             }
@@ -618,12 +620,38 @@ public class OrderServices(
         }
     }
 
-    private string userMessage(int status)
+    private async Task SendNotificationToDeliveries(
+        string message,
+        SendMessageServices messageServe)
+    {
+        try
+        {
+            var deliveriesLenght = await unitOfWork.DeliveryRepository.GetDeliveriesPage(20);
+            for (int i = 0; i < deliveriesLenght; i++)
+            {
+                var deliveryList = await unitOfWork.DeliveryRepository.GetDeliveries(i + 1, 20);
+                if (deliveryList is null) continue;
+                foreach (var delivery in deliveryList)
+                {
+                    if (delivery.DeviceToken is not null)
+                        await messageService.SendingMessage(message, delivery.DeviceToken!);
+                }
+            }
+        }
+        catch
+            (Exception e)
+        {
+            Console.WriteLine($"Error from notification service: {e.Message}");
+        }
+    }
+
+    private string UserMessage(int status)
     {
         return status switch
         {
             0 => "Your Order is Rejected",
-            2 => "Your Order Will Start Operation",
+            1 => "Your Order is Submit Successful",
+            2 => "Your Order is Accepted By Delivery Man",
             3 => "Your Order in Away to Your Place",
             4 => "Your Order is Received",
             5 => "Your Order is Delivered",
@@ -631,17 +659,18 @@ public class OrderServices(
         };
     }
 
-    private string deliveryMessage(int status)
+    private string DeliveryMessage(int status)
     {
         return status switch
         {
             0 => "Order is Rejected",
+            1 => "New Order is Submit",
             5 => "Your Order is Received",
             _ => ""
         };
     }
 
-    private string storeMessage(int status, string customMessage = "")
+    private string StoreMessage(int status, string customMessage = "")
     {
         return status switch
         {

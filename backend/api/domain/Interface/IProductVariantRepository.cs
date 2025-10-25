@@ -1,13 +1,12 @@
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.application.Repository;
+namespace api.domain.Interface;
 
-public interface IProductVariantRepository:IRepository<ProductVarient>
+public interface IProductVariantRepository:IRepository<ProductVariant>
 {
-    public Task<ProductVarient?> getProductVarient(Guid productId,Guid id);
-    void addProductVariants(ICollection<ProductVarient> productVariants);
-    void deleteProductVariantByProductId(Guid productId);
-    void deleteProductVariant(List<CreateProductVarientDto> productVariants, Guid productId);
+    public Task<ProductVariant?> GetProductVarient(Guid productId,Guid id);
+    void AddProductVariants(ICollection<ProductVariant> productVariants);
+    void DeleteProductVariantByProductId(Guid productId);
+    void DeleteProductVariant(List<CreateProductVariantDto> productVariants, Guid productId);
 }

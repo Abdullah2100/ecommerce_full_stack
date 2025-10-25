@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using ecommerc_dotnet.Presentation.dto;
 
-namespace ecommerc_dotnet.dto
+namespace api.Presentation.dto
 {
     public class UserInfoDto
     {

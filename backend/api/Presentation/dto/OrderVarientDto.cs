@@ -1,4 +1,4 @@
-namespace ecommerc_dotnet.Presentation.dto.Response;
+namespace api.Presentation.dto;
 
 public class OrderVarientDto
 {

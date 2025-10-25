@@ -1,14 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -22,7 +19,7 @@ public class OrderItemController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getOrdersItemForStore
+    public async Task<IActionResult> GetOrdersItemForStore
     (
         int pageNumber = 1
     )
@@ -31,7 +28,7 @@ public class OrderItemController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -46,7 +43,7 @@ public class OrderItemController(
         }
 
         var result = await orderItemServices
-            .getOrderItmes(
+            .GetOrderItmes(
                 userId.Value,
                 pageNumber,
                 25
@@ -63,11 +60,11 @@ public class OrderItemController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> updateOrderItemStatus
+    public async Task<IActionResult> UpdateOrderItemStatus
         ([FromBody] UpdateOrderItemStatusDto orderItemStatusDto)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -82,7 +79,7 @@ public class OrderItemController(
         }
 
         var result = await orderItemServices
-            .updateOrderItmesStatus(
+            .UpdateOrderItmesStatus(
                 userId.Value,
                 orderItemStatusDto);
 

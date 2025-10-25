@@ -1,11 +1,11 @@
-using ecommerc_dotnet.Presentation.dto;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.shared.signalr;
+namespace api.shared.signalr;
 
 public class StoreHub : Hub
 {
-    public async Task updatingStoreStatus(StoreStatusDto status)
+    public async Task UpdatingStoreStatus(StoreStatusDto status)
     {
         await Clients.All.SendAsync("storeStatus", status);
     }

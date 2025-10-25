@@ -1,28 +1,28 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class BannerRepository(AppDbContext context) : IBannerRepository
 {
 
-    public void  add(Banner entity)
+    public void  Add(Banner entity)
     {
          context
             .Banner
             .AddAsync(entity);
     }
 
-    public void update(Banner entity)
+    public void Update(Banner entity)
     {
          context
              .Banner
              .Update(entity);
     }
 
-    public void  deleteAsync(Guid id)
+    public void  Delete(Guid id)
     {
        var banners =  context
            .Banner
@@ -32,14 +32,14 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
        context.RemoveRange(banners);
     }
 
-    public async Task<Banner?> getBanner(Guid id)
+    public async Task<Banner?> GetBanner(Guid id)
     {
      return   await context 
             .Banner
             .FindAsync(id); 
     }
 
-    public async Task<Banner?> getBanner(Guid id, Guid storeId)
+    public async Task<Banner?> GetBanner(Guid id, Guid storeId)
     {
         return   await context
             .Banner
@@ -47,7 +47,7 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
             .FirstOrDefaultAsync(ba=>ba.Id==id&&ba.StoreId==storeId);
     }
 
-    public async Task<List<Banner>> getBanners(Guid id, int pageNumber, int pageSize)
+    public async Task<List<Banner>> GetBanners(Guid id, int pageNumber, int pageSize)
     {
         return await  context.Banner
             .OrderByDescending(ba => ba.CreatedAt)
@@ -59,7 +59,7 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
  
     }
 
-    public async Task<List<Banner>> getBanners(int pageNumber, int pageSize)
+    public async Task<List<Banner>> GetBanners(int pageNumber, int pageSize)
     {
         return await  context.Banner
             .OrderByDescending(ba => ba.CreatedAt)
@@ -69,7 +69,7 @@ public class BannerRepository(AppDbContext context) : IBannerRepository
             .ToListAsync();
     }
 
-    public async Task<List<Banner>> getBanners(int randomLenght)
+    public async Task<List<Banner>> GetBanners(int randomLenght)
     {
         return await  context.Banner
             .OrderBy(ba=>ba.Id)

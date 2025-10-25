@@ -1,8 +1,8 @@
 using System.Net;
-using ecommerc_dotnet.Presentation.dto;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace ecommerc_dotnet.midleware;
+namespace api.shared.midleware;
 
 
 public static class ExceptionHandlerMiddlewareExtension

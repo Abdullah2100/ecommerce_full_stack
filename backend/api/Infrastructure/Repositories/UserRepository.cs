@@ -1,15 +1,13 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.mapper;
-using ecommerc_dotnet.domain.entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class UserRepository(AppDbContext dbContext) : IUserRepository
 {
-    public async Task<User?> getUser(Guid id)
+    public async Task<User?> GetUser(Guid id)
     {
         User? user = await dbContext
             .Users
@@ -27,7 +25,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         return user;
     }
 
-    public async Task<User?> getUser(string email)
+    public async Task<User?> GetUser(string email)
     {
         User? user = await dbContext
             .Users
@@ -45,7 +43,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         return user;
     }
 
-    public async Task<int> getUserCount()
+    public async Task<int> GetUserCount()
     {
         return await dbContext
             .Users
@@ -53,7 +51,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             .CountAsync();
     }
 
-    public async Task<int> getUserAddressCount(Guid id)
+    public async Task<int> GetUserAddressCount(Guid id)
     {
         return await dbContext
             .Address
@@ -62,7 +60,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             .CountAsync();
     }
 
-    public async Task<User?> getUserByStoreId(Guid id)
+    public async Task<User?> GetUserByStoreId(Guid id)
     {
         User? user = await dbContext
             .Users
@@ -81,7 +79,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         return user;
     }
 
-    public async Task<List<User>> getUsers(int page, int length)
+    public async Task<List<User>> GetUsers(int page, int length)
     {
         List<User>? users = await dbContext
             .Users
@@ -105,7 +103,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         return users; 
     }
 
-    public async Task<User?> getUser(string username, string password)
+    public async Task<User?> GetUser(string username, string password)
     {
         User? user = await dbContext
             .Users
@@ -124,7 +122,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         return user;
     }
 
-    public async Task<bool> isExist(int role)
+    public async Task<bool> IsExist(int role)
     {
         return await dbContext
             .Users
@@ -132,7 +130,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             .AnyAsync(u => u.Role == role);
     }
 
-    public async Task<bool> isExistByPhone(string phone)
+    public async Task<bool> IsExistByPhone(string phone)
     {
         return (await dbContext
                 .Users
@@ -141,7 +139,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
             );
     }
 
-    public async Task<bool> isExistByEmail(string email)
+    public async Task<bool> IsExistByEmail(string email)
     {
         return (await dbContext
                 .Users
@@ -151,24 +149,24 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
     }
 
   
-    public void  add(User entity)
+    public void  Add(User entity)
     {
          dbContext.Users.Add(entity);
     }
 
-    public void  update(User entity)
+    public void  Update(User entity)
     {
          dbContext.Users.Update(entity);
     }
 
-    public void  deleteAsync(Guid id)
+    public void  Delete(Guid id)
     {
         User? user =  dbContext.Users.Find(id);
         if (user == null) throw new ArgumentNullException();
         user.IsBlocked = true;
     }
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await dbContext.Users.FindAsync(id) != null;
     }

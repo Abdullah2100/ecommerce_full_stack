@@ -1,11 +1,11 @@
-using ecommerc_dotnet.Presentation.dto;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.shared.signalr;
+namespace api.shared.signalr;
 
 public class OrderItemHub : Hub
 {
-    public async Task sendingOrderItemStatusChange(OrderItemsStatusEvent orderItemsStatus)
+    public async Task SendingOrderItemStatusChange(OrderItemsStatusEvent orderItemsStatus)
     {
         await Clients.All.SendAsync("orderItemsStatusChange", orderItemsStatus);
     }

@@ -1,15 +1,15 @@
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.shared.signalr;
+using api.util;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.shared.extentions;
-using ecommerc_dotnet.shared.signalr;
-using hotel_api.util;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class BannerSerivces(
     IConfig config,
@@ -19,14 +19,14 @@ public class BannerSerivces(
     IFileServices fileServices)
     : IBannerSerivces
 {
-    public async Task<Result<BannerDto?>> createBanner(
+    public async Task<Result<BannerDto?>> CreateBanner(
         Guid userId,
         CreateBannerDto bannerDto
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
-        var validation = user.isValidateFunc(false, true);
+            .GetUser(userId);
+        var validation = user.IsValidateFunc(false, true);
         if (validation is not null)
         {
             return new Result<BannerDto?>
@@ -39,9 +39,9 @@ public class BannerSerivces(
         }
 
 
-        string? image = await fileServices.saveFile(
+        string? image = await fileServices.SaveFile(
             bannerDto.Image,
-            EnImageType.BANNER);
+            EnImageType.Banner);
 
         if (image is null)
         {
@@ -56,15 +56,15 @@ public class BannerSerivces(
 
         Banner banner = new Banner
         {
-            Id = clsUtil.generateGuid(),
+            Id = ClsUtil.GenerateGuid(),
             EndAt = bannerDto.EndAt,
             CreatedAt = DateTime.Today,
             Image = image,
             StoreId = user.Store.Id,
         };
 
-        unitOfWork.BannerRepository.add(banner);
-        var result = await unitOfWork.saveChanges();
+        unitOfWork.BannerRepository.Add(banner);
+        var result = await unitOfWork.SaveChanges();
         if (result == 0)
         {
             return new Result<BannerDto?>
@@ -80,19 +80,19 @@ public class BannerSerivces(
 
         return new Result<BannerDto?>
         (
-            data: banner.toDto(config.getKey("url_file")),
+            data: banner.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<bool>> deleteBanner(Guid id, Guid userId)
+    public async Task<Result<bool>> DeleteBanner(Guid id, Guid userId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
-        var validation = user.isValidateFunc(false, true);
+        var validation = user.IsValidateFunc(false, true);
         if (validation is not null)
         {
             return new Result<bool>
@@ -106,7 +106,7 @@ public class BannerSerivces(
 
 
         Banner? banner = await unitOfWork.BannerRepository
-            .getBanner(id);
+            .GetBanner(id);
 
 
         if (banner is null)
@@ -131,8 +131,8 @@ public class BannerSerivces(
             );
         }
 
-        unitOfWork.BannerRepository.deleteAsync(id);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.BannerRepository.Delete(id);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -145,7 +145,7 @@ public class BannerSerivces(
             );
         }
 
-        fileServices.deleteFile(banner.Image);
+        fileServices.DeleteFile(banner.Image);
 
         await hubContext.Clients.All.SendAsync("deletedOrder", id);
 
@@ -159,14 +159,14 @@ public class BannerSerivces(
         );
     }
 
-    public async Task<Result<List<BannerDto>>> getBannersAll(
+    public async Task<Result<List<BannerDto>>> GetBannersAll(
         Guid adminId,
         int pageNumber,
         int pageSize)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
-        var validation = user.isValidateFunc();
+            .GetUser(adminId);
+        var validation = user.IsValidateFunc();
         if (validation is not null)
         {
             return new Result<List<BannerDto>>
@@ -180,8 +180,8 @@ public class BannerSerivces(
         
       
         List<BannerDto> banners = (await unitOfWork.BannerRepository
-                .getBanners(pageNumber, pageSize))
-            .Select(ba => ba.toDto(config.getKey("url_file")))
+                .GetBanners(pageNumber, pageSize))
+            .Select(ba => ba.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<BannerDto>>
@@ -193,15 +193,15 @@ public class BannerSerivces(
         );
     }
 
-    public async Task<Result<List<BannerDto>>> getBanners(
+    public async Task<Result<List<BannerDto>>> GetBanners(
         Guid storeId,
         int pageNumber,
         int pageSize
     )
     {
         List<BannerDto> banners = (await unitOfWork.BannerRepository
-                .getBanners(storeId, pageNumber, pageSize))
-            .Select(ba => ba.toDto(config.getKey("url_file")))
+                .GetBanners(storeId, pageNumber, pageSize))
+            .Select(ba => ba.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<BannerDto>>
@@ -213,13 +213,13 @@ public class BannerSerivces(
         );
     }
 
-    public async Task<Result<List<BannerDto>>> getBanners(
+    public async Task<Result<List<BannerDto>>> GetBanners(
         int randomLenght
     )
     {
         List<BannerDto> banners = (await unitOfWork.BannerRepository
-                .getBanners(randomLenght))
-            .Select(ba => ba.toDto(config.getKey("url_file")))
+                .GetBanners(randomLenght))
+            .Select(ba => ba.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<BannerDto>>

@@ -1,34 +1,30 @@
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.mapper;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using System.Collections.Generic;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using hotel_api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class ProductServices(
     IConfig config,
     IUnitOfWork unitOfWork,
     IFileServices fileServices
 )
-    : IProductSerivces
+    : IProductServices
 {
-    public async Task<Result<List<ProductDto>>> getProductsByStoreId(
+    public async Task<Result<List<ProductDto>>> GetProductsByStoreId(
         Guid storeId,
         int pageNum,
         int pageSize
     )
     {
         List<ProductDto> products = (await unitOfWork.ProductRepository
-                .getProducts(storeId, pageNum, pageSize))
-            .Select((de) => de.toDto(config.getKey("url_file")))
+                .GetProducts(storeId, pageNum, pageSize))
+            .Select((de) => de.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -39,15 +35,15 @@ public class ProductServices(
         );
     }
 
-    public async Task<Result<List<ProductDto>>> getProductsByCategoryId(
+    public async Task<Result<List<ProductDto>>> GetProductsByCategoryId(
         Guid categryId,
         int pageNum,
         int pageSize
     )
     {
         List<ProductDto> products = (await unitOfWork.ProductRepository
-                .getProductsByCategory(categryId, pageNum, pageSize))
-            .Select((de) => de.toDto(config.getKey("url_file")))
+                .GetProductsByCategory(categryId, pageNum, pageSize))
+            .Select((de) => de.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -58,7 +54,7 @@ public class ProductServices(
         );
     }
 
-    public async Task<Result<List<ProductDto>>> getProducts(
+    public async Task<Result<List<ProductDto>>> GetProducts(
         Guid storeId,
         Guid subCategoryId,
         int pageNum,
@@ -66,8 +62,8 @@ public class ProductServices(
     )
     {
         List<ProductDto> products = (await unitOfWork.ProductRepository
-                .getProducts(storeId, subCategoryId, pageNum, pageSize))
-            .Select((de) => de.toDto(config.getKey("url_file")))
+                .GetProducts(storeId, subCategoryId, pageNum, pageSize))
+            .Select((de) => de.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -78,14 +74,14 @@ public class ProductServices(
         );
     }
 
-    public async Task<Result<List<ProductDto>>> getProducts(
+    public async Task<Result<List<ProductDto>>> GetProducts(
         int pageNum,
         int pageSize
     )
     {
         List<ProductDto> products = (await unitOfWork.ProductRepository
-                .getProducts(pageNum, pageSize))
-            .Select((de) => de.toDto(config.getKey("url_file")))
+                .GetProducts(pageNum, pageSize))
+            .Select((de) => de.ToDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<ProductDto>>(
@@ -96,14 +92,14 @@ public class ProductServices(
         );
     }
 
-    public async Task<Result<List<AdminProductsDto>>> getProductsForAdmin(
+    public async Task<Result<List<AdminProductsDto>>> GetProductsForAdmin(
         Guid adminId,
         int pageNum,
         int pageSize
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
         if (user is null)
         {
             return new Result<List<AdminProductsDto>>
@@ -128,8 +124,8 @@ public class ProductServices(
 
 
         List<AdminProductsDto> products = (await unitOfWork.ProductRepository
-                .getProducts(pageNum, pageSize))
-            .Select((de) => de.toAdminDto(config.getKey("url_file")))
+                .GetProducts(pageNum, pageSize))
+            .Select((de) => de.ToAdminDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<AdminProductsDto>>(
@@ -143,7 +139,7 @@ public class ProductServices(
     private async Task<Result<ProductDto?>?> isUserNotExistOrNotHasStore(Guid userId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
         if (user is null)
         {
             return new Result<ProductDto?>
@@ -191,7 +187,7 @@ public class ProductServices(
         return null;
     }
 
-    public async Task<Result<ProductDto?>> createProducts(
+    public async Task<Result<ProductDto?>> CreateProducts(
         Guid userId,
         CreateProductDto productDto
     )
@@ -204,12 +200,12 @@ public class ProductServices(
         }
 
 
-        string? savedThumbnail = await fileServices.saveFile(
+        string? savedThumbnail = await fileServices.SaveFile(
             productDto.Thmbnail,
-            EnImageType.PRODUCT);
-        List<string>? savedImage = await fileServices.saveFile(
+            EnImageType.Product);
+        List<string>? savedImage = await fileServices.SaveFile(
             productDto.Images,
-            EnImageType.PRODUCT);
+            EnImageType.Product);
         if (savedImage is null || savedThumbnail is null)
         {
             return new Result<ProductDto?>
@@ -222,11 +218,11 @@ public class ProductServices(
         }
 
 
-        var id = clsUtil.generateGuid();
+        var id = ClsUtil.GenerateGuid();
 
         List<ProductImage> images = savedImage.Select(pi => new ProductImage
             {
-                Id = clsUtil.generateGuid(),
+                Id = ClsUtil.GenerateGuid(),
                 Path = pi,
                 ProductId = id
             })
@@ -244,18 +240,18 @@ public class ProductServices(
         }
 
 
-        List<ProductVarient>? productVarients = null;
+        List<ProductVariant>? productVarients = null;
         if (productDto.ProductVarients is not null)
             productVarients = productDto
                 .ProductVarients!.Select(pv =>
-                    new ProductVarient
+                    new ProductVariant
                     {
-                        Id = clsUtil.generateGuid(),
+                        Id = ClsUtil.GenerateGuid(),
                         Name = pv.Name,
                         Precentage = pv.Precentage,
                         ProductId = id,
-                        VarientId = pv.VarientId,
-                        OrderProductsVarients = null
+                        VariantId = pv.VariantId,
+                        OrderProductsVariants = null
                     })
                 .ToList();
 
@@ -285,11 +281,11 @@ public class ProductServices(
             // ProductVarients = productVarients
         };
 
-        unitOfWork.ProductRepository.add(product);
-        unitOfWork.ProductImageRepository.addProductImage(images);
+        unitOfWork.ProductRepository.Add(product);
+        unitOfWork.ProductImageRepository.AddProductImage(images);
         if (productVarients is not null)
-            unitOfWork.ProductVariantRepository.addProductVariants(productVarients);
-        int result = await unitOfWork.saveChanges();
+            unitOfWork.ProductVariantRepository.AddProductVariants(productVarients);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -302,22 +298,22 @@ public class ProductServices(
             );
         }
 
-        product = await unitOfWork.ProductRepository.getProduct(product.Id);
+        product = await unitOfWork.ProductRepository.GetProduct(product.Id);
 
         return new Result<ProductDto?>
         (
-            data: product?.toDto(config.getKey("url_file")),
+            data: product?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<ProductDto?>> updateProducts(
+    public async Task<Result<ProductDto?>> UpdateProducts(
         Guid userId, UpdateProductDto productDto
     )
     {
-        if (productDto.isEmpty())
+        if (productDto.IsEmpty())
             return new Result<ProductDto?>
             (
                 data: null,
@@ -334,7 +330,7 @@ public class ProductServices(
         }
 
         if (productDto.SubcategoryId is not null &&
-            !(await unitOfWork.SubCategoryRepository.isExist((Guid)productDto!.SubcategoryId!)))
+            !(await unitOfWork.SubCategoryRepository.IsExist((Guid)productDto!.SubcategoryId!)))
         {
             return new Result<ProductDto?>
             (
@@ -345,7 +341,7 @@ public class ProductServices(
             );
         }
 
-        Product? product = await unitOfWork.ProductRepository.getProduct(productDto.Id, productDto.StoreId);
+        Product? product = await unitOfWork.ProductRepository.GetProduct(productDto.Id, productDto.StoreId);
 
         if (product is null)
         {
@@ -363,16 +359,16 @@ public class ProductServices(
         //delete preview images
         if (productDto.Deletedimages is not null)
         {
-              unitOfWork.ProductImageRepository.deleteProductImages(productDto.Deletedimages,
+              unitOfWork.ProductImageRepository.DeleteProductImages(productDto.Deletedimages,
                 productDto.Id);
 
-            fileServices.deleteFile(productDto.Deletedimages);
+            fileServices.DeleteFile(productDto.Deletedimages);
         }
 
         //delete preview productvarients
         if (productDto.DeletedProductVarients is not null)
         {
-             unitOfWork.ProductVariantRepository.deleteProductVariant(productDto.DeletedProductVarients,
+             unitOfWork.ProductVariantRepository.DeleteProductVariant(productDto.DeletedProductVarients,
                 productDto.Id);
             
         }
@@ -381,18 +377,18 @@ public class ProductServices(
         List<ProductImage>? savedImage = null;
 
         if (productDto.Thmbnail is not null)
-            savedThumbnail = await fileServices.saveFile(
+            savedThumbnail = await fileServices.SaveFile(
                 productDto.Thmbnail,
-                EnImageType.PRODUCT);
+                EnImageType.Product);
 
         if (productDto.Images is not null)
-            savedImage = (await fileServices.saveFile(
+            savedImage = (await fileServices.SaveFile(
                     productDto.Images,
-                    EnImageType.PRODUCT)
+                    EnImageType.Product)
                 )
                 ?.Select(im => new ProductImage
                 {
-                    Id = clsUtil.generateGuid(),
+                    Id = ClsUtil.GenerateGuid(),
                     Path = im,
                     ProductId = product.Id
                 }).ToList();
@@ -419,18 +415,18 @@ public class ProductServices(
             );
         }
 
-        List<ProductVarient>? productVarients = null;
+        List<ProductVariant>? productVarients = null;
         if (productDto.ProductVarients is not null)
             productVarients = productDto
                 .ProductVarients!.Select(pv =>
-                    new ProductVarient
+                    new ProductVariant
                     {
-                        Id = clsUtil.generateGuid(),
+                        Id = ClsUtil.GenerateGuid(),
                         Name = pv.Name,
                         Precentage = pv.Precentage,
                         ProductId = product!.Id,
-                        VarientId = pv.VarientId,
-                        OrderProductsVarients = null
+                        VariantId = pv.VariantId,
+                        OrderProductsVariants = null
                     })
                 .ToList();
         if (productVarients is not null && (productVarients.Count + product?.ProductVarients?.Count) > 20)
@@ -456,8 +452,8 @@ public class ProductServices(
         product.ProductVarients = productVarients;
         product.ProductImages = savedImage;
 
-        unitOfWork.ProductRepository.update(product);
-        result = await unitOfWork.saveChanges();
+        unitOfWork.ProductRepository.Update(product);
+        result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -470,23 +466,23 @@ public class ProductServices(
             );
         }
 
-        Product? finalUpdateProduct = await unitOfWork.ProductRepository.getProduct(product.Id);
+        Product? finalUpdateProduct = await unitOfWork.ProductRepository.GetProduct(product.Id);
 
         return new Result<ProductDto?>
         (
-            data: finalUpdateProduct?.toDto(config.getKey("url_file")),
+            data: finalUpdateProduct?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200
         );
     }
 
-    public async Task<Result<bool>> deleteProducts(
+    public async Task<Result<bool>> DeleteProducts(
         Guid userId,
         Guid id
     )
     {
-        var user = await unitOfWork.UserRepository.getUser(userId);
+        var user = await unitOfWork.UserRepository.GetUser(userId);
         var isPassed = await isUserNotExistOrNotHasStore(userId);
 
         if (isPassed is not null)
@@ -501,7 +497,7 @@ public class ProductServices(
         }
 
 
-        Product? product = await unitOfWork.ProductRepository.getProduct(id, user.Store.Id);
+        Product? product = await unitOfWork.ProductRepository.GetProduct(id, user.Store.Id);
 
         if (product is null || id != product.Id)
         {
@@ -514,8 +510,8 @@ public class ProductServices(
             );
         }
 
-        unitOfWork.ProductRepository.delete(product.Id);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.ProductRepository.Delete(product.Id);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -531,7 +527,7 @@ public class ProductServices(
         if (product.ProductImages is not null)
             foreach (var image in product.ProductImages)
             {
-                fileServices.deleteFile(image.Path);
+                fileServices.DeleteFile(image.Path);
             }
 
         return new Result<bool>

@@ -1,9 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.Presentation.dto.Request;
-using ecommerc_dotnet.Presentation.dto.Response;
 
-namespace ecommerc_dotnet.Presentation.dto
+namespace api.Presentation.dto
 {
     public class OrderDto
     {

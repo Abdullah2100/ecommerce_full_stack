@@ -1,28 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.Presentation.dto.Request;
+using api.application;
 
-namespace hotel_api.util
+namespace api.util
 {
     public enum EnImageType
     {
-        PROFILE,
-        PRODUCT,
-        CATEGORY,
-        STORE,
-        BANNER,
-        DELIVERY
+        Profile,
+        Product,
+        Category,
+        Store,
+        Banner,
+        Delivery
     };
 
-    static class clsUtil
+    static class ClsUtil
     {
-        public static Guid generateGuid() => Guid.NewGuid();
+        public static Guid GenerateGuid() => Guid.NewGuid();
 
-        public static DateTime generateDateTime(EnTokenMode mode)
+        public static DateTime GenerateDateTime(EnTokenMode mode)
         {
             switch (mode)
             {
@@ -38,17 +34,16 @@ namespace hotel_api.util
         }
 
 
-        public static string hashingText(string? text)
+        public static string HashingText(string? text)
         {
             if (text is null) return "";
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                // Compute the hash of the given string
-                byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
+            
+            using SHA256 sha256 = SHA256.Create();
+            // Compute the hash of the given string
+            byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
 
-                // Convert the byte array to string format
-                return BitConverter.ToString(hashValue).Replace("-", "");
-            }
+            // Convert the byte array to string format
+            return BitConverter.ToString(hashValue).Replace("-", "");
         }
     }
 }

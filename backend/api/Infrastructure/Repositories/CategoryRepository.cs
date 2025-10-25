@@ -1,32 +1,31 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
  
 
-    public void  add(Category entity)
+    public void  Add(Category entity)
     {
          context.Categories.Add(entity);
     }
 
-    public void  update(Category entity)
+    public void  Update(Category entity)
     {
         context.Categories.Update(entity);
     }
     
 
-    public async Task<Category?> getCategory(Guid id)
+    public async Task<Category?> GetCategory(Guid id)
     {
         return await context.Categories.FindAsync(id);
     }
 
-    public async Task<List<Category>> getCategories(int page, int length)
+    public async Task<List<Category>> GetCategories(int page, int length)
     {
         return await context
             .Categories
@@ -37,7 +36,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             .ToListAsync(); 
     }
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context
             .Categories
@@ -45,7 +44,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             .AnyAsync(e => e.Id == id);
     }
 
-    public async Task<bool> isExist(string name)
+    public async Task<bool> IsExist(string name)
     {
         return await context
             .Categories
@@ -53,7 +52,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             .AnyAsync(e => e.Name == name);
     }
 
-    public async Task<bool> isExist(string name,Guid id)
+    public async Task<bool> IsExist(string name,Guid id)
     {
         return await context
             .Categories
@@ -61,7 +60,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             .AnyAsync(e => e.Name == name && e.Id != id);
     }
     
-    public  void delete(Guid id)
+    public  void Delete(Guid id)
     {
         var category= context.Categories.FirstOrDefault(ca => ca.Id == id);
         if (category is null) throw new ArgumentNullException();

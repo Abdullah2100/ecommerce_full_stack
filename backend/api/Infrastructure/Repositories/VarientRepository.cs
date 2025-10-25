@@ -1,13 +1,13 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class VarientRepository(AppDbContext context) : IVarientRepository
 {
-    public async Task<IEnumerable<Varient>> getAllAsync(int page, int length)
+    public async Task<IEnumerable<Varient>> GetAllAsync(int page, int length)
     {
         return await context
             .Varients
@@ -17,17 +17,17 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .ToListAsync();
     }
 
-    public void  add(Varient entity)
+    public void  Add(Varient entity)
     {
          context.Varients.AddAsync(entity);
     }
 
-    public void update(Varient entity)
+    public void Update(Varient entity)
     {
         context.Varients.Update(entity);
     }
 
-    public void  deleteAsync(Guid id)
+    public void  Delete(Guid id)
     {
       var variants=   context
             .Varients
@@ -36,14 +36,14 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
       context.Varients.RemoveRange(variants);
     }
 
-    public async Task<Varient?> getVarient(Guid id)
+    public async Task<Varient?> GetVarient(Guid id)
     {
         return await context
             .Varients
             .FindAsync(id);
     }
 
-    public async Task<List<Varient>> getVarients(int page, int length)
+    public async Task<List<Varient>> GetVarients(int page, int length)
     {
         return await context
             .Varients
@@ -53,7 +53,7 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .ToListAsync(); 
     }
 
-    public async Task<int> getVarientCount()
+    public async Task<int> GetVarientCount()
     {
         return await context
             .Varients
@@ -61,7 +61,7 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .CountAsync();
     }
 
-    public async Task<bool> isExist(Guid id)
+    public async Task<bool> IsExist(Guid id)
     {
         return await context
             .Varients
@@ -69,7 +69,7 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .AnyAsync(i => i.Id == id);
     }
 
-    public async Task<bool> isExist(string name)
+    public async Task<bool> IsExist(string name)
     {
         return await context
             .Varients
@@ -77,7 +77,7 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .AnyAsync(i => i.Name == name); 
     }
 
-    public async Task<bool> isExist(string name, Guid id)
+    public async Task<bool> IsExist(string name, Guid id)
     {
         return await context
             .Varients

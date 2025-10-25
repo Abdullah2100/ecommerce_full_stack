@@ -1,18 +1,14 @@
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.di.email;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.mapper;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.shared.extentions;
-using hotel_api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class UserService(
     IConfig config,
@@ -22,21 +18,11 @@ public class UserService(
 )
     : IUserServices
 {
-    public async Task<Result<AuthDto?>> signup(SignupDto signupDto)
+    public async Task<Result<AuthDto?>> Signup(SignupDto signupDto)
     {
-        if (signupDto.Role != 0 && signupDto.Role != 1)
-        {
-            return new Result<AuthDto?>
-            (
-                data: null,
-                message: "role must be 1 or 0",
-                isSuccessful: false,
-                statusCode: 400
-            );
-        }
-
-        string? validationResult = clsValidation
-            .validateInput(
+       
+        string? validationResult = ClsValidation
+            .ValidateInput(
                 signupDto.Email,
                 signupDto.Password,
                 signupDto.Phone
@@ -53,7 +39,8 @@ public class UserService(
             );
         }
 
-        if (await unitOfWork.UserRepository.isExistByEmail(signupDto.Email))
+        bool isExistByEmail =await unitOfWork.UserRepository.IsExistByEmail(signupDto.Email);
+        if (isExistByEmail)
         {
             return new Result<AuthDto?>
             (
@@ -64,7 +51,8 @@ public class UserService(
             );
         }
 
-        if (await unitOfWork.UserRepository.isExistByPhone(signupDto.Phone))
+        bool isExistByPhone = (await unitOfWork.UserRepository.IsExistByPhone(signupDto.Phone));
+        if (isExistByPhone)
         {
             return new Result<AuthDto?>
             (
@@ -75,7 +63,7 @@ public class UserService(
             );
         }
 
-        if (signupDto.Role == 0 && await unitOfWork.UserRepository.isExist(0))
+        if (signupDto.Role == 0 && await unitOfWork.UserRepository.IsExist(0))
         {
             return new Result<AuthDto?>
             (
@@ -86,14 +74,14 @@ public class UserService(
             );
         }
 
-        Guid userId = clsUtil.generateGuid();
+        Guid userId = ClsUtil.GenerateGuid();
         User user = new User
         {
             Id = userId,
             Name = signupDto.Name,
             Phone = signupDto.Phone,
-            Password = clsUtil.hashingText(signupDto.Password),
-            Role = signupDto.Role ?? 1,
+            Password = ClsUtil.HashingText(signupDto.Password),
+            Role =(int) (signupDto.Role?? enRole.User),
             deviceToken = signupDto.DeviceToken ?? "",
             Thumbnail = "",
             CreatedAt = DateTime.Now,
@@ -101,8 +89,8 @@ public class UserService(
             UpdatedAt = null,
         };
 
-        unitOfWork.UserRepository.add(user);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.UserRepository.Add(user);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -117,11 +105,11 @@ public class UserService(
 
         string token = "", refreshToken = "";
 
-        token = authenticationService.generateToken(
+        token = authenticationService.GenerateToken(
             id: userId,
             email: signupDto.Email);
 
-        refreshToken = authenticationService.generateToken(
+        refreshToken = authenticationService.GenerateToken(
             id: userId,
             email: signupDto.Email,
             EnTokenMode.RefreshToken);
@@ -134,14 +122,14 @@ public class UserService(
         );
     }
 
-    public async Task<Result<AuthDto?>> login(LoginDto loginDto)
+    public async Task<Result<AuthDto?>> Login(LoginDto loginDto)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(loginDto.Username,
-                clsUtil.hashingText(loginDto.Password)
+            .GetUser(loginDto.Username,
+                ClsUtil.HashingText(loginDto.Password)
             );
 
-        var isValide = user.isValidateFunc(false);
+        var isValide = user.IsValidateFunc(false);
         if (isValide is not null)
         {
             return new Result<AuthDto?>(
@@ -153,9 +141,9 @@ public class UserService(
         }
 
         user.deviceToken = loginDto.DeviceToken;
-        unitOfWork.UserRepository.update(user);
+        unitOfWork.UserRepository.Update(user);
 
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
         if (result == 0)
             new Result<AuthDto?>(
                 isSuccessful: true,
@@ -167,11 +155,11 @@ public class UserService(
 
         string token = "", refreshToken = "";
 
-        token = authenticationService.generateToken(
+        token = authenticationService.GenerateToken(
             id: user.Id,
             email: user.Email);
 
-        refreshToken = authenticationService.generateToken(
+        refreshToken = authenticationService.GenerateToken(
             id: user.Id,
             email: user.Email,
             EnTokenMode.RefreshToken);
@@ -185,12 +173,12 @@ public class UserService(
     }
 
 
-    public async Task<Result<UserInfoDto?>> getMe(Guid id)
+    public async Task<Result<UserInfoDto?>> GetMe(Guid id)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(id);
+            .GetUser(id);
 
-        var validate = user.isValidateFunc(false);
+        var validate = user.IsValidateFunc(false);
         if (validate is not null)
         {
             return new Result<UserInfoDto?>(
@@ -203,21 +191,21 @@ public class UserService(
 
         return new Result<UserInfoDto?>(
             isSuccessful: true,
-            data: user!.toUserInfoDto(config.getKey("url_file")),
+            data: user!.ToUserInfoDto(config.getKey("url_file")),
             message: "",
             statusCode: 200
         );
     }
 
 
-    public async Task<Result<List<UserInfoDto>?>> getUsers(
+    public async Task<Result<List<UserInfoDto>?>> GetUsers(
         int page,
         Guid id)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(id);
+            .GetUser(id);
 
-        var isValide = user.isValidateFunc(false);
+        var isValide = user.IsValidateFunc(false);
         if (isValide is not null)
         {
             return new Result<List<UserInfoDto>?>(
@@ -229,8 +217,8 @@ public class UserService(
         }
 
         List<UserInfoDto> users = (await unitOfWork.UserRepository
-                .getUsers(page, 25))
-            .Select(u => u.toUserInfoDto(config.getKey("url_file")))
+                .GetUsers(page, 25))
+            .Select(u => u.ToUserInfoDto(config.getKey("url_file")))
             .ToList();
 
         return new Result<List<UserInfoDto>?>
@@ -242,12 +230,12 @@ public class UserService(
         );
     }
 
-    public async Task<Result<bool>> blockOrUnBlockUser(Guid id, Guid userId)
+    public async Task<Result<bool>> BlockOrUnBlockUser(Guid id, Guid userId)
     {
         User? admin = await unitOfWork.UserRepository
-            .getUser(id);
+            .GetUser(id);
 
-        var isValideAdmin = admin.isValidateFunc();
+        var isValideAdmin = admin.IsValidateFunc();
         if (isValideAdmin is not null)
         {
             return new Result<bool>(
@@ -258,9 +246,9 @@ public class UserService(
             );
         }
 
-        User? user = await unitOfWork.UserRepository.getUser(userId);
+        User? user = await unitOfWork.UserRepository.GetUser(userId);
 
-        isValideAdmin = user.isValidateFunc();
+        isValideAdmin = user.IsValidateFunc();
 
         //this to handle if user that admin want to block is not admin
         if (isValideAdmin?.StatusCode == 404 || isValideAdmin == null)
@@ -275,8 +263,8 @@ public class UserService(
 
         user!.IsBlocked = !user.IsBlocked;
 
-        unitOfWork.UserRepository.update(user);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.UserRepository.Update(user);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -299,12 +287,12 @@ public class UserService(
     }
 
 
-    public async Task<Result<UserInfoDto?>> updateUser(
+    public async Task<Result<UserInfoDto?>> UpdateUser(
         UpdateUserInfoDto userDto,
         Guid id,
        bool isUpdateWillBeTop=false)
     {
-        if (userDto.isEmpty())
+        if (userDto.IsEmpty())
             return new Result<UserInfoDto?>
             (
                 data: null,
@@ -314,9 +302,9 @@ public class UserService(
             );
 
 
-        User? user = await unitOfWork.UserRepository.getUser(id);
+        User? user = await unitOfWork.UserRepository.GetUser(id);
 
-        var isValide = user.isValidateFunc(false);
+        var isValide = user.IsValidateFunc(false);
 
         if (isValide is not null)
         {
@@ -331,7 +319,7 @@ public class UserService(
 
         if (userDto.Phone is not null && user?.Phone != userDto.Phone)
         {
-            bool isExistPhone = await unitOfWork.UserRepository.isExistByPhone(userDto.Phone ?? "");
+            bool isExistPhone = await unitOfWork.UserRepository.IsExistByPhone(userDto.Phone ?? "");
 
             if (isExistPhone)
             {
@@ -349,11 +337,11 @@ public class UserService(
             string.IsNullOrEmpty(userDto.Password)
             || string.IsNullOrEmpty(userDto.NewPassword)
                 ? null
-                : clsUtil.hashingText(userDto.NewPassword);
+                : ClsUtil.HashingText(userDto.NewPassword);
 
         if (userDto.Password != null && userDto.NewPassword != null)
         {
-            if (user.Password != clsUtil.hashingText(userDto.Password))
+            if (user.Password != ClsUtil.HashingText(userDto.Password))
             {
                 return new Result<UserInfoDto?>
                 (
@@ -368,7 +356,7 @@ public class UserService(
         string? profile = null;
         if (userDto.Thumbnail != null)
         {
-            profile = await fileServices.saveFile(userDto.Thumbnail, EnImageType.PROFILE);
+            profile = await fileServices.SaveFile(userDto.Thumbnail, EnImageType.Profile);
         }
 
         user.Thumbnail = profile ?? user.Thumbnail;
@@ -377,7 +365,7 @@ public class UserService(
         user.UpdatedAt = DateTime.Now;
         user.Password = hashedPassword ?? user.Password;
         
-         unitOfWork.UserRepository.update(user);
+         unitOfWork.UserRepository.Update(user);
 
         if (isUpdateWillBeTop)
         {
@@ -390,7 +378,7 @@ public class UserService(
             );  
         }
         
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -405,21 +393,21 @@ public class UserService(
 
         return new Result<UserInfoDto?>
         (
-            data: user.toUserInfoDto(config.getKey("url_file")),
+            data: user.ToUserInfoDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200
         );
     }
 
-    public async Task<Result<AddressDto?>> addAddressToUser(
+    public async Task<Result<AddressDto?>> AddAddressToUser(
         CreateAddressDto addressDto,
         Guid id
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(id);
-        var isValide = user.isValidateFunc(false);
+            .GetUser(id);
+        var isValide = user.IsValidateFunc(false);
 
         if (isValide is not null)
         {
@@ -431,7 +419,7 @@ public class UserService(
             );
         }
 
-        int addressCount = await unitOfWork.AddressRepository.getAddressCount(id);
+        int addressCount = await unitOfWork.AddressRepository.GetAddressCount(id);
 
         if (addressCount == 20)
         {
@@ -446,7 +434,7 @@ public class UserService(
 
         Address address = new Address
         {
-            Id = clsUtil.generateGuid(),
+            Id = ClsUtil.GenerateGuid(),
             Longitude = addressDto.Longitude,
             Latitude = addressDto.Latitude,
             Title = addressDto.Title,
@@ -454,10 +442,10 @@ public class UserService(
             IsCurrent = true
         };
 
-        unitOfWork.AddressRepository.makeAddressNotCurrentToId(user.Id);
+        unitOfWork.AddressRepository.MakeAddressNotCurrentToId(user.Id);
 
-        unitOfWork.AddressRepository.add(address);
-        var result = await unitOfWork.saveChanges();
+        unitOfWork.AddressRepository.Add(address);
+        var result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -472,7 +460,7 @@ public class UserService(
 
         return new Result<AddressDto?>
         (
-            data: address.toDto(),
+            data: address.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 201
@@ -480,11 +468,11 @@ public class UserService(
     }
 
 
-    public async Task<Result<AddressDto?>> updateUserAddress(
+    public async Task<Result<AddressDto?>> UpdateUserAddress(
         UpdateAddressDto addressDto,
         Guid id)
     {
-        if (addressDto.isEmpty())
+        if (addressDto.IsEmpty())
             return new Result<AddressDto?>
             (
                 data: null,
@@ -494,8 +482,8 @@ public class UserService(
             );
 
         User? user = await unitOfWork.UserRepository
-            .getUser(id);
-        var isValide = user.isValidateFunc(false);
+            .GetUser(id);
+        var isValide = user.IsValidateFunc(false);
 
         if (isValide is not null)
         {
@@ -521,7 +509,7 @@ public class UserService(
         }
 
 
-        Address? address = await unitOfWork.AddressRepository.getAddress(addressDto.Id);
+        Address? address = await unitOfWork.AddressRepository.GetAddress(addressDto.Id);
 
         if (address is null)
         {
@@ -550,8 +538,8 @@ public class UserService(
         address.Title = addressDto.Title ?? address.Title;
         address.Latitude = addressDto.Latitude ?? address.Latitude;
 
-        unitOfWork.AddressRepository.update(address);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.AddressRepository.Update(address);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -566,7 +554,7 @@ public class UserService(
 
         return new Result<AddressDto?>
         (
-            data: address.toDto(),
+            data: address.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 200
@@ -574,11 +562,11 @@ public class UserService(
     }
 
 
-    public async Task<Result<bool>> deleteUserAddress(Guid addressId, Guid id)
+    public async Task<Result<bool>> DeleteUserAddress(Guid addressId, Guid id)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(id);
-        var isValide = user.isValidateFunc(false);
+            .GetUser(id);
+        var isValide = user.IsValidateFunc(false);
 
         if (isValide is not null)
         {
@@ -590,7 +578,7 @@ public class UserService(
             );
         }
 
-        Address? address = await unitOfWork.AddressRepository.getAddress(addressId);
+        Address? address = await unitOfWork.AddressRepository.GetAddress(addressId);
 
         if (address is null)
         {
@@ -625,8 +613,8 @@ public class UserService(
             );
         }
 
-        unitOfWork.AddressRepository.delete(addressId);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.AddressRepository.Delete(addressId);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -649,11 +637,11 @@ public class UserService(
     }
 
 
-    public async Task<Result<bool>> updateUserCurrentAddress(Guid addressId, Guid id)
+    public async Task<Result<bool>> UpdateUserCurrentAddress(Guid addressId, Guid id)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(id);
-        var isValide = user.isValidateFunc(false);
+            .GetUser(id);
+        var isValide = user.IsValidateFunc(false);
 
         if (isValide is not null)
         {
@@ -665,7 +653,7 @@ public class UserService(
             );
         }
 
-        Address? address = await unitOfWork.AddressRepository.getAddress(addressId);
+        Address? address = await unitOfWork.AddressRepository.GetAddress(addressId);
 
         if (address is null)
         {
@@ -700,11 +688,11 @@ public class UserService(
             );
         }
 
-        unitOfWork.AddressRepository.makeAddressNotCurrentToId(user!.Id);
+        unitOfWork.AddressRepository.MakeAddressNotCurrentToId(user!.Id);
 
 
-        unitOfWork.AddressRepository.updateCurrentLocation(addressId, user!.Id);
-        var result = await unitOfWork.saveChanges();
+        unitOfWork.AddressRepository.UpdateCurrentLocation(addressId, user!.Id);
+        var result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -727,12 +715,12 @@ public class UserService(
     }
 
 
-    public async Task<Result<bool>> generateOtp(ForgetPasswordDto forgetPasswordDto)
+    public async Task<Result<bool>> GenerateOtp(ForgetPasswordDto forgetPasswordDto)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(forgetPasswordDto.Email);
+            .GetUser(forgetPasswordDto.Email);
 
-        var isValide = user.isValidateFunc(false);
+        var isValide = user.IsValidateFunc(false);
 
         if (isValide is not null)
         {
@@ -744,29 +732,29 @@ public class UserService(
             );
         }
 
-        string otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-        bool isOtpExist = await unitOfWork.PasswordRepository.isExist(otp, user!.Email);
+        string otp = ClsUtil.GenerateGuid().ToString().Substring(0, 6).Replace("-", "");
+        bool isOtpExist = await unitOfWork.PasswordRepository.IsExist(otp, user!.Email);
         bool isExist = isOtpExist;
 
         if (isExist)
         {
             do
             {
-                otp = clsUtil.generateGuid().ToString().Substring(0, 6).Replace("-", "");
-                isOtpExist = await unitOfWork.PasswordRepository.isExist(otp, user!.Email);
+                otp = ClsUtil.GenerateGuid().ToString().Substring(0, 6).Replace("-", "");
+                isOtpExist = await unitOfWork.PasswordRepository.IsExist(otp, user!.Email);
             } while (isOtpExist);
         }
 
-        unitOfWork.PasswordRepository.add(
+        unitOfWork.PasswordRepository.Add(
             new ReseatePasswordOtp
             {
                 Email = forgetPasswordDto.Email,
                 CreatedAt = DateTime.Now.AddHours(1),
-                Id = clsUtil.generateGuid(),
+                Id = ClsUtil.GenerateGuid(),
                 Otp = otp
             }
         );
-        int result = await unitOfWork.saveChanges();
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -779,8 +767,8 @@ public class UserService(
             );
         }
 
-        var SendMessageSerivce = new SendMessageSerivcies(new EmailServices(config));
-        bool emailSendResult = await SendMessageSerivce.sendMessage(message: otp, otp);
+        var SendMessageSerivce = new SendMessageServices(new EmailServices(config));
+        bool emailSendResult = await SendMessageSerivce.SendMessage(message: otp, otp);
 
         if (!emailSendResult)
         {
@@ -802,10 +790,10 @@ public class UserService(
         );
     }
 
-    public async Task<Result<bool>> otpVerification(CreateVerificationDto otp)
+    public async Task<Result<bool>> OtpVerification(CreateVerificationDto otp)
     {
         bool isExistUser = await unitOfWork.UserRepository
-            .isExistByEmail(otp.Email);
+            .IsExistByEmail(otp.Email);
         if (!isExistUser)
         {
             return new Result<bool>
@@ -817,7 +805,7 @@ public class UserService(
             );
         }
 
-        ReseatePasswordOtp? otpResult = await unitOfWork.PasswordRepository.getOtp(otp.Otp, otp.Email);
+        ReseatePasswordOtp? otpResult = await unitOfWork.PasswordRepository.GetOtp(otp.Otp, otp.Email);
 
 
         if (otpResult is null)
@@ -833,8 +821,8 @@ public class UserService(
 
         otpResult.IsValidated = true;
 
-        unitOfWork.PasswordRepository.update(otpResult);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.PasswordRepository.Update(otpResult);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -857,10 +845,10 @@ public class UserService(
         );
     }
 
-    public async Task<Result<AuthDto?>> reseatePassword(CreateReseatePasswordDto otp)
+    public async Task<Result<AuthDto?>> ReseatePassword(CreateReseatePasswordDto otp)
     {
         bool isExistUser = await unitOfWork.UserRepository
-            .isExistByEmail(otp.Email);
+            .IsExistByEmail(otp.Email);
         if (!isExistUser)
         {
             return new Result<AuthDto?>
@@ -872,7 +860,7 @@ public class UserService(
             );
         }
 
-        ReseatePasswordOtp? otpResult = await unitOfWork.PasswordRepository.getOtp(otp.Otp, otp.Email, true);
+        ReseatePasswordOtp? otpResult = await unitOfWork.PasswordRepository.GetOtp(otp.Otp, otp.Email, true);
 
 
         if (otpResult is null)
@@ -886,9 +874,9 @@ public class UserService(
             );
         }
 
-        User? user = await unitOfWork.UserRepository.getUser(otp.Email);
+        User? user = await unitOfWork.UserRepository.GetUser(otp.Email);
 
-        var isValide = user.isValidateFunc();
+        var isValide = user.IsValidateFunc();
         if (isValide is not null)
         {
             return new Result<AuthDto?>(
@@ -899,10 +887,10 @@ public class UserService(
             );
         }
 
-        user.Password = clsUtil.hashingText(otp.Password);
+        user.Password = ClsUtil.HashingText(otp.Password);
 
-        unitOfWork.UserRepository.update(user);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.UserRepository.Update(user);
+        int result = await unitOfWork.SaveChanges();
         
         if (result == 0)
         {
@@ -918,12 +906,12 @@ public class UserService(
 
         string token = "", refreshToken = "";
 
-        token = authenticationService.generateToken(
+        token = authenticationService.GenerateToken(
             id: user.Id,
             email: user.Email
             );
 
-        refreshToken = authenticationService.generateToken(
+        refreshToken = authenticationService.GenerateToken(
             id: user.Id,
             email: user.Email,
             EnTokenMode.RefreshToken);

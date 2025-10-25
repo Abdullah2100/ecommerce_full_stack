@@ -1,10 +1,8 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application.Interface;
-using Microsoft.AspNetCore.Authorization;
+using api.application.Interface;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [ApiController]
 [Route("api/RefreshToken")]
@@ -16,16 +14,16 @@ public class RefreshTokenController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> createBanner(string token)
+    public async Task<IActionResult> CreateBanner(string token)
     {
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             token.Replace("Bearer ", ""));
-        Claim? issuAt = authenticationService.getPayloadFromToken("exp",
+        Claim? issuAt = authenticationService.GetPayloadFromToken("exp",
             token.Replace("Bearer ", ""));
-        Claim? expire = authenticationService.getPayloadFromToken("lat",
+        Claim? expire = authenticationService.GetPayloadFromToken("lat",
             token.Replace("Bearer ", ""));
        
-        var result = await refreshTokenServices.generateRefreshToken(token, id, issuAt, expire);
+        var result = await refreshTokenServices.GenerateRefreshToken(token, id, issuAt, expire);
 
         return result.IsSuccessful switch
         {

@@ -1,17 +1,16 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
+using api.domain.entity;
 
-namespace ecommerc_dotnet.domain.Interface;
+namespace api.domain.Interface;
 
 public interface IGeneralSettingRepository:IRepository<GeneralSetting>
 {
 
-    Task<GeneralSetting?> getGeneralSetting(Guid id);
-    Task<IEnumerable<GeneralSetting>> getgenralsettings(int page, int length);
+    Task<GeneralSetting?> GetGeneralSetting(Guid id);
+    Task<IEnumerable<GeneralSetting>> Getgenralsettings(int page, int length);
     
-    Task<bool> isExist(Guid id);
-    Task<bool> isExist(string name);
-    Task<bool> isExist(Guid id,string name);
+    Task<bool> IsExist(Guid id);
+    Task<bool> IsExist(string name);
+    Task<bool> IsExist(Guid id,string name);
 
-    void delete(Guid id);
+    void Delete(Guid id);
 }

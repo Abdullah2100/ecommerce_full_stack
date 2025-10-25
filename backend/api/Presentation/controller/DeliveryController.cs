@@ -1,16 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.dto;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -26,9 +21,9 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> login([FromBody] LoginDto data)
+    public async Task<IActionResult> Login([FromBody] LoginDto data)
     {
-        var result = await deliveryServices.login(data);
+        var result = await deliveryServices.Login(data);
 
         return result.IsSuccessful switch
         {
@@ -43,11 +38,11 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> createDelivery
+    public async Task<IActionResult> CreateDelivery
     ([FromForm] CreateDeliveryDto delivery)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -61,7 +56,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await deliveryServices.createDelivery(
+        var result = await deliveryServices.CreateDelivery(
             userId.Value,
             delivery);
 
@@ -77,10 +72,10 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getDelivery()
+    public async Task<IActionResult> GetDelivery()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -93,7 +88,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await deliveryServices.getDelivery(userId.Value);
+        var result = await deliveryServices.GetDelivery(userId.Value);
 
         return result.IsSuccessful switch
         {
@@ -107,10 +102,10 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> updateDeliveryInfo([FromForm] UpdateDeliveryDto delivery)
+    public async Task<IActionResult> UpdateDeliveryInfo([FromForm] UpdateDeliveryDto delivery)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -123,7 +118,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await deliveryServices.updateDelivery(delivery, deliveryId.Value);
+        var result = await deliveryServices.UpdateDelivery(delivery, deliveryId.Value);
 
         return result.IsSuccessful switch
         {
@@ -137,10 +132,10 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getDeivery(int pageNumber)
+    public async Task<IActionResult> GetDeivery(int pageNumber)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? belongToId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -153,7 +148,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await deliveryServices.getDeliveries(belongToId.Value, pageNumber, 25);
+        var result = await deliveryServices.GetDeliveries(belongToId.Value, pageNumber, 25);
 
         return result.IsSuccessful switch
         {
@@ -167,10 +162,10 @@ public class DeliveryController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> updateDeliveryStatus(bool status)
+    public async Task<IActionResult> UpdateDeliveryStatus(bool status)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? userId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -184,7 +179,7 @@ public class DeliveryController(
         }
 
 
-        var result = await deliveryServices.updateDeliveryStatus(userId.Value, status);
+        var result = await deliveryServices.UpdateDeliveryStatus(userId.Value, status);
 
         return result.IsSuccessful switch
         {
@@ -208,7 +203,7 @@ public class DeliveryController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? deliveryId = null;
@@ -223,7 +218,7 @@ public class DeliveryController(
         }
 
         var result = await orderServices
-            .getOrdersNotBelongToDeliveries(deliveryId.Value, pageNumber, 25);
+            .GetOrdersNotBelongToDeliveries(deliveryId.Value, pageNumber, 25);
 
         return result.IsSuccessful switch
         {
@@ -247,7 +242,7 @@ public class DeliveryController(
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
 
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? deliveryId = null;
@@ -261,7 +256,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await orderServices.getOrdersbyDeliveryId(
+        var result = await orderServices.GetOrdersbyDeliveryId(
             deliveryId.Value, pageNumber, 25);
 
         return result.IsSuccessful switch
@@ -280,7 +275,7 @@ public class DeliveryController(
     public async Task<IActionResult> updateOrderDeliveryId(Guid orderId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -293,7 +288,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await orderServices.submitOrderToDelivery(orderId, deliveryId.Value);
+        var result = await orderServices.SubmitOrderToDelivery(orderId, deliveryId.Value);
 
         return result.IsSuccessful switch
         {
@@ -311,7 +306,7 @@ public class DeliveryController(
     public async Task<IActionResult> cencleOrderBelongToDelivery(Guid orderId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? deliveryId = null;
         if (Guid.TryParse(id?.Value, out Guid outId))
@@ -324,7 +319,7 @@ public class DeliveryController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await orderServices.cancelOrderFromDelivery(orderId, deliveryId.Value);
+        var result = await orderServices.CancelOrderFromDelivery(orderId, deliveryId.Value);
 
         return result.IsSuccessful switch
         {

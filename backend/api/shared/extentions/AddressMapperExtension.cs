@@ -1,11 +1,11 @@
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.Presentation.dto;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.shared.extentions;
+namespace api.shared.extentions;
 
-public static class AddressMapperExtention
+public static class AddressMapperExtension
 {
-    public static AddressDto toDto(this Address address)
+    public static AddressDto ToDto(this Address address)
     {
         return new AddressDto
         {
@@ -17,7 +17,7 @@ public static class AddressMapperExtention
         };
     }
     
-    public static DeliveryAddressDto toDeliveryDto(this Address address)
+    public static DeliveryAddressDto ToDeliveryDto(this Address address)
     {
         return new DeliveryAddressDto 
         {
@@ -26,7 +26,7 @@ public static class AddressMapperExtention
         };
     }
 
-    public static bool isEmpty(this UpdateAddressDto dto)
+    public static bool IsEmpty(this UpdateAddressDto dto)
     {
         return string.IsNullOrWhiteSpace(dto.Title)
                && dto.Longitude == null

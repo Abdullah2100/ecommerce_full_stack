@@ -1,18 +1,19 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.shared.extentions;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using ecommerc_dotnet.application;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class RefreshTokenServices(
     IUnitOfWork unitOfWork,
     IAuthenticationService authenticationService) : IRefreshTokenServices
 {
-    public bool isRefreshToken(string issueAt, string expireAt)
+    public bool IsRefreshToken(string issueAt, string expireAt)
     {
         long lIssueDate = long.Parse(issueAt);
         long lExpireDate = long.Parse(expireAt);
@@ -24,7 +25,7 @@ public class RefreshTokenServices(
         return result.Days >= 29;
     }
 
-    public async Task<Result<AuthDto?>> generateRefreshToken(
+    public async Task<Result<AuthDto?>> GenerateRefreshToken(
         string token,
         Claim? id,
         Claim? issuAt,
@@ -43,11 +44,11 @@ public class RefreshTokenServices(
 
         var idHolder = Guid.Parse(id.Value);
         User? user = await unitOfWork.UserRepository
-            .getUser(idHolder);
+            .GetUser(idHolder);
         
-        Delivery? delivery = await unitOfWork.DeliveryRepository.getDelivery(idHolder);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.GetDelivery(idHolder);
 
-        var validation = user.isValidateFunc(false);
+        var validation = user.IsValidateFunc(false);
         if (validation is not null && delivery is null)
         {
             return new Result<AuthDto?>
@@ -59,7 +60,7 @@ public class RefreshTokenServices(
             );
         }
 
-        if (!isRefreshToken(issuAt.Value, expireAt.Value))
+        if (!IsRefreshToken(issuAt.Value, expireAt.Value))
         {
             return new Result<AuthDto?>
             (
@@ -70,11 +71,11 @@ public class RefreshTokenServices(
             );
         }
 
-        var tokenHolder = authenticationService.generateToken(
+        var tokenHolder = authenticationService.GenerateToken(
             id: idHolder,
             email: (user?.Email??delivery?.User?.Email) ?? string.Empty);
 
-        var refreshTokenHolder = authenticationService.generateToken(
+        var refreshTokenHolder = authenticationService.GenerateToken(
             id: idHolder,
             email: user?.Email?? (delivery?.User?.Email) ?? string.Empty,
             EnTokenMode.RefreshToken);

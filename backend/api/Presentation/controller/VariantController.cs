@@ -1,18 +1,17 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
 [Route("api/Varient")]
-public class VarientController(
-    IVarientServices variantServices,
+public class VariantController(
+    IVariantServices variantServices,
     IAuthenticationService authenticationService
 
     ) : ControllerBase
@@ -25,10 +24,10 @@ public class VarientController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> createVarient([FromBody] CreateVarientDto varient)
+    public async Task<IActionResult> CreateVarient([FromBody] CreateVariantDto variant)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -42,7 +41,7 @@ public class VarientController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await variantServices.createVarient(varient, adminId.Value);
+        var result = await variantServices.CreateVariant(variant, adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -56,10 +55,10 @@ public class VarientController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> updateVarient([FromBody] UpdateVarientDto varient)
+    public async Task<IActionResult> UpdateVarient([FromBody] UpdateVariantDto variant)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -73,7 +72,7 @@ public class VarientController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await variantServices.updateVarient(varient, adminId.Value);
+        var result = await variantServices.UpdateVariant(variant, adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -87,10 +86,10 @@ public class VarientController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> deleteVarient(Guid varientId)
+    public async Task<IActionResult> DeleteVarient(Guid varientId)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -105,7 +104,7 @@ public class VarientController(
         }
 
 
-        var result = await variantServices.deleteVarient(varientId, adminId.Value);
+        var result = await variantServices.DeleteVariant(varientId, adminId.Value);
 
         return result.IsSuccessful switch
         {
@@ -119,11 +118,11 @@ public class VarientController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> getVarients(int pageNumber = 1)
+    public async Task<IActionResult> GetVarients(int pageNumber = 1)
     {
         if (pageNumber < 1)
             return BadRequest("رقم الصفحة لا بد ان تكون اكبر من الصفر");
-        var result = await variantServices.getVarients(pageNumber, 25);
+        var result = await variantServices.GetVariants(pageNumber, 25);
 
         return result.IsSuccessful switch
         {

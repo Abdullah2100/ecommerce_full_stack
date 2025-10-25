@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ecommerc_dotnet.Presentation.dto
+namespace api.Presentation.dto
 {
     public class CategoryDto
     {

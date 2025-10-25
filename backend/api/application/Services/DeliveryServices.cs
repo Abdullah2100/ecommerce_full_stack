@@ -1,22 +1,19 @@
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.mapper;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
+using ecommerc_dotnet.application;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.shared.extentions;
-using hotel_api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
-public enum enBelongToType
+public enum EnBelongToType
 {
-    ADMIN,
-    STORE
+    Admin,
+    Store
 };
 
 public class DeliveryServices(
@@ -29,7 +26,7 @@ public class DeliveryServices(
 )
     : IDeliveryServices
 {
-    public async Task<Result<AuthDto?>> login(LoginDto loginDto)
+    public async Task<Result<AuthDto?>> Login(LoginDto loginDto)
     {
         if (string.IsNullOrWhiteSpace(loginDto.DeviceToken))
             return new Result<AuthDto?>
@@ -41,12 +38,12 @@ public class DeliveryServices(
             );
 
         User? user = await unitOfWork.UserRepository
-            .getUser(
+            .GetUser(
                 loginDto.Username,
-                clsUtil.hashingText(loginDto.Password));
+                ClsUtil.HashingText(loginDto.Password));
 
 
-        var isValide = user.isValidateFunc(isAdmin: false);
+        var isValide = user.IsValidateFunc(isAdmin: false);
 
         if (isValide is not null)
         {
@@ -59,7 +56,7 @@ public class DeliveryServices(
             );
         }
 
-        Delivery? delivery = await unitOfWork.DeliveryRepository.getDeliveryByUserId(user.Id);
+        Delivery? delivery = await unitOfWork.DeliveryRepository.GetDeliveryByUserId(user.Id);
 
         if (delivery is null)
         {
@@ -83,8 +80,8 @@ public class DeliveryServices(
             );
         delivery.DeviceToken = loginDto.DeviceToken;
 
-        unitOfWork.DeliveryRepository.update(delivery);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.DeliveryRepository.Update(delivery);
+        int result = await unitOfWork.SaveChanges();
         if (result == 0)
         {
             return new Result<AuthDto?>
@@ -98,11 +95,11 @@ public class DeliveryServices(
 
 
         string? token = null, refreshToken = null;
-        token = authenticationService.generateToken(
+        token = authenticationService.GenerateToken(
             id: delivery.Id,
             email: delivery.User.Email);
 
-        refreshToken = authenticationService.generateToken(
+        refreshToken = authenticationService.GenerateToken(
             id: delivery.Id,
             email: delivery.User.Email,
             EnTokenMode.RefreshToken);
@@ -115,17 +112,17 @@ public class DeliveryServices(
         );
     }
 
-    public async Task<Result<DeliveryDto?>> createDelivery(
+    public async Task<Result<DeliveryDto?>> CreateDelivery(
         Guid userId,
         CreateDeliveryDto deliveryDto
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(userId);
+            .GetUser(userId);
 
 
-        var admin = user.isValidateFunc(isAdmin: true);
-        var store = user.isValidateFunc(isAdmin: false, isStore: true);
+        var admin = user.IsValidateFunc(isAdmin: true);
+        var store = user.IsValidateFunc(isAdmin: false, isStore: true);
 
 
         if (admin is not null && user.Role == 0 || store != null)
@@ -140,7 +137,7 @@ public class DeliveryServices(
         }
 
 
-        if (await unitOfWork.DeliveryRepository.isExistByUserId(deliveryDto.UserId))
+        if (await unitOfWork.DeliveryRepository.IsExistByUserId(deliveryDto.UserId))
         {
             return new Result<DeliveryDto?>
             (
@@ -156,14 +153,14 @@ public class DeliveryServices(
         if (deliveryDto.Thumbnail is not null)
         {
             deliveryThumnail = await fileServices
-                .saveFile(
+                .SaveFile(
                     deliveryDto.Thumbnail,
-                    EnImageType.DELIVERY);
+                    EnImageType.Delivery);
         }
 
 
-        var addressId = clsUtil.generateGuid();
-        var id = clsUtil.generateGuid();
+        var addressId = ClsUtil.GenerateGuid();
+        var id = ClsUtil.GenerateGuid();
         Address address = new Address
         {
             Id = addressId,
@@ -182,8 +179,8 @@ public class DeliveryServices(
             BelongTo = user?.Store?.Id ?? userId
         };
 
-        unitOfWork.DeliveryRepository.add(delivery);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.DeliveryRepository.Add(delivery);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -196,21 +193,21 @@ public class DeliveryServices(
             );
         }
 
-        delivery = await unitOfWork.DeliveryRepository.getDelivery(id);
+        delivery = await unitOfWork.DeliveryRepository.GetDelivery(id);
 
         return new Result<DeliveryDto?>
         (
-            data: delivery?.toDto(config.getKey("url_file")),
+            data: delivery?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<DeliveryDto?>> updateDeliveryStatus(Guid id, bool status)
+    public async Task<Result<DeliveryDto?>> UpdateDeliveryStatus(Guid id, bool status)
     {
         Delivery? delivery = await unitOfWork.DeliveryRepository
-            .getDelivery(id);
+            .GetDelivery(id);
         if (delivery is null)
         {
             return new Result<DeliveryDto?>
@@ -235,8 +232,8 @@ public class DeliveryServices(
 
         delivery.IsBlocked = status;
 
-        unitOfWork.DeliveryRepository.update(delivery);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.DeliveryRepository.Update(delivery);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -251,19 +248,19 @@ public class DeliveryServices(
 
         return new Result<DeliveryDto?>
         (
-            data: delivery?.toDto(config.getKey("url_file")),
+            data: delivery?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<DeliveryDto?>> getDelivery(Guid id)
+    public async Task<Result<DeliveryDto?>> GetDelivery(Guid id)
     {
         Delivery? delivery = await unitOfWork.DeliveryRepository
-            .getDelivery(id);
+            .GetDelivery(id);
 
-        var isValid = delivery.isValidated(); 
+        var isValid = delivery.IsValidated(); 
 
         if (isValid is not null)
         {
@@ -276,8 +273,8 @@ public class DeliveryServices(
             );
         }
 
-        var deliveryDto = delivery.toDto(config.getKey("url_file"));
-        deliveryDto.Analys = await unitOfWork.DeliveryRepository.getDeliveryAnalys(delivery.Id);
+        var deliveryDto = delivery.ToDto(config.getKey("url_file"));
+        deliveryDto.Analys = await unitOfWork.DeliveryRepository.GetDeliveryAnalys(delivery.Id);
 
         return new Result<DeliveryDto?>
         (
@@ -289,27 +286,27 @@ public class DeliveryServices(
     }
 
 
-    public async Task<Result<List<DeliveryDto>>> getDeliveries(
+    public async Task<Result<List<DeliveryDto>>> GetDeliveries(
         Guid belongToId,
         int pageNumber,
         int pageSize
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(belongToId);
+            .GetUser(belongToId);
 
-        enBelongToType belongType = enBelongToType.ADMIN;
+        EnBelongToType belongType = EnBelongToType.Admin;
 
         switch (user.Role == 0)
         {
             case true:
             {
-                belongType = enBelongToType.ADMIN;
+                belongType = EnBelongToType.Admin;
             }
                 break;
             default:
             {
-                belongType = enBelongToType.STORE;
+                belongType = EnBelongToType.Store;
             }
                 break;
         }
@@ -317,9 +314,9 @@ public class DeliveryServices(
         Guid id = Guid.NewGuid();
         switch (belongType)
         {
-            case enBelongToType.STORE:
+            case EnBelongToType.Store:
             {
-                var isValidated = user.isValidateFunc(isStore: true);
+                var isValidated = user.IsValidateFunc(isStore: true);
                 if (isValidated is not null)
                 {
                     return new Result<List<DeliveryDto>>
@@ -334,9 +331,9 @@ public class DeliveryServices(
                 id = user.Store.Id;
             }
                 break;
-            case enBelongToType.ADMIN:
+            case EnBelongToType.Admin:
             {
-                var isValidated = user.isValidateFunc();
+                var isValidated = user.IsValidateFunc();
                 if (isValidated is not null)
                 {
                     return new Result<List<DeliveryDto>>
@@ -355,14 +352,14 @@ public class DeliveryServices(
 
 
         List<DeliveryDto>? deliveryDto = (await unitOfWork.DeliveryRepository
-                .getDeliveriesByBelongTo(id, pageNumber, pageSize))
-            ?.Select((de) => de.toDto(config.getKey("url_file")))
+                .GetDeliveriesByBelongTo(id, pageNumber, pageSize))
+            ?.Select((de) => de.ToDto(config.getKey("url_file")))
             ?.ToList();
 
         if (deliveryDto is not null)
             foreach (var delivery in deliveryDto)
             {
-                delivery.Analys = await unitOfWork.DeliveryRepository.getDeliveryAnalys(delivery.Id);
+                delivery.Analys = await unitOfWork.DeliveryRepository.GetDeliveryAnalys(delivery.Id);
             }
 
         return new Result<List<DeliveryDto>>
@@ -374,12 +371,12 @@ public class DeliveryServices(
         );
     }
 
-    public async Task<Result<DeliveryDto>> updateDelivery(UpdateDeliveryDto deliveryDto, Guid id)
+    public async Task<Result<DeliveryDto>> UpdateDelivery(UpdateDeliveryDto deliveryDto, Guid id)
     {
         Delivery? delivery = await unitOfWork.DeliveryRepository
-            .getDelivery(id);
+            .GetDelivery(id);
 
-        var isValidated = delivery.isValidated();
+        var isValidated = delivery.IsValidated();
 
         if (isValidated is not null)
         {
@@ -398,7 +395,7 @@ public class DeliveryServices(
         {
             var addressHolder = delivery.Address ?? new Address()
             {
-                Id = clsUtil.generateGuid(),
+                Id = ClsUtil.GenerateGuid(),
                 CreatedAt = DateTime.Now,
                 OwnerId = delivery.Id,
                 IsCurrent = true,
@@ -408,9 +405,9 @@ public class DeliveryServices(
             addressHolder.Latitude = deliveryDto.Latitude;
             addressHolder.IsCurrent = true;
             if (delivery.Address is null)
-                unitOfWork.AddressRepository.add(addressHolder);
+                unitOfWork.AddressRepository.Add(addressHolder);
             else
-                unitOfWork.AddressRepository.update(addressHolder);
+                unitOfWork.AddressRepository.Update(addressHolder);
         }
 
 
@@ -429,21 +426,21 @@ public class DeliveryServices(
         {
             var previuse = delivery.Thumbnail;
             if (previuse is not null)
-                fileServices.deleteFile(filePath: previuse);
+                fileServices.DeleteFile(filePath: previuse);
 
             string? newThumbNail = null;
-            newThumbNail = await fileServices.saveFile(file: deliveryDto.Thumbnail, type: EnImageType.DELIVERY);
+            newThumbNail = await fileServices.SaveFile(file: deliveryDto.Thumbnail, type: EnImageType.Delivery);
             delivery.Thumbnail = newThumbNail;
 
-            unitOfWork.DeliveryRepository.update(delivery);
+            unitOfWork.DeliveryRepository.Update(delivery);
         }
 
-        if (userUpdateData.isUpdateAnyFeild() is true)
+        if (userUpdateData.IsUpdateAnyFeild() is true)
         {
-            await userServices.updateUser(userUpdateData, delivery!.UserId,true);
+            await userServices.UpdateUser(userUpdateData, delivery!.UserId,true);
         }
         
-        var result = await unitOfWork.saveChanges();
+        var result = await unitOfWork.SaveChanges();
 
 
         if (result < 1)
@@ -458,7 +455,7 @@ public class DeliveryServices(
         }
 
 
-        delivery = await unitOfWork.DeliveryRepository.getDelivery(delivery.Id);
+        delivery = await unitOfWork.DeliveryRepository.GetDelivery(delivery.Id);
 
         if (delivery is null)
         {
@@ -473,7 +470,7 @@ public class DeliveryServices(
 
         return new Result<DeliveryDto>
         (
-            data: delivery?.toDto(config.getKey("url_file")),
+            data: delivery?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200

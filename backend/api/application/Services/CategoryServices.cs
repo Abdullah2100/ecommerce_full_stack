@@ -1,17 +1,13 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.mapper;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.shared.extentions;
-using hotel_api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
 public class CategoryServices(
     IWebHostEnvironment host,
@@ -20,12 +16,12 @@ public class CategoryServices(
     IFileServices fileServicee)
     : ICategoryServices
 {
-    public async Task<Result<CategoryDto?>> createCategory(CreateCategoryDto categoryDto, Guid adminId)
+    public async Task<Result<CategoryDto?>> CreateCategory(CreateCategoryDto categoryDto, Guid adminId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var isValid = user.isValidateFunc(true);
+        var isValid = user.IsValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<CategoryDto?>
@@ -37,7 +33,7 @@ public class CategoryServices(
             );
         }
 
-        if (await unitOfWork.CategoryRepository.isExist(categoryDto.Name))
+        if (await unitOfWork.CategoryRepository.IsExist(categoryDto.Name))
         {
             return new Result<CategoryDto?>
             (
@@ -49,8 +45,8 @@ public class CategoryServices(
         }
 
         string? imagePath = await fileServicee
-            .saveFile(categoryDto.Image,
-                EnImageType.CATEGORY);
+            .SaveFile(categoryDto.Image,
+                EnImageType.Category);
 
         if (imagePath is null)
             return new Result<CategoryDto?>
@@ -60,7 +56,7 @@ public class CategoryServices(
                 isSuccessful: false,
                 statusCode: 400
             );
-        Guid categoryId = clsUtil.generateGuid();
+        Guid categoryId = ClsUtil.GenerateGuid();
 
         Category category = new Category
         {
@@ -70,8 +66,8 @@ public class CategoryServices(
             IsBlocked = false,
             OwnerId = user!.Id
         };
-        unitOfWork.CategoryRepository.add(category);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.CategoryRepository.Add(category);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -86,16 +82,16 @@ public class CategoryServices(
 
         return new Result<CategoryDto?>
         (
-            data: category?.toDto(config.getKey("url_file")),
+            data: category?.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<CategoryDto?>> updateCategory(UpdateCategoryDto categoryDto, Guid adminId)
+    public async Task<Result<CategoryDto?>> UpdateCategory(UpdateCategoryDto categoryDto, Guid adminId)
     {
-        if (categoryDto.isEmpty())
+        if (categoryDto.IsEmpty())
             return new Result<CategoryDto?>
             (
                 data: null,
@@ -105,9 +101,9 @@ public class CategoryServices(
             );
 
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var isValid = user.isValidateFunc(true);
+        var isValid = user.IsValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<CategoryDto?>
@@ -120,7 +116,7 @@ public class CategoryServices(
         }
 
         if (categoryDto.Name is not null)
-            if (await unitOfWork.CategoryRepository.isExist(categoryDto.Name, categoryDto.Id))
+            if (await unitOfWork.CategoryRepository.IsExist(categoryDto.Name, categoryDto.Id))
             {
                 return new Result<CategoryDto?>
                 (
@@ -131,7 +127,7 @@ public class CategoryServices(
                 );
             }
 
-        Category? category = await unitOfWork.CategoryRepository.getCategory(categoryDto.Id);
+        Category? category = await unitOfWork.CategoryRepository.GetCategory(categoryDto.Id);
 
 
         if (category is null)
@@ -150,18 +146,18 @@ public class CategoryServices(
         if (categoryDto?.Image is not null)
         {
             if (categoryDto?.Image is not null)
-                fileServicee.deleteFile(category.Image);
+                fileServicee.DeleteFile(category.Image);
             image = await fileServicee 
-                .saveFile(categoryDto!.Image!,
-                    EnImageType.CATEGORY);
+                .SaveFile(categoryDto!.Image!,
+                    EnImageType.Category);
         }
 
         category.Name = categoryDto?.Name ?? category.Name;
         category.Image = image ?? category.Image;
         category.UpdatedAt = DateTime.Now;
 
-        unitOfWork.CategoryRepository.update(category);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.CategoryRepository.Update(category);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -176,18 +172,18 @@ public class CategoryServices(
 
         return new Result<CategoryDto?>
         (
-            data: category.toDto(config.getKey("url_file")),
+            data: category.ToDto(config.getKey("url_file")),
             message: "",
             isSuccessful: true,
             statusCode: 200
         );
     }
 
-    public async Task<Result<bool>> deleteCategory(Guid categoryId, Guid adminId)
+    public async Task<Result<bool>> DeleteCategory(Guid categoryId, Guid adminId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
-        var isValid = user.isValidateFunc(true);
+            .GetUser(adminId);
+        var isValid = user.IsValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<bool>
@@ -199,7 +195,7 @@ public class CategoryServices(
             );
         }
 
-        if (!(await unitOfWork.CategoryRepository.isExist(categoryId)))
+        if (!(await unitOfWork.CategoryRepository.IsExist(categoryId)))
         {
             return new Result<bool>
             (
@@ -210,8 +206,8 @@ public class CategoryServices(
             );
         }
 
-        unitOfWork.CategoryRepository.delete(categoryId);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.CategoryRepository.Delete(categoryId);
+        int result = await unitOfWork.SaveChanges();
         
         if (result == 0)
         {
@@ -233,10 +229,10 @@ public class CategoryServices(
         );
     }
 
-    public async Task<Result<List<CategoryDto>>> getCategories(int pageNumber, int pageSize)
+    public async Task<Result<List<CategoryDto>>> GetCategories(int pageNumber, int pageSize)
     {
-        List<CategoryDto> categories = (await unitOfWork.CategoryRepository.getCategories(pageNumber, pageSize))
-            .Select(ca => ca.toDto(config.getKey("url_file")))
+        List<CategoryDto> categories = (await unitOfWork.CategoryRepository.GetCategories(pageNumber, pageSize))
+            .Select(ca => ca.ToDto(config.getKey("url_file")))
             .ToList();
         return new Result<List<CategoryDto>>
         (

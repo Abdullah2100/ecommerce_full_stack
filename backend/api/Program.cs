@@ -1,17 +1,15 @@
 using System.Text;
+using api.application;
+using api.application.Interface;
+using api.application.Services;
+using api.application.UnitOfWork;
+using api.domain.Interface;
+using api.Infrastructure;
+using api.Infrastructure.Repositories;
+using api.shared.midleware;
+using api.shared.signalr;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.application.Services;
-using ecommerc_dotnet.application.UnitOfWork;
-using ecommerc_dotnet.di.email;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.infrastructure.repositories;
-using ecommerc_dotnet.midleware;
 using ecommerc_dotnet.midleware.ConfigImplment;
-using ecommerc_dotnet.shared.signalr;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,8 +24,8 @@ builder.Services.AddOptions();
 
 
 builder.Services.AddSingleton<IConfig, ConfigurationImplement>();
-builder.Services.AddTransient<IMessageSerivice, EmailServices>();
-builder.Services.AddTransient<IMessageSerivice, NotificationServices>();
+builder.Services.AddTransient<IMessageService, EmailServices>();
+builder.Services.AddTransient<IMessageService, NotificationServices>();
 
 builder.Services.AddTransient<IAuthenticationService, AuthenticationServices>();
 
@@ -35,7 +33,7 @@ builder.Services.AddTransient<IAuthenticationService, AuthenticationServices>();
 
 //respoitory 
 builder.Services.AddTransient<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IReseatePasswordRepository, ReseatePasswordRepository>();
+builder.Services.AddTransient<IReseatePasswordRepository, ReseatPasswordRepository>();
 builder.Services.AddTransient<IAddressRepository, AddressRepository>();
 builder.Services.AddTransient<IStoreRepository, StoreRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
@@ -64,11 +62,11 @@ builder.Services.AddTransient<IUserServices, UserService>();
 builder.Services.AddTransient<IStoreServices, StoreServices>();
 builder.Services.AddTransient<ICategoryServices, CategoryServices>();
 builder.Services.AddTransient<ISubCategoryServices, SubCategoryServices>();
-builder.Services.AddTransient<IVarientServices, VarientServices>();
+builder.Services.AddTransient<IVariantServices, VariantServices>();
 builder.Services.AddTransient<IBannerSerivces, BannerSerivces>();
 builder.Services.AddTransient<IGeneralSettingServices, GeneralSettingServices>();
 builder.Services.AddTransient<IDeliveryServices, DeliveryServices>();
-builder.Services.AddTransient<IProductSerivces, ProductServices>();
+builder.Services.AddTransient<IProductServices, ProductServices>();
 builder.Services.AddTransient<IOrderServices, OrderServices>();
 builder.Services.AddTransient<IOrderItemServices, OrderItemServices>();
 builder.Services.AddTransient<IRefreshTokenServices, RefreshTokenServices>();

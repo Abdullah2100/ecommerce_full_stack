@@ -1,20 +1,19 @@
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
+using api.domain.entity;
 
-namespace ecommerc_dotnet.application.Repository;
+namespace api.domain.Interface;
 
 public interface IStoreRepository:IRepository<Store>
 {
-    Task<Store?> getStore(Guid id);
-    Task<Store?> getStoreByUserId(Guid id);
-    Task<List<Store>> getStores(int page,int length);
+    Task<Store?> GetStore(Guid id);
+    Task<Store?> GetStoreByUserId(Guid id);
+    Task<List<Store>> GetStores(int page,int length);
     
-    Task<int> getStoresCount();
+    Task<int> GetStoresCount();
     
-    Task<bool> isExist(string name);
-    Task<bool> isExist(string name,Guid id);
-    Task<bool> isExist(Guid id);
-    Task<bool> isExist(Guid id,Guid subCategoryId);
+    Task<bool> IsExist(string name);
+    Task<bool> IsExist(string name,Guid id);
+    Task<bool> IsExist(Guid id);
+    Task<bool> IsExist(Guid id,Guid subCategoryId);
 
-    void delete(Guid id);
+    void Delete(Guid id);
 }

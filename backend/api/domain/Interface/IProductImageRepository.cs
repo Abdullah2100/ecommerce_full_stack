@@ -1,12 +1,11 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
 
-namespace ecommerc_dotnet.domain.Interface;
+namespace api.domain.Interface;
 
 public interface IProductImageRepository: IRepository<ProductImage>
 {
-   void deleteProductImages(Guid id);
-    void deleteProductImages(List<string> images, Guid id);
-    void  addProductImage(ICollection<ProductImage> productImage);
-    Task<List<string>> getProductImages(Guid id);
+   void DeleteProductImages(Guid id);
+    void DeleteProductImages(List<string> images, Guid id);
+    void  AddProductImage(ICollection<ProductImage> productImage);
+    Task<List<string>> GetProductImages(Guid id);
 }

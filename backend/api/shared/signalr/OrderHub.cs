@@ -1,29 +1,29 @@
-using ecommerc_dotnet.Presentation.dto;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ecommerc_dotnet.shared.signalr;
+namespace api.shared.signalr;
 
 public class OrderHub : Hub
 {
-    public async Task sendingNewOrder(OrderDto order)
+    public async Task SendingNewOrder(OrderDto order)
     {
         await Clients.All.SendAsync("createdOrder", order);
     }
 
 
-    public async Task orderGettingByCustomer(OrderTookByEvent orderUpdatedEvent)
+    public async Task OrderGettingByCustomer(OrderTookByEvent orderUpdatedEvent)
     {
         await Clients.All.SendAsync("orderGettingByDelivery", orderUpdatedEvent);
     }
 
 
-    public async Task updateOrderStatus(UpdateOrderStatusDto status)
+    public async Task UpdateOrderStatus(UpdateOrderStatusDto status)
     {
         await Clients.All.SendAsync("orderStatus", status);
     }
 
 
-    public async Task expectedOrderByAdmin(OrderDto order)
+    public async Task ExpectedOrderByAdmin(OrderDto order)
     {
         await Clients.All.SendAsync("orderExcptedByAdmin", order);
     }

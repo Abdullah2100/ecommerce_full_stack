@@ -1,6 +1,6 @@
 using Microsoft.Build.Framework;
 
-namespace ecommerc_dotnet.Presentation.dto.Request
+namespace api.Presentation.dto
 {
     public class GeneralSettingDto
     {

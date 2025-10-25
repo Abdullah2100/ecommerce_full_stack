@@ -1,15 +1,13 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.domain.entity;
-using Google;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
-public class ReseatePasswordRepository(AppDbContext context) : IReseatePasswordRepository
+public class ReseatPasswordRepository(AppDbContext context) : IReseatePasswordRepository
 {
-    public async Task<IEnumerable<ReseatePasswordOtp>> getAllAsync(int page, int length)
+    public async Task<IEnumerable<ReseatePasswordOtp>> GetAllAsync(int page, int length)
     {
         return await context
             .ReseatPasswords
@@ -19,17 +17,17 @@ public class ReseatePasswordRepository(AppDbContext context) : IReseatePasswordR
             .ToListAsync();
     }
 
-    public void add(ReseatePasswordOtp entity)
+    public void Add(ReseatePasswordOtp entity)
     {
          context.ReseatPasswords.Add(entity);
     }
 
-    public void  update(ReseatePasswordOtp entity)
+    public void  Update(ReseatePasswordOtp entity)
     {
         context.ReseatPasswords.Update(entity);
     }
 
-    public void  delete(Guid id)
+    public void  Delete(Guid id)
     {
         ReseatePasswordOtp? entity =  context.ReseatPasswords.Find(id);
         if (entity == null) throw new ArgumentNullException();
@@ -40,29 +38,29 @@ public class ReseatePasswordRepository(AppDbContext context) : IReseatePasswordR
     }
 
 
-    public async Task<ReseatePasswordOtp?> getOtp(string otp)
+    public async Task<ReseatePasswordOtp?> GetOtp(string otp)
     {
         return await context.ReseatPasswords
             .AsNoTracking()
             .FirstOrDefaultAsync(f => f.Otp == otp);
     }
 
-    private async Task deleteAllEmailOtp(string email, string otp)
+    private async Task DeleteAllEmailOtp(string email, string otp)
     {
         await context.ReseatPasswords.Where(rp => rp.Email == email && rp.Otp != otp).ExecuteDeleteAsync();
     }
 
-    public async Task<bool> isExist(string otp, string email)
+    public async Task<bool> IsExist(string otp, string email)
     {
         //delete previus otp for email
-        await deleteAllEmailOtp(email, otp);
+        await DeleteAllEmailOtp(email, otp);
         
-        ReseatePasswordOtp? passwordOtp = await getOtp(otp);
+        ReseatePasswordOtp? passwordOtp = await GetOtp(otp);
         if (passwordOtp is null) return false;
         return true;
     }
 
-    public async Task<ReseatePasswordOtp?> getOtp(string otp, string email, bool state)
+    public async Task<ReseatePasswordOtp?> GetOtp(string otp, string email, bool state)
     {
         var otpHolder= await context.ReseatPasswords
             .AsNoTracking()

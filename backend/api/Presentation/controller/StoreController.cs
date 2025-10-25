@@ -1,16 +1,11 @@
 using System.Security.Claims;
-using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.services;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.shared;
-using ecommerc_dotnet.shared.signalr;
+using api.application.Interface;
+using api.Presentation.dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Primitives;
 
-namespace ecommerc_dotnet.Presentation.controller;
+namespace api.Presentation.controller;
 
 [Authorize]
 [ApiController]
@@ -26,11 +21,11 @@ public class StoreController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> createNewStore(
+    public async Task<IActionResult> CreateNewStore(
         [FromForm] CreateStoreDto store)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
         Guid? userId = null;
         if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
@@ -43,7 +38,7 @@ public class StoreController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await storeServices.createStore(store, userId.Value);
+        var result = await storeServices.CreateStore(store, userId.Value);
 
         return result.IsSuccessful switch
         {
@@ -59,11 +54,11 @@ public class StoreController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> updateStore(
+    public async Task<IActionResult> UpdateStore(
         [FromForm] UpdateStoreDto store)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? userId = null;
@@ -78,7 +73,7 @@ public class StoreController(
         }
 
 
-        var result = await storeServices.updateStore(store, userId.Value);
+        var result = await storeServices.UpdateStore(store, userId.Value);
 
         return result.IsSuccessful switch
         {
@@ -93,12 +88,12 @@ public class StoreController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> updateStoreStatus(
+    public async Task<IActionResult> UpdateStoreStatus(
         Guid storeId
     )
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -113,7 +108,7 @@ public class StoreController(
         }
 
 
-        var result = await storeServices.updateStoreStatus(adminId.Value, storeId);
+        var result = await storeServices.UpdateStoreStatus(adminId.Value, storeId);
 
           
 
@@ -129,10 +124,10 @@ public class StoreController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> getStore()
+    public async Task<IActionResult> GetStore()
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid userId = Guid.Empty;
@@ -146,7 +141,7 @@ public class StoreController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await storeServices.getStoreByUserId(userId);
+        var result = await storeServices.GetStoreByUserId(userId);
 
         return result.IsSuccessful switch
         {
@@ -159,9 +154,9 @@ public class StoreController(
     [HttpGet("{storeId:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> getStore(Guid storeId)
+    public async Task<IActionResult> GetStore(Guid storeId)
     {
-        var result = await storeServices.getStoreByStoreId(storeId);
+        var result = await storeServices.GetStoreByStoreId(storeId);
 
         return result.IsSuccessful switch
         {
@@ -175,10 +170,10 @@ public class StoreController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> getStores(int page = 1)
+    public async Task<IActionResult> GetStores(int page = 1)
     {
         StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
-        Claim? id = authenticationService.getPayloadFromToken("id",
+        Claim? id = authenticationService.GetPayloadFromToken("id",
             authorizationHeader.ToString().Replace("Bearer ", ""));
 
         Guid? adminId = null;
@@ -192,7 +187,7 @@ public class StoreController(
             return Unauthorized("هناك مشكلة في التحقق");
         }
 
-        var result = await storeServices.getStores(adminId.Value, page, 25);
+        var result = await storeServices.GetStores(adminId.Value, page, 25);
 
         return result.IsSuccessful switch
         {

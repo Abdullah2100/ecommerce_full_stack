@@ -1,33 +1,28 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.domain.Interface;
-using ecommerc_dotnet.application.Interface;
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.infrastructure.repositories;
-using ecommerc_dotnet.mapper;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.infrastructure;
-using ecommerc_dotnet.shared.extentions;
-using hotel_api.util;
+using api.application.Interface;
+using api.application.Result;
+using api.domain.entity;
+using api.Infrastructure;
+using api.Presentation.dto;
+using api.shared.extentions;
+using api.util;
 
-namespace ecommerc_dotnet.application.Services;
+namespace api.application.Services;
 
-public class VarientServices(IUnitOfWork unitOfWork)
-    : IVarientServices
+public class VariantServices(IUnitOfWork unitOfWork)
+    : IVariantServices
 {
-    public async Task<Result<VarientDto?>> createVarient(
-        CreateVarientDto varientDto,
+    public async Task<Result<VariantDto?>> CreateVariant(
+        CreateVariantDto variantDto,
         Guid adminId
     )
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var isValid = user.isValidateFunc(true);
+        var isValid = user.IsValidateFunc(true);
         if (isValid is not null)
         {
-            return new Result<VarientDto?>
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: isValid.Message,
@@ -36,9 +31,9 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
         }
 
-        if (await unitOfWork.VarientRepository.isExist(varientDto.Name))
+        if (await unitOfWork.VarientRepository.IsExist(variantDto.Name))
         {
-            return new Result<VarientDto?>
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: "there are varient with the same name",
@@ -47,20 +42,20 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
         }
 
-        Guid id = clsUtil.generateGuid();
+        Guid id = ClsUtil.GenerateGuid();
 
         Varient? varient = new Varient
         {
             Id = id,
-            Name = varientDto.Name
+            Name = variantDto.Name
         };
 
-        unitOfWork.VarientRepository.add(varient);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.VarientRepository.Add(varient);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
-            return new Result<VarientDto?>
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: "error while adding new varient",
@@ -69,22 +64,22 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
         }
 
-        return new Result<VarientDto?>
+        return new Result<VariantDto?>
         (
-            data: varient?.toDto(),
+            data: varient?.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<VarientDto?>> updateVarient(
-        UpdateVarientDto varientDto,
+    public async Task<Result<VariantDto?>> UpdateVariant(
+        UpdateVariantDto variantDto,
         Guid adminId
     )
     {
-        if (varientDto.isEmpty())
-            return new Result<VarientDto?>
+        if (variantDto.IsEmpty())
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: "",
@@ -93,12 +88,12 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
 
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
+            .GetUser(adminId);
 
-        var isValid = user.isValidateFunc(true);
+        var isValid = user.IsValidateFunc(true);
         if (isValid is not null)
         {
-            return new Result<VarientDto?>
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: isValid.Message,
@@ -107,10 +102,10 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
         }
 
-        if (varientDto.Name is not null)
-            if (await unitOfWork.VarientRepository.isExist(varientDto.Name, varientDto.Id))
+        if (variantDto.Name is not null)
+            if (await unitOfWork.VarientRepository.IsExist(variantDto.Name, variantDto.Id))
             {
-                return new Result<VarientDto?>
+                return new Result<VariantDto?>
                 (
                     data: null,
                     message: "there are varient with the same name",
@@ -119,11 +114,11 @@ public class VarientServices(IUnitOfWork unitOfWork)
                 );
             }
 
-        Varient? varient = await unitOfWork.VarientRepository.getVarient(varientDto.Id);
+        Varient? varient = await unitOfWork.VarientRepository.GetVarient(variantDto.Id);
 
         if (varient is null)
         {
-            return new Result<VarientDto?>
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: "varient not found",
@@ -132,14 +127,14 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
         }
 
-        varient.Name = varientDto.Name ?? varient.Name;
+        varient.Name = variantDto.Name ?? varient.Name;
 
-        unitOfWork.VarientRepository.update(varient);
-        int result = await unitOfWork.saveChanges();
+        unitOfWork.VarientRepository.Update(varient);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
-            return new Result<VarientDto?>
+            return new Result<VariantDto?>
             (
                 data: null,
                 message: "error while update varient",
@@ -148,20 +143,20 @@ public class VarientServices(IUnitOfWork unitOfWork)
             );
         }
 
-        return new Result<VarientDto?>
+        return new Result<VariantDto?>
         (
-            data: varient?.toDto(),
+            data: varient?.ToDto(),
             message: "",
             isSuccessful: true,
             statusCode: 201
         );
     }
 
-    public async Task<Result<bool>> deleteVarient(Guid vairentId, Guid adminId)
+    public async Task<Result<bool>> DeleteVariant(Guid vairantId, Guid adminId)
     {
         User? user = await unitOfWork.UserRepository
-            .getUser(adminId);
-        var isValid = user.isValidateFunc(true);
+            .GetUser(adminId);
+        var isValid = user.IsValidateFunc(true);
         if (isValid is not null)
         {
             return new Result<bool>
@@ -174,7 +169,7 @@ public class VarientServices(IUnitOfWork unitOfWork)
         }
 
 
-        Varient? varient = await unitOfWork.VarientRepository.getVarient(vairentId);
+        Varient? varient = await unitOfWork.VarientRepository.GetVarient(vairantId);
 
         if (varient is null)
         {
@@ -189,8 +184,8 @@ public class VarientServices(IUnitOfWork unitOfWork)
 
 
         unitOfWork.VarientRepository
-            .deleteAsync(vairentId);
-        int result = await unitOfWork.saveChanges();
+            .Delete(vairantId);
+        int result = await unitOfWork.SaveChanges();
 
         if (result == 0)
         {
@@ -212,13 +207,13 @@ public class VarientServices(IUnitOfWork unitOfWork)
         );
     }
 
-    public async Task<Result<List<VarientDto>>> getVarients(int page, int pageSize)
+    public async Task<Result<List<VariantDto>>> GetVariants(int page, int pageSize)
     {
-        List<VarientDto> varients = (await unitOfWork.VarientRepository
-                .getVarients(page, pageSize))
-            .Select(va => va.toDto())
+        List<VariantDto> varients = (await unitOfWork.VarientRepository
+                .GetVarients(page, pageSize))
+            .Select(va => va.ToDto())
             .ToList();
-        return new Result<List<VarientDto>>
+        return new Result<List<VariantDto>>
         (
             data: varients,
             message: "",

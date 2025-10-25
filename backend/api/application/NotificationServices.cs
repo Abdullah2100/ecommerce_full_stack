@@ -1,11 +1,11 @@
-using ecommerc_dotnet.di.email;
+using api.Infrastructure;
 using FirebaseAdmin.Messaging;
 
-namespace ecommerc_dotnet.application;
+namespace api.application;
 
-public class NotificationServices : IMessageSerivice
+public class NotificationServices : IMessageService
 {
-    public async Task<bool> sendingMessage(string message, string to)
+    public async Task<bool> SendingMessage(string message, string to)
     {
         var messageObj = new Message
         {

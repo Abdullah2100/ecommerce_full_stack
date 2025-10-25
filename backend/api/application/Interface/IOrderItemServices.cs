@@ -1,15 +1,14 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.Presentation.dto;
+using api.application.Result;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.application.Interface;
+namespace api.application.Interface;
 
 public interface IOrderItemServices
 {
     
-    Task<Result<List<OrderItemDto>>> getOrderItmes(Guid storeId, int pageNum, int pageSize);
+    Task<Result<List<OrderItemDto>>> GetOrderItmes(Guid storeId, int pageNum, int pageSize);
     
-    Task<Result<int>> updateOrderItmesStatus(Guid userId, UpdateOrderItemStatusDto orderItemsStatusDto );
+    Task<Result<int>> UpdateOrderItmesStatus(Guid userId, UpdateOrderItemStatusDto orderItemsStatusDto );
     
 
 }

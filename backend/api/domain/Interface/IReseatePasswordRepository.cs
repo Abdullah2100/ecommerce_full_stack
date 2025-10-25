@@ -1,12 +1,11 @@
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
+using api.domain.entity;
 
-namespace ecommerc_dotnet.application.Repository;
+namespace api.domain.Interface;
 
 public interface IReseatePasswordRepository:IRepository<ReseatePasswordOtp>
 {
-    Task<bool> isExist(string otp,string email);
-    Task<ReseatePasswordOtp?> getOtp(string otp,string email,bool state=false);
-    Task<ReseatePasswordOtp?> getOtp(string otp);
-    void delete(Guid id);
+    Task<bool> IsExist(string otp,string email);
+    Task<ReseatePasswordOtp?> GetOtp(string otp,string email,bool state=false);
+    Task<ReseatePasswordOtp?> GetOtp(string otp);
+    void Delete(Guid id);
 }

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using ecommerc_dotnet.core.entity;
 
-namespace ecommerc_dotnet.domain.entity;
+namespace api.domain.entity;
 
 public enum enOrderItemStatus {Cancelled,InProgress,Excepted,ReceivedByDelivery }
 

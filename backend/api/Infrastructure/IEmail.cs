@@ -1,6 +1,6 @@
-namespace ecommerc_dotnet.di.email;
+namespace api.Infrastructure;
 
-public interface IMessageSerivice
+public interface IMessageService
 {
-    Task<bool> sendingMessage(string message, string to);
+    Task<bool> SendingMessage(string message, string to);
 }

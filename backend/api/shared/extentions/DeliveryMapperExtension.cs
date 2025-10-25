@@ -1,30 +1,27 @@
-using ecommerc_dotnet.application.Result;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.dto;
-using ecommerc_dotnet.shared.extentions;
+using api.application.Result;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.mapper;
+namespace api.shared.extentions;
 
-public static class DeliveryMapperExtention
+public static class DeliveryMapperExtension
 {
-    public static DeliveryDto toDto(this Delivery delivery, string url)
+    public static DeliveryDto ToDto(this Delivery delivery, string url)
     {
         return new DeliveryDto
         {
             Id = delivery.Id,
             UserId = delivery.UserId,
             UpdatedAt = delivery.UpdatedAt,
-            Address = delivery?.Address?.toDeliveryDto(),
+            Address = delivery?.Address?.ToDeliveryDto(),
             Analys = null,
             Thumbnail = string.IsNullOrEmpty(delivery?.Thumbnail) ? null : url + delivery.Thumbnail,
-            User = delivery?.User.toDeliveryInfoDto(url),
+            User = delivery?.User.ToDeliveryInfoDto(url),
             IsAvailable = delivery?.IsAvaliable ?? false
         };
     }
 
-    public static Result<DeliveryDto>? isValidated(this Delivery? delivery)
+    public static Result<DeliveryDto>? IsValidated(this Delivery? delivery)
     {
         if (delivery is null)
         {

@@ -1,21 +1,20 @@
+using api.domain.entity;
+using api.domain.Interface;
 using ecommerc_dotnet.application;
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.domain.entity;
-using ecommerc_dotnet.domain.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerc_dotnet.infrastructure.repositories;
+namespace api.Infrastructure.Repositories;
 
 public class ProductImageRepository(AppDbContext context) : IProductImageRepository
 {
-    public void  deleteProductImages(Guid id)
+    public void  DeleteProductImages(Guid id)
     {
         var result = context.ProductImages.FirstOrDefault(p => p.ProductId == id);
         if (result != null) throw new ArgumentNullException();
         context.ProductImages.Remove(result);
     }
 
-    public void deleteProductImages(List<string> images, Guid id)
+    public void DeleteProductImages(List<string> images, Guid id)
     {
         foreach (var image in images)
         {
@@ -27,7 +26,7 @@ public class ProductImageRepository(AppDbContext context) : IProductImageReposit
 
 
 
-    public  void addProductImage(ICollection<ProductImage> productImage)
+    public  void AddProductImage(ICollection<ProductImage> productImage)
     {
         for (var i = 0; i < productImage.Count; i++)
         {
@@ -35,7 +34,7 @@ public class ProductImageRepository(AppDbContext context) : IProductImageReposit
         }
     }
 
-    public async Task<List<string>> getProductImages(Guid id)
+    public async Task<List<string>> GetProductImages(Guid id)
     {
         return await context.ProductImages
             .AsNoTracking()
@@ -44,12 +43,12 @@ public class ProductImageRepository(AppDbContext context) : IProductImageReposit
             .ToListAsync();
     }
 
-    public void add(ProductImage entity)
+    public void Add(ProductImage entity)
     {
         context.Add(entity);
     }
 
-    public void update(ProductImage entity)
+    public void Update(ProductImage entity)
     {
         context.Update(entity);
     }

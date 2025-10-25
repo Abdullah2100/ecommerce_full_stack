@@ -1,22 +1,20 @@
-using ecommerc_dotnet.application.Repository;
-using ecommerc_dotnet.core.entity;
-using ecommerc_dotnet.Presentation.dto;
+using api.domain.entity;
 
-namespace ecommerc_dotnet.domain.Interface;
+namespace api.domain.Interface;
 
 public interface IProductRepository:IRepository<Product>
 {
     
-    Task<Product?> getProduct(Guid id);
-    Task<Product?> getProduct(Guid id, Guid storeId);
-    Task<Product?> getProductByUser(Guid id,Guid userId);
+    Task<Product?> GetProduct(Guid id);
+    Task<Product?> GetProduct(Guid id, Guid storeId);
+    Task<Product?> GetProductByUser(Guid id,Guid userId);
     
-    Task<IEnumerable<Product>> getProducts(Guid storeId,Guid subCategoryId,int pageNum,int pageSize);
-    Task<IEnumerable<Product>> getProducts(Guid storeId,int pageNum,int pageSize);
-    Task<IEnumerable<Product>> getProducts(int page,int length);
-    Task<IEnumerable<Product>> getProductsByCategory(Guid categoryId,int pageNum,int pageSize);
+    Task<IEnumerable<Product>> GetProducts(Guid storeId,Guid subCategoryId,int pageNum,int pageSize);
+    Task<IEnumerable<Product>> GetProducts(Guid storeId,int pageNum,int pageSize);
+    Task<IEnumerable<Product>> GetProducts(int page,int length);
+    Task<IEnumerable<Product>> GetProductsByCategory(Guid categoryId,int pageNum,int pageSize);
     
-    Task<bool> isExist(Guid id);
-    void delete(Guid id);
+    Task<bool> IsExist(Guid id);
+    void Delete(Guid id);
 
 }

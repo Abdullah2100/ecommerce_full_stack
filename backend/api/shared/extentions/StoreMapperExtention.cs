@@ -1,11 +1,11 @@
-using ecommerc_dotnet.Presentation.dto;
-using ecommerc_dotnet.domain.entity;
+using api.domain.entity;
+using api.Presentation.dto;
 
-namespace ecommerc_dotnet.mapper;
+namespace api.shared.extentions;
 
 public static class StoreMapperExtention
 {
-    public static StoreDto toDto(this Store store, string url)
+    public static StoreDto ToDto(this Store store, string url)
     {
         return new StoreDto
         {
@@ -22,7 +22,7 @@ public static class StoreMapperExtention
         };
     }
     
-    public static bool isEmpty(this UpdateStoreDto dto)
+    public static bool IsEmpty(this UpdateStoreDto dto)
     {
         return string.IsNullOrWhiteSpace(dto.Name) &&
                dto.WallpaperImage == null &&
