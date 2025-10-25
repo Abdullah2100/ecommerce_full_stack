@@ -31,6 +31,7 @@ data class CreateOrderDto(
     val TotalPrice: Double,
     val Items: List<CreateOrderItemDto>,
 )
+
 @Serializable
 data class OrderRequestItemsDto(
     @Serializable(with = UUIDKserialize::class)
@@ -40,5 +41,5 @@ data class OrderRequestItemsDto(
     @Serializable(with = UUIDKserialize::class)
     val ProductId: UUID,
     @Serializable(with = UUIDListKserialize::class)
-    val ProductsVarientId: List<UUID>,
+    val ProductsVariantId: List<UUID>,
 )

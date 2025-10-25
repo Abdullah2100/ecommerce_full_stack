@@ -11,7 +11,7 @@ data class ProductVarientDto(
     val name: String,
     val precentage: Double,
     @Serializable(with = UUIDKserialize::class)
-    val varientId: UUID,
+    val variantId: UUID,
     )
 
 @Serializable
@@ -19,5 +19,5 @@ data class CreateProductVarientDto(
     val Name: String,
     val Precentage: Double?,
     @Serializable(with= UUIDKserialize::class)
-    val VarientId: UUID,
+    val VariantId: UUID,
 )

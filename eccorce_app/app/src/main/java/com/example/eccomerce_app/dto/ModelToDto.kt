@@ -8,10 +8,7 @@ import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.eccomerce_app.dto.CreateOrderDto
 import com.example.eccomerce_app.dto.CreateOrderItemDto
 import com.example.eccomerce_app.dto.CreateProductVarientDto
-import com.example.eccomerce_app.dto.DeliveryDto
-import com.example.eccomerce_app.dto.SubCategoryDto
 import com.example.eccomerce_app.dto.UpdateSubCategoryDto
-import com.example.eccomerce_app.model.Delivery
 
 object ModelToDto {
 
@@ -29,7 +26,7 @@ object ModelToDto {
         return CreateProductVarientDto(
             Name = this.name,
             Precentage = this.percentage,
-            VarientId =this.variantId
+            VariantId =this.variantId
         )
     }
     fun List<List<ProductVariant>>.toListOfProductVarient(): List<ProductVarientSelection> {
@@ -46,7 +43,7 @@ object ModelToDto {
             ProductId = this.productId,
             Price = this.price,
             Quantity = this.quantity,
-            ProductsVarientId =  this.productVariants.map { it.id }
+            ProductsVariantId =  this.productVariants.map { it.id }
         )
     }
 

@@ -15,7 +15,7 @@ import com.example.eccomerce_app.dto.GeneralSettingDto
 import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderProductDto
 import com.example.eccomerce_app.dto.OrderDto
-import com.example.eccomerce_app.dto.OrderVarientDto
+import com.example.eccomerce_app.dto.OrderVariantDto
 import com.example.eccomerce_app.model.Delivery
 import com.example.eccomerce_app.model.DeliveryUserInfo
 import com.example.eccomerce_app.util.Secrets
@@ -129,7 +129,7 @@ object DtoToModel {
             id = this.id,
             name = this.name,
             percentage = this.precentage,
-            variantId = this.varientId
+            variantId = this.variantId
         )
     }
 
@@ -146,7 +146,7 @@ object DtoToModel {
             storeId = this.storeId,
             price = this.price,
             categoryId = this.categoryId,
-            productVariants = this.productVarients?.map {
+            productVariants = this.productVariants?.map {
                 it.map { it.toProductVarient() }
             },
             productImages = this.productImages.map { it ->
@@ -158,10 +158,10 @@ object DtoToModel {
         )
     }
 
-    fun OrderVarientDto.toOrderVarient(): OrderVariant {
+    fun OrderVariantDto.toOrderVarient(): OrderVariant {
         return OrderVariant(
-            variantName = this.varientName,
-            productVariantName = this.productVarientName
+            variantName = this.variantName,
+            productVariantName = this.productVariantName
         )
     }
 
