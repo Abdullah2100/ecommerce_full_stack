@@ -53,6 +53,7 @@ To run this project locally, you will need:
 3.  **Apply Database Migrations:**
 
     ```bash
+    dotnet ef migrations add initial
     dotnet ef database update
     ```
     *(Note: Ensure your `DbContext` is correctly configured before running this.)*
