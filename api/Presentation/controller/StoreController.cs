@@ -150,6 +150,36 @@ public class StoreController(
         };
     }
 
+    [HttpGet("pages")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetStoresPages()
+    {
+        StringValues authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        Claim? id = authenticationService.GetPayloadFromToken("id",
+            authorizationHeader.ToString().Replace("Bearer ", ""));
+
+        Guid adminId = Guid.Empty;
+        if (Guid.TryParse(id?.Value.ToString(), out Guid outId))
+        {
+            adminId = outId;
+        }
+
+        if (adminId == Guid.Empty)
+        {
+            return Unauthorized("هناك مشكلة في التحقق");
+        }
+
+        var result = await storeServices.GetStorePage(adminId,20);
+
+        return result.IsSuccessful switch
+        {
+            true => StatusCode(result.StatusCode, result.Data),
+            _ => StatusCode(result.StatusCode, result.Message)
+        };
+    }
+
 
     [HttpGet("{storeId:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

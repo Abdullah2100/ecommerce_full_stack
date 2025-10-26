@@ -91,12 +91,15 @@ public class StoreRepository(AppDbContext context) : IStoreRepository
         return stores;
     }
 
-    public async Task<int> GetStoresCount()
+    public async Task<int> GetStoresCount(int storePerPage)
     {
-        return await context
+        int count = await context
             .Stores
             .AsNoTracking()
             .CountAsync();
+        if (count == 0) return 0;
+        count =(int) Math.Ceiling((double)count / storePerPage);
+        return count;
     }
 
     public async Task<bool> IsExist(string name)

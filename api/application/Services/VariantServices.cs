@@ -207,6 +207,33 @@ public class VariantServices(IUnitOfWork unitOfWork)
         );
     }
 
+    public async Task<Result<int?>> GetVariantPage(Guid adminId, int variantPerPage)
+
+    {
+        User? store = await unitOfWork.UserRepository.GetUser(adminId);
+        
+        var isValide = store.IsValidateFunc();
+
+        if (isValide is not null)
+            return new Result<int?>
+            (
+                data: null,
+                message: "store not found",
+                isSuccessful: false,
+                statusCode: 404
+            );
+        var count = await unitOfWork.VarientRepository.GetVarientCount(variantPerPage);
+
+        return new Result<int?>
+        (
+            data: count,
+            message: "",
+            isSuccessful: true,
+            statusCode: 200
+        );
+    }
+
+
     public async Task<Result<List<VariantDto>>> GetVariants(int page, int pageSize)
     {
         List<VariantDto> varients = (await unitOfWork.VarientRepository

@@ -272,6 +272,33 @@ public class StoreServices(
         );
     }
 
+    public async Task<Result<int?>> GetStorePage(Guid adminId, int storePerPage)
+
+{
+        User? store = await unitOfWork.UserRepository.GetUser(adminId);
+        
+        var isValide = store.IsValidateFunc();
+
+        if (isValide is not null)
+            return new Result<int?>
+            (
+                data: null,
+                message: "store not found",
+                isSuccessful: false,
+                statusCode: 404
+            );
+        var count = await unitOfWork.StoreRepository.GetStoresCount(storePerPage);
+
+        return new Result<int?>
+        (
+            data: count,
+            message: "",
+            isSuccessful: true,
+            statusCode: 200
+        );
+    }
+
+
     public async Task<Result<StoreDto?>> GetStoreByUserId(Guid userId)
     {
         Store? store = await unitOfWork.StoreRepository.GetStoreByUserId(userId);
