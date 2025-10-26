@@ -250,13 +250,13 @@ fun HomePage(
                                 Sizer(10)
                                 Text(
                                     "${
-                                        if ((myInfo.value?.analys?.dayFee ?: 0.0)
-                                            - (myInfo.value?.analys?.weekFee ?: 0.0) < 0
+                                        if ((myInfo.value?.analyse?.dayFee ?: 0.0)
+                                            - (myInfo.value?.analyse?.weekFee ?: 0.0) < 0
                                         )
-                                            ((myInfo.value?.analys?.dayFee ?: 0.0)
-                                                    - (myInfo.value?.analys?.weekFee ?: 0.0)) * -1
-                                        else (myInfo.value?.analys?.dayFee ?: 0.0)
-                                                - (myInfo.value?.analys?.weekFee ?: 0.0)
+                                            ((myInfo.value?.analyse?.dayFee ?: 0.0)
+                                                    - (myInfo.value?.analyse?.weekFee ?: 0.0)) * -1
+                                        else (myInfo.value?.analyse?.dayFee ?: 0.0)
+                                                - (myInfo.value?.analyse?.weekFee ?: 0.0)
                                     }",
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Bold,
@@ -273,15 +273,15 @@ fun HomePage(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             MonayAnalys(
-                                myInfo.value?.analys?.dayFee ?: 50000.0, "Today"
+                                myInfo.value?.analyse?.dayFee ?: 50000.0, "Today"
                             )
                             VerticalLine(width = 1, color = Color.White)
                             MonayAnalys(
-                                myInfo.value?.analys?.weekFee ?: 53333333333.0, "Week"
+                                myInfo.value?.analyse?.weekFee ?: 53333333333.0, "Week"
                             )
                             VerticalLine(width = 1, color = Color.White)
                             MonayAnalys(
-                                myInfo.value?.analys?.monthFee ?: 12355456789.0, "Month"
+                                myInfo.value?.analyse?.monthFee ?: 12355456789.0, "Month"
                             )
 
 
@@ -311,13 +311,13 @@ fun HomePage(
 
                     ) {
                         OrdersAnalys(
-                            myInfo.value?.analys?.dayOrder ?: 0,
+                            myInfo.value?.analyse?.dayOrder ?: 0,
                             "Todays",
                             "Ordes"
                         )
 
                         OrdersAnalys(
-                            myInfo.value?.analys?.weekOrder ?: 0,
+                            myInfo.value?.analyse?.weekOrder ?: 0,
                             "This Week",
                             "Ordes"
                         )

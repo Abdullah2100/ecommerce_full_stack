@@ -17,7 +17,7 @@ class VariantRepository(val client: HttpClient)  {
      suspend fun getVariant(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
-                Secrets.getBaseUrl() + "/Varient/all/${pageNumber}"
+                Secrets.getBaseUrl() + "/Variant/all/${pageNumber}"
             ) {
                 headers {
                     append(

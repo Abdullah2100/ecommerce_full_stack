@@ -78,7 +78,7 @@ const Product = () => {
                                         <div className="font-medium text-left">Sub Category</div>
                                     </th>
                                     <th className="py-4 px-10">
-                                        <div className="font-medium text-left">Product Varient</div>
+                                        <div className="font-medium text-left">Product Variant</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -142,7 +142,7 @@ const Product = () => {
                                                                     </Label>}
                                                                 <div className="ms-4 flex flex-row">
                                                                     <Label>{insidV.name}</Label>
-                                                                    <Label>{insidV.precentage}</Label>
+                                                                    <Label>{insidV.percentage}</Label>
                                                                 </div>
                                                             </div>
                                                         ))

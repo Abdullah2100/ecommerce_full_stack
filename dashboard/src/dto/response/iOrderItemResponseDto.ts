@@ -3,7 +3,7 @@ import iOrderProductVarientDto from "./iOrderProductVarientDto";
 
 export default interface iOrderItemResponseDto{
     price:number,
-    quanity:number,
+    Quantity:number,
     product:iOrderProductDto,
-    productVarient:iOrderProductVarientDto
+    productVariant:iOrderProductVarientDto
 }

@@ -2,7 +2,7 @@ package com.example.e_commerc_delivery_man.model
 
 import com.example.e_commerc_delivery_man.dto.AddressDto
 import com.example.e_commerc_delivery_man.dto.AddressWithTitleDto
-import com.example.e_commerc_delivery_man.dto.DeliveryAnalysDto
+import com.example.e_commerc_delivery_man.dto.DeliveryAnalyseDto
 import com.example.e_commerc_delivery_man.dto.DeliveryDto
 import com.example.e_commerc_delivery_man.dto.UserDto
 import com.example.e_commercompose.dto.response.VariantDto
@@ -10,7 +10,7 @@ import com.example.e_commercompose.model.VariantModel
 import com.example.eccomerce_app.dto.response.OrderItemDto
 import com.example.eccomerce_app.dto.response.OrderProductDto
 import com.example.eccomerce_app.dto.response.OrderDto
-import com.example.eccomerce_app.dto.response.OrderVarientDto
+import com.example.eccomerce_app.dto.response.OrderVariantDto
 import com.example.eccomerce_app.model.Order
 import com.example.eccomerce_app.model.OrderItem
 import com.example.eccomerce_app.model.OrderProduct
@@ -31,7 +31,7 @@ object DtoToModel {
             title = this.title
         )
     }
-    fun DeliveryAnalysDto.toDeliveryAnalyse(): DeliveryAnalyse {
+    fun DeliveryAnalyseDto.toDeliveryAnalyse(): DeliveryAnalyse {
         return DeliveryAnalyse(
             dayFee = this.dayFee,
             weekFee = this.weekFee,
@@ -65,7 +65,7 @@ object DtoToModel {
             ),
             address = this.address.toAddress(),
             user = this.user.toUser(),
-            analys = this.analys?.toDeliveryAnalyse()
+            analyse = this.analyse?.toDeliveryAnalyse()
         )
     }
 
@@ -76,7 +76,7 @@ object DtoToModel {
         )
     }
 
-    fun OrderVarientDto.toOrderVarient(): OrderVarient {
+    fun OrderVariantDto.toOrderVarient(): OrderVarient {
         return OrderVarient(
             varient_name = this.varientName,
             product_varient_name = this.productVarientName
@@ -98,11 +98,11 @@ object DtoToModel {
     fun OrderItemDto.toOrderItem(): OrderItem {
         return OrderItem(
             id = this.id,
-            quanity = this.quanity?:0,
+            quantity = this.quantity?:0,
             price = this.price?:0.0,
             product = this.product?.toOrderProduct(),
             address = this.address?.map { it.toAddressWithTitle() },
-            productVarient = this.productVarient?.map { it.toOrderVarient() },
+            productVariant = this.productVariant?.map { it.toOrderVarient() },
             orderItemStatus = this.orderItemStatus?:""
         )
     }

@@ -63,7 +63,7 @@ const Category = () => {
 
   return (
     <div className="flex flex-col w-auto h-auto">
-      <Label className="text-5xl">Varient</Label>
+      <Label className="text-5xl">Variant</Label>
       <input
         type="file"
         hidden

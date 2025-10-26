@@ -1,7 +1,7 @@
 'use client';
 
 import MyInfoPage from "./myinfo"
-import Varient from "./varient"
+import Variant from "./varient"
 import Users from "./users"
 import Stores from "./stores"
 import Category from "./category"
@@ -21,7 +21,7 @@ const Main = ({ currentPage }: iMainPageProp) => {
                 case 1:
                     return <MyInfoPage />;
                 case 2:
-                    return <Varient />
+                    return <Variant />
                 case 3:
                     return <Category />
                 case 4:

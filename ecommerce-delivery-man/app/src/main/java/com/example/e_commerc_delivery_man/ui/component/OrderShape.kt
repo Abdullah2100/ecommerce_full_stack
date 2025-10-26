@@ -294,7 +294,7 @@ fun OrderComponent(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Sizer(width = 5)
-                                    orderItems.productVarient?.forEach { value ->
+                                    orderItems.productVariant?.forEach { value ->
 
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically

@@ -9,7 +9,7 @@ data class Delivery(
     val thumbnail: String? = null,
     val address: Address,
     val user: UserModel,
-    val analys: DeliveryAnalyse?=null
+    val analyse: DeliveryAnalyse?=null
 )
 data class DeliveryAnalyse(
     val dayFee: Double? = null,

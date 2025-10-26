@@ -383,7 +383,7 @@ fun MapHomeScreen(
                                                 )
                                                     .position
                                         ),
-                                        title = "${addressData.title} | ${data.product?.name?:""} : ${data.quanity}",
+                                        title = "${addressData.title} | ${data.product?.name?:""} : ${data.quantity}",
                                         onClick = { false }) {
                                         Image(
                                             imageVector = ImageVector.vectorResource(id = R.drawable.store_icon),
@@ -399,7 +399,7 @@ fun MapHomeScreen(
                                     }
                                     Marker(
                                         state = MarkerState(position = additionLocation.position),
-                                        title = "${addressData.title} | ${data.product?.name?:""} : ${data.quanity}",
+                                        title = "${addressData.title} | ${data.product?.name?:""} : ${data.quantity}",
                                     )
                                 }
                             }

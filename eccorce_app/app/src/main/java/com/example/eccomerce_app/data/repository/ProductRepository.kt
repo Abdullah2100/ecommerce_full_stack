@@ -239,7 +239,7 @@ class ProductRepository(val client: HttpClient)  {
                             if (productVarients.isNotEmpty())
                                 productVarients.forEachIndexed { it, value ->
                                     append("productVarients[${it}].name", value.name)
-                                    append("productVarients[${it}].precentage", value.percentage!!)
+                                    append("productVarients[${it}].percentage", value.percentage!!)
                                     append(
                                         "productVarients[${it}].valientId",
                                         value.variantId.toString()
@@ -347,7 +347,7 @@ class ProductRepository(val client: HttpClient)  {
                             if (!productVarients.isNullOrEmpty())
                                 productVarients.forEachIndexed { it, value ->
                                     append("productVarients[${it}].name", value.name)
-                                    append("productVarients[${it}].precentage", value.percentage!!)
+                                    append("productVarients[${it}].percentage", value.percentage!!)
                                     append(
                                         "productVarients[${it}].valientId",
                                         value.variantId.toString()
@@ -357,7 +357,7 @@ class ProductRepository(val client: HttpClient)  {
                                 deletedProductVarients.forEachIndexed { it, value ->
                                     append("deletedProductVarients[${it}].name", value.name)
                                     append(
-                                        "deletedProductVarients[${it}].precentage",
+                                        "deletedProductVarients[${it}].percentage",
                                         value.percentage!!
                                     )
                                     append(

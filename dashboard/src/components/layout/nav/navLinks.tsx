@@ -41,7 +41,7 @@ const NavLink = ({ selectedIndex, setSelectedIndex, isNewOrder }: iNavProp) => {
       chageSelectedIndex: setSelectedIndex,
     },
     {
-      name: "Varient",
+      name: "Variant",
       icon: varient,
       currentIndex: 2,
       selectedIndex: selectedIndex,

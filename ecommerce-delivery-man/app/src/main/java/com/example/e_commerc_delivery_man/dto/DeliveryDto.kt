@@ -16,11 +16,11 @@ data class DeliveryDto(
     val thumbnail: String? = null,
     val address: AddressDto,
     val user: UserDto,
-    val analys:DeliveryAnalysDto?=null
+    val analyse:DeliveryAnalyseDto?=null
 )
 
 @Serializable()
-data class DeliveryAnalysDto(
+data class DeliveryAnalyseDto(
     val dayFee: Double? = null,
     val weekFee: Double? = null,
     val monthFee: Double? = null,

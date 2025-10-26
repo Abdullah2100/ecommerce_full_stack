@@ -3,7 +3,7 @@ import { Util } from "@/util/globle";
 import { iVarient } from "@/model/iVarient";
 
  async function getVarient(pageNumber: number) {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient/all/${pageNumber}`;
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Variant/all/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.get(url, {
@@ -30,7 +30,7 @@ import { iVarient } from "@/model/iVarient";
 }
 
  async function getVarientPageLenght() {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient/pages`;
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Variant/pages`;
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.get(url, {
@@ -57,7 +57,7 @@ import { iVarient } from "@/model/iVarient";
 }
 
  async function deleteVarient(id: string) {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient/${id}`;
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Variant/${id}`;
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.delete(url, {
@@ -91,7 +91,7 @@ import { iVarient } from "@/model/iVarient";
 }
 
   async function createVarient(data: iVarient) {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient`;
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Variant`;
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.post(url, {
@@ -127,7 +127,7 @@ import { iVarient } from "@/model/iVarient";
 }
 
  async function updateVarient(data: iVarient) {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Varient`;
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Variant`;
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.put(url, {

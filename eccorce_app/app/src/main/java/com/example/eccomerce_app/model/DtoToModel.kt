@@ -128,7 +128,7 @@ object DtoToModel {
         return ProductVariant(
             id = this.id,
             name = this.name,
-            percentage = this.precentage,
+            percentage = this.percentage,
             variantId = this.variantId
         )
     }
@@ -179,12 +179,12 @@ object DtoToModel {
     fun OrderItemDto.toOrderItem(): OrderItem {
         return OrderItem(
             id = this.id,
-            quantity = this.quanity,
+            quantity = this.Quantity,
             price = this.price,
             product = this.product.toOrderProduct(),
-            productVariant = if (this.productVarient.isNullOrEmpty())
+            productVariant = if (this.productVariant.isNullOrEmpty())
                 listOf()
-            else this.productVarient.map { it.toOrderVarient() },
+            else this.productVariant.map { it.toOrderVarient() },
             orderItemStatus = this.orderItemStatus,
             orderStatusName = this.orderStatusName,
             orderId = this.orderId

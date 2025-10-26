@@ -10,10 +10,10 @@ data class OrderItemDto(
     @Serializable(with = UUIDKserialize::class)
     val id: UUID,
     val price: Double?=null,
-    val quanity:Int?=null,
+    val Quantity:Int?=null,
     val address: List<AddressWithTitleDto>?=null,
     val product: OrderProductDto?=null,
-    val productVarient:List<OrderVarientDto>?=null,
+    val productVariant:List<OrderVariantDto>?=null,
     val orderItemStatus: String?=null
 )
 

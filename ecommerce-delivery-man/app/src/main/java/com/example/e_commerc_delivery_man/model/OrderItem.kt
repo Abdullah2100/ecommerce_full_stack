@@ -6,9 +6,9 @@ import java.util.UUID
 data class OrderItem(
     val id: UUID,
     val price: Double,
-    val quanity:Int,
+    val quantity:Int,
     val address: List<AddressWithTitle>?=null,
     val product: OrderProduct?=null,
-    val productVarient:List<OrderVarient>?=null,
+    val productVariant:List<OrderVarient>?=null,
     val orderItemStatus: String
 )

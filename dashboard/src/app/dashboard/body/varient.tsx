@@ -10,7 +10,7 @@ import { EditeIcon } from "../../../../public/images/editeIcon";
 import { DeleteIcon } from "../../../../public/images/delete";
 import { createVarient, deleteVarient, getVarient, updateVarient } from "@/lib/api/variant";
 
-const Varient = () => {
+const Variant = () => {
     const [varient, setVarient] = useState<iVarient>({
         id: undefined,
         name: ''
@@ -68,14 +68,14 @@ const Varient = () => {
 
     return (
         <div className="flex flex-col w-auto h-auto">
-            <Label className="text-5xl">Varient</Label>
+            <Label className="text-5xl">Variant</Label>
             <div className="h-10" />
             <div className="flex flex-col w-40">
                 <InputWithTitle
                     maxLength={40}
                     title="Name"
                     name={varient.name}
-                    placeHolder="Enter Your Varient"
+                    placeHolder="Enter Your Variant"
                     onchange={
                         (value: string) => { setVarient((data) => ({ ...data, name: value })) }
                     }
@@ -162,4 +162,4 @@ const Varient = () => {
     );
 
 };
-export default Varient;
+export default Variant;

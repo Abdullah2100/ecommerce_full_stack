@@ -25,7 +25,7 @@ object ModelToDto {
     fun ProductVarientSelection.toProdcutVarientRequestDto(): CreateProductVarientDto{
         return CreateProductVarientDto(
             Name = this.name,
-            Precentage = this.percentage,
+            Percentage = this.percentage,
             VariantId =this.variantId
         )
     }
