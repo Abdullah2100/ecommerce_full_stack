@@ -17,9 +17,9 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .ToListAsync();
     }
 
-    public void  Add(Variant entity)
+    public void Add(Variant entity)
     {
-         context.Varients.AddAsync(entity);
+        context.Varients.AddAsync(entity);
     }
 
     public void Update(Variant entity)
@@ -27,13 +27,13 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
         context.Varients.Update(entity);
     }
 
-    public void  Delete(Guid id)
+    public void Delete(Guid id)
     {
-      var variants=   context
+        var variants = context
             .Varients
             .Where(i => i.Id == id)
             .ToList();
-      context.Varients.RemoveRange(variants);
+        context.Varients.RemoveRange(variants);
     }
 
     public async Task<Variant?> GetVarient(Guid id)
@@ -50,15 +50,18 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
             .AsNoTracking()
             .Skip((page - 1) * length)
             .Take(length)
-            .ToListAsync(); 
+            .ToListAsync();
     }
 
-    public async Task<int> GetVarientCount()
+    public async Task<int> GetVarientCount(int variantPerPage)
     {
-        return await context
-            .Varients
+        int count = await context
+            .Stores
             .AsNoTracking()
             .CountAsync();
+        if (count == 0) return 0;
+        count = (int)Math.Ceiling((double)count / variantPerPage);
+        return count;
     }
 
     public async Task<bool> IsExist(Guid id)
@@ -74,7 +77,7 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
         return await context
             .Varients
             .AsNoTracking()
-            .AnyAsync(i => i.Name == name); 
+            .AnyAsync(i => i.Name == name);
     }
 
     public async Task<bool> IsExist(string name, Guid id)
@@ -82,6 +85,6 @@ public class VarientRepository(AppDbContext context) : IVarientRepository
         return await context
             .Varients
             .AsNoTracking()
-            .AnyAsync(i => i.Name == name && i.Id != id); 
+            .AnyAsync(i => i.Name == name && i.Id != id);
     }
 }

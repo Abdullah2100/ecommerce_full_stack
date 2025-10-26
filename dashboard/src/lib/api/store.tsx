@@ -31,10 +31,8 @@ import iStore from "../../model/iStore";
 
 }
 
-
-
   async function getStoreAtPage(pageNumber: number) {
-    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/${pageNumber}`;
+    const url = process.env.NEXT_PUBLIC_PASE_URL + `/api/Store/all/${pageNumber}`;
     console.log(`funtion is Called ${url}`)
     try {
         const result = await axios.get(url, {

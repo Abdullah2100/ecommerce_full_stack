@@ -6,7 +6,7 @@ public interface IVarientRepository:IRepository<Variant>
 {
  Task<Variant?> GetVarient(Guid id);
  Task<List<Variant>> GetVarients(int page,int lenght);
- Task<int> GetVarientCount();
+ Task<int> GetVarientCount(int variantPerPage);
  Task<bool> IsExist(Guid id);
  Task<bool> IsExist(string name);
  Task<bool> IsExist(string name,Guid id);
