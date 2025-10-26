@@ -55,6 +55,8 @@ To run this project locally, you will need:
     ```bash
     dotnet ef database update
     ```
+    *(Note: Ensure your `DbContext` is correctly configured before running this.)*
+
 4. **Copy the trigger.sql content  in psql**
    ```bash
    sudo -i -u postgres;
@@ -62,9 +64,8 @@ To run this project locally, you will need:
    \c ecommerce_db;```
   ### past file at that command 
 
-    *(Note: Ensure your `DbContext` is correctly configured before running this.)*
 
-4.  **Run the application:**
+5.  **Run the application:**
 
     ```bash
     dotnet run
