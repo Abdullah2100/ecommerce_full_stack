@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,7 @@ import com.example.e_commercompose.model.enMapType
 import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
-import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.viewModel.BannerViewModel
@@ -282,7 +283,7 @@ fun MapHomeScreen(
                     )
 
             } else {
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -291,7 +292,6 @@ fun MapHomeScreen(
 
     LaunchedEffect(Unit) {
         if (isHasNavigationMap) {
-            Log.d("fromNavigationState", "True")
             mapViewModel.findPointBetweenTwoDestination(
                 mainLocation.position,
                 additionLocation.position,
@@ -342,7 +342,8 @@ fun MapHomeScreen(
                     },
                     shape = RoundedCornerShape(8.dp),
                     containerColor = Color.White
-                ) {
+                )
+                {
                     Image(
                         imageVector = ImageVector
                             .vectorResource(id = R.drawable.current_location),
@@ -359,7 +360,8 @@ fun MapHomeScreen(
                 },
                 sheetState = sheetState,
 
-                ) {
+                )
+            {
 
                 Column(
                     modifier = Modifier
@@ -370,8 +372,8 @@ fun MapHomeScreen(
 
                     TextInputWithTitle(
                         value = addressTitle,
-                        title = "Address Title",
-                        placeHolder = addressTitle.value.text.ifEmpty { "Write Address Name" },
+                        title = stringResource(R.string.address_title),
+                        placeHolder = addressTitle.value.text.ifEmpty { stringResource(R.string.write_address_name) },
                         errorMessage = errorMessage.value,
                         isHasError = isHasError.value,
 
@@ -403,8 +405,8 @@ fun MapHomeScreen(
                                 }
 
                                 snackBarHostState.showSnackbar(
-                                    message = if (id.isNullOrEmpty()) "Address Add Successfully"
-                                    else "Address Updated Successfully"
+                                    message = if (id.isNullOrEmpty()) context.getString(R.string.address_add_successfully)
+                                    else context.getString(R.string.address_updated_successfully)
                                 )
 
                                 if (!isFomLogin) {
@@ -424,7 +426,7 @@ fun MapHomeScreen(
                             }
 
                         },
-                        buttonTitle = if (id.isNullOrEmpty()) "Add" else "Update",
+                        buttonTitle = if (id.isNullOrEmpty()) stringResource(R.string.add) else stringResource(R.string.update),
                         validationFun = {
                             validateUserAddressTitle()
                         },
@@ -433,7 +435,8 @@ fun MapHomeScreen(
                     Sizer(10)
                 }
             }
-        }) { paddingValue ->
+        })
+    { paddingValue ->
         paddingValue.calculateTopPadding()
         paddingValue.calculateBottomPadding()
 
@@ -513,8 +516,10 @@ fun MapHomeScreen(
             }
 
 
-            /*   if (isHasTitle) CustomButton(
-                   buttonTitle = if (!id.isNullOrEmpty()) "Edite Current Location" else "Add New Address",
+               if (isHasTitle) CustomButton(
+                   buttonTitle = if (!id.isNullOrEmpty()) stringResource(R.string.edite_current_location) else stringResource(
+                       R.string.add_new_address
+                   ),
                    color = CustomColor.primaryColor700,
                    isEnable = true,
                    customModifier = Modifier
@@ -542,7 +547,7 @@ fun MapHomeScreen(
                    },
                    labelSize = 20
                )
-   */
+
         }
     }
 

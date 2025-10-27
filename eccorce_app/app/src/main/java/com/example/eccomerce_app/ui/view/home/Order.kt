@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.ui.view.home
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,6 +73,7 @@ import com.example.e_commercompose.R
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderScreen(orderViewModel: OrderViewModel) {
@@ -101,7 +104,6 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
 
     val page = remember { mutableIntStateOf(1) }
 
-    Log.d("loadingState", isLoadingMore.value.toString())
 
     fun openQrDialog(id: UUID) {
         isShowDialog.value = true
@@ -116,7 +118,6 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
             qrBitMap.value = bitmap
         } catch (e: Exception) {
             isShowDialog.value = false;
-            Log.d("ErrorFromQr","${e.message}")
 
         }
 
@@ -154,7 +155,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                 ),
                 title = {
                     Text(
-                        "My Order",
+                        stringResource(R.string.my_order),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -215,7 +216,6 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
             ) {
                 item {
                     orders.value?.forEach { order ->
-                        Log.d("imageUrl", order.toString())
 
                         Column(
                             modifier = Modifier
@@ -244,7 +244,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                 )
                                 {
                                     Text(
-                                        "Total Price",
+                                        stringResource(R.string.total_price),
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = (16).sp,
@@ -270,7 +270,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                 )
                                 {
                                     Text(
-                                        "DeliveryFee Price",
+                                        stringResource(R.string.deliveryFee_price),
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = (16).sp,
@@ -295,7 +295,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                 )
                                 {
                                     Text(
-                                        "Order Status",
+                                        stringResource(R.string.order_status),
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = (16).sp,
@@ -303,7 +303,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                         textAlign = TextAlign.Center
                                     )
                                     Text(
-                                        "${order.status}",
+                                        order.status,
 
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Bold,
@@ -320,7 +320,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                 )
                                 {
                                     Text(
-                                        "order Qr ",
+                                        stringResource(R.string.order_qr),
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = (16).sp,
@@ -341,7 +341,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                               if(!(order.status=="Received" || order.status=="Completed"))
                                 CustomButton(
 
-                                    buttonTitle = "Cancel Order",
+                                    buttonTitle = stringResource(R.string.cancel_order),
                                     operation = {
                                         deletedId.value = order.id
                                         coroutine.launch {
@@ -353,7 +353,7 @@ fun OrderScreen(orderViewModel: OrderViewModel) {
                                             }.await()
 
                                             isSendingData.value = false
-                                            val message = result ?: "Order deleted Successfully"
+                                            val message = result ?: context.getString(R.string.order_deleted_successfully)
 
                                             snackBarHostState.showSnackbar(message)
                                         }

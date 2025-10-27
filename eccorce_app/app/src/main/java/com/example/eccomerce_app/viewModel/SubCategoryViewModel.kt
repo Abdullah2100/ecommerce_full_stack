@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.dto.ModelToDto.toSubCategoryUpdateDto
 import com.example.eccomerce_app.dto.SubCategoryDto
-import com.example.e_commercompose.model.DtoToModel.toSubCategory
+import com.example.eccomerce_app.model.DtoToModel.toSubCategory
 import com.example.e_commercompose.model.SubCategory
 import com.example.e_commercompose.model.SubCategoryUpdate
 import com.example.eccomerce_app.dto.CreateSubCategoryDto

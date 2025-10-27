@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.dto.StoreDto
-import com.example.e_commercompose.model.DtoToModel.toStore
+import com.example.eccomerce_app.model.DtoToModel.toStore
 import com.example.e_commercompose.model.StoreModel
 import com.example.e_commercompose.ui.view.account.store.enStoreOpeation
 import com.example.eccomerce_app.dto.CreateStoreDto

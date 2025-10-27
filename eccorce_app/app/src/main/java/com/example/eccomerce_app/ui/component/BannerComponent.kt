@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.BannerModel
 import com.example.eccomerce_app.ui.Screens
@@ -104,7 +106,7 @@ if(isShowTitle)
     {
 
         Text(
-            "Banners",
+            stringResource(R.string.banners),
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
@@ -138,13 +140,14 @@ if(isShowTitle)
                             .clip(RoundedCornerShape(8.dp))
                             .border(
                                 width = 1.dp,
-                                color =  CustomColor.neutralColor100,
+                                color = CustomColor.neutralColor100,
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .clickable {
                                 Log.d("navBannerIsPresing", "true")
                                 nav!!.navigate(Screens.Store(banners[page].storeId.toString()))
-                            }.constrainAs(imageRef) {
+                            }
+                            .constrainAs(imageRef) {
                                 top.linkTo(parent.top)
                                 bottom.linkTo(parent.bottom)
                                 start.linkTo(parent.end)
@@ -172,18 +175,22 @@ if(isShowTitle)
             if(deleteBanner!=null)
                 Box(
                     modifier = Modifier
-                        .padding(end = 10.dp,
-                            top = 10.dp)
+                        .padding(
+                            end = 10.dp,
+                            top = 10.dp
+                        )
                         .height(30.dp)
                         .width(30.dp)
-                        .background(CustomColor.alertColor_1_500,
-                            RoundedCornerShape(10.dp))
+                        .background(
+                            CustomColor.alertColor_1_500,
+                            RoundedCornerShape(10.dp)
+                        )
                         .constrainAs(buttonRef) {
                             end.linkTo(parent.end)
                             top.linkTo(parent.top)
-                        }.
-                            clip(RoundedCornerShape(10.dp))
-                        .clickable{
+                        }
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable {
                             deleteBanner(banners[page].id)
                         }
                     , contentAlignment = Alignment.Center

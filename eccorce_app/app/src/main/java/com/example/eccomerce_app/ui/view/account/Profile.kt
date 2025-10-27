@@ -1,22 +1,19 @@
 package com.example.eccomerce_app.ui.view.account
 
 import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -40,16 +37,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -63,9 +58,9 @@ import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.toCustomFil
 import com.example.eccomerce_app.dto.UpdateMyInfoDto
-import com.example.e_commercompose.ui.component.TextInputWithTitle
-import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
-import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextNumberInputWithTitle
+import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.UserViewModel
 import com.example.hotel_mobile.Util.Validation
@@ -115,9 +110,16 @@ fun ProfileScreen(
         }
     }
 
-    fun copyUserId(){
+    fun copyUserId() {
         coroutine.launch {
-            clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText   (userId.value.text, userId.value.text)))
+            clipboardManager.setClipEntry(
+                ClipEntry(
+                    ClipData.newPlainText(
+                        userId.value.text,
+                        userId.value.text
+                    )
+                )
+            )
         }
         //clipboardManager.setPrimaryClip()
     }
@@ -130,31 +132,32 @@ fun ProfileScreen(
         if (oldPassword.value.text.isEmpty() && newPassword.value.text.isEmpty() && phone.value.text.isEmpty())
             return true
         else if (phone.value.text.trim().length < 9) {
-            errorMessage = "Write Valid Phone"
+            errorMessage = context.getString(R.string.write_valid_phone)
         } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordSmallValidation(
                 oldPassword.value.text
             )
         ) {
-            errorMessage = ("password must not contain two small letter")
+            errorMessage = (context.getString(R.string.password_must_not_contain_two_small_letter))
         } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordNumberValidation(
                 oldPassword.value.text
             )
         ) {
-            errorMessage = ("password must not contain two number")
+            errorMessage = (context.getString(R.string.password_must_not_contain_two_number))
         } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordCapitalValidation(
                 oldPassword.value.text
             )
         ) {
-            errorMessage = ("password must not contain two capitalLetter")
+            errorMessage = (context.getString(R.string.password_must_not_contain_two_capitalletter))
         } else if (oldPassword.value.text.isNotEmpty() && !Validation.passwordSpicialCharracterValidation(
                 oldPassword.value.text
             )
         ) {
-            errorMessage = ("password must not contain two spical character")
+            errorMessage =
+                (context.getString(R.string.password_must_not_contain_two_spical_character))
         } else if (newPassword.value.text.isNotEmpty() && newPassword.value.text.trim().isEmpty()) {
-            errorMessage = ("password must not be empty")
+            errorMessage = (context.getString(R.string.password_must_not_be_empty))
         } else if (oldPassword.value.text.isNotEmpty() && newPassword.value.text.isNotEmpty() && oldPassword.value.text != newPassword.value.text) {
-            errorMessage = ("confirm password not equal to password")
+            errorMessage = (context.getString(R.string.confirm_password_not_equal_to_password))
         }
 
         if (errorMessage.isNotEmpty()) {
@@ -188,7 +191,7 @@ fun ProfileScreen(
                 ),
                 title = {
                     Text(
-                        "My Profile",
+                        stringResource(R.string.my_profile),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -247,7 +250,8 @@ fun ProfileScreen(
                                             file.value = null
                                         }
 
-                                        val message = result ?: "profile update successfully"
+                                        val message = result
+                                            ?: context.getString(R.string.profile_update_successfully)
 
                                         coroutine.launch { snackBarHostState.showSnackbar(message) }
 
@@ -257,7 +261,7 @@ fun ProfileScreen(
                             }
                         ) {
                             Text(
-                                "Save",
+                                stringResource(R.string.save),
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = (18).sp,
@@ -273,7 +277,7 @@ fun ProfileScreen(
         it.calculateTopPadding()
         it.calculateBottomPadding()
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
@@ -283,196 +287,207 @@ fun ProfileScreen(
         ) {
 
 
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 15.dp)
-            )
-            {
-                val (imageRef, cameralRef) = createRefs()
-                Box(
+            item {
+                ConstraintLayout(
                     modifier = Modifier
-                        .constrainAs(imageRef) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
-                        .height(110.dp)
-                        .width(110.dp)
-                        .border(
-                            width = 1.dp,
-                            color = CustomColor.neutralColor500,
-                            shape = RoundedCornerShape(60.dp)
-                        ),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(bottom = 15.dp)
                 )
                 {
-                    when (file.value == null) {
-                        true -> {
-                            when (myInfo.value?.thumbnail.isNullOrEmpty()) {
-                                true -> {
+                    val (imageRef, cameralRef) = createRefs()
+                    Box(
+                        modifier = Modifier
+                            .constrainAs(imageRef) {
+                                top.linkTo(parent.top)
+                                bottom.linkTo(parent.bottom)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
+                            .height(110.dp)
+                            .width(110.dp)
+                            .border(
+                                width = 1.dp,
+                                color = CustomColor.neutralColor500,
+                                shape = RoundedCornerShape(60.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    )
+                    {
+                        when (file.value == null) {
+                            true -> {
+                                when (myInfo.value?.thumbnail.isNullOrEmpty()) {
+                                    true -> {
 
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(R.drawable.user),
-                                        "",
-                                        modifier = Modifier.size(80.dp)
-                                    )
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(R.drawable.user),
+                                            "",
+                                            modifier = Modifier.size(80.dp)
+                                        )
+                                    }
+
+                                    else -> {
+
+                                        SubcomposeAsyncImage(
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .height(90.dp)
+                                                .width(90.dp)
+                                                .clip(RoundedCornerShape(50.dp)),
+                                            model = General.handlingImageForCoil(
+                                                myInfo.value!!.thumbnail,
+                                                context
+                                            ),
+                                            contentDescription = "",
+                                            loading = {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize(),
+                                                    contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                                ) {
+                                                    CircularProgressIndicator(
+                                                        color = Color.Black,
+                                                        modifier = Modifier.size(54.dp) // Adjust the size here
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
                                 }
+                            }
 
-                                else -> {
-
-                                    SubcomposeAsyncImage(
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .height(90.dp)
-                                            .width(90.dp)
-                                            .clip(RoundedCornerShape(50.dp)),
-                                        model = General.handlingImageForCoil(
-                                            myInfo.value!!.thumbnail,
-                                            context
-                                        ),
-                                        contentDescription = "",
-                                        loading = {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxSize(),
-                                                contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                            ) {
-                                                CircularProgressIndicator(
-                                                    color = Color.Black,
-                                                    modifier = Modifier.size(54.dp) // Adjust the size here
-                                                )
-                                            }
-                                        },
-                                    )
-                                }
+                            else -> {
+                                SubcomposeAsyncImage(
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .height(90.dp)
+                                        .width(90.dp)
+                                        .clip(RoundedCornerShape(50.dp)),
+                                    model = General.handlingImageForCoil(
+                                        file.value!!.absolutePath,
+                                        context
+                                    ),
+                                    contentDescription = "",
+                                    loading = {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize(),
+                                            contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
+                                        ) {
+                                            CircularProgressIndicator(
+                                                color = Color.Black,
+                                                modifier = Modifier.size(54.dp) // Adjust the size here
+                                            )
+                                        }
+                                    },
+                                )
                             }
                         }
 
-                        else -> {
-                            SubcomposeAsyncImage(
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .height(90.dp)
-                                    .width(90.dp)
-                                    .clip(RoundedCornerShape(50.dp)),
-                                model = General.handlingImageForCoil(
-                                    file.value!!.absolutePath,
-                                    context
-                                ),
-                                contentDescription = "",
-                                loading = {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentAlignment = Alignment.Center // Ensures the loader is centered and doesn't expand
-                                    ) {
-                                        CircularProgressIndicator(
-                                            color = Color.Black,
-                                            modifier = Modifier.size(54.dp) // Adjust the size here
-                                        )
-                                    }
-                                },
-                            )
-                        }
                     }
-
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(end = 5.dp)
-                        .constrainAs(cameralRef) {
-                            end.linkTo(imageRef.end)
-                            bottom.linkTo(imageRef.bottom)
-                        }
-
-
-                )
-                {
-
-                    IconButton(
-                        onClick = {
-                            onImageSelection.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly
-                                )
-                            )
-                        },
+                    Box(
                         modifier = Modifier
-                            .size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = CustomColor.primaryColor200
-                        )
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.camera),
-                            "",
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.White
-                        )
-                    }
-                }
+                            .padding(end = 5.dp)
+                            .constrainAs(cameralRef) {
+                                end.linkTo(imageRef.end)
+                                bottom.linkTo(imageRef.bottom)
+                            }
 
+
+                    )
+                    {
+
+                        IconButton(
+                            onClick = {
+                                onImageSelection.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
+                            modifier = Modifier
+                                .size(30.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = CustomColor.primaryColor200
+                            )
+                        ) {
+                            Icon(
+                                ImageVector.vectorResource(R.drawable.camera),
+                                "",
+                                modifier = Modifier.size(18.dp),
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                }
             }
 
-
-            TextInputWithTitle(
-                value = userId,
-                title = "User Id",
-                placeHolder = myInfo.value?.name ?: "",
-                errorMessage = "",
-                isEnable = false,
-                trailIcon = {
-                    if(myInfo.value!=null)
-                    IconButton(
-                        onClick = {
-                            copyUserId()
-                        }
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(R.drawable.copy)
-                            ,"",
-                            modifier = Modifier.size(30.dp)
-                        )
+            item {
+                TextInputWithTitle(
+                    value = userId,
+                    title = stringResource(R.string.user_id),
+                    placeHolder = myInfo.value?.name ?: "",
+                    errorMessage = "",
+                    isEnable = false,
+                    trailIcon = {
+                        if (myInfo.value != null)
+                            IconButton(
+                                onClick = {
+                                    copyUserId()
+                                }
+                            ) {
+                                Icon(
+                                    ImageVector.vectorResource(R.drawable.copy), "",
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
                     }
-                }
-            )
+                )
+            }
 
-            TextInputWithTitle(
-                value = fullName,
-                title = "Full Name",
-                placeHolder = myInfo.value?.name ?: "",
-                errorMessage = "",
-            )
+            item {
+                TextInputWithTitle(
+                    value = fullName,
+                    title = stringResource(R.string.full_name),
+                    placeHolder = myInfo.value?.name ?: "",
+                    errorMessage = "",
+                )
+            }
+            item {
+                TextInputWithTitle(
+                    value = email,
+                    title = stringResource(R.string.email),
+                    placeHolder = myInfo.value?.email ?: "",
+                    errorMessage = "",
+                    isEnable = false,
+                )
+            }
 
-            TextInputWithTitle(
-                value = email,
-                title = "Email",
-                placeHolder = myInfo.value?.email ?: "",
-                errorMessage = "",
-                isEnable = false,
-            )
+            item {
+                TextNumberInputWithTitle(
+                    value = phone,
+                    title = stringResource(R.string.phone),
+                    placeHolder = myInfo.value?.phone ?: "",
+                    errorMessage = "",
+                )
+            }
+            item {
+                TextSecureInputWithTitle(
+                    value = oldPassword,
+                    title = stringResource(R.string.current_password),
+                    isHasError = false,
+                    errMessage = ""
+                )
+            }
 
-            TextNumberInputWithTitle(
-                value = phone,
-                title = "Phone",
-                placeHolder = myInfo.value?.phone ?: "",
-                errorMessage = "",
-            )
-            TextSecureInputWithTitle(
-                value = oldPassword,
-                title = "Current Password",
-                isHasError = false,
-                errMessage = ""
-            )
-
-            TextSecureInputWithTitle(
-                value = newPassword,
-                title = "New Password",
-                isHasError = false,
-                errMessage = ""
-            )
+            item {
+                TextSecureInputWithTitle(
+                    value = newPassword,
+                    title = stringResource(R.string.new_password),
+                    isHasError = false,
+                    errMessage = ""
+                )
+            }
         }
     }
 

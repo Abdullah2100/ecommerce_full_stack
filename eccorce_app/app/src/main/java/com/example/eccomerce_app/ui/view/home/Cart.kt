@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -111,7 +112,7 @@ fun CartScreen(
                 ),
                 title = {
                     Text(
-                        "My Cart",
+                        stringResource(R.string.my_cart),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -139,7 +140,7 @@ fun CartScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "Total",
+                            stringResource(R.string.total),
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
                             fontSize = (16).sp,
@@ -163,7 +164,7 @@ fun CartScreen(
                             .padding(horizontal = 15.dp)
                     ) {
                         CustomButton(
-                            buttonTitle = "Go to Checkout", operation = {
+                            buttonTitle = stringResource(R.string.go_to_checkout), operation = {
                                 coroutine.launch {
                                     cartViewModel.calculateOrderDistanceToUser(
                                         stores = stores.value,

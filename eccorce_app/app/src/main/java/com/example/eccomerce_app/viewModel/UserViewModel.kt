@@ -1,14 +1,15 @@
 package com.example.eccomerce_app.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.util.General
-import com.example.eccomerce_app.data.Room.AuthDao
+import com.example.eccomerce_app.data.Room.DAO.AuthDao
 import com.example.eccomerce_app.data.Room.Model.IsPassLocationScreen
 import com.example.e_commercompose.model.Address
-import com.example.e_commercompose.model.DtoToModel.toAddress
-import com.example.e_commercompose.model.DtoToModel.toUser
+import com.example.eccomerce_app.model.DtoToModel.toAddress
+import com.example.eccomerce_app.model.DtoToModel.toUser
 import com.example.eccomerce_app.dto.UpdateMyInfoDto
 import com.example.e_commercompose.model.UserModel
 import com.example.eccomerce_app.dto.AddressDto
@@ -16,11 +17,15 @@ import com.example.eccomerce_app.dto.CreateAddressDto
 import com.example.eccomerce_app.dto.UpdateAddressDto
 import com.example.eccomerce_app.dto.UserDto
 import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.Room.DAO.LocaleDao
+import com.example.eccomerce_app.data.Room.Model.CurrentLocal
 import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
 import com.example.eccomerce_app.data.repository.AddressRepository
 import com.example.eccomerce_app.data.repository.UserRepository
+import com.example.eccomerce_app.util.General.currentLocal
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +35,8 @@ import java.util.UUID
 class UserViewModel(
     val dao: AuthDao,
     val userRepository: UserRepository,
-    val addressRepository: AddressRepository
+    val addressRepository: AddressRepository,
+    val localeDao: LocaleDao
 ) : ViewModel() {
     val _userInfo = MutableStateFlow<UserModel?>(null)
     val userInfo = _userInfo.asStateFlow()
@@ -51,6 +57,11 @@ class UserViewModel(
         }
     }
 
+
+   suspend fun updateCurrentLocale(locale:String) {
+             localeDao.saveCurrentLocale(CurrentLocal(0, locale))
+            currentLocal.emit(locale);
+    }
     suspend fun userPassLocation(status: Boolean? = false) {
         var isPassLocation = IsPassLocationScreen()
         isPassLocation.condition = status ?: false;

@@ -27,19 +27,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.component.Sizer
-import com.example.e_commercompose.ui.component.TextInputWithTitle
-import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -47,6 +49,7 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     nav: NavHostController, authKoin: AuthViewModel
 ) {
+    val context = LocalContext.current
 
     val fontScall = LocalDensity.current.fontScale
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -64,9 +67,6 @@ fun LoginScreen(
     val userNameOrEmail = remember { mutableStateOf(TextFieldValue("salime@gmail.com")) }
     val password = remember { mutableStateOf(TextFieldValue("12AS@#fs")) }
 
-//    val userNameOrEmail = remember { mutableStateOf(TextFieldValue("")) }
-//    val password = remember { mutableStateOf(TextFieldValue("")) }
-
 
     val errorMessageValidation = remember { mutableStateOf("") }
 
@@ -79,13 +79,14 @@ fun LoginScreen(
         isPasswordError.value = false
         when {
             username.trim().isEmpty() -> {
-                errorMessageValidation.value = "email must not be empty"
+                errorMessageValidation.value = context.getString(R.string.email_must_not_be_empty)
                 isEmailError.value = true
                 return false
             }
 
             password.trim().isEmpty() -> {
-                errorMessageValidation.value = ("password must not be empty")
+                errorMessageValidation.value =
+                    context.getString(R.string.password_must_not_be_empty)
                 isPasswordError.value = true
                 return false
             }
@@ -137,7 +138,7 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Don’t have any account yet?",
+                        text = stringResource(R.string.don_t_have_any_account_yet),
                         color = CustomColor.neutralColor800,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
@@ -150,7 +151,7 @@ fun LoginScreen(
                                 nav.navigate(Screens.Signup)
                             }) {
                         Text(
-                            text = "Signup",
+                            text = stringResource(R.string.signup),
                             color = CustomColor.primaryColor700,
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
@@ -176,7 +177,7 @@ fun LoginScreen(
             ) {
 
                 Text(
-                    "Login",
+                    text = stringResource(R.string.login),
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Bold,
                     color = CustomColor.neutralColor950,
@@ -186,19 +187,22 @@ fun LoginScreen(
                 Sizer(heigh = 50)
                 TextInputWithTitle(
                     userNameOrEmail,
-                    title = "Email",
-                    placeHolder = "Enter Your email",
+                    title = stringResource(R.string.email),
+                    placeHolder = stringResource(R.string.enter_your_email),
                     errorMessage = errorMessageValidation.value,
                     isHasError = isEmailError.value,
                 )
                 TextSecureInputWithTitle(
-                    password, "Password", isPasswordError.value, errorMessageValidation.value
+                    password,
+                    stringResource(R.string.password),
+                    isPasswordError.value,
+                    errorMessageValidation.value
                 )
                 Box(
                     modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd
                 ) {
                     Text(
-                        "Forget Password",
+                        stringResource(R.string.forget_password),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Medium,
                         color = CustomColor.neutralColor950,
@@ -217,7 +221,7 @@ fun LoginScreen(
                         keyboardController?.hide()
                         if (userNameOrEmail.value.text.isBlank() || password.value.text.isBlank()) {
                             coroutine.launch {
-                                snackBarHostState.showSnackbar("User name Or Password is Blank")
+                                snackBarHostState.showSnackbar(context.getString(R.string.user_name_or_password_is_blank))
                             }
                         } else {
                             coroutine.launch {
@@ -225,12 +229,13 @@ fun LoginScreen(
 
                                 delay(10)
 
-                                val token = async { authKoin.generateTokenNotification() }.await()
+                                val token =
+                                    //async { authKoin.generateTokenNotification() }.await()
 
-//                                Pair(
-//                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-//                                    null
-//                                )
+                                Pair(
+                                    "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+                                    null
+                                )
                                 if (!token.first.isNullOrEmpty()) {
                                     val result = authKoin.loginUser(
                                         userNameOrEmail.value.text,
@@ -252,27 +257,20 @@ fun LoginScreen(
                                     coroutine.launch {
                                         snackBarHostState.showSnackbar(
                                             token.second
-                                                ?: "network must be connected to complete operation"
+                                                ?: context.getString(R.string.network_must_be_connected_to_complete_operation)
                                         )
                                     }
                                 }
                             }
 
-
                         }
-                    }, buttonTitle = "Login", validationFun = {
+                    }, buttonTitle = stringResource(R.string.login), validationFun = {
                         true
                         validateLoginInput(
                             username = userNameOrEmail.value.text, password = password.value.text
                         )
-
                     })
-
             }
         }
-
-
     }
-
-
 }

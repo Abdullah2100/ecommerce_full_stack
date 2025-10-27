@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,7 @@ import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.CategoryViewModel
-
+import com.example.e_commercompose.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +66,7 @@ fun CategoryScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
                 title = {
                     Text(
-                        "Category",
+                        stringResource(R.string.category),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,

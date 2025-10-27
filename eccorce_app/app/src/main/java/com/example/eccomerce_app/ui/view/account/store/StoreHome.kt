@@ -2,7 +2,6 @@ package com.example.e_commercompose.ui.view.account.store
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -73,6 +72,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -93,12 +93,11 @@ import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.ProductLoading
 import com.example.e_commercompose.ui.component.ProductShape
 import com.example.e_commercompose.ui.component.Sizer
-import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.reachedBottom
-import com.example.eccomerce_app.util.General.toCalender
 import com.example.eccomerce_app.util.General.toCustomFil
 import com.example.eccomerce_app.util.General.toLocalDateTime
 import com.example.eccomerce_app.viewModel.BannerViewModel
@@ -216,20 +215,14 @@ fun StoreScreen(
 
 
     val calendar = Calendar.getInstance();
-//    calendar.add(Calendar.HOUR,-3)
+
     val newTimeInMillis = calendar.timeInMillis
 
     val locationClient = LocationServices.getFusedLocationProviderClient(context)
 
-    fun handlingLocation(type: enMapType, location: Location): LatLng? {
+    fun handlingLocation(): LatLng? {
               return   if (storeData == null) null
                 else   LatLng(storeData.latitude, storeData.longitude)
-
-//            }
-
-//            else ->
-//                return null;
-//        }
     }
 
     val requestPermissionThenNavigate = rememberLauncherForActivityResult(
@@ -260,7 +253,7 @@ fun StoreScreen(
                                         true -> enMapType.MyStore
                                         else -> enMapType.Store
                                     }
-                                val locationHolder = handlingLocation(type, location)
+                                val locationHolder = handlingLocation()
 
                                 nav.navigate(
                                     Screens.MapScreen(
@@ -275,7 +268,7 @@ fun StoreScreen(
                                 )
                             } else
                                 coroutine.launch {
-                                    snackBarHostState.showSnackbar("you should enable location services")
+                                    snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                                 }
                         }
                         addOnFailureListener { fail ->
@@ -290,7 +283,9 @@ fun StoreScreen(
 
                 // Got last known location. In some srare situations this can be null.
             } else {
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.location_permission_denied)
+                    , Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -337,13 +332,13 @@ fun StoreScreen(
         keyboardController?.hide()
         var errorMessage = ""
         if (createdStoreInfoHolder.value?.wallpaperImage == null) errorMessage =
-            "You must select the wallpaper image"
+            context.getString(R.string.you_must_select_the_wallpaper_image)
         else if (createdStoreInfoHolder.value?.smallImage == null) errorMessage =
-            "You must select the small image"
+            context.getString(R.string.you_must_select_the_small_image)
         else if (createdStoreInfoHolder.value?.name.isNullOrEmpty()) errorMessage =
-            "You must write the store name"
+            context.getString(R.string.you_must_write_the_store_name)
         else if (createdStoreInfoHolder.value?.latitude == null) errorMessage =
-            "You must select the store Location"
+            context.getString(R.string.you_must_select_the_store_location)
 
         if (errorMessage.trim().isNotEmpty()) {
             coroutine.launch {
@@ -359,7 +354,7 @@ fun StoreScreen(
         storeViewModel.getStoreData(storeId = id!!)
         bannerViewModel.getStoreBanner(id)
         subCategoryViewModel.getStoreSubCategories(id, 1)
-        productViewModel.getProducts(mutableStateOf(1), id)
+        productViewModel.getProducts(mutableIntStateOf(1), id)
     }
 
     fun changeStoreOperation(storeOperationStore: enStoreOpeation?) {
@@ -438,7 +433,7 @@ fun StoreScreen(
                         )
                         {
                             Text(
-                                "Category",
+                                stringResource(R.string.category),
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (16).sp,
@@ -473,7 +468,7 @@ fun StoreScreen(
                                 {
 
                                     Text(
-                                        categoryName.value.text.ifEmpty { "Select Category Name" }
+                                        categoryName.value.text.ifEmpty { stringResource(R.string.select_category_name) }
                                     )
                                     Icon(
                                         Icons.Default.KeyboardArrowDown,
@@ -526,8 +521,8 @@ fun StoreScreen(
 
                         TextInputWithTitle(
                             value = subCategoryName,
-                            title = "Name",
-                            placeHolder = "Enter Sub Category Name",
+                            title = stringResource(R.string.name),
+                            placeHolder = stringResource(R.string.enter_sub_category_name),
                         )
 
                         CustomButton(
@@ -566,7 +561,7 @@ fun StoreScreen(
 
                                 }
                             },
-                            buttonTitle = if (isUpdated.value) "Update" else "Create",
+                            buttonTitle = if (isUpdated.value) stringResource(R.string.update) else stringResource(R.string.create),
                             color = null,
                             isEnable = !isDeleted.value && (subCategoryName.value.text.isNotEmpty() &&
                                     categoryName.value.text.isNotEmpty())
@@ -603,9 +598,9 @@ fun StoreScreen(
 
                                     }
                                 },
-                                buttonTitle = "Deleted",
+                                buttonTitle = stringResource(R.string.deleted),
                                 color = CustomColor.alertColor_1_600,
-                                isEnable = isSendingData.value == false
+                                isEnable = !isSendingData.value
                             )
                         }
                         if (isSubCategoryCreateError.value) {
@@ -633,7 +628,7 @@ fun StoreScreen(
                                     }) {
 
                                         Text(
-                                            "cencle",
+                                            stringResource(R.string.cancel),
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Normal,
                                             fontSize = (16).sp,
@@ -660,7 +655,7 @@ fun StoreScreen(
                 ),
                 title = {
                     Text(
-                        "Store",
+                        stringResource(R.string.store),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -744,7 +739,9 @@ fun StoreScreen(
 
                                 else -> {
                                     Text(
-                                        if (storeOperation.value == enStoreOpeation.Update) "Update" else "Create",
+                                        if (storeOperation.value == enStoreOpeation.Update) stringResource(
+                                            R.string.update
+                                        ) else stringResource(R.string.create),
                                         fontFamily = General.satoshiFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = (16).sp,
@@ -828,20 +825,10 @@ fun StoreScreen(
                     {
                         TextButton(
                             onClick = {
-                                Log.d(
-                                    "thisTheSelectedBannerDate", """
-    this the selected date millisecond ${datePickerState.selectedDateMillis!!.toCalender().timeInMillis}
-     this the current Time${newTimeInMillis}
-     this the date ${datePickerState.selectedDateMillis?.toCalender()?.toLocalDateTime()}
-     this the current date ${calendar.toLocalDateTime()}
-                                 """.trimIndent()
-                                )
-
-
                                 if (datePickerState.selectedDateMillis != null && datePickerState.selectedDateMillis!! < newTimeInMillis) {
                                     isShownDateDialog.value = false
                                     coroutine.launch {
-                                        snackBarHostState.showSnackbar("You must select valid date")
+                                        snackBarHostState.showSnackbar(context.getString(R.string.you_must_select_valid_date))
                                     }
                                 } else {
                                     isShownDateDialog.value = false
@@ -859,7 +846,7 @@ fun StoreScreen(
                                         isSendingData.value = false
                                         var errorMessage = ""
                                         errorMessage =
-                                            if (result.isNullOrEmpty()) "banner created successfully"
+                                            if (result.isNullOrEmpty()) context.getString(R.string.banner_created_successfully)
                                             else result
                                         coroutine.launch {
                                             snackBarHostState.showSnackbar(
@@ -872,7 +859,7 @@ fun StoreScreen(
                                 }
                             }) {
                             Text(
-                                "ok",
+                                stringResource(R.string.ok),
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = (18).sp,
@@ -1053,7 +1040,7 @@ fun StoreScreen(
                         ConstraintLayout(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .offset(y = -50.dp)
+                                .offset(y = (-50).dp)
                                 .constrainAs(smalImageRef) {
                                     top.linkTo(bigImageRef.bottom)
                                     start.linkTo(parent.start)
@@ -1233,7 +1220,7 @@ fun StoreScreen(
                             Sizer(10)
 
                             Text(
-                                "Store Name",
+                                stringResource(R.string.store_name),
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = (18).sp,
@@ -1243,7 +1230,7 @@ fun StoreScreen(
                             TextInputWithTitle(
                                 value = storeName,
                                 title = "",
-                                placeHolder = storeData?.name ?: "Write Your Store Name",
+                                placeHolder = storeData?.name ?: stringResource(R.string.write_your_store_name),
                                 isHasError = false,
                                 onChange = { it ->
                                     storeViewModel
@@ -1270,7 +1257,7 @@ fun StoreScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Store Banner",
+                                    stringResource(R.string.store_banner),
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = (18).sp,
@@ -1337,7 +1324,7 @@ fun StoreScreen(
                                         isSendingData.value = false
                                         var errorMessage = ""
                                         errorMessage = if (result.isNullOrEmpty()) {
-                                            "banner deleted Seccesffuly"
+                                            context.getString(R.string.banner_deleted_successfully)
                                         } else {
                                             result
                                         }
@@ -1362,7 +1349,7 @@ fun StoreScreen(
                     {
 
                         Text(
-                            "Store Location",
+                            stringResource(R.string.store_location),
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = (18).sp,
@@ -1408,7 +1395,7 @@ fun StoreScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Sub Category ",
+                                    stringResource(R.string.sub_category),
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = (18).sp,
@@ -1492,7 +1479,7 @@ fun StoreScreen(
 
                                                 ) {
                                                     Text(
-                                                        "All",
+                                                        stringResource(R.string.all),
                                                         fontFamily = General.satoshiFamily,
                                                         fontWeight = FontWeight.Bold,
                                                         fontSize = (18).sp,
@@ -1633,7 +1620,7 @@ fun StoreScreen(
                                                                 isSendingData.value = false
                                                                 var resultMessage = ""
                                                                 resultMessage = result
-                                                                    ?: "Product is Deleted successfully"
+                                                                    ?: context.getString(R.string.product_is_deleted_successfully)
 
                                                                 snackBarHostState.showSnackbar(
                                                                     resultMessage

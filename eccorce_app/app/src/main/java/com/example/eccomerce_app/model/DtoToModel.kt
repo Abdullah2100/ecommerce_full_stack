@@ -1,23 +1,32 @@
-package com.example.e_commercompose.model
+package com.example.eccomerce_app.model
 
+import com.example.e_commercompose.model.Address
+import com.example.e_commercompose.model.BannerModel
+import com.example.e_commercompose.model.Category
+import com.example.e_commercompose.model.GeneralSetting
+import com.example.e_commercompose.model.Order
+import com.example.e_commercompose.model.OrderItem
+import com.example.e_commercompose.model.OrderProduct
+import com.example.e_commercompose.model.OrderVariant
+import com.example.e_commercompose.model.ProductModel
+import com.example.e_commercompose.model.ProductVariant
+import com.example.e_commercompose.model.StoreModel
+import com.example.e_commercompose.model.SubCategory
+import com.example.e_commercompose.model.UserModel
+import com.example.e_commercompose.model.VarirntModel
 import com.example.eccomerce_app.dto.AddressDto
 import com.example.eccomerce_app.dto.BannerDto
 import com.example.eccomerce_app.dto.CategoryDto
 import com.example.eccomerce_app.dto.DeliveryDto
 import com.example.eccomerce_app.dto.DeliveryUserInfoDto
-import com.example.eccomerce_app.dto.ProductDto
-import com.example.eccomerce_app.dto.ProductVarientDto
 import com.example.eccomerce_app.dto.StoreDto
 import com.example.eccomerce_app.dto.SubCategoryDto
-import com.example.eccomerce_app.dto.UserDto
 import com.example.eccomerce_app.dto.VarientDto
 import com.example.eccomerce_app.dto.GeneralSettingDto
-import com.example.eccomerce_app.dto.OrderItemDto
 import com.example.eccomerce_app.dto.OrderProductDto
 import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderVariantDto
-import com.example.eccomerce_app.model.Delivery
-import com.example.eccomerce_app.model.DeliveryUserInfo
+import com.example.eccomerce_app.dto.*
 import com.example.eccomerce_app.util.Secrets
 import kotlin.text.replace
 
@@ -179,7 +188,7 @@ object DtoToModel {
     fun OrderItemDto.toOrderItem(): OrderItem {
         return OrderItem(
             id = this.id,
-            quantity = this.Quantity,
+            quantity = this.quantity,
             price = this.price,
             product = this.product.toOrderProduct(),
             productVariant = if (this.productVariant.isNullOrEmpty())

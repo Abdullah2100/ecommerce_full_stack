@@ -162,11 +162,11 @@ fun BannerLoading() {
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun ProductLoading(lenght: Int? = null) {
+fun ProductLoading(length: Int? = null) {
     val config = LocalConfiguration.current
-    val screanWidth = config.screenWidthDp.dp
+    val screenWidth = config.screenWidthDp.dp
 
-    val items = ((screanWidth - 30.dp) / 160)
+    val items = ((screenWidth - 30.dp) / 160)
 
     FlowRow(
         modifier = Modifier
@@ -176,7 +176,7 @@ fun ProductLoading(lenght: Int? = null) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        repeat(lenght ?: items.value.toInt()) {
+        repeat(length ?: items.value.toInt()) {
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White

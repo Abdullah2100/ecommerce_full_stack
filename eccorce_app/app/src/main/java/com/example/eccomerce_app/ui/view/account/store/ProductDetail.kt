@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.CardProductModel
 import com.example.e_commercompose.model.ProductVariant
@@ -185,7 +188,7 @@ fun ProductDetail(
                 ),
                 title = {
                     Text(
-                        "Product Detail",
+                        stringResource(R.string.product_detail),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -232,7 +235,7 @@ fun ProductDetail(
                             )
                         )
                         coroutine.launch {
-                            snackBarHostState.showSnackbar("Item Added to Cart")
+                            snackBarHostState.showSnackbar(context.getString(R.string.item_added_to_cart))
 
                         }
                     },
@@ -245,7 +248,7 @@ fun ProductDetail(
 
 
                     Text(
-                        "Add To Cart",
+                        stringResource(R.string.add_to_cart),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (16).sp
@@ -381,7 +384,7 @@ fun ProductDetail(
 
                     Sizer(16)
                     Text(
-                        text = "Product Details",
+                        text = stringResource(R.string.product_details),
                         color = CustomColor.neutralColor950,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
@@ -406,7 +409,7 @@ fun ProductDetail(
                         variants.value?.firstOrNull { it.id == productData.productVariants!![index][0].variantId }?.name
                             ?: ""
                     Text(
-                        text = "Select ${title}",
+                        text = stringResource(R.string.select, title),
                         color = CustomColor.neutralColor950,
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
@@ -422,7 +425,7 @@ fun ProductDetail(
                     ) {
                         repeat(productData.productVariants[index].size) { pvIndex ->
 
-                            val productVarientHolder = ProductVariant(
+                            val productVariantHolder = ProductVariant(
                                 id = productData.productVariants[index][pvIndex].id,
                                 name = productData.productVariants[index][pvIndex].name,
                                 percentage = productData.productVariants[index][pvIndex].percentage,
@@ -431,7 +434,7 @@ fun ProductDetail(
                             when (title == "Color") {
                                 true -> {
                                     val colorValue =
-                                        General.convertColorToInt(productData.productVariants!![index][pvIndex].name)
+                                        General.convertColorToInt(productData.productVariants[index][pvIndex].name)
 
                                     if (colorValue != null)
                                         Box(
@@ -444,11 +447,11 @@ fun ProductDetail(
                                                 )
                                                 .border(
                                                     width = if (selectedProductVariants.value.contains(
-                                                            productVarientHolder
+                                                            productVariantHolder
                                                         )
                                                     ) 1.dp else 0.dp,
                                                     color = if (selectedProductVariants.value.contains(
-                                                            productVarientHolder
+                                                            productVariantHolder
                                                         )
                                                     ) CustomColor.primaryColor700
                                                     else Color.Transparent,
@@ -460,7 +463,7 @@ fun ProductDetail(
                                                     val copyVarient =
                                                         mutableListOf<ProductVariant>()
 
-                                                    copyVarient.add(productVarientHolder)
+                                                    copyVarient.add(productVariantHolder)
                                                     copyVarient.addAll(selectedProductVariants.value)
                                                     selectedProductVariants.value =
                                                         copyVarient.distinctBy { it.variantId }
@@ -476,7 +479,7 @@ fun ProductDetail(
                                             .border(
                                                 1.dp,
                                                 if (selectedProductVariants.value.contains(
-                                                        productVarientHolder
+                                                        productVariantHolder
                                                     )
                                                 ) CustomColor.primaryColor700 else CustomColor.neutralColor200,
                                                 RoundedCornerShape(8.dp)
@@ -487,7 +490,7 @@ fun ProductDetail(
 
                                                 val copyVarient = mutableListOf<ProductVariant>()
 
-                                                copyVarient.add(productVarientHolder)
+                                                copyVarient.add(productVariantHolder)
                                                 copyVarient.addAll(selectedProductVariants.value)
                                                 selectedProductVariants.value = copyVarient
                                                     .distinctBy { it.variantId }
@@ -496,7 +499,7 @@ fun ProductDetail(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = productData.productVariants!![index][pvIndex].name,
+                                            text = productData.productVariants[index][pvIndex].name,
                                             color = CustomColor.neutralColor950,
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Bold,
@@ -524,7 +527,6 @@ fun ProductDetail(
                         SubcomposeAsyncImage(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-//                                                .padding(top = 35.dp)
                                 .height(50.dp)
                                 .width(50.dp)
                                 .clip(RoundedCornerShape(50.dp)),
@@ -562,7 +564,7 @@ fun ProductDetail(
 
                             if (isCanNavigateToStore)
                                 Text(
-                                    "Visit Store",
+                                    stringResource(R.string.visit_store),
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = (16).sp,
@@ -571,7 +573,7 @@ fun ProductDetail(
                                         if (productData != null)
                                             productViewModel
                                                 .getProducts(
-                                                    pageNumber = mutableStateOf(1),
+                                                    pageNumber = mutableIntStateOf(1),
                                                     storeId = productData.storeId
                                                 )
                                         nav.navigate(

@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -107,7 +108,7 @@ fun AddressHomeScreen(
                                     )
                                 else
                                     coroutine.launch {
-                                        snackBarHostState.showSnackbar("you should enable location services")
+                                        snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                                     }
                             }
                             addOnFailureListener { fail ->
@@ -123,7 +124,8 @@ fun AddressHomeScreen(
                 }
 
             } else {
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -175,7 +177,7 @@ fun AddressHomeScreen(
 
             Sizer(50)
             Text(
-                "What is Your Location?",
+                stringResource(R.string.what_is_your_location),
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = (24 / fontScall).sp,
@@ -185,7 +187,7 @@ fun AddressHomeScreen(
             )
             Sizer(8)
             Text(
-                "We need to know your location in order to suggest nearby services.",
+                stringResource(R.string.we_need_to_know_your_location_in_order_to_suggest_nearby_services),
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = (16 / fontScall).sp,
@@ -202,7 +204,7 @@ fun AddressHomeScreen(
                         )
                     )
                 },
-                buttonTitle = "Allow Location Access",
+                buttonTitle = stringResource(R.string.allow_location_access),
                 color = CustomColor.primaryColor700
             )
             Sizer(20)
@@ -211,7 +213,7 @@ fun AddressHomeScreen(
                     userViewModel.getMyInfo()
                     nav.navigate(Screens.PickCurrentAddress)
                 },
-                buttonTitle = "Enter Location Manually",
+                buttonTitle = stringResource(R.string.enter_location_manually),
                 color = CustomColor.primaryColor700
             )
 
@@ -225,10 +227,10 @@ fun AddressHomeScreen(
                         isNotEnablePermission.value = false
                     },
                     title = {
-                        Text("Permission Required")
+                        Text(stringResource(R.string.permission_required))
                     },
                     text = {
-                        Text("You need to approve this permission in order to...")
+                        Text(stringResource(R.string.you_need_to_approve_this_permission_in_order_to))
                     },
                     confirmButton = {
 //                        TextButton(onClick = {
@@ -242,7 +244,7 @@ fun AddressHomeScreen(
                             //Logic when user denies to accept permissions
                         }) {
                             isNotEnablePermission.value = false
-                            Text("Deny")
+                            Text(stringResource(R.string.deny))
                         }
                     })
             }

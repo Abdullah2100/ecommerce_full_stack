@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.dto
 
+
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDKserialize
 import com.example.hotel_mobile.services.kSerializeChanger.UUIDListKserialize
 import kotlinx.serialization.Serializable
@@ -17,7 +18,7 @@ data class OrderItemDto(
     val productVariant:List<OrderVariantDto>?=null,
     val orderItemStatus: String,
     val orderStatusName:String,
-    )
+)
 
 
 @Serializable

@@ -48,11 +48,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.reachedBottom
 import com.example.e_commercompose.ui.component.CustomButton
@@ -135,7 +137,7 @@ fun OrderForMyStoreScreen(
                 ),
                 title = {
                     Text(
-                        "Order Belong To My Store",
+                        stringResource(R.string.order_belong_to_my_store),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -274,7 +276,7 @@ fun OrderForMyStoreScreen(
                                             CustomButton(
                                                 isEnable = true,
                                                 operation = {},
-                                                buttonTitle = "Excepted",
+                                                buttonTitle = context.getString(R.string.excepted),
                                                 color = CustomColor.alertColor_2_600
                                             )
                                         }
@@ -303,7 +305,7 @@ fun OrderForMyStoreScreen(
                                                         }.await()
                                                         isSendingData.value = false
                                                         var message =
-                                                            "Complete Update OrderItem Status"
+                                                            context.getString(R.string.complete_update_orderitem_status)
                                                         if (!result.isNullOrEmpty()) {
                                                             message = result
                                                         }
@@ -312,7 +314,7 @@ fun OrderForMyStoreScreen(
                                                     }
                                                 },
 
-                                                buttonTitle = "Except",
+                                                buttonTitle = context.getString(R.string.except),
                                                 color = CustomColor.primaryColor700
                                             )
                                         }
@@ -337,8 +339,7 @@ fun OrderForMyStoreScreen(
                                                         }.await()
                                                         isSendingData.value = false
 
-                                                        var message =
-                                                            "Complete Update OrderItem Status"
+                                                        var message = context.getString(R.string.complete_update_orderitem_status)
                                                         if (!result.isNullOrEmpty()) {
                                                             message = result
                                                         }
@@ -346,7 +347,7 @@ fun OrderForMyStoreScreen(
 
                                                     }
                                                 },
-                                                buttonTitle = "Reject",
+                                                buttonTitle = context.getString(R.string.reject),
                                                 color = CustomColor.alertColor_1_600
                                             )
                                         }

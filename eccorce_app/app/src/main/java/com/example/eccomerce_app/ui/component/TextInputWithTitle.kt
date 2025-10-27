@@ -1,4 +1,4 @@
-package com.example.e_commercompose.ui.component
+package com.example.eccomerce_app.ui.component
 
 import androidx.compose.foundation.Image
 import com.example.e_commercompose.R
@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,12 +18,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.e_commercompose.ui.component.Sizer
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.theme.CustomColor
 
@@ -58,7 +58,8 @@ fun TextInputWithTitle(
     ) {
 
     val modifierWithFocus =
-        Modifier.fillMaxWidth()
+        Modifier
+            .fillMaxWidth()
             .padding(0.dp)
 
 
@@ -250,7 +251,7 @@ fun TextSecureInputWithTitle(
             onValueChange = { value.value = it },
             placeholder = {
                 Text(
-                    "Enter your Password",
+                    stringResource(R.string.enter_your_password),
                     color = CustomColor.neutralColor500,
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Normal,

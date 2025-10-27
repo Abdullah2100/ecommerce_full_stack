@@ -3,7 +3,7 @@ package com.example.eccomerce_app.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commercompose.model.DtoToModel.toGeneralSetting
+import com.example.eccomerce_app.model.DtoToModel.toGeneralSetting
 import com.example.e_commercompose.model.GeneralSetting
 import com.example.eccomerce_app.dto.GeneralSettingDto
 import com.example.eccomerce_app.data.NetworkCallHandler

@@ -1,6 +1,5 @@
 package com.example.eccomerce_app.ui.view.account.store
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -74,8 +74,8 @@ import com.example.e_commercompose.dto.ModelToDto.toListOfProductVarient
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.e_commercompose.ui.component.CustomButton
 import com.example.e_commercompose.ui.component.Sizer
-import com.example.e_commercompose.ui.component.TextInputWithTitle
-import com.example.e_commercompose.ui.component.TextNumberInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextNumberInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.viewModel.ProductViewModel
 import com.example.eccomerce_app.viewModel.SubCategoryViewModel
@@ -201,17 +201,17 @@ fun CreateProductScreen(
     fun validateInput(): Boolean {
         var errorMessage = ""
         if (thumbnail.value == null) {
-            errorMessage = "product thumbnail is require"
+            errorMessage = context.getString(R.string.product_thumbnail_is_require)
         } else if (images.value.isEmpty())
-            errorMessage = "you must select least one image for product"
+            errorMessage = context.getString(R.string.you_must_select_least_one_image_for_product)
         else if (productName.value.text.trim().isEmpty())
-            errorMessage = "product name is require"
+            errorMessage = context.getString(R.string.product_name_is_require)
         else if (description.value.text.trim().isEmpty())
-            errorMessage = "product description is required"
+            errorMessage = context.getString(R.string.product_description_is_required)
         else if (price.value.text.trim().isEmpty())
-            errorMessage = "product price is required"
+            errorMessage = context.getString(R.string.product_price_is_required)
         else if (selectedSubCategoryId.value == null)
-            errorMessage = "you must select subCategory"
+            errorMessage = context.getString(R.string.you_must_select_subcategory)
 
         if (errorMessage.isNotEmpty()) {
             coroutine.launch {
@@ -244,7 +244,9 @@ fun CreateProductScreen(
                 ),
                 title = {
                     Text(
-                        if (productId == null) "Create Product" else "Update Product",
+                        if (productId == null) stringResource(R.string.create_product) else stringResource(
+                            R.string.update_product
+                        ),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -306,7 +308,7 @@ fun CreateProductScreen(
                                         description.value = TextFieldValue("")
                                         selectedSubCategoryId.value = null
                                         productVariants.value = emptyList()
-                                        snackBarHostState.showSnackbar("Product created Successfully")
+                                        snackBarHostState.showSnackbar(context.getString(R.string.product_created_successfully))
                                         nav.popBackStack()
                                     }
 
@@ -368,13 +370,14 @@ fun CreateProductScreen(
                                     description.value = TextFieldValue("")
                                     selectedSubCategoryId.value = null
                                     productVariants.value = emptyList()
-                                    snackBarHostState.showSnackbar("Product Update Successfully")
+                                    snackBarHostState.showSnackbar(context.getString(R.string.product_update_successfully))
                                     nav.popBackStack()
                                 }
                             }
                         }
                     },
-                    buttonTitle = if (productIdHolder != null) "Update Product" else "Create Product",
+                    buttonTitle = if (productIdHolder != null) context.getString(R.string.update_product)
+                    else context.getString(R.string.create_product),
                     isEnable = true,
                 )
             }
@@ -390,10 +393,11 @@ fun CreateProductScreen(
                 .padding(horizontal = 15.dp)
                 .padding(top = scaffoldStatus.calculateTopPadding() + 30.dp)
                 .verticalScroll(rememberScrollState())
-        ) {
+        )
+        {
 
             Text(
-                "Product Thumbnail",
+                stringResource(R.string.product_thumbnail),
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = (18).sp,
@@ -505,7 +509,7 @@ fun CreateProductScreen(
             }
             Sizer(10)
             Text(
-                "Product Images",
+                stringResource(R.string.product_images),
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = (18).sp,
@@ -551,7 +555,6 @@ fun CreateProductScreen(
 
                     images.value.forEachIndexed { index, value ->
 
-                        Log.d("productImageIs", value)
                         ConstraintLayout {
                             Box(
                                 modifier = Modifier
@@ -667,24 +670,24 @@ fun CreateProductScreen(
 
             TextInputWithTitle(
                 value = productName,
-                title = "Name",
-                placeHolder = productData?.name ?: "Product Name",
+                title = stringResource(R.string.name),
+                placeHolder = productData?.name ?: stringResource(R.string.product_name),
                 fontTitle = (18).sp,
                 fontWeight = FontWeight.Bold,
             )
 
             TextNumberInputWithTitle(
                 value = price,
-                title = "Price",
-                placeHolder = "Product Price",
+                title = stringResource(R.string.price),
+                placeHolder = stringResource(R.string.product_price),
                 errorMessage = "",
                 fontTitle = (18).sp,
                 fontWeight = FontWeight.Bold,
             )
             TextInputWithTitle(
                 value = description,
-                title = "Description",
-                placeHolder = "Product Price",
+                title = stringResource(R.string.description),
+                placeHolder = stringResource(R.string.product_price),
                 errorMessage = "",
                 fontTitle = (18).sp,
                 fontWeight = FontWeight.Bold,
@@ -692,7 +695,7 @@ fun CreateProductScreen(
             )
 
             Text(
-                "SubCategory",
+                stringResource(R.string.subcategory),
                 fontFamily = General.satoshiFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = (18).sp,
@@ -728,8 +731,8 @@ fun CreateProductScreen(
                     Text(
                         if (productData != null && selectedSubCategoryId.value == null)
                             storeSubCategory?.firstOrNull { it.id == productData.subcategoryId }?.name
-                                ?: "Select SubCategory "
-                        else if (selectedSubCategoryId.value == null) "Select SubCategory "
+                                ?: stringResource(R.string.select_subcategory)
+                        else if (selectedSubCategoryId.value == null) stringResource(R.string.select_subcategory)
                         else storeSubCategory?.firstOrNull { it.id == selectedSubCategoryId.value }?.name
                             ?: ""
                     )
@@ -775,7 +778,7 @@ fun CreateProductScreen(
             if (productVariants.value.isNotEmpty()) {
                 Sizer(5)
                 Text(
-                    "Product Variant",
+                    stringResource(R.string.product_variant),
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = (18).sp,
@@ -889,7 +892,7 @@ fun CreateProductScreen(
                     )
                     {
                         Text(
-                            if (selectedVariantId.value == null) "Select Variant"
+                            if (selectedVariantId.value == null) stringResource(R.string.select_variant)
                             else variants.value?.firstOrNull { it.id == selectedVariantId.value }?.name
                                 ?: ""
                         )
@@ -943,7 +946,7 @@ fun CreateProductScreen(
                     onValueChange = { productVariantName.value = it },
                     placeholder = {
                         Text(
-                            "Variant Name",
+                            stringResource(R.string.variant_name),
                             color = CustomColor.neutralColor500,
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
@@ -976,7 +979,7 @@ fun CreateProductScreen(
                     onValueChange = { productVariantPercentage.value = it },
                     placeholder = {
                         Text(
-                            "Variant Price",
+                            stringResource(R.string.variant_price),
                             color = CustomColor.neutralColor500,
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
@@ -1020,7 +1023,7 @@ fun CreateProductScreen(
                         productVariantPercentage.value = TextFieldValue("")
                         selectedVariantId.value = null
                     },
-                    buttonTitle = "Add ProductVariant",
+                    buttonTitle = stringResource(R.string.add_productvariant),
                     isEnable = selectedVariantId.value != null && productVariantName.value.text.isNotEmpty(),
                     color = null
                 )

@@ -37,15 +37,7 @@ object ModelToDto {
         }}.flatten()
     }
 
-    fun CardProductModel.toOrderRequestItemDto(): CreateOrderItemDto{
-        return CreateOrderItemDto(
-            StoreId =  this.storeId,
-            ProductId = this.productId,
-            Price = this.price,
-            Quantity = this.quantity,
-            ProductsVariantId =  this.productVariants.map { it.id }
-        )
-    }
+
 
     fun CartModel.toOrderRequestDto(): CreateOrderDto{
         return CreateOrderDto(
@@ -53,6 +45,15 @@ object ModelToDto {
             TotalPrice = this.totalPrice ,
             Latitude = this.latitude,
             Longitude=this.longitude
+        )
+    }
+    fun CardProductModel.toOrderRequestItemDto(): CreateOrderItemDto{
+        return CreateOrderItemDto(
+            StoreId =  this.storeId,
+            ProductId = this.productId,
+            Price = this.price,
+            Quantity = this.quantity,
+            ProductsVariantId =  this.productVariants.map { it.id }
         )
     }
 

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commercompose.model.DtoToModel.toOrderItem
+import com.example.eccomerce_app.model.DtoToModel.toOrderItem
 import com.example.e_commercompose.model.OrderItem
 import com.example.eccomerce_app.dto.OrderDto
 import com.example.eccomerce_app.dto.OrderItemDto

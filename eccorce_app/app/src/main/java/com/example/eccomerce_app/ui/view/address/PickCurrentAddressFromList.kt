@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -108,7 +109,7 @@ fun PickCurrentAddressFromAddressScreen(
 
                 title = {
                     Text(
-                        "Enter Your Location",
+                        stringResource(R.string.enter_your_location),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24 / fontScall).sp,
@@ -159,7 +160,7 @@ fun PickCurrentAddressFromAddressScreen(
 
                     Sizer(10)
                     Text(
-                        "There is No Locations Found",
+                        stringResource(R.string.there_is_no_locations_found),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = (20 / fontScall).sp,

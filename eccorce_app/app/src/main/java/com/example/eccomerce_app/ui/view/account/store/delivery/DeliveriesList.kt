@@ -45,20 +45,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -68,7 +65,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.component.CustomAuthBottom
 import com.example.e_commercompose.ui.component.Sizer
-import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.model.Delivery
 import com.example.eccomerce_app.util.General
@@ -127,7 +124,7 @@ fun DeliveriesListScreen(
             isSendingData.value = false
             if (result.isNullOrEmpty()) {
                 clearTextInpu()
-                snackBarHostState.showSnackbar("Delivery Created Successfully")
+                snackBarHostState.showSnackbar(context.getString(R.string.delivery_created_successfully))
                 return@launch
             }
             snackBarHostState.showSnackbar(result)
@@ -167,7 +164,7 @@ fun DeliveriesListScreen(
                 ),
                 title = {
                     Text(
-                        "Deliveries",
+                        stringResource(R.string.deliveries),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -246,7 +243,7 @@ fun DeliveriesListScreen(
                     Sizer(10)
                     TextInputWithTitle(
                         userId,
-                        title = "", "User Id",
+                        title = "", stringResource(R.string.user_id),
                         errorMessage = errorMessage.value,
                         isHasError = errorMessage.value.isNotEmpty(),
                         maxLines = 2
@@ -262,11 +259,12 @@ fun DeliveriesListScreen(
                         },
                         validationFun = {
                             if (userId.value.text.isEmpty()) {
-                                errorMessage.value = "User Id must not be empty"
+                                errorMessage.value =
+                                    context.getString(R.string.user_id_must_not_be_empty)
                                 return@CustomAuthBottom false
                             } else return@CustomAuthBottom true
                         },
-                        buttonTitle = "Create",
+                        buttonTitle = stringResource(R.string.create),
                         isHasBottomPadding = false
                     )
                     Sizer(10)
@@ -409,7 +407,7 @@ fun DeliveriesListScreen(
                                 Column(
                                     modifier = Modifier
                                         .fillParentMaxHeight()
-                                        .width((screenWidth-130).dp)
+                                        .width((screenWidth - 130).dp)
                                         .padding(start = 5.dp),
                                     verticalArrangement = Arrangement.Center
                                 ) {

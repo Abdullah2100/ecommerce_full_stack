@@ -1,20 +1,21 @@
 package com.example.eccomerce_app.data.repository
 
-import com.example.eccomerce_app.dto.VarientDto
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.Secrets
-import com.example.eccomerce_app.data.NetworkCallHandler
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import java.io.IOException
+import io.ktor.http.headers
+import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.dto.VarientDto
+import io.ktor.client.call.body
+import kotlinx.io.IOException
 import java.net.UnknownHostException
 
+
 class VariantRepository(val client: HttpClient)  {
-     suspend fun getVariant(pageNumber: Int): NetworkCallHandler {
+    suspend fun getVariant(pageNumber: Int): NetworkCallHandler {
         return try {
             val result = client.get(
                 Secrets.getBaseUrl() + "/Variant/all/${pageNumber}"

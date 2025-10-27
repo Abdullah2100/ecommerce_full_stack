@@ -1,23 +1,24 @@
 package com.example.eccomerce_app.viewModel
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.example.eccomerce_app.util.General
-import com.example.eccomerce_app.data.Room.AuthDao
+import com.example.eccomerce_app.data.Room.DAO.AuthDao
 import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
 import com.example.eccomerce_app.dto.LoginDto
-import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.dto.AuthDto
 import com.example.eccomerce_app.dto.SignupDto
 import com.example.eccomerce_app.data.NetworkCallHandler
+import com.example.eccomerce_app.data.Room.DAO.LocaleDao
+import com.example.eccomerce_app.data.Room.Model.CurrentLocal
 import com.example.eccomerce_app.data.repository.AuthRepository
+import com.example.eccomerce_app.util.General.currentLocal
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -28,8 +29,8 @@ import kotlinx.coroutines.tasks.await
 class AuthViewModel(
     val authRepository:
     AuthRepository,
-    val dao: AuthDao,
-    val context: Context
+    val authDao: AuthDao,
+    val localDao: LocaleDao
 ) : ViewModel() {
 
     val _isLoading = MutableStateFlow(false)
@@ -63,14 +64,27 @@ class AuthViewModel(
     }
 
     init {
+        getCurrentLocalization()
         getStartedScreen()
+    }
+
+    fun getCurrentLocalization() {
+        viewModelScope.launch(Dispatchers.Default) {
+            val dbLocale = localDao.getCurrentLocal()
+            Log.d("CurrentLocalization",dbLocale?.name?:"no data")
+
+            if (dbLocale == null) {
+                return@launch
+            }
+            currentLocal.emit(dbLocale.name);
+        }
     }
 
     fun getStartedScreen() {
         viewModelScope.launch(Dispatchers.Default) {
-            val authData = dao.getAuthData()
-            val isPassOnBoard = dao.isPassOnBoarding()
-            val isLocation = dao.isPassLocationScreen()
+            val authData = authDao.getAuthData()
+            val isPassOnBoard = authDao.isPassOnBoarding()
+            val isLocation = authDao.isPassLocationScreen()
             Log.d("AuthDataIs", isPassOnBoard.toString())
             General.authData.emit(authData)
             when (isPassOnBoard) {
@@ -141,7 +155,7 @@ class AuthViewModel(
                     token = authData.token,
                     refreshToken = authData.refreshToken
                 )
-                dao.saveAuthData(
+                authDao.saveAuthData(
                     authDataHolder
                 )
 
@@ -187,7 +201,7 @@ class AuthViewModel(
                     token = authData.token,
                     refreshToken = authData.refreshToken
                 )
-                dao.saveAuthData(
+                authDao.saveAuthData(
                     authDataHolder
                 )
                 General.authData.emit(authDataHolder)
@@ -271,7 +285,7 @@ class AuthViewModel(
                     token = authData.token,
                     refreshToken = authData.refreshToken
                 )
-                dao.saveAuthData(
+                authDao.saveAuthData(
                     authDataHolder
                 )
                 General.authData.emit(authDataHolder)
@@ -293,8 +307,8 @@ class AuthViewModel(
 
     fun logout() {
         viewModelScope.launch(Dispatchers.IO + _coroutineException) {
-            dao.nukeAuthTable()
-            dao.nukeIsPassAddressTable()
+            authDao.nukeAuthTable()
+            authDao.nukeIsPassAddressTable()
         }
     }
 }

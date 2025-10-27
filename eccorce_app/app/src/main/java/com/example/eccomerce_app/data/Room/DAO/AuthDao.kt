@@ -1,22 +1,22 @@
-package com.example.eccomerce_app.data.Room
+package com.example.eccomerce_app.data.Room.DAO
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.eccomerce_app.data.Room.Model.IsPassLocationScreen
 import com.example.eccomerce_app.data.Room.Model.AuthModelEntity
+import com.example.eccomerce_app.data.Room.Model.IsPassLocationScreen
 import com.example.eccomerce_app.data.Room.Model.IsPassOnBoardingScreen
 
 @Dao
 interface AuthDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun saveAuthData(authData: AuthModelEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun savePassingOnBoarding(value: IsPassOnBoardingScreen)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun savePassingLocation(authData: IsPassLocationScreen)
 
 

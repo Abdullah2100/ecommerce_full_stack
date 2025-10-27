@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eccomerce_app.dto.VarientDto
-import com.example.e_commercompose.model.DtoToModel.toVarient
+import com.example.eccomerce_app.model.DtoToModel.toVarient
 import com.example.e_commercompose.model.VarirntModel
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.VariantRepository
