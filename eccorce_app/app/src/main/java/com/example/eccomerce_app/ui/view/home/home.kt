@@ -6,7 +6,6 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,11 +49,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.Sizer
 import com.example.e_commercompose.ui.theme.CustomColor
@@ -155,7 +156,6 @@ fun HomePage(
 
     LaunchedEffect(reachedBottom.value) {
         if (!products.value.isNullOrEmpty() && reachedBottom.value && products.value!!.size > 23) {
-            Log.d("scrollReachToBottom", "true")
             productViewModel.getProducts(
                 page,
                 isLoadingMore
@@ -227,7 +227,7 @@ fun HomePage(
                                             )
                                     ) {
                                         Text(
-                                            "Loaction",
+                                            stringResource(R.string.location),
                                             fontFamily = General.satoshiFamily,
                                             fontWeight = FontWeight.Medium,
                                             fontSize = 16.sp,
@@ -298,7 +298,7 @@ fun HomePage(
                                 )
                                 Sizer(width = 5)
                                 Text(
-                                    "Find your favorite items",
+                                    stringResource(R.string.find_your_favorite_items),
                                     fontFamily = General.satoshiFamily,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 16.sp,

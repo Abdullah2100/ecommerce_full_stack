@@ -18,7 +18,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val viewModelModel = module {
-    single { AuthViewModel(get(), get(), get()) }
+    single { AuthViewModel(get(), get(),get()) }
     single { BannerViewModel(get(), get(named("bannerHub"))) }
     single { CartViewModel() }
     single { CategoryViewModel(get()) }
@@ -26,7 +26,7 @@ val viewModelModel = module {
     single { VariantViewModel(get()) }
     single { StoreViewModel(get(), get(named("storeHub"))) }
     single { ProductViewModel(get()) }
-    single { UserViewModel(get(), get(), get()) }
+    single { UserViewModel(get(), get(), get(),get()) }
     single { GeneralSettingViewModel(get()) }
     single { OrderViewModel(get(), get(named("orderHub"))) }
     single { OrderItemsViewModel(get(), get(named("orderItemHub")),get(named("orderHub"))) }

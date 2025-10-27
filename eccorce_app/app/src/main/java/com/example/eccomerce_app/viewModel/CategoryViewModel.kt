@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.e_commercompose.model.Category
-import com.example.e_commercompose.model.DtoToModel.toCategory
+import com.example.eccomerce_app.model.DtoToModel.toCategory
 import com.example.eccomerce_app.dto.CategoryDto
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.CategoryRepository

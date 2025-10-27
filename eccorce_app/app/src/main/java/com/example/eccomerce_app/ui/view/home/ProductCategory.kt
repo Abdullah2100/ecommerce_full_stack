@@ -141,7 +141,7 @@ fun ProductCategoryScreen(
             onRefresh = {
                 coroutine.launch {
                     if (!isRefresh.value) isRefresh.value = true
-                    page.value=1;
+                    page.intValue=1;
                     productViewModel.getProductsByCategoryID(
                         page,
                         categoryId,

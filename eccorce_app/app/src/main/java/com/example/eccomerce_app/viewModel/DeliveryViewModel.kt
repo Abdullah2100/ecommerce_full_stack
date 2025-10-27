@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableIntState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.e_commercompose.model.DtoToModel.toDeliveryInfo
+import com.example.eccomerce_app.model.DtoToModel.toDeliveryInfo
 import com.example.eccomerce_app.data.NetworkCallHandler
 import com.example.eccomerce_app.data.repository.DeliveryRepository
 import com.example.eccomerce_app.dto.DeliveryDto

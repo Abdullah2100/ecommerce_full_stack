@@ -51,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -133,7 +134,7 @@ fun EditOrAddLocationScreen(
                                     )
                                 else
                                     coroutine.launch {
-                                        snackBarHostState.showSnackbar("you should enable location services")
+                                        snackBarHostState.showSnackbar(context.getString(R.string.you_should_enable_location_services))
                                     }
                             }
                             addOnFailureListener { fail ->
@@ -148,7 +149,7 @@ fun EditOrAddLocationScreen(
 
                 }
             } else {
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -164,7 +165,7 @@ fun EditOrAddLocationScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Address",
+                        stringResource(R.string.address_list),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp,
@@ -211,7 +212,7 @@ fun EditOrAddLocationScreen(
                                 )
                             )
                         },
-                        buttonTitle = "Add New"
+                        buttonTitle = stringResource(R.string.add_new)
                     )
                 }
             }
@@ -269,7 +270,7 @@ fun EditOrAddLocationScreen(
 
                         Sizer(10)
                         Text(
-                            "There is No Locations Found",
+                            stringResource(R.string.there_is_no_locations_found),
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
                             fontSize = 20.sp,
@@ -301,7 +302,7 @@ fun EditOrAddLocationScreen(
                             Sizer(30)
 
                             Text(
-                                "Saved Address",
+                                stringResource(R.string.saved_address),
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
@@ -331,7 +332,7 @@ fun EditOrAddLocationScreen(
                                                     }.await()
                                                     isLoading.value = false
                                                     val message = result
-                                                        ?: "update Current Address Successfully"
+                                                        ?: context.getString(R.string.update_current_address_successfully)
 
                                                     snackBarHostState.showSnackbar(message)
                                                 }
@@ -394,7 +395,7 @@ fun EditOrAddLocationScreen(
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
-                                                    "Default",
+                                                    stringResource(R.string._default),
                                                     fontFamily = General.satoshiFamily,
                                                     fontWeight = FontWeight.Medium,
                                                     fontSize = 11.sp,
@@ -420,7 +421,7 @@ fun EditOrAddLocationScreen(
                                                     )
                                                 }.await()
                                                 isLoading.value = false
-                                                var message = "update Current Address Seccessfuly"
+                                                var message =context.getString(R.string.update_current_address_successfully)
                                                 userViewModel.getMyInfo()
                                                 if (result != null) {
                                                     message = result

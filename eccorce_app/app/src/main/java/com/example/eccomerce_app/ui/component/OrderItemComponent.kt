@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -196,7 +197,6 @@ fun OrderItemShape(
                                             )
 
                                             .clip(RoundedCornerShape(20.dp))
-//                                                    .padding(5.dp)
                                     )
                             }
 
@@ -224,7 +224,7 @@ fun OrderItemShape(
                 if (isShowOrderStatus) {
                     Row {
                         Text(
-                            "Quantity :",
+                            stringResource(R.string.quantity),
 
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
@@ -249,7 +249,7 @@ fun OrderItemShape(
                     )
                     {
                         Text(
-                            "Order Status :",
+                            stringResource(R.string.order_status),
 
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,
@@ -281,7 +281,7 @@ fun OrderItemShape(
                         )
                         {
                             Text(
-                                "Collect Order :",
+                                stringResource(R.string.collect_order),
 
                                 fontFamily = General.satoshiFamily,
                                 fontWeight = FontWeight.Normal,
@@ -307,7 +307,7 @@ fun OrderItemShape(
                     )
                     {
                         Text(
-                            "Item Status :",
+                            stringResource(R.string.item_status),
 
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Normal,

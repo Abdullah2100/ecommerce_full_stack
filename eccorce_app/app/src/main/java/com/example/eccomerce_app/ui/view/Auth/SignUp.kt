@@ -33,8 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -46,13 +48,13 @@ import androidx.navigation.NavHostController
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.ui.component.CustomAuthBottom
-import com.example.e_commercompose.ui.component.TextInputWithTitle
-import com.example.e_commercompose.ui.component.TextSecureInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextSecureInputWithTitle
 import com.example.e_commercompose.ui.theme.CustomColor
 import com.example.eccomerce_app.ui.Screens
 import com.example.hotel_mobile.Util.Validation
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import com.example.e_commercompose.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +63,7 @@ fun SignUpPage(
     nav: NavHostController,
     authKoin: AuthViewModel
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val fontScall = LocalDensity.current.fontScale
 
@@ -106,73 +109,81 @@ fun SignUpPage(
         when {
 
             name.trim().isEmpty() -> {
-                errorMessageValidation.value = "name must not be empty"
+                errorMessageValidation.value = context.getString(R.string.name_must_not_be_empty)
                 isNameError.value = true
                 return false
             }
 
             email.trim().isEmpty() -> {
-                errorMessageValidation.value = "email must not be empty"
+                errorMessageValidation.value = context.getString(R.string.email_must_not_be_empty)
                 isEmailError.value = true
                 return false
             }
 
             !Validation.emailValidation(email) -> {
-                errorMessageValidation.value = "write valid email"
+                errorMessageValidation.value = context.getString(R.string.write_valid_email)
                 isEmailError.value = true
                 return false
             }
 
             phone.value.text.trim().isEmpty() -> {
-                errorMessageValidation.value = "phone must not Empty"
+                errorMessageValidation.value = context.getString(R.string.phone_must_not_empty)
                 isPhoneError.value = true
                 return false
             }
 
             password.trim().isEmpty() -> {
-                errorMessageValidation.value = ("password must not be empty")
+                errorMessageValidation.value =
+                    (context.getString(R.string.password_must_not_be_empty))
                 isPasswordError.value = true
                 return false
             }
 
             !Validation.passwordSmallValidation(password) -> {
-                errorMessageValidation.value = ("password must not contain two small letter")
+                errorMessageValidation.value =
+                    (context.getString(R.string.password_must_not_contain_two_small_letter))
                 isPasswordError.value = true
                 return false
             }
 
             !Validation.passwordNumberValidation(password) -> {
-                errorMessageValidation.value = ("password must not contain two number")
+                errorMessageValidation.value =
+                    (context.getString(R.string.password_must_not_contain_two_number))
                 isPasswordError.value = true
                 return false
             }
 
             !Validation.passwordCapitalValidation(password) -> {
-                errorMessageValidation.value = ("password must not contain two capitalLetter")
+                errorMessageValidation.value =
+                    (context.getString(R.string.password_must_not_contain_two_capitalletter))
                 isPasswordError.value = true
                 return false
             }
 
             !Validation.passwordSpicialCharracterValidation(password) -> {
-                errorMessageValidation.value = ("password must not contain two spical character")
+                errorMessageValidation.value =
+                    (context.getString(R.string.password_must_not_contain_two_spical_character))
                 isPasswordError.value = true
                 return false
             }
 
             confirmPassword.trim().isEmpty() -> {
-                errorMessageValidation.value = ("password must not be empty")
+                errorMessageValidation.value =
+                    context.getString(R.string.password_must_not_be_empty)
                 isPasswordConfirm.value = true
                 return false
             }
 
             password != confirmPassword -> {
-                errorMessageValidation.value = ("confirm password not equal to password")
+                errorMessageValidation.value =
+                    (context.getString(R.string.confirm_password_not_equal_to_password))
                 isPasswordConfirm.value = true
                 return false
             }
 
             !isCheckBox.value -> {
-                errorMessageValidation.value = "Term And Policies is Required"
+                errorMessageValidation.value =
+                    context.getString(R.string.term_and_policies_is_required)
                 isTermAndServicesError.value = true;
 
                 return false
@@ -210,7 +221,7 @@ fun SignUpPage(
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            "Signup",
+                            stringResource(R.string.signup),
                             fontFamily = General.satoshiFamily,
                             fontWeight = FontWeight.Bold,
                             color = CustomColor.neutralColor950,
@@ -258,35 +269,35 @@ fun SignUpPage(
 
                 TextInputWithTitle(
                     name,
-                    title = "Name",
-                    placeHolder = "Enter Your name",
+                    title = stringResource(R.string.name),
+                    placeHolder = stringResource(R.string.enter_your_name),
                     errorMessage = errorMessageValidation.value,
                     isHasError = isNameError.value,
                 )
 
                 TextInputWithTitle(
                     email,
-                    title = "Email",
-                    placeHolder = "Enter Your email",
+                    title = stringResource(R.string.email),
+                    placeHolder = stringResource(R.string.enter_your_email),
                     errorMessage = errorMessageValidation.value,
                     isHasError = isEmailError.value,
                 )
                 TextInputWithTitle(
                     phone,
-                    title = "Phone",
-                    placeHolder = "Enter Phone",
+                    title = stringResource(R.string.phone),
+                    placeHolder = stringResource(R.string.enter_phone),
                     errorMessage = errorMessageValidation.value,
                     isHasError = isPhoneError.value,
                 )
                 TextSecureInputWithTitle(
                     password,
-                    "Password",
+                    stringResource(R.string.password),
                     isPasswordError.value,
                     errorMessageValidation.value,
                 )
                 TextSecureInputWithTitle(
                     confirmPassword,
-                    "Confirm Password",
+                    stringResource(R.string.confirm_password),
                     isPasswordConfirm.value,
                     errorMessageValidation.value,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
@@ -308,14 +319,14 @@ fun SignUpPage(
                         modifier = Modifier.padding()
                     )
                     Text(
-                        "Agree With",
+                        stringResource(R.string.agree_with),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Normal,
                         color = if (isTermAndServicesError.value) CustomColor.alertColor_1_400 else CustomColor.neutralColor950,
                         fontSize = (16 / fontScall).sp,
                     )
                     Text(
-                        "Term & Condition",
+                        stringResource(R.string.term_condition),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Medium,
                         color = if (isTermAndServicesError.value) CustomColor.alertColor_1_400 else CustomColor.primaryColor700,
@@ -350,16 +361,16 @@ fun SignUpPage(
                             confirmPassword = confirmPassword.value.text
                         )
                     },
-                    buttonTitle = "Signup",
+                    buttonTitle = stringResource(R.string.signup),
                     operation = {
                         keyboardController?.hide()
                         coroutine.launch {
                             isLoading.value = true;
-                            val token = async { authKoin.generateTokenNotification() }.await()
-//                             Pair(
-//                                "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
-//                                null
-//                            )
+                            val token = //async { authKoin.generateTokenNotification() }.await()
+                             Pair(
+                                "fv6pNFrXSsC7o29xq991br:APA91bHiUFcyvxKKxcqWoPZzoIaeWEs6_uN36YI0II5HHpN3HP-dUQap9UbnPiyBB8Fc5xX6GiCYbDQ7HxuBlXZkAE2P0T82-DRQ160EiKCJ9tlPgfgQxa4",
+                                null
+                            )
 
                             if (token.first != null) {
                                 val result = authKoin.signUpUser(
@@ -383,21 +394,14 @@ fun SignUpPage(
                                 coroutine.launch {
                                     snackBarHostState.showSnackbar(
                                         token.second
-                                            ?: "network must be connected to complete operation"
+                                            ?: context.getString(R.string.network_must_be_connected_to_complete_operation)
                                     )
-
                                 }
                             }
                         }
                     }
                 )
-
-
             }
         }
-
-
     }
-
-
 }

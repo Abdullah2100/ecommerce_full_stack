@@ -1,5 +1,6 @@
 package com.example.eccomerce_app.data.repository
 
+
 import com.example.e_commercompose.model.ProductVarientSelection
 import com.example.eccomerce_app.dto.ProductDto
 import com.example.eccomerce_app.util.General
@@ -25,7 +26,7 @@ import java.util.UUID
 
 class ProductRepository(val client: HttpClient)  {
 
-     suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
+    suspend fun getProduct(pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/all/${pageNumber}"
             val result = client.get(fullUrl) {
@@ -65,7 +66,7 @@ class ProductRepository(val client: HttpClient)  {
         }
     }
 
-     suspend fun getProductByCategoryId(
+    suspend fun getProductByCategoryId(
         categoryId: UUID,
         pageNumber: Int
     ): NetworkCallHandler {
@@ -108,7 +109,7 @@ class ProductRepository(val client: HttpClient)  {
         }
     }
 
-     suspend fun getProduct(storeId: UUID, pageNumber: Int): NetworkCallHandler {
+    suspend fun getProduct(storeId: UUID, pageNumber: Int): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${pageNumber}"
             val result = client.get(fullUrl) {
@@ -148,7 +149,7 @@ class ProductRepository(val client: HttpClient)  {
         }
     }
 
-     suspend fun getProduct(
+    suspend fun getProduct(
         storeId: UUID,
         subCategory: UUID,
         pageNumber: Int
@@ -194,7 +195,7 @@ class ProductRepository(val client: HttpClient)  {
     }
 
 
-     suspend fun createProduct(
+    suspend fun createProduct(
         name: String,
         description: String,
         thumbnail: File,
@@ -292,7 +293,7 @@ class ProductRepository(val client: HttpClient)  {
         }
     }
 
-     suspend fun updateProduct(
+    suspend fun updateProduct(
         id: UUID,
         name: String?,
         description: String?,
@@ -428,7 +429,7 @@ class ProductRepository(val client: HttpClient)  {
         }
     }
 
-     suspend fun deleteProduct(storeId: UUID, productId: UUID): NetworkCallHandler {
+    suspend fun deleteProduct(storeId: UUID, productId: UUID): NetworkCallHandler {
         return try {
             val fullUrl = Secrets.getBaseUrl() + "/Product/${storeId}/${productId}"
             val result = client.delete(fullUrl) {

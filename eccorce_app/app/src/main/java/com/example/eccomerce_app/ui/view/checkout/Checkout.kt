@@ -42,6 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,6 +76,7 @@ fun CheckoutScreen(
     generalSettingViewModel: GeneralSettingViewModel,
     orderViewModel: OrderViewModel,
 ) {
+    val context = LocalContext.current
     val config = LocalConfiguration.current
 
     val cartData = cartViewModel.cartItems.collectAsState()
@@ -115,7 +118,7 @@ fun CheckoutScreen(
                 ),
                 title = {
                     Text(
-                        "Checkout",
+                        stringResource(R.string.checkout),
                         fontFamily = General.satoshiFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = (24).sp,
@@ -160,7 +163,7 @@ fun CheckoutScreen(
                                         clearCartData = { cartViewModel.clearCart() })
                                 }.await()
                                 isSendingData.value = false
-                                var message = "Order Submit Successfully"
+                                var message = context.getString(R.string.order_submit_successfully)
                                 if (!result.isNullOrEmpty()) {
                                     message = result
                                 }

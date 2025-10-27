@@ -33,6 +33,7 @@ object General {
 
 
     val authData = MutableStateFlow<AuthModelEntity?>(null)
+    val currentLocal = MutableStateFlow<String?>(null)
 
     val BASED_URL = Secrets.getBaseUrl()
 

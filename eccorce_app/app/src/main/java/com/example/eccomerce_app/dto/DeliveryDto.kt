@@ -22,3 +22,4 @@ data class DeliveryUserInfoDto(
     val email: String,
     val thumbnail: String?=null,
 )
+

@@ -26,12 +26,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
+import com.example.e_commercompose.R
 import com.example.eccomerce_app.util.General
 import com.example.e_commercompose.model.Category
 import com.example.eccomerce_app.ui.Screens
@@ -45,7 +47,6 @@ fun CategoryShape(
     productViewModel: ProductViewModel,
     nav: NavHostController
 ){
-    Log.d("category_image",categories[0].image)
     val context = LocalContext.current
 
 
@@ -57,7 +58,7 @@ fun CategoryShape(
     )
     {
         Text(
-            "Category",
+            stringResource(R.string.category),
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
@@ -66,7 +67,7 @@ fun CategoryShape(
 
         )
         if (categories.size > 4) Text(
-            "View All",
+            stringResource(R.string.view_all),
             fontFamily = General.satoshiFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 14.sp,
@@ -81,7 +82,8 @@ fun CategoryShape(
     LazyRow(
 
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.padding(top = 10.dp)
+        modifier = Modifier
+            .padding(top = 10.dp)
             .fillMaxWidth()
     ) {
         items(items = categories,
@@ -90,14 +92,16 @@ fun CategoryShape(
                 modifier = Modifier
                     .padding(end = 5.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable{
+                    .clickable {
                         productViewModel.getProductsByCategoryID(
                             pageNumber = mutableStateOf(1),
                             categoryId = category.id
                         )
-                        nav.navigate(Screens.ProductCategory(
-                            category.id.toString()
-                        ))
+                        nav.navigate(
+                            Screens.ProductCategory(
+                                category.id.toString()
+                            )
+                        )
 
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -131,7 +135,6 @@ fun CategoryShape(
                             }
                         },
                         onError = {error->
-                            Log.d("errorFromPlaingImage",error.result.toString())
                         }
                     )
 

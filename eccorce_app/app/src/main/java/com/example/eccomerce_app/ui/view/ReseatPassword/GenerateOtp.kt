@@ -20,7 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -28,7 +30,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.example.eccomerce_app.ui.Screens
 import com.example.e_commercompose.ui.component.CustomButton
-import com.example.e_commercompose.ui.component.TextInputWithTitle
+import com.example.eccomerce_app.ui.component.TextInputWithTitle
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import com.example.e_commercompose.R
 import com.example.e_commercompose.ui.theme.CustomColor
@@ -42,7 +44,7 @@ fun GenerateOtpScreen(
     authViewModel: AuthViewModel
 ) {
 
-
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val coroutine = rememberCoroutineScope()
@@ -96,7 +98,7 @@ fun GenerateOtpScreen(
                 TextInputWithTitle(
                     email,
                     title = "",
-                    placeHolder = "Enter Your email",
+                    placeHolder = context.getString(R.string.enter_your_email),
                 )
 
 
@@ -122,7 +124,7 @@ fun GenerateOtpScreen(
                         }
                     },
                     isEnable = email.value.text.trim().isNotEmpty(),
-                    buttonTitle = "Check",
+                    buttonTitle = stringResource(R.string.check),
 
                     )
 

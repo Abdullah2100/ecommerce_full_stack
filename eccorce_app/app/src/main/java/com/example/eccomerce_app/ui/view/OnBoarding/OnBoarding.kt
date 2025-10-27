@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -84,7 +85,7 @@ fun OnBoardingScreen(
                 )
 
                 Text(
-                    "Welcome to ShopZen",
+                    stringResource(R.string.welcome_to_shopzen),
                     fontWeight = FontWeight.Bold,
                     fontFamily = General.satoshiFamily,
                     color = CustomColor.neutralColor950,
@@ -92,7 +93,7 @@ fun OnBoardingScreen(
                 )
 
                 Text(
-                    "Your one-stop destination for hassle-free online shopping",
+                    stringResource(R.string.your_one_stop_destination_for_hassle_free_online_shopping),
                     color = CustomColor.neutralColor800,
                     fontSize = (18 / fontScall).sp,
                     textAlign = TextAlign.Center,
@@ -132,7 +133,7 @@ fun OnBoardingScreen(
                 ) {
 
                 Text(
-                    "Get Started",
+                    stringResource(R.string.get_started),
                     fontFamily = General.satoshiFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = (16 / fontScall).sp

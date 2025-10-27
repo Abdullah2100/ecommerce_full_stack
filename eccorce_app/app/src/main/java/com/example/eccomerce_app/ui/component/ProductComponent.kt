@@ -74,7 +74,6 @@ fun  ProductShape(
                         defaultElevation = 58.dp
                     ),
                     modifier = Modifier
-//                        .height(150.dp)
                         .width(160.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .clickable{
@@ -104,7 +103,6 @@ fun  ProductShape(
                         SubcomposeAsyncImage(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-//                                                .padding(top = 35.dp)
                                 .fillMaxHeight()
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp)),
