@@ -51,6 +51,7 @@ import com.example.eccomerce_app.ui.NavController
 import com.example.eccomerce_app.ui.Screens
 import com.example.eccomerce_app.util.General
 import com.example.eccomerce_app.util.General.currentLocal
+import com.example.eccomerce_app.util.General.whenLanguageUpdateDo
 import com.example.eccomerce_app.viewModel.AuthViewModel
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform.getKoin
@@ -65,12 +66,7 @@ class MainActivity : ComponentActivity() {
 
        lifecycleScope.launch{
            currentLocal.collect { value->
-               val locale = Locale(value?:"ar")
-               Locale.setDefault(locale)
-               val config: Configuration = resources.configuration
-               config.setLocale(locale)
-               config.setLayoutDirection(locale) // Important for RTL
-               resources.updateConfiguration(config, resources.displayMetrics)
+               whenLanguageUpdateDo(value?:"ar",this@MainActivity)
            }
        }
 

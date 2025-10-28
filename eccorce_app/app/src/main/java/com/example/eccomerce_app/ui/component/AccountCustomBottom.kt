@@ -30,27 +30,40 @@ import com.example.e_commercompose.ui.theme.CustomColor
 
 
 @Composable
-fun AccountCustomBottom(title: String, icon: Int, operation: () -> Unit){
+fun AccountCustomBottom(
+    title: String,
+    icon: Int,
+    operation: (() -> Unit)? = null,
+    additionalComponent: (@Composable () -> Unit)? = null
+
+) {
     Column(
         modifier = Modifier
-            .padding(bottom = 5.dp, top = 5.dp)
+            .padding(bottom = 8.dp)
+            .height(40.dp)
             .clip(RoundedCornerShape(4.dp))
-            .clickable{
-                operation()
-            }
-    ){
+            .clickable {
+                if (operation != null)
+                    operation()
+            },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         Row(
             modifier = Modifier
                 .padding(top = 5.dp, start = 3.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = ImageVector.vectorResource(icon),"",
+                Icon(
+                    imageVector = ImageVector.vectorResource(icon), "",
                     modifier = Modifier.size(24.dp),
-                    tint = CustomColor.neutralColor900)
+                    tint = CustomColor.neutralColor900
+                )
                 Sizer(width = 15)
                 Text(
                     title,
@@ -62,34 +75,34 @@ fun AccountCustomBottom(title: String, icon: Int, operation: () -> Unit){
 
                 )
             }
+            when (additionalComponent == null) {
+                true -> Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight, "",
+                    tint = CustomColor.neutralColor950,
+                    modifier = Modifier.size(24.dp)
+                )
 
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,"",
-                tint = CustomColor.neutralColor950,
-                modifier = Modifier.size(24.dp))
+                else -> additionalComponent();
+            }
+
         }
 
-        Box(
-            modifier = Modifier
-                .padding(top = 15.dp)
-                .height(1.dp)
-                .fillMaxWidth()
-                .background(CustomColor.neutralColor200)
-        )
+
     }
 }
 
 @Composable
-fun LogoutBotton(title: String, icon: Int, operation: () -> Unit){
+fun LogoutButton(title: String, icon: Int, operation: () -> Unit) {
     Column(
         modifier = Modifier
-            .padding(bottom = 15.dp, top = 10.dp)
+            .padding(bottom = 8.dp)
+            .height(40.dp)
             .clip(RoundedCornerShape(4.dp))
-            .clickable{
+            .clickable {
                 operation()
             }
 
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .padding(top = 10.dp, start = 2.dp)
@@ -100,9 +113,11 @@ fun LogoutBotton(title: String, icon: Int, operation: () -> Unit){
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = ImageVector.vectorResource(icon),"",
+                Icon(
+                    imageVector = ImageVector.vectorResource(icon), "",
                     modifier = Modifier.size(24.dp),
-                    tint = CustomColor.alertColor_1_600)
+                    tint = CustomColor.alertColor_1_600
+                )
                 Sizer(width = 15)
                 Text(
                     title,
