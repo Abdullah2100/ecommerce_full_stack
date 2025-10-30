@@ -15,7 +15,6 @@ obj/
 *.ncrunchsolution
 *.ncrunchproject
 Migrations/
-images/
 obj/
 bin/
 
